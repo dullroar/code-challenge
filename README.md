@@ -18,6 +18,8 @@ dotnet run
 
 The window intentionally says **DEMO ONLY**. Generated records are stored only in a local SQLite file under `%LOCALAPPDATA%\ModernChallenge1`; the application has no connection to an actual time-reporting system.
 
+![Modern WPF demo window](docs/images/modern-wpf-demo.png)
+
 ## The fun, the why, the flex
 
 The fun is treating the three expression slots of a `for` statement as a tiny programming language. The why is historical: the original sample was built to exercise the C# 3.0 and .NET 3.x features that were new in class. The flex is not that this is good production code; it is that the code can make a lot of runtime machinery legible while obeying an intentionally absurd syntactic rule.
@@ -60,6 +62,8 @@ The project deliberately stays close to the original's shape. A modern idiomatic
 ```text
 docs/
   My Code Challenge.pdf       # anonymized source presentation
+  images/
+    modern-wpf-demo.png       # captured WPF demo window
 src/
   ModernChallenge1/           # .NET 10 WPF modernization
 LICENSE
