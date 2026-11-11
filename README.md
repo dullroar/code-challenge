@@ -66,5 +66,20 @@ docs/
     modern-wpf-demo.png       # captured WPF demo window
 src/
   ModernChallenge1/           # .NET 10 WPF modernization
+  RustChallenge1/             # Rust + GTK 4 companion for WSL
 LICENSE
 ```
+
+## Rust companion for WSL
+
+[`src/RustChallenge1`](src/RustChallenge1/README.md) translates the challenge into Rust's iterator and closure mechanics: an empty-body `for` with no `;`, `let` or `return` anywhere in `main` (enforced by a test), a GTK 4 window, and local SQLite demo records. It also compares the approach with [Ken Kastl's Java and Kotlin + Spring ports](https://github.com/kastl/one-statement-spring). The companion README contains Ubuntu APT setup and run instructions.
+
+From WSL, run the Rust version and inspect its saved demo records with:
+
+```bash
+cd /home/lehmer/repos/code-challenge/src/RustChallenge1
+cargo run --locked
+sqlite3 data/demo-timecards.db 'select * from demo_timecards;'
+```
+
+The SQLite command runs after the window is closed. See the companion README for the Ubuntu packages and setup.
