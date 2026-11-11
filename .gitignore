@@ -6,3 +6,7 @@ obj/
 .appdata/
 .localappdata/
 *.user
+
+# Rust challenge build output and disposable demo records
+src/RustChallenge1/target/
+src/RustChallenge1/data/

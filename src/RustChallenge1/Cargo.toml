@@ -1,0 +1,11 @@
+[package]
+name = "rust-challenge1"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+
+[dependencies]
+chrono = { version = "=0.4.38", default-features = false, features = ["clock"] }
+gtk = { package = "gtk4", version = "=0.8.2" }
+rand = "=0.8.5"
+rusqlite = "=0.31.0"
