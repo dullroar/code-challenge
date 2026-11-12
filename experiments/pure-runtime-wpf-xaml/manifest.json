@@ -1,0 +1,17 @@
+{
+  "baselineCommit": "8c14a8e369d16dddb9aa8c54ae22971b4d713971",
+  "experimentBranch": "experiment/pure-runtime-wpf-xaml",
+  "experimentCommit": "see git log (set at commit time)",
+  "framework": "net10.0-windows",
+  "net11": "not evaluated: toolchain absent",
+  "sdk": "10.0.404",
+  "packages": ["Microsoft.EntityFrameworkCore.Sqlite 10.0.14 (host only; Microsoft.Data.Sqlite used by package-backed program)"],
+  "selectedGrade": "strict-built-in (partial) and package-backed-pure (partial, caveat); constrained not built",
+  "rngSeed": 42,
+  "databasePath": "experiments/pure-runtime-wpf-xaml/artifacts/run-<id>/artifacts/pkg-run/demo-timecards.db",
+  "testCommands": ["./run.ps1 package-backed-pure <id>", "./run.ps1 strict-built-in <id>"],
+  "runtimeXamlHashes": "evidence/xaml-hashes.txt",
+  "iterationsUsed": 15,
+  "startUtc": "2026-11-12",
+  "endUtc": "2026-11-12 "
+}

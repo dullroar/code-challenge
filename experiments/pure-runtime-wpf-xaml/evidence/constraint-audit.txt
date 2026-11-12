@@ -1,0 +1,13 @@
+# static audit 2026-11-12T23:35:46Z
+## pattern: x:Code|Converter|MarkupExtension|code-behind|Class=|Process|cmd|Assembly.Load|Reflection in program XAML
+(no hits)
+## C# files in experiment (excluding obj/bin/artifacts)
+./probes/host/Host.cs
+## assemblies/namespaces referenced by program XAML
+      1 assembly=Microsoft.Data.Sqlite
+      1 assembly=System.Linq
+      3 assembly=System.Runtime
+      1 assembly=System.Threading.Thread
+## custom (non-System/WPF/Sqlite) assembly refs
+none
+# re-audit after final edits: no hits

@@ -1,0 +1,38 @@
+<!-- STRICT BUILT-IN: only System.* / WPF types. No SQLite (provenance), no custom code. -->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime" xmlns:thr="clr-namespace:System.Threading;assembly=System.Threading.Thread"
+        xmlns:col="clr-namespace:System.Collections;assembly=System.Runtime" xmlns:linq="clr-namespace:System.Linq;assembly=System.Linq"
+        Title="Only One STATEMENT (strict built-in pure XAML)" Width="520" Height="320" ResizeMode="NoResize" ShowActivated="False">
+  <Window.Resources>
+    <!-- seeded PRNG + three re-triggered draws (Refresh smuggled through an x:Array) -->
+    <sys:Random x:Key="rnd"><x:Arguments><sys:Int32>42</sys:Int32></x:Arguments></sys:Random>
+    <ObjectDataProvider x:Key="next" ObjectInstance="{StaticResource rnd}" MethodName="Next"><ObjectDataProvider.MethodParameters><sys:Int32>10</sys:Int32><sys:Int32>20</sys:Int32></ObjectDataProvider.MethodParameters></ObjectDataProvider>
+    <x:Array x:Key="holder" Type="{x:Type ObjectDataProvider}"><StaticResource ResourceKey="next"/></x:Array>
+    <ObjectDataProvider x:Key="getNext" ObjectInstance="{StaticResource holder}" MethodName="GetValue"><ObjectDataProvider.MethodParameters><sys:Int32>0</sys:Int32></ObjectDataProvider.MethodParameters></ObjectDataProvider>
+    <ObjectDataProvider x:Key="again1" ObjectInstance="{StaticResource getNext}" MethodName="Refresh"/>
+    <ObjectDataProvider x:Key="again2" ObjectInstance="{StaticResource getNext}" MethodName="Refresh"/>
+    <!-- arithmetic + comparison with built-ins: Sum(int[]) then CompareTo(40) -->
+    <x:Array x:Key="hours" Type="{x:Type sys:Int32}"><sys:Int32>16</sys:Int32><sys:Int32>11</sys:Int32><sys:Int32>14</sys:Int32></x:Array>
+    <ObjectDataProvider x:Key="sum" ObjectType="{x:Type linq:Enumerable}" MethodName="Sum"><ObjectDataProvider.MethodParameters><StaticResource ResourceKey="hours"/></ObjectDataProvider.MethodParameters></ObjectDataProvider>
+    <ObjectDataProvider x:Key="vs40" ObjectInstance="{StaticResource sum}" MethodName="CompareTo"><ObjectDataProvider.MethodParameters><sys:Int32>40</sys:Int32></ObjectDataProvider.MethodParameters></ObjectDataProvider>
+    <!-- background thread: ThreadStart bound (CreateDelegate via x:FactoryMethod) to ArrayList.Clear -->
+    <col:ArrayList x:Key="target"><sys:String>pending</sys:String></col:ArrayList>
+    <sys:Delegate x:Key="ts" x:FactoryMethod="CreateDelegate"><x:Arguments><x:Type TypeName="thr:ThreadStart"/><StaticResource ResourceKey="target"/><sys:String>Clear</sys:String></x:Arguments></sys:Delegate>
+    <thr:Thread x:Key="bg" IsBackground="True"><x:Arguments><StaticResource ResourceKey="ts"/></x:Arguments></thr:Thread>
+    <ObjectDataProvider x:Key="bgId" ObjectInstance="{StaticResource bg}" MethodName="get_ManagedThreadId"/>
+    <ObjectDataProvider x:Key="bgStart" ObjectInstance="{StaticResource bg}" MethodName="Start"/>
+    <ObjectDataProvider x:Key="bgJoin" ObjectInstance="{StaticResource bg}" MethodName="Join"/>
+    <ObjectDataProvider x:Key="pendingAfter" ObjectInstance="{StaticResource target}" MethodName="get_Count"/>
+  </Window.Resources>
+  <Viewbox><Grid x:Name="g" Background="#172033" Width="520" Height="320">
+    <Grid.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard><Storyboard>
+      <DoubleAnimation Storyboard.TargetName="g" Storyboard.TargetProperty="Opacity" From="1" To="0.45" Duration="0:0:1.2" AutoReverse="True" RepeatBehavior="Forever"/>
+    </Storyboard></BeginStoryboard></EventTrigger></Grid.Triggers>
+    <StackPanel Margin="28">
+      <TextBlock Foreground="#FFCE56" FontWeight="Bold" FontSize="18" Text="DEMO ONLY - no real time system is involved"/>
+      <TextBlock Foreground="White" FontSize="22" Text="{Binding Source={StaticResource next}, StringFormat='last seeded draw: {0}'}"/>
+      <TextBlock Foreground="White" FontSize="22" Text="{Binding Source={StaticResource sum}, StringFormat='sum of cards: {0}'}"/>
+      <TextBlock Foreground="White" FontSize="22" Text="{Binding Source={StaticResource vs40}, StringFormat='CompareTo(40): {0}'}"/>
+    </StackPanel>
+  </Grid></Viewbox>
+</Window>

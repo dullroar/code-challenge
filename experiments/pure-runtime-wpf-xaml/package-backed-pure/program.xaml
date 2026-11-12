@@ -1,0 +1,36 @@
+<!-- PACKAGE-BACKED PURE DECLARATIVE XAML.
+     Non-built-in dependency: Microsoft.Data.Sqlite (+ SQLitePCLRaw) via Microsoft.EntityFrameworkCore.Sqlite 10.0.14, unmodified.
+     No application code. CAVEAT (owner decision needed): the termination guard and the hour formula live in SQL text embedded
+     in this XAML, executed by SQLite; the seeded Random draws do not reach the database (no dynamic-parameter primitive).
+     Sequencing = document order at parse time (providers execute in EndInit order); the summary runs on a pool thread (IsAsynchronous). -->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime" xmlns:sql="clr-namespace:Microsoft.Data.Sqlite;assembly=Microsoft.Data.Sqlite"
+        Title="Only One STATEMENT (package-backed pure XAML)" Width="520" Height="320" ResizeMode="NoResize" ShowActivated="False">
+  <Window.Resources>
+    <sys:Random x:Key="rnd"><x:Arguments><sys:Int32>42</sys:Int32></x:Arguments></sys:Random>
+    <ObjectDataProvider x:Key="draw" ObjectInstance="{StaticResource rnd}" MethodName="Next"><ObjectDataProvider.MethodParameters><sys:Int32>10</sys:Int32><sys:Int32>20</sys:Int32></ObjectDataProvider.MethodParameters></ObjectDataProvider>
+    <sql:SqliteConnection x:Key="conn"><x:Arguments><sys:String>Data Source=artifacts/pkg-run/demo-timecards.db</sys:String></x:Arguments></sql:SqliteConnection>
+    <ObjectDataProvider x:Key="open" ObjectInstance="{StaticResource conn}" MethodName="Open"/>
+    <sql:SqliteCommand x:Key="ddl"><x:Arguments><sys:String>CREATE TABLE IF NOT EXISTS DemoTimeCards(Id INTEGER PRIMARY KEY, Category TEXT NOT NULL, Hours REAL, UserId TEXT, Year INTEGER, Week INTEGER, IsDemo INTEGER NOT NULL)</sys:String><StaticResource ResourceKey="conn"/></x:Arguments></sql:SqliteCommand>
+    <ObjectDataProvider x:Key="doDdl" ObjectInstance="{StaticResource ddl}" MethodName="ExecuteNonQuery"/>
+    <sql:SqliteCommand x:Key="ins1"><x:Arguments><sys:String>INSERT INTO DemoTimeCards(Category,Hours,UserId,Year,Week,IsDemo) SELECT 'Meetings', 10 + ((SELECT COUNT(*) FROM DemoTimeCards)*7+5)%10, 'DemoUser', CAST(strftime('%Y','now') AS INTEGER), CAST(strftime('%W','now') AS INTEGER), 1 WHERE (SELECT COALESCE(SUM(Hours),0) FROM DemoTimeCards) &lt;= 40</sys:String><StaticResource ResourceKey="conn"/></x:Arguments></sql:SqliteCommand>
+    <ObjectDataProvider x:Key="doIns1" ObjectInstance="{StaticResource ins1}" MethodName="ExecuteNonQuery"/>
+    <sql:SqliteCommand x:Key="ins2"><x:Arguments><sys:String>INSERT INTO DemoTimeCards(Category,Hours,UserId,Year,Week,IsDemo) SELECT 'Coding', 10 + ((SELECT COUNT(*) FROM DemoTimeCards)*7+5)%10, 'DemoUser', CAST(strftime('%Y','now') AS INTEGER), CAST(strftime('%W','now') AS INTEGER), 1 WHERE (SELECT COALESCE(SUM(Hours),0) FROM DemoTimeCards) &lt;= 40</sys:String><StaticResource ResourceKey="conn"/></x:Arguments></sql:SqliteCommand>
+    <ObjectDataProvider x:Key="doIns2" ObjectInstance="{StaticResource ins2}" MethodName="ExecuteNonQuery"/>
+    <sql:SqliteCommand x:Key="ins3"><x:Arguments><sys:String>INSERT INTO DemoTimeCards(Category,Hours,UserId,Year,Week,IsDemo) SELECT 'Debugging', 10 + ((SELECT COUNT(*) FROM DemoTimeCards)*7+5)%10, 'DemoUser', CAST(strftime('%Y','now') AS INTEGER), CAST(strftime('%W','now') AS INTEGER), 1 WHERE (SELECT COALESCE(SUM(Hours),0) FROM DemoTimeCards) &lt;= 40</sys:String><StaticResource ResourceKey="conn"/></x:Arguments></sql:SqliteCommand>
+    <ObjectDataProvider x:Key="doIns3" ObjectInstance="{StaticResource ins3}" MethodName="ExecuteNonQuery"/>
+    <sql:SqliteCommand x:Key="ins4"><x:Arguments><sys:String>INSERT INTO DemoTimeCards(Category,Hours,UserId,Year,Week,IsDemo) SELECT 'Learning', 10 + ((SELECT COUNT(*) FROM DemoTimeCards)*7+5)%10, 'DemoUser', CAST(strftime('%Y','now') AS INTEGER), CAST(strftime('%W','now') AS INTEGER), 1 WHERE (SELECT COALESCE(SUM(Hours),0) FROM DemoTimeCards) &lt;= 40</sys:String><StaticResource ResourceKey="conn"/></x:Arguments></sql:SqliteCommand>
+    <ObjectDataProvider x:Key="doIns4" ObjectInstance="{StaticResource ins4}" MethodName="ExecuteNonQuery"/>
+    <sql:SqliteCommand x:Key="cnt"><x:Arguments><sys:String>SELECT COUNT(*) || ' cards, ' || SUM(Hours) || ' hours' FROM DemoTimeCards</sys:String><StaticResource ResourceKey="conn"/></x:Arguments></sql:SqliteCommand>
+    <ObjectDataProvider x:Key="obsSummary" IsAsynchronous="True" ObjectInstance="{StaticResource cnt}" MethodName="ExecuteScalar"/>
+  </Window.Resources>
+  <Viewbox><Grid x:Name="g" Background="#172033" Width="520" Height="320">
+    <Grid.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard><Storyboard>
+      <DoubleAnimation Storyboard.TargetName="g" Storyboard.TargetProperty="Opacity" From="1" To="0.45" Duration="0:0:1.2" AutoReverse="True" RepeatBehavior="Forever"/>
+    </Storyboard></BeginStoryboard></EventTrigger></Grid.Triggers>
+    <StackPanel Margin="28">
+      <TextBlock Foreground="#FFCE56" FontWeight="Bold" FontSize="18" Text="DEMO ONLY - no real time system is involved"/>
+      <TextBlock Foreground="White" FontSize="22" Text="{Binding Source={StaticResource obsSummary}, StringFormat='Saved locally: {0}'}"/>
+    </StackPanel>
+  </Grid></Viewbox>
+</Window>
