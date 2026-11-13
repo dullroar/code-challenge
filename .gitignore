@@ -11,5 +11,5 @@ obj/
 src/RustChallenge1/target/
 src/RustChallenge1/data/
 
-# experiment run outputs
-experiments/pure-runtime-wpf-xaml/artifacts/
+# XAML challenge disposable demo records
+src/xaml/data/
