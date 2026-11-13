@@ -1,6 +1,6 @@
 # Regex Challenge: One Match, Zero Mercy
 
-**Status:** All three tracks implemented (`src/regex-perl`, `src/regex-pcre2`, `src/regex-dotnet`). Track 3 got further than this plan predicted but did hit the expected walls; see its README. The plan below is unchanged from when it was written.
+**Status:** All three tracks implemented (`src/regex-perl`, `src/regex-pcre2`, `src/regex-dotnet`), plus a `pcre2grep` variant of Track 2 (`src/regex-pcre2grep`) that needs no custom host code. Track 3 got further than this plan predicted but did hit the expected walls; see its README. The plan below is unchanged from when it was written.
 **Baseline:** the timecard demo shared by every entry in this repo (see root `README.md`). This plan does not change the baseline.
 **Nature:** a gleeful dare, not a production spec. If a rule here is making the result *less* ridiculous, the rule is wrong.
 **Where it runs:** WSL/Linux. No WPF this time — Perl and PCRE2 are native there, and `dotnet` is cross-platform, so nothing here depends on Windows.

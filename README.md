@@ -25,6 +25,7 @@ Every version builds the same demo: generate 10 to 19 random hours at a time for
 | **XAML** | Jim | The program *is* a XAML file, interpreted at run time. No code-behind, no event handlers, no converters | WPF | [`src/xaml`](src/xaml) |
 | **Perl regex** | Jim | The file's only statement is one `=~` match: `(?{ })` and `(??{ })` blocks seed, draw, write to SQLite, pulse and print, then the match returns *false* | terminal | [`src/regex-perl`](src/regex-perl/README.md) |
 | **PCRE2 regex** | Jim | One `pcre2_match` call; the pattern's callout strings are opcodes for a bodiless C dispatcher; result: "no match" | terminal | [`src/regex-pcre2`](src/regex-pcre2/README.md) |
+| **pcre2grep regex** | Jim | No custom code: a stock `pcre2grep` and one command line. Callouts run `sqlite3`, and the helpers' exit codes steer the match; result: "no match" | terminal | [`src/regex-pcre2grep`](src/regex-pcre2grep/README.md) |
 | **.NET regex** | Jim | One `Regex.Match`, balancing groups only: no callouts, no inline code. A budget stack is the stop rule, flag groups pick the category. Documents the walls it hits | terminal | [`src/regex-dotnet`](src/regex-dotnet/README.md) |
 | **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | Swing | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
 | **Kotlin** | Ken | The same challenge, Kotlin style | Swing | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
@@ -140,13 +141,14 @@ The SQLite command runs after the window is closed. See the companion README for
 
 ## Regex companions for WSL
 
-Three entries turn a regular expression into the program. In the first two, the loop, the running total, the stop rule and the record writes all happen *inside one regex match*, which then deliberately reports failure after doing all the work. [`src/regex-perl`](src/regex-perl/README.md) uses Perl's executable `(?{ })` and `(??{ })` blocks; [`src/regex-pcre2`](src/regex-pcre2/README.md) uses PCRE2 callouts as a tiny instruction set. Both pulse a **DEMO ONLY** banner in the terminal, from inside the match, and both ship a `check.sh` that asserts the rules. The Perl one goes furthest: its file is a single statement, and the match itself writes the records to a real SQLite transaction.
+Four entries turn a regular expression into the program. In the first three, the loop, the running total, the stop rule and the record writes all happen *inside one regex match*, which then deliberately reports failure after doing all the work. [`src/regex-perl`](src/regex-perl/README.md) uses Perl's executable `(?{ })` and `(??{ })` blocks; [`src/regex-pcre2`](src/regex-pcre2/README.md) uses PCRE2 callouts as a tiny instruction set, and [`src/regex-pcre2grep`](src/regex-pcre2grep/README.md) needs no custom code at all: a stock `pcre2grep` runs `sqlite3` from callouts and the exit codes steer the match. All three pulse a **DEMO ONLY** banner in the terminal, from inside the match, and all three ship a `check.sh` that asserts the rules. The Perl one goes furthest: its file is a single statement, and the match itself writes the records to a real SQLite transaction.
 
-The third, [`src/regex-dotnet`](src/regex-dotnet/README.md), is the purist's version: .NET balancing groups and conditionals only, no code in the pattern. The pattern does the walk, the accumulation and the stop rule, but its README is honest about the walls: a regex cannot draw random numbers or write files, and a failed .NET match exposes no captures, so the "return false" signature move is impossible there. See [`plans/regex.md`](plans/regex.md).
+The last, [`src/regex-dotnet`](src/regex-dotnet/README.md), is the purist's version: .NET balancing groups and conditionals only, no code in the pattern. The pattern does the walk, the accumulation and the stop rule, but its README is honest about the walls: a regex cannot draw random numbers or write files, and a failed .NET match exposes no captures, so the "return false" signature move is impossible there. See [`plans/regex.md`](plans/regex.md).
 
 ```bash
 perl src/regex-perl/timecards.pl
 make -C src/regex-pcre2 run     # needs libpcre2-dev
+PCRE2GREP=~/.local/bin/pcre2grep src/regex-pcre2grep/timecards.sh   # needs a pcre2grep built with callouts
 dotnet run -c Release --project src/regex-dotnet
 ```
 
@@ -163,6 +165,7 @@ src/
   RustChallenge1/             # Rust + GTK 4 companion for WSL
   regex-perl/                 # Perl: one executable-regex match is the program
   regex-pcre2/                # PCRE2: callout strings as opcodes, C dispatcher
+  regex-pcre2grep/            # pcre2grep: callouts run sqlite3, exit codes steer the match
   regex-dotnet/               # .NET: balancing groups only, and the walls it hits
   xaml/                       # XAML: the program is a .xaml file run at run time
 plans/
