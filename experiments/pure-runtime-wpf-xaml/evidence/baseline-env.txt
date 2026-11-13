@@ -1,0 +1,106 @@
+# Baseline / toolchain inventory (captured 2026-11-13T00:24:25Z)
+
+## dotnet --info
+.NET SDK:
+ Version:           11.0.100
+ Commit:            297acf930f
+ Workload version:  11.0.100-manifests.08e30c08
+ MSBuild version:   18.12.2-1.26529.118+297acf930
+
+Runtime Environment:
+ OS Name:     Windows
+ OS Version:  10.0.26300
+ OS Platform: Windows
+ RID:         win-x64
+ Base Path:   C:\Program Files\dotnet\sdk\11.0.100
+
+.NET workloads installed:
+There are no installed workloads to display.
+Configured to use workload sets when installing new manifests.
+No workload sets are installed. Run "dotnet workload restore" to install a workload set.
+
+Host:
+  Version:      11.0.0
+  Architecture: x64
+  Commit:       297acf930f
+
+.NET SDKs installed:
+  10.0.404 [C:\Program Files\dotnet\sdk]
+  11.0.100 [C:\Program Files\dotnet\sdk]
+
+.NET runtimes installed:
+  Microsoft.AspNetCore.App 10.0.15 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.AspNetCore.App 11.0.0 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+  Microsoft.NETCore.App 10.0.15 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.NETCore.App 11.0.0 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+  Microsoft.WindowsDesktop.App 10.0.15 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+  Microsoft.WindowsDesktop.App 11.0.0 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+
+Other architectures found:
+  None
+
+Environment variables:
+  Not set
+
+global.json file:
+  Not found
+
+Learn more:
+  https://aka.ms/dotnet/info
+
+Download .NET:
+  https://aka.ms/dotnet/download
+
+## dotnet --list-sdks
+10.0.404 [C:\Program Files\dotnet\sdk]
+11.0.100 [C:\Program Files\dotnet\sdk]
+## dotnet --list-runtimes
+Microsoft.AspNetCore.App 10.0.15 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+Microsoft.AspNetCore.App 11.0.0 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+Microsoft.NETCore.App 10.0.15 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+Microsoft.NETCore.App 11.0.0 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+Microsoft.WindowsDesktop.App 10.0.15 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+Microsoft.WindowsDesktop.App 11.0.0 [C:\Program Files\dotnet\shared\Microsoft.WindowsDesktop.App]
+
+## baseline git SHA at start
+8c14a8e369d16dddb9aa8c54ae22971b4d713971
+
+## baseline package inventory (dotnet list package --include-transitive), src/ModernChallenge1
+  Determining projects to restore...
+  Restored C:\Users\jimle\repos\code-challenge\src\ModernChallenge1\ModernChallenge1.csproj (in 39 ms).
+Project 'ModernChallenge1' has the following package references
+   [net10.0-windows]: 
+   Top-level Package                           Requested   Resolved
+   > Microsoft.EntityFrameworkCore.Sqlite      10.0.14     10.0.14 
+
+   Transitive Package                                           Resolved
+   > Microsoft.Data.Sqlite.Core                                 10.0.14 
+   > Microsoft.EntityFrameworkCore                              10.0.14 
+   > Microsoft.EntityFrameworkCore.Abstractions                 10.0.14 
+   > Microsoft.EntityFrameworkCore.Analyzers                    10.0.14 
+   > Microsoft.EntityFrameworkCore.Relational                   10.0.14 
+   > Microsoft.EntityFrameworkCore.Sqlite.Core                  10.0.14 
+   > Microsoft.Extensions.Caching.Abstractions                  10.0.14 
+   > Microsoft.Extensions.Caching.Memory                        10.0.14 
+   > Microsoft.Extensions.Configuration.Abstractions            10.0.14 
+   > Microsoft.Extensions.DependencyInjection                   10.0.14 
+   > Microsoft.Extensions.DependencyInjection.Abstractions      10.0.14 
+   > Microsoft.Extensions.DependencyModel                       10.0.14 
+   > Microsoft.Extensions.Logging                               10.0.14 
+   > Microsoft.Extensions.Logging.Abstractions                  10.0.14 
+   > Microsoft.Extensions.Options                               10.0.14 
+   > Microsoft.Extensions.Primitives                            10.0.14 
+   > SQLitePCLRaw.bundle_e_sqlite3                              2.1.13  
+   > SQLitePCLRaw.core                                          2.1.13  
+   > SQLitePCLRaw.lib.e_sqlite3                                 2.1.13  
+   > SQLitePCLRaw.provider.e_sqlite3                            2.1.13  
+
+
+## experiment host/model packages
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+Project 'EfModel' has the following package references
+   [net10.0-windows]: 
+   Top-level Package                           Requested   Resolved
+   > Microsoft.EntityFrameworkCore.Sqlite      10.0.14     10.0.14 
+

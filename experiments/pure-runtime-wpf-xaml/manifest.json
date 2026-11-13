@@ -1,18 +1,73 @@
 {
   "baselineCommit": "8c14a8e369d16dddb9aa8c54ae22971b4d713971",
   "experimentBranch": "experiment/pure-runtime-wpf-xaml",
-  "experimentCommit": "see git log (set at commit time)",
-  "framework": "net10.0-windows",
-  "net11": "not evaluated: toolchain absent",
-  "sdk": "10.0.404",
-  "packages": ["Microsoft.EntityFrameworkCore.Sqlite 10.0.14 (host only; Microsoft.Data.Sqlite used by package-backed program)"],
-  "selectedGrade": "strict-built-in (whole demo, XML persistence substitution) and package-backed-pure (whole demo except EF API); constrained not needed",
+  "experimentCommitAtManifestWrite": "74d80475c8eeb5d64e7f9bc3e4c382d022087b2c",
+  "activeFrameworks": {
+    "net10.0-windows": "verified",
+    "net11.0-windows": "compatible (observed)"
+  },
+  "sdks": [
+    "10.0.404",
+    "11.0.100"
+  ],
+  "runtimes": [
+    "Microsoft.NETCore.App 10.0.15",
+    "Microsoft.WindowsDesktop.App 10.0.15",
+    "Microsoft.NETCore.App 11.0.0",
+    "Microsoft.WindowsDesktop.App 11.0.0"
+  ],
+  "packages": {
+    "Microsoft.EntityFrameworkCore.Sqlite": "10.0.14 (unmodified; brings Microsoft.Data.Sqlite, SQLitePCLRaw.bundle_e_sqlite3 2.1.13)",
+    "inventory": "evidence/baseline-env.txt"
+  },
+  "selectedGrades": {
+    "strict-built-in": "whole demo with XML persistence substitution (DataTable.WriteXml)",
+    "package-backed-pure": "whole demo, SQLite via Microsoft.Data.Sqlite",
+    "package-backed-ef": "whole demo, EF Core via owner-approved model copy",
+    "constrained": "not built (no remaining imperative capability)"
+  },
   "rngSeed": 42,
-  "databasePath": "experiments/pure-runtime-wpf-xaml/artifacts/run-<id>/artifacts/pkg-run/demo-timecards.db",
-  "testCommands": ["./run.ps1 package-backed-pure <id>", "./run.ps1 strict-built-in <id>"],
-  "runtimeXamlHashes": "evidence/xaml-hashes.txt",
-  "iterationsUsed": 16,
-  "followUps": ["H3 raw typed values", "I1 LOCALAPPDATA redirect check", "J1 EF Core composition"],
-  "startUtc": "2026-11-12",
-  "endUtc": "2026-11-12 "
+  "databasePaths": {
+    "package-backed-pure": "artifacts/run-<id>/artifacts/pkg-run/demo-timecards.db",
+    "package-backed-ef": "artifacts/run-<id>/artifacts/ef-run/demo-timecards.db",
+    "strict-output": "artifacts/run-<id>/artifacts/strict-run/demo-timecards.xml",
+    "baselineLocalAppData": "never touched (verified absent)"
+  },
+  "testCommands": [
+    "dotnet build probes/host/Host.csproj -c Release -o artifacts/host",
+    "./run.ps1 strict-built-in <fresh-id>",
+    "./run.ps1 package-backed-pure <fresh-id>",
+    "./run.ps1 package-backed-ef <fresh-id>",
+    "bash tools/collect_evidence.sh   # needs net11 host in artifacts/net11/host11 (see toolchain.md)"
+  ],
+  "startUtc": "2026-11-12T16:55:08-07:00",
+  "endUtc": "2026-11-13T00:26:03Z",
+  "iterations": {
+    "loopBudget": 16,
+    "followUps": 4
+  },
+  "runtimeXamlSha256": {
+    "strict-built-in/program.xaml": "53e24742e1230f1db775321a8a6c52a3d98a99477c27e1a2b03b387f1892e995",
+    "package-backed-pure/program.xaml": "0961b019749271ed933eca9e5ce8138c12f368f603476abc9091a7c4be27556e",
+    "package-backed-ef/program.xaml": "1a336745382d083b7930a79f4fe9efe226371ab3261d55497efa3eba40cbe777",
+    "probes\\B1-window-animation.xaml": "fa9f678ea40da3b17d512b4c909ae105b107a343317fef30629c8249fb1dedfc",
+    "probes\\C1-odp-random.xaml": "9466b6c916cc9794138b81290726c95b01390f9672d7e14ab86c13a023300ef2",
+    "probes\\C2-refresh-retrigger.xaml": "dbe9b4f44569dc7e6647e3b0300bcdbabd37fe759373c89840ce9c045513fd39",
+    "probes\\C3-dynamic-params.xaml": "43dc25d0b05b0462dcb8caf12b6993f01ed966ccffcea523b3bb33e863810578",
+    "probes\\C4-sequence-order.xaml": "6bfe9409632b0d083b2a391daeeff9336208c5e696819f7370aab2caab68820a",
+    "probes\\D1-datatrigger-branch.xaml": "fd8f267ae27d434df1341e17a24cc0d34dd46c5efbfaeba07ffae93ba914b7a4",
+    "probes\\D2-trigger-effect.xaml": "91899314fb9e5e0d1cef1793247d6ebd6210a69ba5d1dc8c998a3ecf4997d72b",
+    "probes\\D3-trigger-binding-effect.xaml": "ed53b4522208fa53efa79d4d8ed2e4045bf1c57c57d30ad532634f15e8f67f85",
+    "probes\\E1-shuffle-sum.xaml": "a5b37c61bd9d8b491c32a6dc6018d9883ea1313059345db3257bb104191cb4a3",
+    "probes\\F1-sqlite-package.xaml": "a7317501f2088ecf30b4b8d61947721a635b7b0a6356582c1e8a7f281c3b44b2",
+    "probes\\F2-ef-core.xaml": "f559d1d4717ab1a9041495ce35ada89873537a0fc59cc0f04f2fc2ec7cdf7c73",
+    "probes\\F3-ef-odp-ctor.xaml": "65ff48ccc2b9c6ae0866cc00986262f6c34edef7ef4fcd25e5e11a206dd968af",
+    "probes\\F4-odp-ctor-semantics.xaml": "b0bcb01696a11b1a8bd3e2f365dec1c308fd8865f39e9a63cbd7e68faf2aea13",
+    "probes\\G1-thread-delegate.xaml": "d8a8682b928500094cbe9d473089db8fa68e97ea62be24013fdee59070ab44f3",
+    "probes\\G2-thread-async-odp.xaml": "24effe666ee2a502562122d4c9d126ca83f7d63ffd76a041838af5a06e22f64f",
+    "probes\\H1-carrier-to-sqlite.xaml": "5f03f2cc48557d8d06df8003f8dc6e34e388974bdb23a0bf3c8286181ce973c2",
+    "probes\\H2-carrier-datatable-sum.xaml": "5326184584140c9b89eda5338104e45f799b33956723dd72b537a1a1da7699a2",
+    "probes\\H3-carrier-to-raw-typed.xaml": "f800f9655cca79213de90cb81c4e15bb57550b004a4c7ff52c82b1e59f640f6a",
+    "probes\\I1-localappdata.xaml": "b885f6c60182c00663ff43122e43110114aa12ab3496219c8593ffc352461e2b"
+  }
 }

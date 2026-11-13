@@ -7,3 +7,6 @@
 - Source inspection confirms: one empty-body `for`; `XamlReader.Load` of a Viewbox with EventTrigger/BeginStoryboard DoubleAnimation; `Random.Shared` 10..19; ≤40 h threshold; EF Core/SQLite; named Mutex; background Thread with reflection calls.
 - DB location (by source): `%LOCALAPPDATA%\ModernChallenge1\demo-timecards.db`, hard-coded, no override.
 - **The baseline was NOT executed.** Running it would write to the real LocalAppData path, which the plan forbids. Its behaviors are source-observed, not run-verified. Baseline project files are untouched (`git status` shows only `experiments/`).
+
+- Full `dotnet --info`, SDK/runtime lists and package inventory (direct + transitive, incl. SQLitePCLRaw.bundle_e_sqlite3 2.1.13) are in `baseline-env.txt`.
+- Baseline execution remains **not run** (hard-coded real LocalAppData path; I1 showed it cannot be redirected). Behaviors are source-observed; the experiment's compositions are the executed oracle.

@@ -25,7 +25,13 @@ internal static class Host
         Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.ContextIdle, () => Dump(root, "context-idle"));
         if (root is Window w) w.Show();
         var t = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(ms) };
-        t.Tick += (_, _) => { Dump(root, "final"); app.Shutdown(); };
+        t.Tick += (_, _) =>
+        {
+            Dump(root, "final");
+            var png = Environment.GetEnvironmentVariable("HOST_PNG");
+            if (png != null && root is Window win) Snap(win, png);
+            app.Shutdown();
+        };
         t.Start();
         app.Run();
         return 0;
@@ -44,8 +50,25 @@ internal static class Host
         }
         if (fe is Window ww && ww.Content is TextBlock tb) Console.WriteLine($"content.Text={tb.Text} tag={tb.Tag} style={(tb.Style==null?"null":"set")}");
         foreach (var tx in Texts(fe)) Console.WriteLine("TEXT: " + tx);
+        foreach (var nm in Named(fe)) Console.WriteLine("NAMED: " + nm);
         Console.WriteLine($"root.Opacity={fe.Opacity} tag={Fmt(fe.Tag)}");
         if (fe is ContentControl cc && cc.Content is FrameworkElement c) Console.WriteLine($"content.Opacity={c.Opacity}");
+    }
+    // generic: render the window content to a PNG (visible smoke evidence); no demo logic
+    static void Snap(Window w, string path)
+    {
+        if (w.Content is not FrameworkElement c) return;
+        c.Measure(new Size(w.Width, w.Height)); c.Arrange(new Rect(0, 0, w.Width, w.Height)); c.UpdateLayout();
+        var rtb = new System.Windows.Media.Imaging.RenderTargetBitmap((int)w.Width, (int)w.Height, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+        rtb.Render(c);
+        var enc = new System.Windows.Media.Imaging.PngBitmapEncoder(); enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rtb));
+        using var f = File.Create(path); enc.Save(f);
+        Console.WriteLine("PNG: " + path);
+    }
+    static IEnumerable<string> Named(DependencyObject d)
+    {
+        if (d is FrameworkElement fe && !string.IsNullOrEmpty(fe.Name)) yield return $"{fe.Name}.Opacity={fe.Opacity:F3}";
+        foreach (var c in LogicalTreeHelper.GetChildren(d).OfType<DependencyObject>()) foreach (var x in Named(c)) yield return x;
     }
     static IEnumerable<string> Texts(DependencyObject d)
     {

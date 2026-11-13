@@ -130,7 +130,7 @@ a("""<Viewbox><Grid x:Name="g" Background="#172033" Width="520" Height="320">
         <DataTrigger Binding="{Binding Source={StaticResource obsVs40}}"><DataTrigger.Value><sys:Int32>1</sys:Int32></DataTrigger.Value><Setter Property="Text" Value="over 40 h: batch complete"/></DataTrigger>
         <DataTrigger Binding="{Binding Source={StaticResource obsVs40}}"><DataTrigger.Value><sys:Int32>-1</sys:Int32></DataTrigger.Value><Setter Property="Text" Value="under 40 h: would continue"/></DataTrigger>
       </Style.Triggers></Style></TextBlock.Style></TextBlock>
-    <TextBlock Foreground="White" FontSize="22" Text="Saved locally (XML) for the modernization exercise."/>
+    <TextBlock Foreground="White" FontSize="22" Text="Saved locally (XML file)."/>
   </StackPanel>
 </Grid></Viewbox>
 </Window>""")
