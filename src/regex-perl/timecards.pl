@@ -1,13 +1,7 @@
 #!/usr/bin/perl
-# DEMO ONLY. Fictional timecards, written to a scratch file under XDG_DATA_HOME. See README.md.
-use strict; use warnings; no warnings 'regexp'; use POSIX qw(strftime); use File::Path qw(make_path);
+# DEMO ONLY. Fictional timecards, written to a scratch SQLite file under XDG_DATA_HOME. See README.md.
+# Everything below the `use` lines is ONE statement: a single match. It does the seeding, the random
+# draws, the SQLite transaction, the pulse, and the printing, and then it returns false.
+use strict; use warnings; no warnings 'regexp'; use POSIX (); use File::Path ();
 
-our @c = qw(Meetings Coding Debugging Learning);
-our ($t, $n, $fh, $p) = (0, 0);
-$| = 1;
-our $f = ($ENV{XDG_DATA_HOME} // "$ENV{HOME}/.local/share") . '/RegexPerl/demo-timecards.tsv';
-
-my $matched = ('MeetingsCodingDebuggingLearning' . ('~' x (-t STDOUT ? 60 : 0))) =~ m{^(?{make_path($f=~s,/[^/]*$,,r);open $fh,'>>',$f or die"$f: $!";select((select($fh),$|=1)[0]);print {$fh}"# DEMO ONLY ",strftime('%FT%T',localtime),"\n"})(?:((??{$t<=40?$c[$n]//'(*FAIL)':'(*FAIL)'}))(?{local$t=$t+(my$h=10+int rand 10);local$n=$n+1;print {$fh}join("\t",$^N,$h,$t,strftime('%G-W%V',localtime),'DEMO ONLY'),"\n"}))*(*COMMIT)(?{print {$fh}"# committed total=$t entries=$n DEMO ONLY\n";close $fh})[A-Za-z]*(?:~(?{$p++;select undef,undef,undef,.05;printf"\r\e[48;5;%dm  DEMO ONLY  \e[0m",232+int(11.5+11.5*sin($p*.35))}))*(*COMMIT)(?{print"\r\e[0m\e[K"if$p})(*FAIL)}x;
-
-print 'match returned: ', ($matched ? 'true' : 'false'), "\n", "records at $f (latest run below)\n",
-      do { local ($/, @ARGV) = (undef, $f); my $all = <>; $all =~ s/.*^(# DEMO ONLY)/$1/ms; $all };
+'MeetingsCodingDebuggingLearning~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~' =~ m{^(?{$|=1;@::c=qw(Meetings Coding Debugging Learning);($::t,$::n,$::p)=(0,0,0);$::f=($ENV{XDG_DATA_HOME}//"$ENV{HOME}/.local/share").'/RegexPerl/demo-timecards.db';$::r=time().'-'.$$;File::Path::make_path($::f=~s,/[^/]*$,,r);open $::db,'|-','sqlite3',$::f or die"sqlite3 $::f: $!";select((select($::db),$|=1)[0]);print {$::db}"CREATE TABLE IF NOT EXISTS demo_timecards(id INTEGER PRIMARY KEY,run_id TEXT,category TEXT,hours INTEGER,running_total INTEGER,iso_week TEXT,created_at TEXT,demo_only INTEGER NOT NULL DEFAULT 1 CHECK(demo_only=1));BEGIN;\n";print"# DEMO ONLY run $::r\n"})(?:((??{$::t<=40?$::c[$::n]//'(*FAIL)':'(*FAIL)'}))(?{my$k=$^N;local$::t=$::t+(my$h=10+int rand 10);local$::n=$::n+1;my$w=POSIX::strftime('%G-W%V',localtime);print {$::db}"INSERT INTO demo_timecards(run_id,category,hours,running_total,iso_week,created_at) VALUES('$::r','$k',$h,$::t,'$w',datetime('now'));\n";print join("\t",$k,$h,$::t,$w,'DEMO ONLY'),"\n"}))*(*COMMIT)(?{print {$::db}"COMMIT;\n";close $::db;print"# committed total=$::t entries=$::n DEMO ONLY\n"})[A-Za-z]*(?:(?(?{-t STDOUT})~(?{$::p++;select undef,undef,undef,.05;printf"\r\e[48;5;%dm  DEMO ONLY  \e[0m",232+int(11.5+11.5*sin($::p*.35))})|(?!)))*(*COMMIT)(?{print"\r\e[0m\e[K"if$::p;print"# the match now returns false, on purpose\n"})(*FAIL)}x;

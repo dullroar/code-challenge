@@ -23,7 +23,7 @@ Every version builds the same demo: generate 10 to 19 random hours at a time for
 | **C# (the original)** | Jim | Empty-body `for`; anonymous object as loop state; runtime XAML; LINQ; EF Core | WPF | [`src/ModernChallenge1`](src/ModernChallenge1) |
 | **Rust** | Jim | No `;`, `let`, or `return` in `main` (a test enforces it); iterators and closures | GTK 4 (WSL) | [`src/RustChallenge1`](src/RustChallenge1/README.md) |
 | **XAML** | Jim | The program *is* a XAML file, interpreted at run time. No code-behind, no event handlers, no converters | WPF | [`src/xaml`](src/xaml) |
-| **Perl regex** | Jim | One `=~` match is the whole program: `(?{ })` and `(??{ })` blocks do the work, then the match returns *false* | terminal | [`src/regex-perl`](src/regex-perl/README.md) |
+| **Perl regex** | Jim | The file's only statement is one `=~` match: `(?{ })` and `(??{ })` blocks seed, draw, write to SQLite, pulse and print, then the match returns *false* | terminal | [`src/regex-perl`](src/regex-perl/README.md) |
 | **PCRE2 regex** | Jim | One `pcre2_match` call; the pattern's callout strings are opcodes for a bodiless C dispatcher; result: "no match" | terminal | [`src/regex-pcre2`](src/regex-pcre2/README.md) |
 | **.NET regex** | Jim | One `Regex.Match`, balancing groups only: no callouts, no inline code. A budget stack is the stop rule, flag groups pick the category. Documents the walls it hits | terminal | [`src/regex-dotnet`](src/regex-dotnet/README.md) |
 | **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | Swing | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
@@ -140,7 +140,7 @@ The SQLite command runs after the window is closed. See the companion README for
 
 ## Regex companions for WSL
 
-Three entries turn a regular expression into the program. In the first two, the loop, the running total, the stop rule and the record writes all happen *inside one regex match*, which then deliberately reports failure after doing all the work. [`src/regex-perl`](src/regex-perl/README.md) uses Perl's executable `(?{ })` and `(??{ })` blocks; [`src/regex-pcre2`](src/regex-pcre2/README.md) uses PCRE2 callouts as a tiny instruction set. Both pulse a **DEMO ONLY** banner in the terminal, from inside the match, and both ship a `check.sh` that asserts the rules.
+Three entries turn a regular expression into the program. In the first two, the loop, the running total, the stop rule and the record writes all happen *inside one regex match*, which then deliberately reports failure after doing all the work. [`src/regex-perl`](src/regex-perl/README.md) uses Perl's executable `(?{ })` and `(??{ })` blocks; [`src/regex-pcre2`](src/regex-pcre2/README.md) uses PCRE2 callouts as a tiny instruction set. Both pulse a **DEMO ONLY** banner in the terminal, from inside the match, and both ship a `check.sh` that asserts the rules. The Perl one goes furthest: its file is a single statement, and the match itself writes the records to a real SQLite transaction.
 
 The third, [`src/regex-dotnet`](src/regex-dotnet/README.md), is the purist's version: .NET balancing groups and conditionals only, no code in the pattern. The pattern does the walk, the accumulation and the stop rule, but its README is honest about the walls: a regex cannot draw random numbers or write files, and a failed .NET match exposes no captures, so the "return false" signature move is impossible there. See [`plans/regex.md`](plans/regex.md).
 
