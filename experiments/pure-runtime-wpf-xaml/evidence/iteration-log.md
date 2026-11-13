@@ -79,3 +79,6 @@ F2 (x:Arguments) failed earlier. F3 tried ODP `ConstructorParameters=[provider]`
 
 ## What the carrier primitive changes
 It removes "no late-bound scalar argument" as a blocker for **data** (numbers/text), not for **typed object** arguments. Remaining strict gaps: typed-object arguments (EF), an unbounded loop (all repetition is unrolled to 4 draws), and conditional *effect selection* is only available through expression engines (DataView filter, SQL WHERE), not through triggers (D2/D3).
+
+## Post-16 follow-up H3 — raw typed dynamic values (pass; outside the 16-iteration budget, one small probe requested by the owner's EF question)
+Raw XAML nodes are constructed in document order, so a node declared *after* the carrier writers sees the filled carrier. `String(char[])` → `Double.Parse(string)` (via `x:FactoryMethod`) produced a raw `System.Double` equal to the seeded draw (CompareTo(15.5) = 1 for 16). This turns carriers into **raw typed arguments for any type constructible/parsable from text** (Int32, Double, Guid, TimeSpan, DateTime, Uri...). It does not by itself produce a `DbContextOptions`.
