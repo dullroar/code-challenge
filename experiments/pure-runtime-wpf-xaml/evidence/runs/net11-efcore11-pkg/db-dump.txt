@@ -1,5 +1,0 @@
-Id|Category|Hours|UserId|Year|Week|IsDemo
-1|Meetings|16.0|DemoUser|2026|45|1
-2|Coding|11.0|DemoUser|2026|45|1
-3|Debugging|11.0|DemoUser|2026|45|1
-4|Learning|15.0|DemoUser|2026|45|1

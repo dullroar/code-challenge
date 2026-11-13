@@ -1,17 +1,17 @@
-<!-- PACKAGE-BACKED PURE DECLARATIVE XAML, EF Core variant.
-     Existing model types (owner-approved copy, internal->public and DB path only): Challenge1.DemoTimeCard / Challenge1.DemoTimeCardContext (assembly EfModel).
-     Package: Microsoft.EntityFrameworkCore.Sqlite 10.0.14 (EF Core + Microsoft.Data.Sqlite), unmodified. No application code in this file's logic.
-     Dynamic values reach typed entity properties as RAW typed nodes: carrier array -> new String(char[]) -> Double/Int32.Parse, declared AFTER the
-     providers that fill the carriers (nodes are constructed in document order). Guard = SQL trigger text (owner: SQL in XAML counts as XAML). -->
+<!-- THE EF CORE EDITION: the whole demo, driven by XAML. No code-behind, no converters, no event handlers.
+     It uses the two model classes in DemoTimeCard.cs / DemoTimeCardContext.cs (EF Core + SQLite) and nothing else of ours.
+     Dynamic values reach typed entity properties as RAW typed nodes: carrier array -> new String(char[]) -> Double/Int32.Parse,
+     declared AFTER the providers that fill the carriers (XAML builds nodes in document order, so document order IS the program).
+     The 40-hour stop rule is a SQL trigger, because a SQL string in XAML is still XAML. -->
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:sys="clr-namespace:System;assembly=System.Runtime" xmlns:glob="clr-namespace:System.Globalization;assembly=System.Runtime"
         xmlns:sql="clr-namespace:Microsoft.Data.Sqlite;assembly=Microsoft.Data.Sqlite"
-        xmlns:m="clr-namespace:Challenge1;assembly=EfModel"
-        Title="Only One STATEMENT (package-backed pure XAML, EF Core)" Width="520" Height="320" ResizeMode="NoResize" ShowActivated="False">
+        xmlns:m="clr-namespace:Challenge1;assembly=XamlChallenge1"
+        Title="Only One STATEMENT (package-backed pure XAML, EF Core)" Width="520" Height="320" ResizeMode="NoResize">
 <Window.Resources>
 <sys:Random x:Key="rnd"><x:Arguments><sys:Int32>42</sys:Int32></x:Arguments></sys:Random>
 <m:DemoTimeCardContext x:Key="ctx"/>
-<sql:SqliteConnection x:Key="conn"><x:Arguments><sys:String>Data Source=artifacts/ef-run/demo-timecards.db</sys:String></x:Arguments></sql:SqliteConnection>
+<sql:SqliteConnection x:Key="conn"><x:Arguments><sys:String>Data Source=data/demo-timecards.db</sys:String></x:Arguments></sql:SqliteConnection>
 <ObjectDataProvider x:Key="open" ObjectInstance="{StaticResource conn}" MethodName="Open"/>
 <sql:SqliteCommand x:Key="guardCmd"><x:Arguments><sys:String>CREATE TRIGGER IF NOT EXISTS DemoGuard AFTER INSERT ON TimeCards WHEN (SELECT COALESCE(SUM(Hours),0) FROM TimeCards WHERE Id &lt; NEW.Id) &gt; 40 BEGIN DELETE FROM TimeCards WHERE Id = NEW.Id; END</sys:String><StaticResource ResourceKey="conn"/></x:Arguments></sql:SqliteCommand>
 <ObjectDataProvider x:Key="doGuard" ObjectInstance="{StaticResource guardCmd}" MethodName="ExecuteNonQuery"/>

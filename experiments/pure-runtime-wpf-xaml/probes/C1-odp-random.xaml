@@ -1,9 +1,0 @@
-<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:sys="clr-namespace:System;assembly=System.Runtime" Width="10" Height="10" ShowActivated="False">
-  <Window.Resources>
-    <sys:Random x:Key="rnd"><x:Arguments><sys:Int32>42</sys:Int32></x:Arguments></sys:Random>
-    <ObjectDataProvider x:Key="next" x:Name="next" ObjectInstance="{StaticResource rnd}" MethodName="Next">
-      <ObjectDataProvider.MethodParameters><sys:Int32>10</sys:Int32><sys:Int32>20</sys:Int32></ObjectDataProvider.MethodParameters></ObjectDataProvider>
-    <ObjectDataProvider x:Key="again" ObjectInstance="{x:Reference next}" MethodName="Refresh"/>
-  </Window.Resources>
-</Window>
