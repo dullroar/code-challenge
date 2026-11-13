@@ -1,6 +1,6 @@
 # Regex Challenge: One Match, Zero Mercy
 
-**Status:** proposed — no code written yet; this plan precedes any `src/regex*` entry, same as `plans/pure-xaml.md` preceded `src/xaml`.
+**Status:** Tracks 1 and 2 implemented (`src/regex-perl`, `src/regex-pcre2`); Track 3 (.NET balancing groups) not attempted. The plan below is unchanged from when it was written.
 **Baseline:** the timecard demo shared by every entry in this repo (see root `README.md`). This plan does not change the baseline.
 **Nature:** a gleeful dare, not a production spec. If a rule here is making the result *less* ridiculous, the rule is wrong.
 **Where it runs:** WSL/Linux. No WPF this time — Perl and PCRE2 are native there, and `dotnet` is cross-platform, so nothing here depends on Windows.
