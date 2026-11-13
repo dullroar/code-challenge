@@ -1,13 +1,15 @@
-# static audit 2026-11-12T23:35:46Z
-## pattern: x:Code|Converter|MarkupExtension|code-behind|Class=|Process|cmd|Assembly.Load|Reflection in program XAML
+# static audit (final) 2026-11-13T00:02:03Z
+## hits in program XAML for: x:Code|Converter|x:Class|MarkupExtension|Process|Assembly.Load|powershell|cmd.exe
 (no hits)
 ## C# files in experiment (excluding obj/bin/artifacts)
 ./probes/host/Host.cs
-## assemblies/namespaces referenced by program XAML
-      1 assembly=Microsoft.Data.Sqlite
-      1 assembly=System.Linq
-      3 assembly=System.Runtime
-      1 assembly=System.Threading.Thread
-## custom (non-System/WPF/Sqlite) assembly refs
-none
-# re-audit after final edits: no hits
+## python authoring aids (outside graded source)
+gen_h2.py
+gen_pkg.py
+gen_strict.py
+## assemblies referenced by strict program
+assembly=System.Data.Common assembly=System.Runtime assembly=System.Threading.Thread 
+## Sqlite mentions in strict program (must be 0)
+0
+## assemblies referenced by package-backed program
+assembly=Microsoft.Data.Sqlite assembly=System.Runtime 

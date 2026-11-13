@@ -1,0 +1,8 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime" Width="10" Height="10" ShowActivated="False"><Window.Resources>
+  <ObjectDataProvider x:Key="obsRnd" ObjectType="{x:Type sys:Random}"><ObjectDataProvider.ConstructorParameters><sys:Int32>42</sys:Int32></ObjectDataProvider.ConstructorParameters></ObjectDataProvider>
+  <ObjectDataProvider x:Key="obsNext" ObjectInstance="{StaticResource obsRnd}" MethodName="Next"><ObjectDataProvider.MethodParameters><sys:Int32>10</sys:Int32><sys:Int32>20</sys:Int32></ObjectDataProvider.MethodParameters></ObjectDataProvider>
+  <!-- ctor param that is itself a provider (dynamic): seed from another draw -->
+  <ObjectDataProvider x:Key="obsSeed" ObjectInstance="{StaticResource obsRnd}" MethodName="Next"><ObjectDataProvider.MethodParameters><sys:Int32>100</sys:Int32><sys:Int32>200</sys:Int32></ObjectDataProvider.MethodParameters></ObjectDataProvider>
+  <ObjectDataProvider x:Key="obsRnd2" ObjectType="{x:Type sys:Random}"><ObjectDataProvider.ConstructorParameters><StaticResource ResourceKey="obsSeed"/></ObjectDataProvider.ConstructorParameters></ObjectDataProvider>
+</Window.Resources></Window>
