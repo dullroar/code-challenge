@@ -5,7 +5,7 @@ $ErrorActionPreference='Stop'
 $root=$PSScriptRoot
 dotnet build "$root/probes/host/Host.csproj" -c Release -o "$root/artifacts/host" | Out-Null
 $run="$root/artifacts/run-$RunId"; if (Test-Path $run) { throw "run dir exists: $run (use a fresh id)" }
-New-Item -ItemType Directory -Force "$run/artifacts/pkg-run","$run/artifacts/strict-run" | Out-Null
+New-Item -ItemType Directory -Force "$run/artifacts/pkg-run","$run/artifacts/strict-run","$run/artifacts/ef-run" | Out-Null
 Copy-Item "$root/$Grade/program.xaml" "$run/program.xaml"
 Push-Location $run   # relative DB path 'artifacts/pkg-run/...' resolves inside the run dir
 & "$root/artifacts/host/Host.exe" program.xaml 800 | Out-File trace.txt -Encoding utf8; Get-Content trace.txt

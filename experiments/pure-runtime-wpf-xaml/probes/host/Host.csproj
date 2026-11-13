@@ -9,4 +9,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.14" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- makes the experiment model assembly resolvable by name from runtime XAML (deps.json); host stays generic -->
+    <ProjectReference Include="../../package-backed-ef/model/EfModel.csproj" />
+  </ItemGroup>
 </Project>

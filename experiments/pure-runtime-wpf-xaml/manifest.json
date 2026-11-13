@@ -12,6 +12,7 @@
   "testCommands": ["./run.ps1 package-backed-pure <id>", "./run.ps1 strict-built-in <id>"],
   "runtimeXamlHashes": "evidence/xaml-hashes.txt",
   "iterationsUsed": 16,
+  "followUps": ["H3 raw typed values", "I1 LOCALAPPDATA redirect check", "J1 EF Core composition"],
   "startUtc": "2026-11-12",
   "endUtc": "2026-11-12 "
 }
