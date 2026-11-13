@@ -1,0 +1,4 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime" Width="10" Height="10" ShowActivated="False"><Window.Resources>
+  <ObjectDataProvider x:Key="obsPath" ObjectType="{x:Type sys:Environment}" MethodName="GetFolderPath"><ObjectDataProvider.MethodParameters><x:Static Member="sys:Environment+SpecialFolder.LocalApplicationData"/></ObjectDataProvider.MethodParameters></ObjectDataProvider>
+</Window.Resources></Window>
