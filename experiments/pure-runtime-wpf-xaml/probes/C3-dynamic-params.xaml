@@ -1,0 +1,13 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime" xmlns:col="clr-namespace:System.Collections;assembly=System.Runtime" Width="10" Height="10" ShowActivated="False">
+  <Window.Resources>
+    <sys:Random x:Key="rnd"><x:Arguments><sys:Int32>42</sys:Int32></x:Arguments></sys:Random>
+    <ObjectDataProvider x:Key="next" ObjectInstance="{StaticResource rnd}" MethodName="Next">
+      <ObjectDataProvider.MethodParameters><sys:Int32>10</sys:Int32><sys:Int32>20</sys:Int32></ObjectDataProvider.MethodParameters></ObjectDataProvider>
+    <col:ArrayList x:Key="list"/>
+    <!-- (a) StaticResource of a provider as a METHOD PARAMETER -->
+    <ObjectDataProvider x:Key="addA" ObjectInstance="{StaticResource list}" MethodName="Add">
+      <ObjectDataProvider.MethodParameters><StaticResource ResourceKey="next"/></ObjectDataProvider.MethodParameters></ObjectDataProvider>
+    <ObjectDataProvider x:Key="dump" ObjectInstance="{StaticResource list}" MethodName="ToArray"/>
+  </Window.Resources>
+</Window>

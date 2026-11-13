@@ -1,0 +1,55 @@
+host thread=2 sta=STA
+loaded root=System.Windows.Window
+--- after-load(parse-time)
+ODP[obsBgId] data=7 error=:
+ODP[obsKept] data=[System.Data.DataRow,System.Data.DataRow,System.Data.DataRow,System.Data.DataRow] error=:
+ODP[obsPending] data=0 error=:
+ODP[obsTotal] data=53 error=:
+ODP[obsVs40] data=1 error=:
+TEXT: DEMO ONLY - no real time system is involved
+TEXT: Total simulated hours: 53
+TEXT: over 40 h: batch complete
+TEXT: Saved locally (XML file).
+NAMED: g.Opacity=1.000
+root.Opacity=1 tag=null
+content.Opacity=1
+--- Loaded-event
+ODP[obsBgId] data=7 error=:
+ODP[obsKept] data=[System.Data.DataRow,System.Data.DataRow,System.Data.DataRow,System.Data.DataRow] error=:
+ODP[obsPending] data=0 error=:
+ODP[obsTotal] data=53 error=:
+ODP[obsVs40] data=1 error=:
+TEXT: DEMO ONLY - no real time system is involved
+TEXT: Total simulated hours: 53
+TEXT: over 40 h: batch complete
+TEXT: Saved locally (XML file).
+NAMED: g.Opacity=1.000
+root.Opacity=1 tag=null
+content.Opacity=1
+--- context-idle
+ODP[obsBgId] data=7 error=:
+ODP[obsKept] data=[System.Data.DataRow,System.Data.DataRow,System.Data.DataRow,System.Data.DataRow] error=:
+ODP[obsPending] data=0 error=:
+ODP[obsTotal] data=53 error=:
+ODP[obsVs40] data=1 error=:
+TEXT: DEMO ONLY - no real time system is involved
+TEXT: Total simulated hours: 53
+TEXT: over 40 h: batch complete
+TEXT: Saved locally (XML file).
+NAMED: g.Opacity=0.994
+root.Opacity=1 tag=null
+content.Opacity=1
+--- final
+ODP[obsBgId] data=7 error=:
+ODP[obsKept] data=[System.Data.DataRow,System.Data.DataRow,System.Data.DataRow,System.Data.DataRow] error=:
+ODP[obsPending] data=0 error=:
+ODP[obsTotal] data=53 error=:
+ODP[obsVs40] data=1 error=:
+TEXT: DEMO ONLY - no real time system is involved
+TEXT: Total simulated hours: 53
+TEXT: over 40 h: batch complete
+TEXT: Saved locally (XML file).
+NAMED: g.Opacity=0.650
+root.Opacity=1 tag=null
+content.Opacity=1
+PNG: C:/Users/jimle/repos/code-challenge/experiments/pure-runtime-wpf-xaml/artifacts/final/20261113T002434-net10-a-strict/shot.png

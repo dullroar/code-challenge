@@ -10,3 +10,6 @@ obj/
 # Rust challenge build output and disposable demo records
 src/RustChallenge1/target/
 src/RustChallenge1/data/
+
+# experiment run outputs
+experiments/pure-runtime-wpf-xaml/artifacts/

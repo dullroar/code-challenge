@@ -1,0 +1,36 @@
+# static audit (final) 2026-11-13T00:26:03Z
+## hits in program XAML for: x:Code|Converter|x:Class|MarkupExtension|Process|Assembly.Load|powershell|cmd.exe
+(no hits)
+## C# files (excluding obj/bin/artifacts)
+./package-backed-ef/model/DemoTimeCard.cs
+./package-backed-ef/model/DemoTimeCardContext.cs
+./probes/host/Host.cs
+## authoring aids (outside graded source)
+collect_evidence.sh
+finalize_docs.py
+gen_ef.py
+gen_h2.py
+gen_pkg.py
+gen_strict.py
+make_iteration_notes.py
+## strict program assemblies (must be BCL only)
+assembly=System.Data.Common assembly=System.Runtime assembly=System.Threading.Thread 
+## Sqlite/EfModel mentions in strict program (must be 0)
+0
+## package-backed assemblies
+assembly=Microsoft.Data.Sqlite assembly=System.Runtime 
+## EF program assemblies
+assembly=EfModel assembly=Microsoft.Data.Sqlite assembly=System.Runtime 
+## model copy diff vs baseline
+< internal sealed class DemoTimeCard
+> public sealed class DemoTimeCard
+< internal sealed class DemoTimeCardContext : DbContext
+> public sealed class DemoTimeCardContext : DbContext
+<         var directory = Path.Combine(
+<             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+<             "ModernChallenge1");
+>         // EXPERIMENT COPY: only change vs baseline (besides internal->public): isolated, cwd-relative DB folder
+>         // instead of %LOCALAPPDATA%\ModernChallenge1 (owner-approved).
+>         var directory = Path.Combine("artifacts", "ef-run");
+## baseline src untouched
+(clean if empty)

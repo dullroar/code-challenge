@@ -1,0 +1,12 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+        xmlns:ef="clr-namespace:Microsoft.EntityFrameworkCore;assembly=Microsoft.EntityFrameworkCore"
+        xmlns:efs="clr-namespace:Microsoft.EntityFrameworkCore;assembly=Microsoft.EntityFrameworkCore.Sqlite"
+        Width="10" Height="10" ShowActivated="False">
+  <Window.Resources>
+    <ef:DbContextOptionsBuilder x:Key="b"/>
+    <ObjectDataProvider x:Key="obsUse" ObjectType="{x:Type efs:SqliteDbContextOptionsBuilderExtensions}" MethodName="UseSqlite">
+      <ObjectDataProvider.MethodParameters><StaticResource ResourceKey="b"/><sys:String>Data Source=ef.db</sys:String><x:Null/></ObjectDataProvider.MethodParameters></ObjectDataProvider>
+    <ObjectDataProvider x:Key="obsOptions" ObjectInstance="{StaticResource b}" MethodName="get_Options"/>
+  </Window.Resources>
+</Window>

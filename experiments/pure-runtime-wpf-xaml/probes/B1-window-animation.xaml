@@ -1,0 +1,7 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Title="B1" Width="200" Height="100">
+  <Grid x:Name="g" Opacity="1" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard><Storyboard>
+      <DoubleAnimation Storyboard.TargetName="g" Storyboard.TargetProperty="Opacity" From="1" To="0.2" Duration="0:0:0.4" FillBehavior="HoldEnd"/>
+    </Storyboard></BeginStoryboard></EventTrigger></Grid.Triggers>
+  </Grid>
+</Window>

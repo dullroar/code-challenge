@@ -1,0 +1,12 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+        xmlns:sql="clr-namespace:Microsoft.Data.Sqlite;assembly=Microsoft.Data.Sqlite" Width="10" Height="10" ShowActivated="False">
+  <Window.Resources>
+    <sql:SqliteConnection x:Key="conn"><x:Arguments><sys:String>Data Source=artifacts/f1-demo.db</sys:String></x:Arguments></sql:SqliteConnection>
+    <ObjectDataProvider x:Key="open" ObjectInstance="{StaticResource conn}" MethodName="Open"/>
+    <sql:SqliteCommand x:Key="create"><x:Arguments><sys:String>CREATE TABLE IF NOT EXISTS DemoTimeCards(Id INTEGER PRIMARY KEY, Category TEXT, Hours REAL, IsDemo INTEGER)</sys:String><StaticResource ResourceKey="conn"/></x:Arguments></sql:SqliteCommand>
+    <ObjectDataProvider x:Key="doCreate" ObjectInstance="{StaticResource create}" MethodName="ExecuteNonQuery"/>
+    <sql:SqliteCommand x:Key="ins"><x:Arguments><sys:String>INSERT INTO DemoTimeCards(Category,Hours,IsDemo) VALUES('Coding', 10 + abs(random()) % 10, 1)</sys:String><StaticResource ResourceKey="conn"/></x:Arguments></sql:SqliteCommand>
+    <ObjectDataProvider x:Key="doIns" ObjectInstance="{StaticResource ins}" MethodName="ExecuteNonQuery"/>
+  </Window.Resources>
+</Window>
