@@ -1,6 +1,6 @@
 # Iteration index (plan section 5 template)
 
-Each note follows the plan's template. Numbering: 1-16 are the original loop budget; 17-20 are owner-requested follow-ups (H3, I1, J1, .NET 11). Narrative history, including superseded designs, remains in `iteration-log.md`.
+Each note follows the plan's template. Numbering: 1-16 are the original loop budget; 17-21 are owner-requested follow-ups (H3, I1, J1, .NET 11, EF Core 11). Narrative history, including superseded designs, remains in `iteration-log.md`.
 
 - [1. Window composition and storyboard](iteration-01-window-animation.md) - **pass**
 - [2. ObjectDataProvider and seeded Random](iteration-02-odp-seeded-random.md) - **partial**
@@ -22,3 +22,4 @@ Each note follows the plan's template. Numbering: 1-16 are the original loop bud
 - [18. Isolating the baseline context (follow-up I1)](iteration-18-localappdata-redirect.md) - **blocked**
 - [19. EF Core composition (follow-up J1)](iteration-19-ef-composition.md) - **pass**
 - [20. .NET 11 compatibility](iteration-20-net11-compat.md) - **pass**
+- [21. EF Core 11.0.0 packages](iteration-21-efcore11.md) - **pass**

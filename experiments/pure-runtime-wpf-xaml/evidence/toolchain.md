@@ -7,4 +7,4 @@
   - EF Core packages stay at the baseline's 10.0.14 (no package changes); they restored and ran on net11.
   - Probe host and EfModel retargeted to net11 (copies under `artifacts/net11/hostsrc`); all three compositions and probes B1, C4, D1, H2, H3 gave results identical to net10 (see `iteration-20-net11-compat.md`, `runs/`).
   - The net10 baseline still builds with SDK 11 installed.
-- Not tested: any net11-specific EF Core 11 packages (not requested; plan forbids changing packages).
+- **EF Core 11.0.0 packages: tested, compatible** (`iteration-21-efcore11.md`): copy host and model, set `TargetFramework` to `net11.0-windows` and the package version to 11.0.0; all three compositions give identical results. Committed projects stay on 10.0.14 (plan: do not change baseline packages).

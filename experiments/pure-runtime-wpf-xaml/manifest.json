@@ -1,7 +1,7 @@
 {
   "baselineCommit": "8c14a8e369d16dddb9aa8c54ae22971b4d713971",
   "experimentBranch": "experiment/pure-runtime-wpf-xaml",
-  "experimentCommitAtManifestWrite": "74d80475c8eeb5d64e7f9bc3e4c382d022087b2c",
+  "experimentCommitAtManifestWrite": "5775f54a3c7941fe90e93b995b66e976d48bf223",
   "activeFrameworks": {
     "net10.0-windows": "verified",
     "net11.0-windows": "compatible (observed)"
@@ -18,7 +18,8 @@
   ],
   "packages": {
     "Microsoft.EntityFrameworkCore.Sqlite": "10.0.14 (unmodified; brings Microsoft.Data.Sqlite, SQLitePCLRaw.bundle_e_sqlite3 2.1.13)",
-    "inventory": "evidence/baseline-env.txt"
+    "inventory": "evidence/baseline-env.txt",
+    "Microsoft.EntityFrameworkCore.Sqlite.net11Variant": "11.0.0 tested in an experiment copy (iteration 21): identical results"
   },
   "selectedGrades": {
     "strict-built-in": "whole demo with XML persistence substitution (DataTable.WriteXml)",
@@ -44,7 +45,7 @@
   "endUtc": "2026-11-13T00:26:03Z",
   "iterations": {
     "loopBudget": 16,
-    "followUps": 4
+    "followUps": 5
   },
   "runtimeXamlSha256": {
     "strict-built-in/program.xaml": "53e24742e1230f1db775321a8a6c52a3d98a99477c27e1a2b03b387f1892e995",

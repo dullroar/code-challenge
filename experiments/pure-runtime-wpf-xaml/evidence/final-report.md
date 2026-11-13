@@ -1,4 +1,4 @@
-# Final report: pure runtime-WPF-XAML experiment (16 of 16 iterations plus follow-ups H3, I1, J1 and .NET 11)
+# Final report: pure runtime-WPF-XAML experiment (16 of 16 iterations plus follow-ups H3, I1, J1, .NET 11 and EF Core 11)
 
 ## 1. Executive finding
 Owner decision recorded: SQL text embedded in the XAML counts as XAML.
@@ -10,7 +10,7 @@ Owner decision recorded: SQL text embedded in the XAML counts as XAML.
 - **Key finding (the interpreter vocabulary):** `ObjectDataProvider` plus `x:Arguments`/`x:FactoryMethod` gives construction and calls; document order gives sequencing; `Refresh` gives re-triggering; **mutable carrier arrays give late-bound data arguments** and, because raw nodes are constructed in document order, `String(char[])` + `Parse` turns them into **raw typed values** that can populate entity properties; BCL expression engines (`DataTable.Compute`, `DataView.RowFilter`, SQL) give arithmetic and conditionals.
 
 ## 2. Environment
-Win11 Pro 10.0.26300; SDKs 10.0.404 and 11.0.100; runtimes 10.0.15 and 11.0.0; targets `net10.0-windows` (verified) and `net11.0-windows` (**compatible**: baseline copy builds; all compositions identical results). Package: Microsoft.EntityFrameworkCore.Sqlite 10.0.14 (unmodified). SQLite CLI 3.54.1 installed by the owner, used only for inspection.
+Win11 Pro 10.0.26300; SDKs 10.0.404 and 11.0.100; runtimes 10.0.15 and 11.0.0; targets `net10.0-windows` (verified) and `net11.0-windows` (**compatible**: baseline copy builds; all compositions identical results; also with EF Core / Microsoft.Data.Sqlite **11.0.0**, iteration 21). Package: Microsoft.EntityFrameworkCore.Sqlite 10.0.14 (unmodified). SQLite CLI 3.54.1 installed by the owner, used only for inspection.
 
 ## 3. Capability matrix
 See `capability-matrix.md`; per-iteration evidence in `iteration-log.md`.
