@@ -42,6 +42,10 @@ The C host (`timecards.c`) compiles it, registers one callout dispatcher, calls 
 
 PCRE2 supplies the iteration (`*`), the category walk (the subject string and the alternation), and the backtracking. `(*COMMIT)` keeps a failed match from retrying shorter loops, so `commit` runs exactly once. `(*FAIL)` then makes the whole match lose, after everything was written. That is the signature move.
 
+## The pulse
+
+On a real terminal, the match finishes the records, then pulses a **DEMO ONLY** banner through a grey ramp for about three seconds (60 frames, 50 ms each), then clears it. `pulse` and `settle` are two more opcodes: the host appends 60 `~` characters to the subject, and `[A-Za-z]*(?:~(?C"pulse"))*(*COMMIT)(?C"settle")` draws one frame per tick. The host still has no loop. The second `(*COMMIT)` stops the final `(*FAIL)` from backtracking into shorter tick counts and re-running `settle`. Nothing is appended when stdout is not a terminal, so pipes and `check.sh` skip it.
+
 ## The optimizer caveat, as the plan asks
 
 Callouts only mean something if the engine actually visits them. This program compiles with `PCRE2_NO_AUTO_POSSESS | PCRE2_NO_START_OPTIMIZE | PCRE2_NO_DOTSTAR_ANCHOR`, so the optimizer cannot skip or reorder the callout points. It also does **not** use the PCRE2 JIT, which does not support callouts at all. `check.sh` verifies that every run's committed total and entry count agree with the rows actually written, which is the evidence that no callout was silently skipped. This was tested with the system PCRE2 (10.42 on Ubuntu 24.04); I did not test with those flags removed to see which callouts the optimizer would elide.

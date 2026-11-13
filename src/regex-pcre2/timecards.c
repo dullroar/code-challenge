@@ -4,23 +4,26 @@
  * dispatcher, calls pcre2_match once, and reports. Walking the entries, drawing hours, deciding
  * to stop, and committing are all callout opcodes in the pattern; PCRE2 supplies the iteration. */
 #include <stdio.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
 
-typedef struct { FILE *out; long start; int total, entries, committed; const char *path; } Demo;
+typedef struct { FILE *out; long start; int total, entries, committed, frame; const char *path; } Demo;
 
 /* A callout's negative return becomes pcre2_match's return value, and -1 is PCRE2_ERROR_NOMATCH,
  * so failures must use something else or a broken run would masquerade as the expected outcome. */
 #define FAILED PCRE2_ERROR_CALLOUT
 
 static const char SUBJECT[] = "MeetingsCodingDebuggingLearning";
+static const char TICKS[] = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"; /* 60: ~3 s of pulse */
 static const char PATTERN[] =
     "^(?C\"init\")(?:(?C\"gate\")(Meetings|Coding|Debugging|Learning)(?C\"book\"))*"
-    "(*COMMIT)(?C\"commit\")(*FAIL)";
+    "(*COMMIT)(?C\"commit\")[A-Za-z]*(?:~(?C\"pulse\"))*(*COMMIT)(?C\"settle\")(*FAIL)";
 
 static int op_init(Demo *d) {
     return (d->out = fopen(d->path, "a")) == NULL ? (perror(d->path), FAILED)
@@ -41,6 +44,15 @@ static int op_commit(Demo *d) {
            || fclose(d->out) != 0 ? FAILED : (d->committed = 1, 0);
 }
 
+static int op_pulse(Demo *d) {
+    return (printf("\r\x1b[48;5;%dm  DEMO ONLY  \x1b[0m", 232 + (int)(11.5 + 11.5 * sin(++d->frame * 0.35))),
+            fflush(stdout), nanosleep(&(struct timespec){0, 50000000}, NULL), 0);
+}
+
+static int op_settle(Demo *d) {
+    return d->frame ? (fputs("\r\x1b[0m\x1b[K", stdout), fflush(stdout), 0) : 0;
+}
+
 /* Callout return values: 0 = carry on, positive = fail this branch (backtrack), negative = abort. */
 static int dispatch(pcre2_callout_block *b, void *p) {
     Demo *d = p;
@@ -51,6 +63,8 @@ static int dispatch(pcre2_callout_block *b, void *p) {
          : IS("gate")   ? d->total > 40
          : IS("book")   ? op_book(d, b)
          : IS("commit") ? op_commit(d)
+         : IS("pulse")  ? op_pulse(d)
+         : IS("settle") ? op_settle(d)
          : FAILED;
 }
 
@@ -73,7 +87,10 @@ int main(void) {
     pcre2_match_context *mc = pcre2_match_context_create(NULL);
     pcre2_set_callout(mc, dispatch, &demo);
     pcre2_match_data *md = pcre2_match_data_create_from_pattern(re, NULL);
-    int rc = pcre2_match(re, (PCRE2_SPTR)SUBJECT, sizeof SUBJECT - 1, 0, 0, md, mc);
+    /* The pulse is driven by "~" ticks appended to the subject, but only on a real terminal. */
+    char subject[sizeof SUBJECT + sizeof TICKS];
+    snprintf(subject, sizeof subject, "%s%.*s", SUBJECT, isatty(STDOUT_FILENO) ? (int)sizeof TICKS - 1 : 0, TICKS);
+    int rc = pcre2_match(re, (PCRE2_SPTR)subject, strlen(subject), 0, 0, md, mc);
 
     char report[4096] = "";
     FILE *in = fopen(path, "r");

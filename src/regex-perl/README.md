@@ -41,6 +41,10 @@ The host seeds four category names and a counter, fires one match against the sc
 
 `local` is the interesting bit. Perl unwinds `local` assignments when the engine backtracks, so the running total and category counter are properly backtrack-aware, but the `print` calls are not and cannot be un-done. That is the "transaction engine without rollback" idea: the engine abandons the branch, and the side effects stay written.
 
+## The pulse
+
+On a real terminal, the match finishes the records, then pulses a **DEMO ONLY** banner through a grey ramp for about three seconds (60 frames, 50 ms each), then clears it. It is also done inside the regex: the scaffold string gets 60 `~` characters appended, and `[A-Za-z]*(?:~(?{ frame }))*` draws one frame per tick. The host still has no loop. A second `(*COMMIT)` stops the final `(*FAIL)` from backtracking into shorter tick counts and re-running the cleanup. Nothing is appended when stdout is not a terminal, so pipes and `check.sh` skip it.
+
 ## Fine print
 
 - The pattern is not formatted. `/x` is on only so the scaffold is parsed sanely; there are no comments, no named groups, and no helper functions inside it. That is deliberate.

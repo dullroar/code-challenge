@@ -1,5 +1,5 @@
 CFLAGS ?= -Wall -Wextra -O1
-PCRE2  := $(shell pkg-config --cflags --libs libpcre2-8)
+PCRE2  := $(shell pkg-config --cflags --libs libpcre2-8) -lm
 
 timecards: timecards.c
 	$(CC) $(CFLAGS) -o $@ $< $(PCRE2)
