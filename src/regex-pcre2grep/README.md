@@ -1,6 +1,6 @@
 # Regex challenge, Track 2b: `pcre2grep` (no custom code at all)
 
-The "host" here is a stock `pcre2grep` and one command line. There is no C, no Perl, no dispatcher to write: the pattern's callout strings name the programs to run, and the **exit codes of those programs steer the match**. Then the match **returns false**. Follows [`plans/regex.md`](../../plans/regex.md). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
+The "host" here is a stock `pcre2grep` and one command line. There is no C, no Perl, no dispatcher to write: the pattern's callout strings name the programs to run, and the **exit codes of those programs steer the match**. Then the match **returns false**. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
 
 ## Install and run on Ubuntu under WSL 2
 
