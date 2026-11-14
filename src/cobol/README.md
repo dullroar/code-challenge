@@ -63,3 +63,13 @@ A COBOL program has four *divisions*, always in the same order: `IDENTIFICATION`
 - **`ACCEPT ... FROM ENVIRONMENT` blanks the field when the variable is unset.** It doesn't leave it alone, so the `IF` that falls back to `$HOME/.local/share` tests for spaces.
 - **Ubuntu's compiler prints a `_FORTIFY_SOURCE redefined` warning** on every compile. It comes from `cobc`'s C flags meeting Ubuntu's GCC defaults, and it's harmless.
 - **SQL by string building is a bad habit.** It's safe here only because every value is a number computed by the program or one of four fixed words. Don't copy it.
+
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh src/cobol
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: the compiled program, GnuCOBOL's runtime library (libcob) and sqlite3 on a minimal Ubuntu. No compiler, no package manager.

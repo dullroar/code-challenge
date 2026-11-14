@@ -28,6 +28,7 @@ bases=(
     'java|xvfb scrot openjdk-25-jre fonts-dejavu-core'
     'dotnet|dotnet-runtime-10.0 libicu74'
     'apl|libpcre2-32-0 libstdc++6'
+    'cobol|libcob4t64'
 )
 
 if (( force )) || ! $docker image inspect code-challenge-sandbox:local >/dev/null 2>&1; then
