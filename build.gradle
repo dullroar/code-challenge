@@ -1,0 +1,31 @@
+// Run any of Ken's ports from the repo root:
+//   .\gradlew.bat runJava | runKotlin | runPython | runGo
+// Each task delegates to the port's own folder, so data/ still lands inside that folder.
+
+tasks.register('runJava') {
+    group = 'application'
+    description = 'Runs the Java version (src/JavaChallenge1).'
+    dependsOn gradle.includedBuild('JavaChallenge1').task(':runJava')
+}
+
+tasks.register('runKotlin') {
+    group = 'application'
+    description = 'Runs the Kotlin version (src/KotlinChallenge1).'
+    dependsOn gradle.includedBuild('KotlinChallenge1').task(':runKotlin')
+}
+
+// Needs only the installed Python launcher (py).
+tasks.register('runPython', Exec) {
+    group = 'application'
+    description = 'Runs the Python version (src/PythonChallenge1).'
+    workingDir = file('src/PythonChallenge1')
+    commandLine 'py', 'program.py'
+}
+
+// Needs the Go toolchain on PATH (the first run downloads modules).
+tasks.register('runGo', Exec) {
+    group = 'application'
+    description = 'Runs the Go version (src/GoChallenge1).'
+    workingDir = file('src/GoChallenge1')
+    commandLine 'go', 'run', '.'
+}
