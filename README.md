@@ -10,7 +10,7 @@ It is a joke with a serious job inside it. Underneath every entry is a real less
 
 The deeper point, the one worth keeping after the jokes wear off: **THERE ARE NO BLOCKERS, JUST NOT ENOUGH IMAGINATION.**
 
-It has turned into a small, friendly contagion. [**Ken caught it too.**](https://github.com/kastl/one-statement-challenge) What started as one C# program is now **twenty-two** programs in **thirteen** languages, written by more than one person, and still growing.
+It has turned into a small, friendly contagion. **Ken caught it too.** What started as one C# program is now **twenty-two** programs in **thirteen** languages, written by more than one person, and still growing.
 
 ## Psst, hey kid
 
@@ -97,4 +97,4 @@ src/
 LICENSE
 ```
 
-Ken's Java, Kotlin, Python, and Go ports started in [his own repository](https://github.com/kastl/one-statement-challenge) and now live here too, folded in with full credit intact in each one's README.
+Ken's Java, Kotlin, Python, and Go ports live here too, folded in with full credit intact in each one's README.
