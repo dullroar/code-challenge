@@ -28,7 +28,7 @@ A pass means the entry built, ran and passed its own check **in a place where it
 Other limits worth knowing:
 
 - Containers share the host's kernel. On Windows, that kernel is Docker Desktop's (or WSL's) VM, and a container escape would land there. Windows Sandbox and the GitHub runners are full VMs.
-- The **Actions Windows runner has network.** It's a fresh VM with no secrets, so the risk is to GitHub's machine, not ours. For a network-off Windows run, use `windows/run.ps1` locally.
+- The **Actions Windows runner has network.** It's a fresh VM with no secrets, so the risk is to GitHub's machine, not ours. For a network-off Windows run, use `windows/run.ps1` locally. The job prints the names of any credential-like environment variables the entry could read. When first tested (2026-11-14) there were no tokens (no `ACTIONS_RUNTIME_TOKEN`, OIDC token or `GITHUB_TOKEN`); the only names were an orchestration ID and the runner image's stock `PGPASSWORD` for its preinstalled Postgres. The runner does have a real desktop, so WPF windows open and the screenshots in the run's artifacts show them.
 - The GUI ports (Rust/GTK, Python/Tk, Java and Kotlin/Swing, Go in a browser) have no check script and aren't covered yet. They're Ken's and Jim's, and they wait for someone to close a window.
 
 ## Adding a toolchain for a new language

@@ -19,8 +19,6 @@ on:
         description: Pull request number (leave empty for the self-test and the existing entries)
         required: false
         default: ''
-  push:  # TEMPORARY: lets the gate run on its own branch before it exists on master. Remove before merging.
-    branches: [sandbox-gate]
 
 permissions:
   contents: read
