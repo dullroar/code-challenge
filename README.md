@@ -38,30 +38,30 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 
 | Version | By | The stunt | Teaches you | Folder |
 | --- | --- | --- | --- | --- |
-| **C# (the original)** | Jim | Empty-body `for`; everything else lives in its three clauses | Runtime XAML, LINQ, EF Core, WPF animation | [`src/ModernChallenge1`](src/ModernChallenge1/README.md) |
-| **Rust** | Jim | No `;`, `let`, or `return` in `main` - a test enforces it | Iterators and closures as control flow | [`src/RustChallenge1`](src/RustChallenge1/README.md) |
-| **XAML** | Jim | The program *is* a `.xaml` file, run by the parser that loads it | XAML as a runtime interpreter, not just markup | [`src/xaml`](src/xaml/README.md) |
-| **Perl regex** | Jim | One `=~` match does everything, then deliberately returns false | Executable code inside a live regex match | [`src/regex-perl`](src/regex-perl/README.md) |
-| **PCRE2 regex** | Jim | Callout strings become opcodes for a bodiless C dispatcher | Regex callouts as a tiny instruction set | [`src/regex-pcre2`](src/regex-pcre2/README.md) |
-| **pcre2grep regex** | Jim | No custom code at all: a stock `pcre2grep`, one command line | Program exit codes as control flow | [`src/regex-pcre2grep`](src/regex-pcre2grep/README.md) |
-| **.NET regex** | Jim | Balancing groups only - no callouts, no code in the pattern | A regex as a stack-based counter | [`src/regex-dotnet`](src/regex-dotnet/README.md) |
-| **LINQ, fluent chain** | Jim | One LINQ method chain is the entire program | LINQ method chains, end to end | [`src/LinqChallenge1`](src/LinqChallenge1/README.md) |
-| **LINQ, query expression** | Jim | Nearly every line is `from`/`where`/`let`/`select` | C# query syntax, pushed as far as it goes | [`src/LinqChallenge2`](src/LinqChallenge2/README.md) |
-| **GNU Make** | Jim | No `$(shell)`; Make re-executes itself as the loop | Arithmetic and looping in plain Make syntax | [`src/make-gnu`](src/make-gnu/README.md) |
-| **CMake** | Jim | One bodiless `while()`; its condition is a regex machine | `while()` + regex as a tiny register machine | [`src/cmake`](src/cmake/README.md) |
 | **APL** | Jim | Five rolls and one take-while: no loop anywhere | That array thinking can replace control flow | [`src/apl`](src/apl/README.md) |
 | **APL, weirder** | Jim | Each timecard is a function that copies its own source with `⎕CR`, rewrites it and defines the copy with `⎕FX`; compress over that source is the stop rule | Self-replicating functions instead of loops and `if` | [`src/apl-weird`](src/apl-weird/README.md) |
-| **Haskell** | Jim | One pure function: random hours, `scanl1`, `span` | A lazy list and one `span` as the whole stop rule | [`src/haskell`](src/haskell/README.md) |
-| **Haskell on drugs** | Jim | An infinite list of cards whose elements have side effects: each running total is read off the card before it, and forcing a cell writes its row | Lazy IO as control flow, knot-tied with `fix` and `fixIO` | [`src/haskell-weird`](src/haskell-weird/README.md) |
-| **Forth** | Jim | One `begin ... until`, and `outfile-execute` points the output at SQLite | A stack language as a whole program | [`src/forth`](src/forth/README.md) |
-| **Forth, weirder** | Jim | No control-flow word and no variable: the state rides the data stack while the loop moves the text interpreter's own `>in` backwards | The parse position as a program counter | [`src/forth-weird`](src/forth-weird/README.md) |
-| **GNU sed regex** | Ken | The program is one line of text, rewritten until it's done | sed substitutions as a Markov algorithm | [`src/regex-sed`](src/regex-sed/README.md) |
+| **C# (the original)** | Jim | Empty-body `for`; everything else lives in its three clauses | Runtime XAML, LINQ, EF Core, WPF animation | [`src/ModernChallenge1`](src/ModernChallenge1/README.md) |
 | **COBOL** | Ken | `PERFORM DRAW-CARD UNTIL OVER-FORTY`: the stop rule is declared as data on the total, not coded in the procedure | A stop rule declared as data, and a number's picture doing your rounding | [`src/cobol`](src/cobol/README.md) |
 | **COBOL, weirder** | Ken | No `IF`, `PERFORM` or `UNTIL`: `ALTER` rewires a `GO TO` at run time, and a two-digit field overflowing is the stop rule | Why structured programming won, via self-rewriting control flow | [`src/cobol-weird`](src/cobol-weird/README.md) |
+| **Forth** | Jim | One `begin ... until`, and `outfile-execute` points the output at SQLite | A stack language as a whole program | [`src/forth`](src/forth/README.md) |
+| **Forth, weirder** | Jim | No control-flow word and no variable: the state rides the data stack while the loop moves the text interpreter's own `>in` backwards | The parse position as a program counter | [`src/forth-weird`](src/forth-weird/README.md) |
+| **Go** | Ken | The same challenge, serving a pulsing page in your browser | The same trick, as a one-request web server | [`src/GoChallenge1`](src/GoChallenge1/README.md) |
+| **Haskell** | Jim | One pure function: random hours, `scanl1`, `span` | A lazy list and one `span` as the whole stop rule | [`src/haskell`](src/haskell/README.md) |
+| **Haskell on drugs** | Jim | An infinite list of cards whose elements have side effects: each running total is read off the card before it, and forcing a cell writes its row | Lazy IO as control flow, knot-tied with `fix` and `fixIO` | [`src/haskell-weird`](src/haskell-weird/README.md) |
 | **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | The same bodiless-loop trick, Java style | [`src/JavaChallenge1`](src/JavaChallenge1/README.md) |
 | **Kotlin** | Ken | The same challenge, built as a sequence | The same trick, with Kotlin's sequence builders | [`src/KotlinChallenge1`](src/KotlinChallenge1/README.md) |
+| **LINQ, fluent chain** | Jim | One LINQ method chain is the entire program | LINQ method chains, end to end | [`src/LinqChallenge1`](src/LinqChallenge1/README.md) |
+| **LINQ, query expression** | Jim | Nearly every line is `from`/`where`/`let`/`select` | C# query syntax, pushed as far as it goes | [`src/LinqChallenge2`](src/LinqChallenge2/README.md) |
+| **Make, CMake** | Jim | One bodiless `while()`; its condition is a regex machine | `while()` + regex as a tiny register machine | [`src/cmake`](src/cmake/README.md) |
+| **Make, GNU** | Jim | No `$(shell)`; Make re-executes itself as the loop | Arithmetic and looping in plain Make syntax | [`src/make-gnu`](src/make-gnu/README.md) |
 | **Python** | Ken | The same challenge, Python style | The same trick, in a language with no `;` loops | [`src/PythonChallenge1`](src/PythonChallenge1/README.md) |
-| **Go** | Ken | The same challenge, serving a pulsing page in your browser | The same trick, as a one-request web server | [`src/GoChallenge1`](src/GoChallenge1/README.md) |
+| **RegEx, .NET** | Jim | Balancing groups only - no callouts, no code in the pattern | A regex as a stack-based counter | [`src/regex-dotnet`](src/regex-dotnet/README.md) |
+| **RegEx, GNU sed** | Ken | The program is one line of text, rewritten until it's done | sed substitutions as a Markov algorithm | [`src/regex-sed`](src/regex-sed/README.md) |
+| **RegEx, PCRE2** | Jim | Callout strings become opcodes for a bodiless C dispatcher | Regex callouts as a tiny instruction set | [`src/regex-pcre2`](src/regex-pcre2/README.md) |
+| **RegEx, pcre2grep** | Jim | No custom code at all: a stock `pcre2grep`, one command line | Program exit codes as control flow | [`src/regex-pcre2grep`](src/regex-pcre2grep/README.md) |
+| **RegEx, Perl** | Jim | One `=~` match does everything, then deliberately returns false | Executable code inside a live regex match | [`src/regex-perl`](src/regex-perl/README.md) |
+| **Rust** | Jim | No `;`, `let`, or `return` in `main` - a test enforces it | Iterators and closures as control flow | [`src/RustChallenge1`](src/RustChallenge1/README.md) |
+| **XAML** | Jim | The program *is* a `.xaml` file, run by the parser that loads it | XAML as a runtime interpreter, not just markup | [`src/xaml`](src/xaml/README.md) |
 
 Every "Teaches you" cell above is a promise, not just a label: open the folder's README and that is genuinely what you will walk away understanding.
 
