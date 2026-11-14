@@ -143,7 +143,7 @@ The SQLite command runs after the window is closed. See the companion README for
 
 Four entries turn a regular expression into the program. In the first three, the loop, the running total, the stop rule and the record writes all happen *inside one regex match*, which then deliberately reports failure after doing all the work. [`src/regex-perl`](src/regex-perl/README.md) uses Perl's executable `(?{ })` and `(??{ })` blocks; [`src/regex-pcre2`](src/regex-pcre2/README.md) uses PCRE2 callouts as a tiny instruction set, and [`src/regex-pcre2grep`](src/regex-pcre2grep/README.md) needs no custom code at all: a stock `pcre2grep` runs `sqlite3` from callouts and the exit codes steer the match. All three pulse a **DEMO ONLY** banner in the terminal, from inside the match, and all three ship a `check.sh` that asserts the rules. The Perl one goes furthest: its file is a single statement, and the match itself writes the records to a real SQLite transaction.
 
-The last, [`src/regex-dotnet`](src/regex-dotnet/README.md), is the purist's version: .NET balancing groups and conditionals only, no code in the pattern. The pattern does the walk, the accumulation and the stop rule, but its README is honest about the walls: a regex cannot draw random numbers or write files, and a failed .NET match exposes no captures, so the "return false" signature move is impossible there. See [`plans/regex.md`](plans/regex.md).
+The last, [`src/regex-dotnet`](src/regex-dotnet/README.md), is the purist's version: .NET balancing groups and conditionals only, no code in the pattern. The pattern does the walk, the accumulation and the stop rule, but its README is honest about the walls: a regex cannot draw random numbers or write files, and a failed .NET match exposes no captures, so the "return false" signature move is impossible there.
 
 ```bash
 perl src/regex-perl/timecards.pl
@@ -168,9 +168,6 @@ src/
   regex-pcre2grep/            # pcre2grep: callouts run sqlite3, exit codes steer the match
   regex-dotnet/               # .NET: balancing groups only, and the walls it hits
   xaml/                       # XAML: the program is a .xaml file run at run time
-plans/
-  pure-xaml.md                # the plan the XAML experiment followed
-  regex.md                    # the plan the regex experiments followed
 LICENSE
 ```
 

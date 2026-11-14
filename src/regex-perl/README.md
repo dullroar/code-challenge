@@ -1,6 +1,6 @@
 # Regex challenge, Track 1: Perl (the whole program is one match)
 
-The file's only statement is a single `=~` match. Seeding, the random draws, the SQLite transaction, the terminal pulse and all the printing happen *inside* that match, and then the match **returns false**. Follows [`plans/regex.md`](../../plans/regex.md). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
+The file's only statement is a single `=~` match. Seeding, the random draws, the SQLite transaction, the terminal pulse and all the printing happen *inside* that match, and then the match **returns false**. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
 
 ## Run it
 

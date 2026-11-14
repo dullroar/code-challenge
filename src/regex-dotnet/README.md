@@ -1,6 +1,6 @@
 # Regex challenge, Track 3: .NET balancing groups (the purist's attempt)
 
-One `Regex.Match` call, no callouts, no inline code, no `MatchEvaluator`. Follows [`plans/regex.md`](../../plans/regex.md), which expected this track to hit a wall. It did hit some, and they are listed below, but the core got further than the plan predicted. **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
+One `Regex.Match` call, no callouts, no inline code, no `MatchEvaluator`. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`), which expected this track to hit a wall. It did hit some, and they are listed below, but the core got further than the plan predicted. **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
 
 ## Run it
 

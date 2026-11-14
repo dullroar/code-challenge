@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Checks the rules from plans/regex.md for the .NET track. Uses a throwaway data dir.
+# Checks the rules of the regex challenge for the .NET track. Uses a throwaway data dir.
 set -euo pipefail
 cd "$(dirname "$0")"
 data=$(mktemp -d); trap 'rm -rf "$data"' EXIT

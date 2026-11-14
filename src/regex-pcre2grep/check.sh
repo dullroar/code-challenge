@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Checks the rules from plans/regex.md for the pcre2grep track. Uses a throwaway data dir.
+# Checks the rules of the regex challenge for the pcre2grep track. Uses a throwaway data dir.
 # Needs a pcre2grep built with callout scripts (see README.md); set PCRE2GREP to point at it.
 set -euo pipefail
 cd "$(dirname "$0")"

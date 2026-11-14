@@ -1,6 +1,6 @@
 # Regex challenge, Track 2: PCRE2 callouts as a tiny DSL
 
-One `pcre2_match` call runs the whole timecard demo, then reports **no match**. Follows [`plans/regex.md`](../../plans/regex.md). **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
+One `pcre2_match` call runs the whole timecard demo, then reports **no match**. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
 
 ## Install and run on Ubuntu under WSL 2
 
