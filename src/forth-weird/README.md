@@ -77,7 +77,7 @@ With comments and `."` strings removed, none of `begin until while repeat again 
 ## Gotchas worth knowing
 
 - **It only works at the top level, or in `evaluate`d / `included` text.** `>in` is the parse position *of the current input line*. A colon definition that moves `>in` (like `rewind?`) works because it runs while the interpreter is parsing the line that called it. Compile the loop *into* a word and there is no line to rewind.
-- **The loop and the data are on one line.** If you move the `0 0` before the `>in @` onto the previous line, you get a correct-looking program that resets the state on every pass and never stops.
+- **The loop and the data are on one line.** If you move the `0 0` to *after* the `>in @` (`>in @ 0 0 step rewind?`), you get a correct-looking program that resets the state on every pass and never stops: the anchor is now before the `0 0`, so every rewind pushes a fresh pair. (Moving it to the previous line is harmless: the anchor is still after it.)
 - **The anchor is a number of characters, not an address.** Edit the line and the anchor is recomputed at run time, because `>in @` reads it on the way past.
 - **`random` is `0..n-1`**, so `10 random 10 +` is 10..19; Gforth is seeded from `utime`.
 - **`3dup` is not in Gforth 0.7.3.** It is defined at the top with `2 pick` three times.

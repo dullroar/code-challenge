@@ -48,7 +48,7 @@ Legitimate uses: generating includes (`-include $(DEPS)`) that cause a restart w
 
 ### 5. Now break it yourself
 
-See [exercises](../exercises.md#make-remove-the-no-op).
+See [exercises](../exercises.md#b4-make-remove-the-no-op-and-override-the-clock-verified).
 
 ## CMake
 
@@ -94,7 +94,7 @@ Tags: `CMAKE_MATCH_n` being set by `MATCHES` is **documented**; re-expansion of 
 
 ### 5. Now break it yourself
 
-See [exercises](../exercises.md#cmake-mutate-the-literal): the repo's own `check.sh` mutates the 41-character literal to prove it controls the loop.
+See [exercises](../exercises.md#b5-cmake-mutate-the-literal-verified): the repo's own `check.sh` mutates the 41-character literal to prove it controls the loop.
 
 ## Quirks and walls
 

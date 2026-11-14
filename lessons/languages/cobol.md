@@ -67,7 +67,7 @@ Legitimate uses: none in new code. Historically, though, in memory-poor, perform
 
 ### 5. Now break it yourself
 
-See [exercises](../exercises.md#cobol-predict-then-break-alter): predict what happens if you add a `DISPLAY` to `NEXT-CARD`, or change the `59`.
+See [exercises](../exercises.md#b1-cobol-predict-then-break-alter-verified): predict what happens if you add a `DISPLAY` to `NEXT-CARD`, or change the `59`.
 
 ## Quirks
 

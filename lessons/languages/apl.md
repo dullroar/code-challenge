@@ -100,7 +100,7 @@ Legitimate uses: metaprogramming, interactive exploration, and code generation, 
 
 ### Break it yourself
 
-See [exercises](../exercises.md#apl-the-off-by-one-rewrite).
+See [exercises](../exercises.md#b6-apl-the-off-by-one-rewrite-verified).
 
 ## Quirks
 

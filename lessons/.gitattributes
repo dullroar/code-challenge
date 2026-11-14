@@ -1,0 +1,5 @@
+# The check scripts and reference solutions run under bash, awk, ghc and Docker on Linux: keep LF even on
+# Windows checkouts with core.autocrlf=true. The Markdown is left to the repo's default.
+tools/*.sh  text eol=lf
+solutions/** text eol=lf
+book/*.py   text eol=lf

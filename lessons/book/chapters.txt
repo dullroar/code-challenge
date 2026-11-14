@@ -1,0 +1,17 @@
+# The book's chapters, in reading order. Paths are relative to lessons/.
+# lessons/README.md is the web index and is deliberately not a chapter.
+intro.md
+goals.md
+languages/README.md
+languages/csharp-linq-xaml.md
+languages/cobol.md
+languages/haskell.md
+languages/forth.md
+languages/make-cmake.md
+languages/regex.md
+languages/apl.md
+patterns.md
+problems-overcome.md
+blocking-problems.md
+exercises.md
+answers-key.md
