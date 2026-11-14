@@ -1,0 +1,6 @@
+# Check out entries with LF even on Windows (core.autocrlf=true), so they run from WSL: with CRLF,
+# shell scripts fail on their first line ('bash\r'). Everything is already stored as LF, so this
+# changes no content. text=auto skips binaries; cmd.exe needs CRLF in batch files.
+src/** text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
