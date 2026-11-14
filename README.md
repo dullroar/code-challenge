@@ -12,7 +12,7 @@ You've spent years writing clean code. Small functions. Meaningful names. Tests.
 
 You know you want to write perversely incomprehensible code. **You know you do.**
 
-It's a trend, too. This started as one C# program. It is now **nine** programs in **seven** languages and counting, written by more than one person (Ken caught it, too). Pick a language. Pick a constraint. Make something terrible that works.
+It's a trend, too. This started as one C# program. It is now **eleven** programs in **seven** languages and counting, written by more than one person (Ken caught it, too). Pick a language. Pick a constraint. Make something terrible that works.
 
 ## The family
 
@@ -27,6 +27,8 @@ Every version builds the same demo: generate 10 to 19 random hours at a time for
 | **PCRE2 regex** | Jim | One `pcre2_match` call; the pattern's callout strings are opcodes for a bodiless C dispatcher; result: "no match" | terminal | [`src/regex-pcre2`](src/regex-pcre2/README.md) |
 | **pcre2grep regex** | Jim | No custom code: a stock `pcre2grep` and one command line. Callouts run `sqlite3`, and the helpers' exit codes steer the match; result: "no match" | terminal | [`src/regex-pcre2grep`](src/regex-pcre2grep/README.md) |
 | **.NET regex** | Jim | One `Regex.Match`, balancing groups only: no callouts, no inline code. A budget stack is the stop rule, flag groups pick the category. Documents the walls it hits | terminal | [`src/regex-dotnet`](src/regex-dotnet/README.md) |
+| **LINQ, fluent chain** | Jim | One statement, one genuine LINQ method chain: `Aggregate` folds and caps the timecard, `SelectMany`/`AsEnumerable` cross the EF Core `IQueryable<T>` boundary, inline `Func<T>.Invoke()` wrappers turn `void` WPF/EF calls into chainable values | WPF | [`src/LinqChallenge1`](src/LinqChallenge1/README.md) |
+| **LINQ, query expression** | Jim | The same demo as a genuine `from`/`where`/`let`/`select` query expression, driven by the real work week (`where` caps the total via a recomputed prefix sum, no accumulator); its own `.ToList()` terminal op is also where the EF query and window pick up, once each, not once per row | WPF | [`src/LinqChallenge2`](src/LinqChallenge2/README.md) |
 | **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | Swing | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
 | **Kotlin** | Ken | The same challenge, Kotlin style | Swing | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
 | **Python** | Ken | The same challenge in Python | Tk | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
@@ -152,6 +154,22 @@ PCRE2GREP=~/.local/bin/pcre2grep src/regex-pcre2grep/timecards.sh   # needs a pc
 dotnet run -c Release --project src/regex-dotnet
 ```
 
+## LINQ companions: method chain vs. query syntax
+
+Two more C# entries, both built on the same `ModernChallenge1`-style WPF/EF Core/SQLite demo, but swapping the empty-body `for` for a different single-statement rule: exactly one `;`-terminated expression statement does the fold-and-cap, the EF Core save and query, and the WPF window/pulse/close - no `for`, no helper method. [`src/LinqChallenge1`](src/LinqChallenge1/README.md) writes that statement as one fluent LINQ method chain throughout. [`src/LinqChallenge2`](src/LinqChallenge2/README.md) writes the data-shaping half as a genuine `from`/`where`/`let`/`select` query expression - `where` caps the week at 40h with a recomputed prefix sum, not a mutable accumulator, driven by the real five-row work week - then is honest that query syntax has nothing left to offer for the rest: the EF query and the window still need the same `Enumerable.Repeat(…, 1)` collapse-and-chain trick Variant A uses, so they run exactly once rather than once per surviving row. Both variants lean on the same trick for the WPF/EF `void` methods a chain, a tuple, or a `let` can't call directly: an inline `new Func<T>(() => { sideEffect(); return value; }).Invoke()` right where the pipeline needs a value back.
+
+```powershell
+cd src\LinqChallenge1
+dotnet run                       # Variant A: fluent chain
+.\check.ps1                      # build + structural check + one end-to-end run
+
+cd ..\LinqChallenge2
+dotnet run                       # Variant B: query expression
+.\check.ps1
+```
+
+Both show a pulsing **DEMO ONLY** terminal window that closes itself after three pulses; records land in `%LOCALAPPDATA%\LinqChallenge1\timecards.db` and `%LOCALAPPDATA%\LinqChallenge2\timecards.db`. Each README documents the honest compromises: where `SaveChanges()` has to run eagerly rather than deferred, why query syntax turns out to help with the cap (a real `where` clause, no mutable accumulator) but has nothing left to offer once the rows are shaped - the EF query and the window still have to fall back to the same collapse-and-chain trick Variant A uses, or they would re-run once per surviving row - and why a top-level expression statement in C# has to end in an invocation, which rules out binding intermediate stages to a named local and forces both variants to nest stages directly in each other's arguments instead.
+
 ## Repository layout
 
 ```text
@@ -168,6 +186,8 @@ src/
   regex-pcre2grep/            # pcre2grep: callouts run sqlite3, exit codes steer the match
   regex-dotnet/               # .NET: balancing groups only, and the walls it hits
   xaml/                       # XAML: the program is a .xaml file run at run time
+  LinqChallenge1/             # LINQ: one fluent method-chain expression statement
+  LinqChallenge2/             # LINQ: one SQL-like query-expression statement
 LICENSE
 ```
 
