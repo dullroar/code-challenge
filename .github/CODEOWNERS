@@ -1,0 +1,10 @@
+# The trusted side of reviewing outside entries: changes here need the maintainer's review.
+# (The master ruleset requires code-owner review; the maintainer can still merge their own PRs.)
+/.github/          @dullroar
+/sandbox/          @dullroar
+/CONTRIBUTING.md   @dullroar
+/build.gradle      @dullroar
+/settings.gradle   @dullroar
+/gradlew           @dullroar
+/gradlew.bat       @dullroar
+/gradle/           @dullroar
