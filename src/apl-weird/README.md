@@ -61,6 +61,10 @@ The recursion is therefore a chain of different functions rather than a function
 
 `check.sh` enforces the rules by reading the source: no `⍣` (power operator), no `→` (branch), exactly one `∇ … ∇` block, exactly one `⎕FX`, and the generated-card count in the output must equal the number of entries. It also runs the program under `timeout`, because a broken stop rule does not fail, it recurses forever (see below).
 
+## Seeing the glyphs
+
+If the APL symbols show as empty boxes, see [Seeing the glyphs](../apl/README.md#seeing-the-glyphs) in the straight entry's README. (`⎕` is *supposed* to be an empty box.)
+
 ## Gotchas worth knowing
 
 - **Dynamic scope.** APL local variables are visible to everything *called* from the function, not just to its own text. Every card must declare `N;C;H;T;…` in its header (that is what `Locals` is for) or a child's genes would overwrite its parent's.
