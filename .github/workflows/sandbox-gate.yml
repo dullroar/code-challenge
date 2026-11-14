@@ -1,0 +1,190 @@
+name: sandbox gate
+
+# Run by hand, from master: Actions -> "sandbox gate" -> Run workflow, and give a PR number.
+#
+# The trusted side (this file and everything in sandbox/) comes from master. The pull request is
+# fetched as data with git and is never checked out. sandbox/scope-check.sh judges it first;
+# only if that passes are its files copied into the Linux sandbox (no network, see sandbox/run.sh)
+# or onto a throwaway Windows runner (a fresh VM with no secrets, but with network).
+#
+# With no PR number it runs the sandbox self-test and every existing entry: a regression check
+# of the gate itself.
+#
+# Never add a pull_request_target trigger here, and never pass secrets to these jobs.
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: Pull request number (leave empty for the self-test and the existing entries)
+        required: false
+        default: ''
+  push:  # TEMPORARY: lets the gate run on its own branch before it exists on master. Remove before merging.
+    branches: [sandbox-gate]
+
+permissions:
+  contents: read
+
+jobs:
+  scope:
+    name: Scope check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      linux: ${{ steps.plan.outputs.linux }}
+      windows: ${{ steps.plan.outputs.windows }}
+    env:
+      PR: ${{ inputs.pr }}
+    steps:
+      - name: Only judge pull requests with master's scripts
+        if: inputs.pr != '' && github.ref != 'refs/heads/master'
+        run: |
+          echo "::error::Run the gate from master, so the scripts that judge the PR are master's."
+          exit 1
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch the pull request as data (not checked out)
+        if: inputs.pr != ''
+        run: |
+          [[ $PR =~ ^[0-9]+$ ]] || { echo "::error::pr must be a number"; exit 1; }
+          git fetch --no-tags origin "+refs/pull/$PR/head:refs/remotes/pr/head"
+          git log -1 --format='PR head %H by %an <%ae>: %s' pr/head
+
+      - name: scope-check.sh
+        if: inputs.pr != ''
+        run: |
+          set -o pipefail
+          sandbox/scope-check.sh origin/master pr/head --entries-out entries.txt | tee scope.txt
+
+      - name: Reviewer report
+        if: always() && inputs.pr != ''
+        run: |
+          [[ -f scope.txt ]] || exit 0
+          { echo "### scope-check for PR #$PR"; echo '```text'; sed 's/```/` ` `/g' scope.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Decide what runs where
+        id: plan
+        run: |
+          linux=() windows=()
+          if [[ -n $PR ]]; then
+              while read -r e; do
+                  git cat-file -e "pr/head:$e/check.sh" 2>/dev/null && linux+=("$e")
+                  git cat-file -e "pr/head:$e/check.ps1" 2>/dev/null && windows+=("$e")
+              done < entries.txt
+          else
+              for f in src/*/check.sh; do linux+=("$(dirname "$f")"); done
+              while read -r line; do windows+=("$line"); done < <(grep -Ev '^\s*(#|$)' sandbox/windows/regression.txt)
+          fi
+          echo "linux=${linux[*]}" >> "$GITHUB_OUTPUT"
+          { echo "windows<<EOF"; printf '%s\n' "${windows[@]}"; echo "EOF"; } >> "$GITHUB_OUTPUT"
+          echo "Linux sandbox: ${linux[*]:-none}"; echo "Windows runner: ${windows[*]:-none}"
+
+  linux:
+    name: Linux sandbox
+    needs: scope
+    if: needs.scope.outputs.linux != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      PR: ${{ inputs.pr }}
+      LINUX: ${{ needs.scope.outputs.linux }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Copy the PR's entry out of git (no checkout)
+        run: |
+          if [[ -n $PR ]]; then
+              git fetch --no-tags origin "+refs/pull/$PR/head:refs/remotes/pr/head"
+              mkdir -p "$RUNNER_TEMP/pr"
+              for e in $LINUX; do git archive pr/head "$e" | tar -x -C "$RUNNER_TEMP/pr"; done
+              echo "ROOT=$RUNNER_TEMP/pr" >> "$GITHUB_ENV"
+          else
+              echo "ROOT=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build the sandbox image (from master's Dockerfile)
+        run: docker build -t code-challenge-sandbox:local sandbox/linux
+
+      - name: Self-test the sandbox on this runner
+        run: sandbox/selftest.sh
+
+      - name: Run the entries in the sandbox
+        run: cd "$ROOT" && "$GITHUB_WORKSPACE/sandbox/run.sh" $LINUX
+
+  windows:
+    name: Windows runner
+    needs: scope
+    if: needs.scope.outputs.windows != ''
+    runs-on: windows-2025
+    timeout-minutes: 45
+    env:
+      PR: ${{ inputs.pr }}
+      WINDOWS: ${{ needs.scope.outputs.windows }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: What a step on this runner can see (names only)
+        shell: pwsh
+        run: |
+          $names = Get-ChildItem env: | Where-Object Name -match 'TOKEN|SECRET|ACTIONS_|PASSWORD|KEY' | ForEach-Object Name
+          "Credential-like environment variable names visible to the entry: $(if ($names) { $names -join ', ' } else { 'none' })"
+
+      - name: Make sure a .NET 10 SDK is installed
+        shell: pwsh
+        run: |
+          dotnet --list-sdks
+          if (-not (dotnet --list-sdks | Select-String '^10\.')) {
+              Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile "$env:RUNNER_TEMP\dotnet-install.ps1"
+              & "$env:RUNNER_TEMP\dotnet-install.ps1" -Channel 10.0 -InstallDir "$env:ProgramFiles\dotnet"
+              dotnet --list-sdks
+          }
+
+      - name: Copy the PR's entry out of git (no checkout)
+        shell: bash
+        run: |
+          if [[ -n $PR ]]; then
+              git fetch --no-tags origin "+refs/pull/$PR/head:refs/remotes/pr/head"
+              mkdir -p "$RUNNER_TEMP/pr"
+              while read -r e _; do git archive pr/head "$e" | tar -x -C "$RUNNER_TEMP/pr"; done <<< "$WINDOWS"
+              echo "ROOT=$RUNNER_TEMP/pr" >> "$GITHUB_ENV"
+          else
+              echo "ROOT=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build, run and screenshot each entry
+        shell: pwsh
+        run: |
+          $failed = 0
+          foreach ($line in ($env:WINDOWS -split "`n" | Where-Object { $_.Trim() })) {
+              $parts = $line.Trim() -split '\s+'
+              $dir = $parts[0]; $runArgs = @($parts | Select-Object -Skip 1)
+              $name = Split-Path $dir -Leaf
+              $parent = Join-Path $env:ROOT (Split-Path $dir -Parent)
+              $out = Join-Path $env:RUNNER_TEMP "out\$name"
+              $jobFile = Join-Path $env:RUNNER_TEMP "job-$name.json"
+              @{ Name = $name; RunArgs = $runArgs; Seconds = 20 } | ConvertTo-Json | Set-Content $jobFile
+              Write-Host "=== $name $($runArgs -join ' ')"
+              & powershell.exe -NoProfile -ExecutionPolicy Bypass -File sandbox\windows\inside.ps1 `
+                  -OnRunner -In $parent -Out $out -JobFile $jobFile -Work (Join-Path $env:RUNNER_TEMP "work-$name")
+              $r = Get-Content (Join-Path $out 'result.json') -Raw | ConvertFrom-Json
+              if ($r.Passed) { Write-Host "PASS $name ($($r.Summary))" } else { Write-Host "FAIL $name ($($r.Summary))"; $failed++ }
+          }
+          exit $failed
+
+      - name: Upload logs and screenshots
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-results
+          path: ${{ runner.temp }}/out
+          if-no-files-found: ignore
