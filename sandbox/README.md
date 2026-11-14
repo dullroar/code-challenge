@@ -20,9 +20,9 @@ This folder is the trusted side of reviewing outside entries. It is changed only
 
 For a human to watch an entry run, rather than for the gate to judge it:
 
-- **Linux entries:** `sandbox/container/run-image.sh src/<entry>`. Each entry carries its own `Dockerfile`: a build stage with the toolchain, then a runtime stage that copies in only the finished program on a base with just enough to run it (117 to 350 MB, against 2.45 GB for the toolchain image). No network, no host files (unless you pass `--out`), and a read-only look at the results afterwards. The Go entry serves its page on loopback *inside* the container; the entrypoint fetches it from there with `wget` and then "closes" it, so no port is ever published.
+- **Linux entries:** `sandbox/container/run-image.sh src/<entry>`. Each entry carries its own `Dockerfile`: a build stage with the toolchain, then a runtime stage that copies in only the finished program on a base with just enough to run it (117 to 770 MB, against 2.45 GB for the toolchain image). No network, no host files (unless you pass `--out`), and a read-only look at the results afterwards. The Go entry serves its page on loopback *inside* the container; the entrypoint fetches it from there with `wget` and then "closes" it, so no port is ever published.
 - **Windows and GUI entries:** `sandbox\windows\run.ps1 src\<entry>`. Covers .NET (WPF, XAML, LINQ), Python/Tk, and, untested so far, Go (in Edge) and Java/Kotlin Swing.
-- **GUI entries on Linux:** the Rust/GTK entry runs in a container on a virtual display (Xvfb) and is screenshotted from inside; use `--out` to get the PNG. There is deliberately no Windows Sandbox profile for it: GTK 4 on Windows is not something to ship into a sandbox.
+- **GUI entries on Linux:** the Rust/GTK, Python/Tk and Java and Kotlin (Swing) entries run in a container on a virtual display (Xvfb) and are screenshotted from inside; use `--out` to get the PNG. They also have Windows Sandbox profiles, except Rust: GTK 4 on Windows is not something to ship into a sandbox.
 
 Prerequisites for both are in [`SANDBOX-SETUP.md`](../SANDBOX-SETUP.md).
 

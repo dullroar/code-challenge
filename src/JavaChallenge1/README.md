@@ -29,6 +29,16 @@ From the repo root, the same task name works without the `cd`: `.\gradlew.bat ru
 
 `bootRun` runs the same program. The window is a Swing dialog. Records land in `src/JavaChallenge1/data/demo-timecards.db`. The data path is relative to the working directory, which the Gradle run tasks set to this folder. If you run the JAR from somewhere else, `data` is created there.
 
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh --online-build --out ./results src/JavaChallenge1
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`. Gradle and OpenJDK 25 build one Spring Boot jar in a build stage; the image holds only that jar on an OpenJDK 25 JRE with AWT, Xvfb and a screenshot tool, with no JDK or Gradle (about 760 MB, the largest of the set). The window opens on a virtual display (Xvfb) *inside* the container, so nothing is drawn on your desktop: the run screenshots it, closes it, and prints the rows it wrote. With `--out`, `results/screenshot.png` is the window. `--online-build` is needed because the build downloads Gradle (from this entry's wrapper) and the Maven dependencies; the run itself has no network.
+
 ## Run it in Windows Sandbox
 
 Prerequisites: Windows Sandbox and this entry's toolchain on your machine, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#windows-sandbox).

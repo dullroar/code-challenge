@@ -24,6 +24,8 @@ bases=(
     'make|make'
     'cmake|cmake'
     'gtk|xvfb scrot libgtk-4-1 fonts-dejavu-core'
+    'pytk|xvfb scrot python3 python3-tk fonts-dejavu-core'
+    'java|xvfb scrot openjdk-25-jre fonts-dejavu-core'
     'dotnet|dotnet-runtime-10.0 libicu74'
     'apl|libpcre2-32-0 libstdc++6'
 )
@@ -40,10 +42,12 @@ for b in "${bases[@]}"; do
         $docker build --target runtime -t "cc-rt-$name:local" --build-arg "PACKAGES=$pkgs" "$(host_path "$here")"
     fi
 done
-if [[ $only == "  " || $only == *" build-go "* ]]; then
-    $docker image inspect cc-build-go:local >/dev/null 2>&1 && (( ! force )) || { echo "building cc-build-go:local"; $docker build --target build-go -t cc-build-go:local "$(host_path "$here")"; }
-fi
-if [[ $only == "  " || $only == *" build-rust "* ]]; then
-    $docker image inspect cc-build-rust:local >/dev/null 2>&1 && (( ! force )) || { echo "building cc-build-rust:local"; $docker build --target build-rust -t cc-build-rust:local "$(host_path "$here")"; }
-fi
+for t in go rust java; do   # build-only bases: a toolchain image that entries' build stages start from
+    if [[ $only == "  " || $only == *" build-$t "* ]]; then
+        if (( force )) || ! $docker image inspect "cc-build-$t:local" >/dev/null 2>&1; then
+            echo "building cc-build-$t:local"
+            $docker build --target "build-$t" -t "cc-build-$t:local" "$(host_path "$here")"
+        fi
+    fi
+done
 $docker images --format 'table {{.Repository}}:{{.Tag}}\t{{.Size}}' | grep -E '^(REPOSITORY|cc-rt-|cc-build-|code-challenge-sandbox)'

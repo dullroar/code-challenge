@@ -23,8 +23,8 @@ fail() { echo "FAIL  Dockerfile line $1: $2"; fails=$((fails + 1)); }
 
 # Join "\" continuations into logical lines, tagging each with its first physical line number.
 mapfile -t logical < <(awk '
-    { line = $0; if (!pending) start = NR
-      if (line ~ /\[ \t]*$/) { sub(/\[ \t]*$/, "", line); buf = buf line " "; pending = 1; next }
+    { line = $0; sub(/\r$/, "", line); if (!pending) start = NR
+      if (line ~ /\\[ \t]*$/) { sub(/\\[ \t]*$/, "", line); buf = buf line " "; pending = 1; next }
       print start "\t" buf line; buf = ""; pending = 0 }
     END { if (pending) print start "\t" buf }' "$src")
 

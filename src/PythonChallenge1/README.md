@@ -16,6 +16,16 @@ Or, from the repo root, through Gradle: `.\gradlew.bat runPython`.
 
 The window is a Tk window. Records land in `src/PythonChallenge1/data/demo-timecards.db`, beside `program.py`, whatever the working directory. Delete `data` to start over.
 
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh --out ./results src/PythonChallenge1
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`. In the image: Python 3 with Tk, Xvfb and a screenshot tool; no pip, no compiler (about 340 MB). The window opens on a virtual display (Xvfb) *inside* the container, so nothing is drawn on your desktop: the run screenshots it, closes it, and prints the rows it wrote. With `--out`, `results/screenshot.png` is the window.
+
 ## Run it in Windows Sandbox
 
 Prerequisites: Windows Sandbox and this entry's toolchain on your machine, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#windows-sandbox).

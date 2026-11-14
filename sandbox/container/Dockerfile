@@ -10,6 +10,8 @@
 #   cc-rt-sqlite   sqlite3 only        (anything that ships its own interpreter or binary)
 #   cc-rt-gforth   + gforth
 #   cc-rt-gtk      + Xvfb, scrot, GTK 4 runtime (GUI entries on a virtual display)
+#   cc-rt-pytk     + Python 3 with Tk, Xvfb, scrot (Python/Tk GUI entries)
+#   cc-rt-java     + OpenJDK 25 JRE (with AWT), Xvfb, scrot (Java and Kotlin Swing entries)
 #   ...            (the list lives in build-bases.sh)
 #
 # What is deliberately NOT here: a compiler, curl, git, pip, an editor, or a package manager
@@ -22,7 +24,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG PACKAGES=""
 COPY strip.sh /tmp/strip.sh
 # One layer for install and strip, so what strip.sh deletes is really gone from the image size.
-RUN apt-get update \n && apt-get install -y --no-install-recommends sqlite3 ${PACKAGES} \n && rm -rf /var/lib/apt/lists/* \n && sh /tmp/strip.sh && rm /tmp/strip.sh
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends sqlite3 ${PACKAGES} \
+ && rm -rf /var/lib/apt/lists/* \
+ && sh /tmp/strip.sh && rm /tmp/strip.sh
 COPY entrypoint.sh /usr/local/bin/cc-entrypoint
 RUN chmod 0555 /usr/local/bin/cc-entrypoint
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
@@ -41,4 +46,13 @@ FROM ${UBUNTU} AS build-rust
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates build-essential pkg-config cargo rustc libgtk-4-dev libsqlite3-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+# Build base for Java and Kotlin entries: Ubuntu's OpenJDK 25 (the entries' build.gradle asks for Java 25),
+# with Gradle itself coming from each entry's wrapper. The Gradle distribution and the Maven dependencies are
+# downloaded at build time, so these entries need run-image.sh --online-build.
+FROM ${UBUNTU} AS build-java
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates openjdk-25-jdk-headless \
  && rm -rf /var/lib/apt/lists/*

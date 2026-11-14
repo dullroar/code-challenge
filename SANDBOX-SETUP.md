@@ -4,7 +4,7 @@ Every entry here is code that does odd things on purpose, so nothing needs to ru
 
 | You want to run... | Use | Needs |
 | --- | --- | --- |
-| A Linux entry (APL, Forth, Haskell, regex, Make, CMake, Go, Rust/GTK, .NET regex...) | **Docker**: `sandbox/container/run-image.sh src/<entry>` | [Docker](#docker) |
+| A Linux entry (APL, Forth, Haskell, regex, Make, CMake, Go, Rust/GTK, Python/Tk, Java/Kotlin Swing, .NET regex...) | **Docker**: `sandbox/container/run-image.sh src/<entry>` | [Docker](#docker) |
 | A Windows or GUI entry (WPF, XAML, LINQ, Python/Tk, Java/Kotlin Swing, Go in a browser) | **Windows Sandbox**: `sandbox\windows\run.ps1 src\<entry>` | [Windows Sandbox](#windows-sandbox), plus the entry's [toolchain](#windows-toolchains) |
 | To judge a pull request from someone you don't know | The same two, driven by the [gate](sandbox/README.md#reviewing-a-pull-request-from-someone-we-dont-know) | Both, or just GitHub Actions |
 
@@ -34,7 +34,7 @@ The first run needs the internet once, to download Ubuntu and its packages. Afte
 sandbox/container/build-bases.sh
 ```
 
-This builds the build toolchain (slow the first time: it includes GHC, .NET and GNU APL, about 2.5 GB) and the small runtime images the entries are built on (about 120 to 350 MB each). Run it again with `--force` after pulling changes to `sandbox/`.
+This builds the build toolchain (slow the first time: it includes GHC, .NET and GNU APL, about 2.5 GB) and the small runtime images the entries are built on (about 120 to 770 MB each). Run it again with `--force` after pulling changes to `sandbox/`.
 
 ### Run an entry
 
@@ -42,10 +42,10 @@ This builds the build toolchain (slow the first time: it includes GHC, .NET and 
 sandbox/container/run-image.sh src/forth                    # build the entry's image, run it, show the rows
 sandbox/container/run-image.sh --out ./results src/haskell  # also copy what it wrote to ./results
 sandbox/container/run-image.sh --tty src/regex-sed           # give it a terminal (for the animations)
-sandbox/container/run-image.sh --online-build --out ./results src/RustChallenge1   # a GUI entry: screenshot.png lands in ./results
+sandbox/container/run-image.sh --online-build --out ./results src/RustChallenge1   # a GUI entry (Rust, Python, Java, Kotlin): screenshot.png lands in ./results
 ```
 
-Entries that must download dependencies while building (the Go entry, which fetches its SQLite module, and the Rust entry, which fetches its locked crates) need `--online-build`. Use that only on entries already merged to `master`: the build then has network, though the run never does.
+Entries that must download dependencies while building (the Go entry, which fetches its SQLite module; the Rust entry, which fetches its locked crates; and the Java and Kotlin entries, which fetch Gradle and their Maven dependencies) need `--online-build`. Use that only on entries already merged to `master`: the build then has network, though the run never does.
 
 ### If something goes wrong
 
