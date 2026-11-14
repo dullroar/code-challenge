@@ -42,6 +42,16 @@ Error: stepping, CHECK constraint failed: stop rule fired: total exceeds 40 (19)
 
 That `Error:` line is on **stderr** and is the stop rule announcing itself (see below), not a failure. It appears exactly once per run that ends over 40; `check.sh` asserts that and that nothing else is ever written to stderr.
 
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh src/regex-pcre2grep
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: A callout-enabled `pcre2grep` (built from the pinned PCRE2 release in the toolchain image) and sqlite3 on a minimal Ubuntu.
+
 ## How the stunt works
 
 `pcre2grep` supports two kinds of callout string. `(?C{|text$n})` echoes text. `(?C{/abs/path/prog|arg|arg})` runs a program: **exit 0 lets the match continue; any other exit code, or a program that cannot run, fails that branch and the engine backtracks.** The subject is a one-line "tape": `MeetingsCodingDebuggingLearning` followed by 60 three-digit grey shades.

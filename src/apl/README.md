@@ -84,3 +84,13 @@ To test, paste `⍳ ⍴ ⍵ ⎕ ∇ ⍝ ⍣ ⍸ ⌽` somewhere. You should see e
 - **`_←` is a throwaway.** Primitives such as `⎕FIO` return a value; a bare expression would print it. Assigning to `_` swallows it.
 - **No formatter exists.** There is no `gofmt` for GNU APL source. The layout rules applied by hand are: one statement per line (`⋄` is for the REPL), CamelCase names for things you define, and comments aligned in a column.
 - **SQL by string formatting is a bad habit.** It is safe here only because every value is a number computed by the program or one of four fixed words. Do not copy it.
+
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh src/apl
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: GNU APL (built from the pinned gnu.org tarball in the toolchain image) and sqlite3 on a minimal Ubuntu. No compiler, no package manager.

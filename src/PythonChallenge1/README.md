@@ -16,6 +16,16 @@ Or, from the repo root, through Gradle: `.\gradlew.bat runPython`.
 
 The window is a Tk window. Records land in `src/PythonChallenge1/data/demo-timecards.db`, beside `program.py`, whatever the working directory. Delete `data` to start over.
 
+## Run it in Windows Sandbox
+
+Prerequisites: Windows Sandbox and this entry's toolchain on your machine, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#windows-sandbox).
+
+```powershell
+sandbox\windows\run.ps1 src\PythonChallenge1
+```
+
+It runs the entry in a throwaway VM with networking off, screenshots the window, asks it to close, and prints what it saved. Tested.
+
 ## Layout
 
 [program.py](program.py) is the whole port. The entity and repository classes sit in the same file, above `main`.

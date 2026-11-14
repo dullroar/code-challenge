@@ -20,6 +20,16 @@ A small terminal-styled window appears, pulses three times, and closes itself; t
 .\check.ps1    # build, structural check, one end-to-end run against a throwaway DB
 ```
 
+## Run it in Windows Sandbox
+
+Prerequisites: Windows Sandbox and this entry's toolchain on your machine, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#windows-sandbox).
+
+```powershell
+sandbox\windows\run.ps1 src\LinqChallenge1
+```
+
+It runs the entry in a throwaway VM with networking off, screenshots the window, asks it to close, and prints what it saved. This entry has a `check.ps1`, so that is what runs.
+
 ## How the stunt works
 
 The fixed work week (`WorkWeek`, five 8-hour days: Planning / Implementation / Review / Testing / Documentation) and the challenge statement live in [`Program.cs`](Program.cs). Reading top to bottom, the one statement is:

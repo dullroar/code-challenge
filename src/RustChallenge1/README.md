@@ -20,6 +20,16 @@ The locked dependencies are tested with Ubuntu's Rust and Cargo 1.75. Cargo need
 
 The window displays the generated total over a gently shifting shade; closing it ends the program. Each run appends fictional records to `$XDG_DATA_HOME/RustChallenge1/demo-timecards.db` (by default `~/.local/share/RustChallenge1/demo-timecards.db`), the Linux counterpart of the C# version's `%LOCALAPPDATA%\ModernChallenge1`. Delete that directory to start over. The database is **DEMO ONLY**, with no connection to a real time-reporting system.
 
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh --online-build --out ./results src/RustChallenge1
+```
+
+This is the Linux home of this entry, and it needs no WSLg: the [`Dockerfile`](Dockerfile) compiles it with Ubuntu's Rust in a build stage, then runs the one binary on a base with the GTK 4 runtime, a virtual display (Xvfb) and a screenshot tool, and no Rust, headers or compiler. The window opens on that virtual display *inside* the container, the entrypoint screenshots it after a few seconds and closes it, and the run prints the SQLite rows it wrote. With `--out`, `results/screenshot.png` is the window. `--online-build` is needed because the build downloads the locked crates (the run itself has no network). The image is about 350 MB, the largest of the set, because GTK 4 is.
+
 ## How the stunt works
 
 `main` is one empty-body `for` loop, and nothing inside it is a statement: no `;`, no `let`, no `return`. `tests/one_statement.rs` scans `src/main.rs` and fails if that stops being true. Helper types in `lib.rs` handle data generation and persistence, as the C# version's `DemoTimeCardContext` does.

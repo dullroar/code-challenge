@@ -20,6 +20,16 @@ Runtime error near line 1: CHECK constraint failed: stop rule fired: total excee
 The question this entry asks: **how much of the work can Make's own syntax do?** The `Makefile` contains no
 `$(shell)`, no `!=`, no Guile and no `load`. `check.sh` greps for all of them.
 
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh src/make-gnu
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: GNU Make and sqlite3 on a minimal Ubuntu. The Makefile runs from a private folder that starts out holding nothing else.
+
 ## How the stunt works
 
 | Job | Done by | Shell? |

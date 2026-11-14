@@ -17,6 +17,16 @@ From the repo root, the same task name works without the `cd`: `.\gradlew.bat ru
 
 `bootRun` runs the same program. The window is a Swing dialog. Records land in `src/KotlinChallenge1/data/demo-timecards.db`; delete `data` to start over. The data path is relative to the working directory, which the Gradle run tasks set to this folder.
 
+## Run it in Windows Sandbox
+
+Prerequisites: Windows Sandbox and this entry's toolchain on your machine, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#windows-sandbox).
+
+```powershell
+sandbox\windows\run.ps1 src\KotlinChallenge1
+```
+
+It runs the entry in a throwaway VM with networking off, screenshots the window, asks it to close, and prints what it saved. **Not yet tested on real hardware**; it needs a JDK and a populated Gradle home on the host.
+
 ## Layout
 
 | File | Role |

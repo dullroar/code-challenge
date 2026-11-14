@@ -18,6 +18,16 @@ The window says **DEMO ONLY** on purpose. Records go to a local SQLite file unde
 
 ![Modern WPF demo window](../../docs/images/modern-wpf-demo.png)
 
+## Run it in Windows Sandbox
+
+Prerequisites: Windows Sandbox and this entry's toolchain on your machine, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#windows-sandbox).
+
+```powershell
+sandbox\windows\run.ps1 src\ModernChallenge1
+```
+
+It runs the entry in a throwaway VM with networking off, screenshots the window, asks it to close, and prints what it saved. Use `-Seconds 30` to leave the animation up longer.
+
 ## How the stunt works
 
 Open [`Program.cs`](Program.cs) and look for the two arrow comments:

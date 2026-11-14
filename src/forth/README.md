@@ -49,3 +49,13 @@ The file is built bottom-up, so each word is made of words above it:
 - **Gforth-specific words.** `outfile-execute`, `open-pipe`, `utime` and `s\"` are Gforth extensions, not ISO Forth.
 - **No formatter exists.** The style is by hand: one stack comment per word, short words, two-space indents for bodies, and a trailing `$` on words that leave a string.
 - **SQL by concatenation is a bad habit.** It is safe here only because every value is a number computed by the program or one of four fixed words. Do not copy it.
+
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh src/forth
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: Gforth and sqlite3 on a minimal Ubuntu. No compiler, no package manager.

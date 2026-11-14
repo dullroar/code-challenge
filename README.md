@@ -26,6 +26,8 @@ The rules, the shared demo, and the do's and don'ts live in **[`CHALLENGE.md`](C
 
 ## The results so far
 
+**Want to run one without trusting it?** Every Linux entry (including the Rust/GTK and Go ones) has its own tiny, locked-down **Docker container** that runs it with no network and shows you what it did, and every Windows or GUI entry runs in a throwaway **Windows Sandbox**. See **[`SANDBOX-SETUP.md`](SANDBOX-SETUP.md)** for the one-time setup, then open the folder's README (linked in the table below) and look for its **Run it in a container** or **Run it in Windows Sandbox** section for the one command.
+
 Every entry builds the same small demo: make up some *Meetings / Coding / Debugging / Learning* time-card hours, save them to a local **DEMO ONLY** SQLite file, stop once the total passes 40, and show the result. Nothing here touches a real time-reporting system - see the [disclaimer](#disclaimer).
 
 **ALL OF THESE ARE TESTED AND WORK AS ADVERTISED.** Remember that while reading the code.
@@ -66,7 +68,8 @@ Every "Teaches you" cell above is a promise, not just a label: open the folder's
 ```text
 CHALLENGE.md                  # the rules - start here if you want to play
 CONTRIBUTING.md               # how to send in an entry, and how it gets reviewed
-sandbox/                      # where entries we didn't write get run: Docker, Windows Sandbox, the Actions gate
+SANDBOX-SETUP.md              # how to install Docker / Windows Sandbox to run entries safely
+sandbox/                      # where entries get run safely: Docker images, Windows Sandbox, the Actions gate
 build.gradle, gradlew*        # root Gradle wrapper: runs the Java, Kotlin, Python, and Go ports
 docs/
   My Code Challenge.pdf       # anonymized source presentation

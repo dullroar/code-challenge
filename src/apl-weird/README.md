@@ -73,3 +73,13 @@ If the APL symbols show as empty boxes, see [Seeing the glyphs](../apl/README.md
 - **`Card0` is slightly different.** It is the only card whose hours come from `H←10+?10` in its own text; later cards have a literal. That is the honest price of having something to start from.
 - **No `⎕IO` independence here.** The weird version sets `⎕IO←0` and relies on it.
 - **Not a pattern.** Rewriting your own source to avoid a `while` is a stunt, not a technique.
+
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh src/apl-weird
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: GNU APL (built from the pinned gnu.org tarball in the toolchain image) and sqlite3 on a minimal Ubuntu. No compiler, no package manager.

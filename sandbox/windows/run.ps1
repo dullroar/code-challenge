@@ -5,17 +5,24 @@
 
 .DESCRIPTION
   The entry is copied to a scratch folder and mapped into the sandbox read-only, along with
-  this machine's .NET SDK and NuGet package cache (also read-only: restore is offline, so an
-  entry can only use packages already in your cache). The only writable mapping is an output
-  folder that receives the log, a screenshot and a result file.
+  this machine's toolchain for that kind of entry (see profiles\README.md: .NET SDK and NuGet
+  cache, Python, Go, or JDK and Gradle home; also read-only, and restore is offline, so an entry
+  can only use packages already in your caches). The only writable mapping is an output folder
+  that receives the log, a screenshot, a result file and whatever the profile saves (the
+  database, the page a Go entry served).
 
   Inside the sandbox, if the entry has check.ps1 it is run (it builds and checks the entry
   itself). Otherwise the entry is built and started, left running for -Seconds, screenshotted
-  and closed: a smoke test that it builds, starts, shows a window and does not crash.
+  and asked to close (then closed by force if it won't): a smoke test that it builds, starts,
+  shows a window and does not crash. The profile then shows what the entry produced.
+
+  Prerequisites: see SANDBOX-SETUP.md at the root of the repository.
 
   Needs Windows 11 Pro/Enterprise with Windows Sandbox enabled. Only one sandbox can run at a
   time, so close any open Windows Sandbox window first.
 
+.EXAMPLE
+  sandbox\windows\run.ps1 src\PythonChallenge1
 .EXAMPLE
   sandbox\windows\run.ps1 src\LinqChallenge1
 .EXAMPLE
@@ -29,6 +36,7 @@ param(
     [string[]]$RunArgs = @(),
     [int]$Seconds = 20,
     [int]$TimeoutMinutes = 15,
+    [string]$Profile,   # dotnet, python, go or gradle; chosen from the entry's files if omitted
     [switch]$Keep   # keep the scratch folder (log, screenshot) instead of deleting it
 )
 $ErrorActionPreference = 'Stop'
@@ -48,9 +56,17 @@ elseif (Get-Process -Name 'WindowsSandbox', 'WindowsSandboxClient', 'WindowsSand
 
 $entryDir = (Resolve-Path $Entry).Path
 $name = Split-Path $entryDir -Leaf
-$dotnet = Join-Path $env:ProgramFiles 'dotnet'
-$nuget = if ($env:NUGET_PACKAGES) { $env:NUGET_PACKAGES } else { Join-Path $env:USERPROFILE '.nuget\packages' }
-foreach ($p in $dotnet, $nuget) { if (-not (Test-Path $p)) { throw "Not found: $p" } }
+
+# Which kind of entry is this? Each profile (profiles\*.ps1) recognises its own; see profiles\README.md.
+$profilesDir = Join-Path $PSScriptRoot 'profiles'
+if (-not $Profile) {
+    $Profile = Get-ChildItem $profilesDir -Filter *.ps1 | ForEach-Object { . $_.FullName; if (Test-Entry $entryDir) { $_.BaseName } } | Select-Object -First 1
+    if (-not $Profile) { throw "No profile recognises $entryDir; pass -Profile (one of: $((Get-ChildItem $profilesDir -Filter *.ps1).BaseName -join ', '))" }
+}
+if ($Profile -notmatch '^[a-z]+$' -or -not (Test-Path (Join-Path $profilesDir "$Profile.ps1"))) { throw "Unknown profile '$Profile'" }
+. (Join-Path $profilesDir "$Profile.ps1")
+$hostMaps = @(Get-HostMaps)
+Write-Host "profile: $Profile"
 
 # Scratch layout: in\<entry> (read-only copy), tools (read-only), out (writable).
 $work = Join-Path ([IO.Path]::GetTempPath()) ("cc-wsb-$name-" + [guid]::NewGuid().ToString('N').Substring(0, 8))
@@ -59,7 +75,8 @@ New-Item -ItemType Directory -Path $in, $tools, $out | Out-Null
 robocopy $entryDir (Join-Path $in $name) /E /XD bin obj .vs /NFL /NDL /NJH /NJS /NP | Out-Null
 if ($LASTEXITCODE -ge 8) { throw "robocopy failed ($LASTEXITCODE)" }
 Copy-Item (Join-Path $PSScriptRoot 'inside.ps1') $tools
-@{ Name = $name; RunArgs = $RunArgs; Seconds = $Seconds } | ConvertTo-Json | Set-Content (Join-Path $tools 'job.json') -Encoding UTF8
+Copy-Item $profilesDir (Join-Path $tools 'profiles') -Recurse
+@{ Name = $name; Profile = $Profile; RunArgs = $RunArgs; Seconds = $Seconds } | ConvertTo-Json | Set-Content (Join-Path $tools 'job.json') -Encoding UTF8
 
 function Map([string]$hostPath, [string]$sandboxPath, [bool]$readOnly) {
     "    <MappedFolder><HostFolder>$([Security.SecurityElement]::Escape($hostPath))</HostFolder><SandboxFolder>$sandboxPath</SandboxFolder><ReadOnly>$($readOnly.ToString().ToLower())</ReadOnly></MappedFolder>"
@@ -77,8 +94,7 @@ $wsb = Join-Path $work 'entry.wsb'
   <MappedFolders>
 $(Map $in 'C:\sbx\in' $true)
 $(Map $tools 'C:\sbx\tools' $true)
-$(Map $dotnet 'C:\sbx\dotnet' $true)
-$(Map $nuget 'C:\sbx\nuget' $true)
+$(($hostMaps | ForEach-Object { Map $_.Host $_.Sandbox $true }) -join "`n")
 $(Map $out 'C:\sbx\out' $false)
   </MappedFolders>
   <LogonCommand>

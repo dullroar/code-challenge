@@ -376,3 +376,13 @@ Finally `Q1` quits with exit status 1. In shell terms the program "fails" after 
 - **GNU only.** `T`, `Q`, `--debug`, `\x1b`, `\t` and `-E` intervals are GNU extensions. macOS/BSD sed won't run this.
 - SQL is built by pasting text into strings. That's safe here only because every value is a run id the host built from digits, a week from `date`, one of four fixed category names, or a number sed produced from tally marks. Don't copy the habit.
 - `run_id` is `epoch-pid`, so two runs in the same second from the same PID would collide. It's a toy.
+
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh src/regex-sed
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: GNU sed, bash and coreutils (from the Ubuntu base) and sqlite3. No compiler, no package manager.

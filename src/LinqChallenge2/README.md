@@ -20,6 +20,16 @@ Same behavior as Variant A: one terminal-styled window appears, pulses three tim
 .\check.ps1    # build, structural check (genuine query syntax at every layer), one end-to-end run
 ```
 
+## Run it in Windows Sandbox
+
+Prerequisites: Windows Sandbox and this entry's toolchain on your machine, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#windows-sandbox).
+
+```powershell
+sandbox\windows\run.ps1 src\LinqChallenge2
+```
+
+It runs the entry in a throwaway VM with networking off, screenshots the window, asks it to close, and prints what it saved. This entry has a `check.ps1`, so that is what runs.
+
 ## How the stunt works
 
 C# query syntax is surface sugar over the same `Select`/`SelectMany`/`Where` calls Variant A uses directly - it is not a different execution engine. [`Program.cs`](Program.cs) pushes that sugar as far as it goes, in two headline places and then everywhere else for good measure:
