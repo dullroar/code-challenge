@@ -29,6 +29,8 @@ Every version builds the same demo: generate 10 to 19 random hours at a time for
 | **.NET regex** | Jim | One `Regex.Match`, balancing groups only: no callouts, no inline code. A budget stack is the stop rule, flag groups pick the category. Documents the walls it hits | terminal | [`src/regex-dotnet`](src/regex-dotnet/README.md) |
 | **LINQ, fluent chain** | Jim | One statement, one genuine LINQ method chain: `Aggregate` folds and caps the timecard, `SelectMany`/`AsEnumerable` cross the EF Core `IQueryable<T>` boundary, inline `Func<T>.Invoke()` wrappers turn `void` WPF/EF calls into chainable values | WPF | [`src/LinqChallenge1`](src/LinqChallenge1/README.md) |
 | **LINQ, query expression** | Jim | The same demo with nearly every component as `from`/`where`/`let`/`select`: a genuine `where` caps the real work week via a recomputed prefix sum, a genuine second `from` crosses the EF Core `IQueryable<T>` boundary, and every `void`-wrapping `Func<T>.Invoke()` is itself nested in its own throwaway one-row query | WPF | [`src/LinqChallenge2`](src/LinqChallenge2/README.md) |
+| **GNU Make** | Jim | No `$(shell)`: Make reads its own entropy and clock from `/proc`, does arithmetic by counting list words, and the loop is Make re-executing itself once per card (`$(MAKE_RESTARTS)` is the counter). Only SQLite persistence shells out | terminal, or `make pop` for a Windows Terminal window | [`src/make-gnu`](src/make-gnu/README.md) |
+| **CMake** | Jim | The whole program is one `while()` with an empty body. Its condition is a regex machine: `MATCHES` leaves captures in `CMAKE_MATCH_n`, and the next pass rebuilds its subject and pattern from them | terminal, or `-DPOP=1` for a Windows Terminal window | [`src/cmake`](src/cmake/README.md) |
 | **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | Swing | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
 | **Kotlin** | Ken | The same challenge, Kotlin style | Swing | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
 | **Python** | Ken | The same challenge in Python | Tk | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
@@ -154,6 +156,10 @@ PCRE2GREP=~/.local/bin/pcre2grep src/regex-pcre2grep/timecards.sh   # needs a pc
 dotnet run -c Release --project src/regex-dotnet
 ```
 
+## Build-tool companions
+
+Two entries move the control flow into a build tool, which `CHALLENGE.md` lists as a place it doesn't belong. Both run in a terminal, glow a **DEMO ONLY** banner when stdout is a TTY, and can pop a Windows Terminal window that closes itself. [`src/make-gnu`](src/make-gnu/README.md) asks how much GNU Make's *syntax alone* can do: no `$(shell)`, entropy and the clock read from `/proc`, arithmetic by counting `$(words)`, a calendar walk for the ISO week, and a loop that is Make re-executing itself once per card. [`src/cmake`](src/cmake/README.md) is the contrast, and its first draft was thrown away for being `RunEverything()` in CMake's accent: it is now one bodiless `while()` whose regex condition rebuilds itself from its own captures. Each has a `check.sh`, and each README lists the walls it hit.
+
 ## LINQ companions: method chain vs. query syntax
 
 Two more C# entries, both built on the same `ModernChallenge1`-style WPF/EF Core/SQLite demo, but swapping the empty-body `for` for a different single-statement rule: exactly one `;`-terminated expression statement does the fold-and-cap, the EF Core save and query, and the WPF window/pulse/close - no `for`, no helper method. [`src/LinqChallenge1`](src/LinqChallenge1/README.md) writes that statement as one fluent LINQ method chain throughout. [`src/LinqChallenge2`](src/LinqChallenge2/README.md) pushes query syntax as far as it goes: a genuine `where` caps the real five-row work week via a recomputed prefix sum (no mutable accumulator), a genuine second `from` crosses the EF Core `IQueryable<T>` boundary, and then - once that stops being enough - every remaining `void`-wrapping `Func<T>.Invoke()` is nested inside its own throwaway one-row `from`/`select` query, turtles all the way down, purely because the challenge rewards that kind of excess. Both variants lean on the same trick for the WPF/EF `void` methods a chain, a tuple, or a `let` can't call directly: an inline `new Func<T>(() => { sideEffect(); return value; }).Invoke()` right where the pipeline needs a value back; `Aggregate`, `Enumerable.Repeat`, `Take`, `Sum`, `ToList`, and `Single` stay method calls throughout, because no query-syntax keyword exists for any of them.
@@ -188,6 +194,8 @@ src/
   xaml/                       # XAML: the program is a .xaml file run at run time
   LinqChallenge1/             # LINQ: one fluent method-chain expression statement
   LinqChallenge2/             # LINQ: one SQL-like query-expression statement
+  make-gnu/                   # GNU Make: no $(shell); Make re-executes itself as the loop
+  cmake/                      # CMake: one bodiless while(), a regex machine in its condition
 LICENSE
 ```
 
