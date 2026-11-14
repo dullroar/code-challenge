@@ -35,13 +35,17 @@ caps the week with a `where` clause that recomputes the running total as a prefi
 
 ```csharp
 from persisted in
-    from p in ctx.Timecards.Where(e => e.RunId == runId).OrderBy(e => e.WorkDate).Select(e => new { ... }).AsEnumerable()
-    select p
+    (
+        from e in ctx.Timecards
+        where e.RunId == runId
+        orderby e.WorkDate
+        select new { e.WorkDate, e.Hours, e.Description }
+    ).AsEnumerable()
 ```
 
-is a genuine second `from` clause crossing the `IQueryable<T>` → `IEnumerable<T>` boundary - exactly the shape the plan's own sketch calls for ("`from persisted item in DbContext.Timecards ...`").
+is a genuine second `from` clause crossing the `IQueryable<T>` → `IEnumerable<T>` boundary - exactly the shape the plan's own sketch calls for ("`from persisted item in DbContext.Timecards ...`"). The inner query is not a stand-in for a fluent `Where`/`OrderBy`/`Select` chain; `where`/`orderby`/`select` lower to exactly those calls, so EF Core's SQLite provider translates it exactly as it would the fluent version. `AsEnumerable()` is still the one piece no query keyword replaces - it stays a trailing call, like `ToList`/`Sum`/`Single` elsewhere, marking the boundary explicitly.
 
-**Everywhere else, for the sake of the bit:** every `let` that needs a value back from a `void` WPF/EF call (`tracked`, `saved`, `line`, `window`, `pulse`) wraps its `new Func<T>(() => {...}).Invoke()` inside its own `from _x in Enumerable.Repeat(0, 1) select ....Invoke()` one-row query, then calls `.Single()` to pull the value back out. The window's text join (`string.Join("\n", from l in r.Lines select l)`) and the EF phase's `from p in ... select p` wrapper are the same idea applied to code that did not need it at all. None of this makes the program more correct; all of it makes the point that query syntax *can* reach into almost every corner, once you stop asking whether it should.
+**Everywhere else, for the sake of the bit:** every `let` that needs a value back from a `void` WPF/EF call (`tracked`, `saved`, `line`, `window`, `pulse`) wraps its `new Func<T>(() => {...}).Invoke()` inside its own `from _x in Enumerable.Repeat(0, 1) select ....Invoke()` one-row query, then calls `.Single()` to pull the value back out. The window's text join (`string.Join("\n", from l in r.Lines select l)`) is the same idea applied to code that did not need it at all. None of this makes the program more correct; all of it makes the point that query syntax *can* reach into almost every corner, once you stop asking whether it should.
 
 The whole thing is two nested query expressions (the second supplies the single already-folded report to the window/pulse `let`s, because `Aggregate` - folding many persisted rows into one report - has no query-syntax keyword and has to happen as a trailing method call in between), ending in one `.Single()`, which both forces the lazy pipeline to run and extracts the one value the outer pseudo-row was always going to produce.
 
@@ -55,7 +59,7 @@ Three things in this file cannot be query syntax, because the language simply ha
 
 ## Honest fine print
 
-- The embedded one-row queries around `tracked`, `saved`, `line`, `window`, `pulse`, the `Lines` fold step, the EF phase wrapper, and the window's text join are gratuitous. Removing any of them and calling the wrapped expression directly would behave identically and read more plainly. They exist because the challenge asked for maximum, deliberate perversity - "twisted thinking is good thinking" - not because they improve the code.
+- The embedded one-row queries around `tracked`, `saved`, `line`, `window`, `pulse`, the `Lines` fold step, and the window's text join are gratuitous. Removing any of them and calling the wrapped expression directly would behave identically and read more plainly. They exist because the challenge asked for maximum, deliberate perversity - "twisted thinking is good thinking" - not because they improve the code. The EF phase's `where`/`orderby`/`select`, by contrast, is not gratuitous: it replaced an actual fluent `Where`/`OrderBy`/`Select` chain that was doing real work.
 - Same prefix-sum cap and mutation-in-place caveats from the earlier draft apply here; see [Variant A's README](../LinqChallenge1/README.md#honest-fine-print) for the shared ones (eager `SaveChanges()` timing, in-place list mutation inside `Aggregate`).
 - `Console.WriteLine` calls inside the `window` `let` exist purely so `check.ps1` can verify the persisted report from stdout.
 

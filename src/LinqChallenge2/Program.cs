@@ -92,15 +92,21 @@ internal static class Program
                          select ctx.SaveChanges())
                             .Single()
                     from persisted in
-                        // A gratuitously embedded query around the EF Core phase: the
-                        // "from" keyword is genuine (this is the real IQueryable<T> ->
-                        // IEnumerable<T> crossing), the inner "select p" is pure theater.
-                        from p in ctx.Timecards
-                            .Where(e => e.RunId == runId)
-                            .OrderBy(e => e.WorkDate)
-                            .Select(e => new { e.WorkDate, e.Hours, e.Description })
+                        (
+                            // The EF Core phase itself, as genuine query syntax: WHERE/
+                            // ORDERBY/SELECT lower to exactly the same Where/OrderBy/Select
+                            // calls EF Core's SQLite provider already translates, so this
+                            // is not a stand-in for the fluent chain - it is the chain.
+                            from e in ctx.Timecards
+                            where e.RunId == runId
+                            orderby e.WorkDate
+                            select new { e.WorkDate, e.Hours, e.Description }
+                        )
+                            // AsEnumerable() is still the explicit IQueryable<T> ->
+                            // IEnumerable<T> crossing. No query-syntax keyword replaces
+                            // it, so - like ToList/Sum/Single elsewhere - it stays a
+                            // trailing call just outside the query expression.
                             .AsEnumerable()
-                        select p
                     let line =
                         (from _line in Enumerable.Repeat(0, 1)
                          select $"{persisted.WorkDate:yyyy-MM-dd}  {persisted.Hours,4:F1}h  {persisted.Description}")

@@ -24,11 +24,18 @@ if ($code -notmatch '\bfrom\s+day\s+in\s+WorkWeek\b' -or
 }
 
 # 3. The EF Core IQueryable<T> -> IEnumerable<T> crossing is also genuine query syntax (a
-#    second "from", not SelectMany called directly), and the void-wrapping Func<T>.Invoke()
-#    calls are themselves nested inside throwaway one-row query expressions - the "turtles
-#    all the way down" requirement.
-if ($code -notmatch '\bfrom\s+persisted\s+in\b' -or $code -notmatch '\bfrom\s+p\s+in\s+ctx\.Timecards\b') {
-    Write-Error "FAIL: expected a genuine second 'from persisted in (from p in ctx.Timecards ...)' query expression in Program.cs"
+#    second "from"/"where"/"orderby"/"select" over ctx.Timecards, not a fluent
+#    Where/OrderBy/Select chain), and the void-wrapping Func<T>.Invoke() calls are
+#    themselves nested inside throwaway one-row query expressions - the "turtles all the
+#    way down" requirement.
+if ($code -notmatch '\bfrom\s+persisted\s+in\b' -or
+    $code -notmatch '\bfrom\s+e\s+in\s+ctx\.Timecards\b' -or
+    $code -notmatch '\borderby\s+e\.WorkDate\b') {
+    Write-Error "FAIL: expected a genuine second 'from persisted in (from e in ctx.Timecards where ... orderby ... select ...)' query expression in Program.cs"
+    exit 1
+}
+if ($code -match 'ctx\.Timecards\s*\.\s*Where\(' -or $code -match '\.OrderBy\(e\s*=>') {
+    Write-Error "FAIL: found a fluent Where/OrderBy chain on ctx.Timecards - expected query syntax instead"
     exit 1
 }
 $fromCount = ([regex]::Matches($code, '\bfrom\s+\w+\s+in\b')).Count
