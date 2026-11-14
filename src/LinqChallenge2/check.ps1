@@ -23,6 +23,20 @@ if ($code -notmatch '\bfrom\s+day\s+in\s+WorkWeek\b' -or
     exit 1
 }
 
+# 3. The EF Core IQueryable<T> -> IEnumerable<T> crossing is also genuine query syntax (a
+#    second "from", not SelectMany called directly), and the void-wrapping Func<T>.Invoke()
+#    calls are themselves nested inside throwaway one-row query expressions - the "turtles
+#    all the way down" requirement.
+if ($code -notmatch '\bfrom\s+persisted\s+in\b' -or $code -notmatch '\bfrom\s+p\s+in\s+ctx\.Timecards\b') {
+    Write-Error "FAIL: expected a genuine second 'from persisted in (from p in ctx.Timecards ...)' query expression in Program.cs"
+    exit 1
+}
+$fromCount = ([regex]::Matches($code, '\bfrom\s+\w+\s+in\b')).Count
+if ($fromCount -lt 8) {
+    Write-Error "FAIL: expected at least 8 'from ... in' clauses (nested throwaway queries included); found $fromCount"
+    exit 1
+}
+
 # 3. Build.
 dotnet build -c Release -v q --nologo
 if ($LASTEXITCODE -ne 0) { Write-Error "FAIL: build failed"; exit 1 }

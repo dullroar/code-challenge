@@ -1,6 +1,6 @@
 # LINQ challenge, Variant B: one SQL-like query-expression statement
 
-The same demo as [`src/LinqChallenge1`](../LinqChallenge1/README.md) - a fixed 40-hour timecard, tracked and saved through EF Core and SQLite, crossing the `IQueryable<T>` → `IEnumerable<T>` boundary, and a WPF **DEMO ONLY** terminal window that shows, pulses, and closes itself - but written so the data-shaping narrative is a genuine SQL-like C# query expression (`from` / `where` / `let` / `select`), driven by the real five-row work week, plus exactly one terminal call outside it, in the same statement.
+The same demo as [`src/LinqChallenge1`](../LinqChallenge1/README.md) - a fixed 40-hour timecard, tracked and saved through EF Core and SQLite, crossing the `IQueryable<T>` → `IEnumerable<T>` boundary, and a WPF **DEMO ONLY** terminal window that shows, pulses, and closes itself - but written so nearly every component, not just the headline data-shaping stage, is phrased as a C# query expression (`from` / `where` / `let` / `select`). Where a `let` has to smuggle a `void`-returning WPF/EF call into a value, the inline `Func<T>.Invoke()` wrapper is itself nested inside a throwaway one-row query. Turtles all the way down, on purpose.
 
 ## Run it
 
@@ -15,42 +15,48 @@ dotnet run
 Same behavior as Variant A: one terminal-styled window appears, pulses three times, and closes itself; the process exits on its own. Records land in `%LOCALAPPDATA%\LinqChallenge2\timecards.db`.
 
 ```powershell
-.\check.ps1    # build, structural check (genuine from/where/let/select), one end-to-end run
+.\check.ps1    # build, structural check (genuine query syntax at every layer), one end-to-end run
 ```
 
 ## How the stunt works
 
-C# query syntax is surface sugar over the same `Select`/`SelectMany`/`Where` calls Variant A uses directly - it is not a different execution engine. Query syntax also has no running-total accumulator across rows, but it does not need one: `where` can recompute the running total as a prefix sum over the rows up to and including the current one, with no mutable state at all. That is genuinely `FROM`/`WHERE`/`SELECT`, and it is driven by the real `WorkWeek` array, not a stand-in:
+C# query syntax is surface sugar over the same `Select`/`SelectMany`/`Where` calls Variant A uses directly - it is not a different execution engine. [`Program.cs`](Program.cs) pushes that sugar as far as it goes, in two headline places and then everywhere else for good measure:
+
+**The two places query syntax genuinely carries the EF Core round trip:**
 
 ```csharp
-from day in WorkWeek
-where WorkWeek.Take(Array.IndexOf(WorkWeek, day) + 1).Sum(d => d.Hours) <= MaxWeeklyHours
+from day in WorkWeek                                   // FROM the real five-row work week
+where (from d in WorkWeek.Take(Array.IndexOf(WorkWeek, day) + 1) select d.Hours).Sum() <= MaxWeeklyHours
 let tracked = /* ctx.Timecards.Add(...), wrapped to return the entity */
 select tracked
 ```
 
-That query expression's own terminal operation - `.ToList()`, chained directly onto the parenthesized query - is exactly what the plan calls for: "use one terminal operation... outside the query expression but in the same expression statement." It also happens to be the natural place where the *rest* of the workflow has to pick up. [`Program.cs`](Program.cs), read stage by stage:
+caps the week with a `where` clause that recomputes the running total as a prefix sum - no mutable accumulator - and
 
-| Stage | Shape | What it does |
-| --- | --- | --- |
-| 1 | `from`/`where`/`let`/`select`, then `.ToList()` | The real query expression above. `where` caps the week at 40h without mutable state; `let` tracks each surviving day's entity through EF Core. `.ToList()` is its terminal op, forcing it to run, in row order, right here. |
-| - | tuple `(…, ctx.SaveChanges())` | Tuple elements evaluate left to right, so `SaveChanges()` runs once every entity above is tracked - once total, not once per row. |
-| 2 | `Enumerable.Repeat(…, 1).SelectMany` | Crosses from the materialized row list into EF Core's `IQueryable<T>` (`Where`/`OrderBy`/`Select` - SQL-translatable), then explicitly back with `AsEnumerable()`. The outer sequence has exactly one element, so the EF query runs exactly once, not once per surviving row. |
-| 3 | `Aggregate` | Back on LINQ to Objects: folds the persisted rows into a report (`Lines`, `Total`). |
-| 4 | `Enumerable.Repeat(…, 1).Select` | Builds, styles, and shows the WPF window, inline - once. |
-| 5 | `.Select` | Starts a finite pulse, then calls `Application.Run()` to pump the dispatcher until the completion handler closes the window and shuts the app down. |
-| final | `.Aggregate(0, …)` | Forces the whole lazy tail (stages 2-5) to actually execute. |
+```csharp
+from persisted in
+    from p in ctx.Timecards.Where(e => e.RunId == runId).OrderBy(e => e.WorkDate).Select(e => new { ... }).AsEnumerable()
+    select p
+```
+
+is a genuine second `from` clause crossing the `IQueryable<T>` → `IEnumerable<T>` boundary - exactly the shape the plan's own sketch calls for ("`from persisted item in DbContext.Timecards ...`").
+
+**Everywhere else, for the sake of the bit:** every `let` that needs a value back from a `void` WPF/EF call (`tracked`, `saved`, `line`, `window`, `pulse`) wraps its `new Func<T>(() => {...}).Invoke()` inside its own `from _x in Enumerable.Repeat(0, 1) select ....Invoke()` one-row query, then calls `.Single()` to pull the value back out. The window's text join (`string.Join("\n", from l in r.Lines select l)`) and the EF phase's `from p in ... select p` wrapper are the same idea applied to code that did not need it at all. None of this makes the program more correct; all of it makes the point that query syntax *can* reach into almost every corner, once you stop asking whether it should.
+
+The whole thing is two nested query expressions (the second supplies the single already-folded report to the window/pulse `let`s, because `Aggregate` - folding many persisted rows into one report - has no query-syntax keyword and has to happen as a trailing method call in between), ending in one `.Single()`, which both forces the lazy pipeline to run and extracts the one value the outer pseudo-row was always going to produce.
 
 ## Important language constraint
 
-Once the query expression's job (shaping and capping the source rows) is done, query syntax has nothing left to offer: there is no second `from` that can cross into `ctx.Timecards` without re-running once per row already produced by stage 1, and no `let` that runs exactly once across every row rather than once per row. So stages 2-5 fall back to the identical `Enumerable.Repeat(…, 1)` collapse-and-chain technique, and the identical inline `new Func<T>(() => { sideEffect(); return value; }).Invoke()` pattern, that Variant A uses for its whole workflow. That is not an accident: it is the actual answer to "what does query syntax buy you here?" - a real, better-looking `FROM`/`WHERE`/`SELECT` for the part that is naturally row-shaped, and no advantage at all for the part that fundamentally needs to run exactly once.
+Three things in this file cannot be query syntax, because the language simply has no keyword for them, and each is called out in a comment where it appears:
 
-An earlier draft of this variant dodged that by driving the *whole* query (including the EF read-back and the window) from a single fabricated one-row table, so every stage could be a `let`. It was rejected: it is a cop-out dressed as query syntax, the `where` clause it started from had no real multi-row source to filter, and it quietly contradicts the plan's own instruction to drive from "a fixed LINQ-to-Objects input" and avoid turning the query expression into something that "merely calls a fluent helper-like chain." Stage 1 above is real; the tail is honestly labeled as not benefiting from query syntax at all.
+- **`Aggregate`** - folding N persisted rows into one `(Lines, Total)` report. There is no `fold`/`reduce` query clause.
+- **`Enumerable.Repeat` / `.Take` / `.Sum` / `.ToList` / `.Single`** - every place a value needs to become a one-row sequence, be capped, be summed, be forced, or be pulled back out. Query syntax lowers to these same calls; it never replaces them.
+- **`ctx.Timecards.Add(...)`, `window.Show()`, `app.Run()`, `window.BeginAnimation(...)`, `app.Shutdown()`** - the actual WPF/EF Core side effects. No syntax, query or fluent, turns a `void` method into an expression; that is what every inline `Func<T>.Invoke()` wrapper is for, with or without a throwaway query around it.
 
 ## Honest fine print
 
-- Same mutation-free, prefix-sum cap as described above replaces the mutable-accumulator fold Variant A uses for the same job - a genuine difference in how the two variants express "cap at 40h," not just a syntax skin.
-- The same eager-at-build-time `SaveChanges()` and `Aggregate`-mutates-in-place caveats from Variant A's README apply to stages 2-5 here (see [its README](../LinqChallenge1/README.md#honest-fine-print)), since those stages are the same technique.
-- `Console.WriteLine` calls inside the window-creation stage exist purely so `check.ps1` can verify the persisted report from stdout.
+- The embedded one-row queries around `tracked`, `saved`, `line`, `window`, `pulse`, the `Lines` fold step, the EF phase wrapper, and the window's text join are gratuitous. Removing any of them and calling the wrapped expression directly would behave identically and read more plainly. They exist because the challenge asked for maximum, deliberate perversity - "twisted thinking is good thinking" - not because they improve the code.
+- Same prefix-sum cap and mutation-in-place caveats from the earlier draft apply here; see [Variant A's README](../LinqChallenge1/README.md#honest-fine-print) for the shared ones (eager `SaveChanges()` timing, in-place list mutation inside `Aggregate`).
+- `Console.WriteLine` calls inside the `window` `let` exist purely so `check.ps1` can verify the persisted report from stdout.
 
 See [the repository README](../../README.md#the-family) for how this compares to the other one-statement entries, and [`src/LinqChallenge1`](../LinqChallenge1/README.md) for the fluent-chain variant of the same idea.
