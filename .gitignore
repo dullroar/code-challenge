@@ -13,3 +13,7 @@ src/RustChallenge1/data/
 
 # XAML challenge disposable demo records
 src/xaml/data/
+
+# Root Gradle build for the Java/Kotlin/Python/Go ports
+/.gradle/
+/build/

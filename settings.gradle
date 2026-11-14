@@ -1,0 +1,7 @@
+// Root build for Ken's four one-statement ports. Each port is still its own independent
+// project in src/; this file only lets them be run from the repo root (and lets IntelliJ
+// find them). The Java and Kotlin builds are included as composite builds.
+rootProject.name = 'code-challenge'
+
+includeBuild 'src/JavaChallenge1'
+includeBuild 'src/KotlinChallenge1'
