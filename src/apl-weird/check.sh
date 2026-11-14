@@ -5,14 +5,15 @@ cd "$(dirname "$0")"
 data=$(mktemp -d); trap 'rm -rf "$data"' EXIT
 export XDG_DATA_HOME=$data
 db=$data/AplWeird/demo-timecards.db
-run() { "${APL:-apl}" --script -f timecards.apl; }
+run() { timeout 30 "${APL:-apl}" --script -f timecards.apl; }   # timeout: a broken stop rule recurses forever
 
 # 1. Static: the constraint is real. No power operator, no branch arrow, no loop-ish primitives outside comments;
-#    the host instantiates only F0, and the rest of the chain is written at runtime by ⎕FX.
+#    the host defines only Card0 (one ∇ ... ∇ block), and the rest of the chain is written at runtime by ⎕FX.
 code=$(grep -Ev '^\s*⍝' timecards.apl)
 grep -q 'DEMO ONLY' timecards.apl || { echo "FAIL: no DEMO ONLY marker in timecards.apl"; exit 1; }
 if grep -q '[⍣→]' <<<"$code"; then echo "FAIL: ⍣ or → found in timecards.apl"; exit 1; fi
-[[ $(grep -c '⎕FX' <<<"$code") -eq 1 ]] || { echo "FAIL: expected exactly one ⎕FX (inside Mk)"; exit 1; }
+[[ $(grep -c '^∇' <<<"$code") -eq 2 ]] || { echo "FAIL: expected exactly one ∇ ... ∇ definition (Card0)"; exit 1; }
+[[ $(grep -c '⎕FX' <<<"$code") -eq 1 ]] || { echo "FAIL: expected exactly one ⎕FX (inside Card0)"; exit 1; }
 if grep -Eqi 'http|socket|curl|wget' timecards.apl; then echo "FAIL: network-looking text in timecards.apl"; exit 1; fi
 
 # 2. Run it a bunch of times; every run must print a sane record set, and the SQLite rows must agree with it.
@@ -21,7 +22,8 @@ for i in $(seq 1 25); do
     out=$(run)
     run_id=$(sed -nE 's/^# DEMO ONLY run (.+)$/\1/p' <<<"$out")
     [[ -n $run_id ]] || { echo "FAIL run $i: no run id"; echo "$out"; exit 1; }
-    grep -q '^# the host wrote F0 and nothing else' <<<"$out" || { echo "FAIL run $i: no stunt note"; echo "$out"; exit 1; }
+    grep -q '^# the host wrote Card0 and nothing else' <<<"$out" || { echo "FAIL run $i: no stunt note"; echo "$out"; exit 1; }
+    (( $(grep -c '^# Card[0-9] ⇐' <<<"$out") == $(sed -E 's/.*entries=([0-9]+).*/\1/' <<<"$(grep '^# committed' <<<"$out")") )) || { echo "FAIL run $i: the number of Card functions does not match entries"; echo "$out"; exit 1; }
     commit=$(grep '^# committed' <<<"$out" || true)
     [[ -n $commit ]] || { echo "FAIL run $i: no committed line"; echo "$out"; exit 1; }
     total=$(sed -E 's/.*total=([0-9]+).*/\1/' <<<"$commit")
