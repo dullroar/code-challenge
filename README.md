@@ -12,7 +12,7 @@ You've spent years writing clean code. Small functions. Meaningful names. Tests.
 
 You know you want to write perversely incomprehensible code. **You know you do.**
 
-It's a trend, too. This started as one C# program. It is now **eleven** programs in **seven** languages and counting, written by more than one person (Ken caught it, too). Pick a language. Pick a constraint. Make something terrible that works.
+It's a trend, too. This started as one C# program. It is now **sixteen** programs in **ten** languages and counting, written by more than one person (Ken caught it, too). Pick a language. Pick a constraint. Make something terrible that works.
 
 ## The family
 
@@ -29,6 +29,9 @@ Every version builds the same demo: generate 10 to 19 random hours at a time for
 | **.NET regex** | Jim | One `Regex.Match`, balancing groups only: no callouts, no inline code. A budget stack is the stop rule, flag groups pick the category. Documents the walls it hits | terminal | [`src/regex-dotnet`](src/regex-dotnet/README.md) |
 | **LINQ, fluent chain** | Jim | One statement, one genuine LINQ method chain: `Aggregate` folds and caps the timecard, `SelectMany`/`AsEnumerable` cross the EF Core `IQueryable<T>` boundary, inline `Func<T>.Invoke()` wrappers turn `void` WPF/EF calls into chainable values | WPF | [`src/LinqChallenge1`](src/LinqChallenge1/README.md) |
 | **LINQ, query expression** | Jim | The same demo with nearly every component as `from`/`where`/`let`/`select`: a genuine `where` caps the real work week via a recomputed prefix sum, a genuine second `from` crosses the EF Core `IQueryable<T>` boundary, and every `void`-wrapping `Func<T>.Invoke()` is itself nested in its own throwaway one-row query | WPF | [`src/LinqChallenge2`](src/LinqChallenge2/README.md) |
+| **GNU Make** | Jim | No `$(shell)`: Make reads its own entropy and clock from `/proc`, does arithmetic by counting list words, and the loop is Make re-executing itself once per card (`$(MAKE_RESTARTS)` is the counter). Only SQLite persistence shells out | terminal, or `make pop` for a Windows Terminal window | [`src/make-gnu`](src/make-gnu/README.md) |
+| **CMake** | Jim | The whole program is one `while()` with an empty body. Its condition is a regex machine: `MATCHES` leaves captures in `CMAKE_MATCH_n`, and the next pass rebuilds its subject and pattern from them | terminal, or `-DPOP=1` for a Windows Terminal window | [`src/cmake`](src/cmake/README.md) |
+| **GNU sed regex** | Ken | The program is one line of text, rewritten by regex substitutions until it is done (a Markov algorithm): no variables, numbers or arithmetic anywhere. One `sed` command writes a real SQLite transaction, pulses a banner, and exits 1 on purpose | terminal | [`src/regex-sed`](src/regex-sed/README.md) |
 | **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | Swing | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
 | **Kotlin** | Ken | The same challenge, Kotlin style | Swing | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
 | **Python** | Ken | The same challenge in Python | Tk | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
@@ -45,6 +48,8 @@ Ken's repo is a great reading list for anyone who wants to see the same perversi
 - **Java and Kotlin** run from a Gradle wrapper and show a Swing dialog.
 - **Python** needs only Python 3 (`tkinter` and `sqlite3` ship with it) and shows a Tk window.
 - **Go** serves the pulsing page to your default browser.
+
+His GNU sed regex entry lives here, in [`src/regex-sed`](src/regex-sed/README.md), alongside the other regex tracks.
 
 Run his with `.\gradlew.bat runJava`, `runKotlin`, `runPython` or `runGo`, and see [his README](https://github.com/kastl/one-statement-challenge#readme) for the details. If you write a new language port, I would love to hear about it.
 
@@ -143,16 +148,23 @@ The SQLite command runs after the window is closed. See the companion README for
 
 ## Regex companions for WSL
 
-Four entries turn a regular expression into the program. In the first three, the loop, the running total, the stop rule and the record writes all happen *inside one regex match*, which then deliberately reports failure after doing all the work. [`src/regex-perl`](src/regex-perl/README.md) uses Perl's executable `(?{ })` and `(??{ })` blocks; [`src/regex-pcre2`](src/regex-pcre2/README.md) uses PCRE2 callouts as a tiny instruction set, and [`src/regex-pcre2grep`](src/regex-pcre2grep/README.md) needs no custom code at all: a stock `pcre2grep` runs `sqlite3` from callouts and the exit codes steer the match. All three pulse a **DEMO ONLY** banner in the terminal, from inside the match, and all three ship a `check.sh` that asserts the rules. The Perl one goes furthest: its file is a single statement, and the match itself writes the records to a real SQLite transaction.
+Five entries turn a regular expression into the program. In the first three, the loop, the running total, the stop rule and the record writes all happen *inside one regex match*, which then deliberately reports failure after doing all the work. [`src/regex-perl`](src/regex-perl/README.md) uses Perl's executable `(?{ })` and `(??{ })` blocks; [`src/regex-pcre2`](src/regex-pcre2/README.md) uses PCRE2 callouts as a tiny instruction set, and [`src/regex-pcre2grep`](src/regex-pcre2grep/README.md) needs no custom code at all: a stock `pcre2grep` runs `sqlite3` from callouts and the exit codes steer the match. All three pulse a **DEMO ONLY** banner in the terminal, from inside the match, and all three ship a `check.sh` that asserts the rules. The Perl one goes furthest: its file is a single statement, and the match itself writes the records to a real SQLite transaction.
 
-The last, [`src/regex-dotnet`](src/regex-dotnet/README.md), is the purist's version: .NET balancing groups and conditionals only, no code in the pattern. The pattern does the walk, the accumulation and the stop rule, but its README is honest about the walls: a regex cannot draw random numbers or write files, and a failed .NET match exposes no captures, so the "return false" signature move is impossible there.
+The fourth, [`src/regex-dotnet`](src/regex-dotnet/README.md), is the purist's version: .NET balancing groups and conditionals only, no code in the pattern. The pattern does the walk, the accumulation and the stop rule, but its README is honest about the walls: a regex cannot draw random numbers or write files, and a failed .NET match exposes no captures, so the "return false" signature move is impossible there.
+
+The fifth, [`src/regex-sed`](src/regex-sed/README.md), is Ken's, and it takes the opposite approach to the one-match entries: *many small substitutions on a single line of text*, a Markov algorithm, where the line is the entire program state. There are no variables, numbers or arithmetic anywhere in it, even the running total is text being rewritten, and the single `sed` command writes the records to a real SQLite transaction, pulses a banner and then exits 1 on purpose. It ships a `check.sh` too.
 
 ```bash
 perl src/regex-perl/timecards.pl
 make -C src/regex-pcre2 run     # needs libpcre2-dev
 PCRE2GREP=~/.local/bin/pcre2grep src/regex-pcre2grep/timecards.sh   # needs a pcre2grep built with callouts
 dotnet run -c Release --project src/regex-dotnet
+src/regex-sed/timecards.sh      # needs GNU sed, sqlite3 and coreutils' basenc
 ```
+
+## Build-tool companions
+
+Two entries move the control flow into a build tool, which `CHALLENGE.md` lists as a place it doesn't belong. Both run in a terminal, glow a **DEMO ONLY** banner when stdout is a TTY, and can pop a Windows Terminal window that closes itself. [`src/make-gnu`](src/make-gnu/README.md) asks how much GNU Make's *syntax alone* can do: no `$(shell)`, entropy and the clock read from `/proc`, arithmetic by counting `$(words)`, a calendar walk for the ISO week, and a loop that is Make re-executing itself once per card. [`src/cmake`](src/cmake/README.md) is the contrast, and its first draft was thrown away for being `RunEverything()` in CMake's accent: it is now one bodiless `while()` whose regex condition rebuilds itself from its own captures. Each has a `check.sh`, and each README lists the walls it hit.
 
 ## LINQ companions: method chain vs. query syntax
 
@@ -185,9 +197,12 @@ src/
   regex-pcre2/                # PCRE2: callout strings as opcodes, C dispatcher
   regex-pcre2grep/            # pcre2grep: callouts run sqlite3, exit codes steer the match
   regex-dotnet/               # .NET: balancing groups only, and the walls it hits
+  regex-sed/                  # GNU sed (Ken): the program is one line of text, rewritten by substitutions
   xaml/                       # XAML: the program is a .xaml file run at run time
   LinqChallenge1/             # LINQ: one fluent method-chain expression statement
   LinqChallenge2/             # LINQ: one SQL-like query-expression statement
+  make-gnu/                   # GNU Make: no $(shell); Make re-executes itself as the loop
+  cmake/                      # CMake: one bodiless while(), a regex machine in its condition
 LICENSE
 ```
 
