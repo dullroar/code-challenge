@@ -7,13 +7,15 @@ export XDG_DATA_HOME=$data
 db=$data/HaskellWeird/demo-timecards.db
 run() { "${RUNGHC:-runghc}" timecards.hs; }
 
-# 1. Static: the constraint is real. The cards are a fixed point (`fix`) of themselves; no scan, fold, iterate,
-#    explicit recursion helper, or random package is used to get the running total or the stop.
+# 1. Static: the constraint is real. The cards are a lazy IO fixed point (`fixIO`) of themselves, each card's effects
+#    are deferred with unsafeInterleaveIO, and no scan, fold, iterate, monadic loop, explicit recursion helper or
+#    random package is used to get the running total or the stop.
 code=$(grep -Ev '^\s*--' timecards.hs)
 grep -q 'DEMO ONLY' timecards.hs || { echo "FAIL: no DEMO ONLY marker in timecards.hs"; exit 1; }
-grep -q '^sheet :: Integer -> \[Card\]' timecards.hs || { echo "FAIL: no pure sheet function"; exit 1; }
-grep -q 'fix \$ \\cards ->' <<<"$code" || { echo "FAIL: the cards are not defined as a fixed point of themselves"; exit 1; }
-if grep -Eqw 'scanl|scanl1|iterate|foldr|foldl|foldl\x27|unfoldr|until|go' <<<"$code"; then echo "FAIL: scan/fold/iterate/helper found in timecards.hs"; exit 1; fi
+grep -q '^sheet :: (Card -> IO ()) -> Word64 -> IO \[Card\]' timecards.hs || { echo "FAIL: no lazy-IO sheet function"; exit 1; }
+grep -q 'fixIO \$ \\cards ->' <<<"$code" || { echo "FAIL: the cards are not defined as a fixed point of themselves"; exit 1; }
+if grep -Eqw 'scanl|scanl1|iterate|foldr|foldl|foldl\x27|unfoldr|until|go|mapM|mapM_|forM|forM_|forever|replicateM|replicateM_|foldM|zipWithM|zipWithM_|sequence|sequence_' <<<"$code"; then echo "FAIL: scan/fold/iterate/monadic-loop/helper found in timecards.hs"; exit 1; fi
+[[ $(grep -c 'unsafeInterleaveIO' <<<"$code") -eq 2 ]] || { echo "FAIL: expected unsafeInterleaveIO exactly once (plus its import)"; exit 1; }
 if grep -Eq 'System\.Random|Network|Http' timecards.hs; then echo "FAIL: random/network import in timecards.hs"; exit 1; fi
 
 # 2. Run it a bunch of times; every run must print a sane record set, and the SQLite rows must agree with it.

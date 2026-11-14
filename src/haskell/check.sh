@@ -9,7 +9,7 @@ run() { "${RUNGHC:-runghc}" timecards.hs; }
 
 # 1. Static: the challenge logic is a pure function (its type has no IO), and no random package sneaks in.
 grep -q 'DEMO ONLY' timecards.hs || { echo "FAIL: no DEMO ONLY marker in timecards.hs"; exit 1; }
-grep -q '^timecards :: Integer -> \[' timecards.hs || { echo "FAIL: no pure timecards function"; exit 1; }
+grep -q "^timecards :: Word64 -> \\[Card\\]" timecards.hs || { echo "FAIL: no pure timecards function"; exit 1; }
 if grep -Eq 'System\.Random|Network|Http' timecards.hs; then echo "FAIL: random/network import in timecards.hs"; exit 1; fi
 
 # 2. Run it a bunch of times; every run must print a sane record set, and the SQLite rows must agree with it.

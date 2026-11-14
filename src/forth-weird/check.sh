@@ -9,11 +9,12 @@ run() { "${GFORTH:-gforth}" timecards.fs; }
 
 # 1. Static: the constraint is real. With comments and ." strings removed, no Forth control-flow word appears
 #    anywhere, and the loop is the text interpreter's own >in being moved backwards.
-code=$(grep -Ev '^\s*\\' timecards.fs | sed -E 's/\." [^"]*"//g')
+code=$(grep -Ev '^\s*\\' timecards.fs | sed -E 's/\." [^"]*"//g; s/[[:space:]]\\ .*$//')
 grep -q 'DEMO ONLY' timecards.fs || { echo "FAIL: no DEMO ONLY marker in timecards.fs"; exit 1; }
 if grep -Eiqw 'begin|until|while|repeat|again|if|then|else|do|\?do|loop|\+loop|case|of|endof|endcase|recurse|exit|leave' <<<"$code"; then
     echo "FAIL: control-flow word found in timecards.fs"; exit 1
 fi
+if grep -Eiqw 'variable|2variable|buffer:' <<<"$code"; then echo "FAIL: a variable was declared; state must live on the stack"; exit 1; fi
 [[ $(grep -c '>in @' <<<"$code") -ge 2 ]] || { echo "FAIL: expected >in to be read by both the loop line and rewind"; exit 1; }
 if grep -Eqi 'http|socket|curl|wget' timecards.fs; then echo "FAIL: network-looking text in timecards.fs"; exit 1; fi
 
