@@ -2,7 +2,7 @@
 
 **Teaches you:** iterators and closures as control flow.
 
-A WSL/GTK 4 companion to Jim Lehmer's C# challenge and [Ken's Java, Kotlin, Python and Go versions](https://github.com/kastl/one-statement-challenge). The point is to explore expression mechanics through a deliberately ridiculous constraint, not to offer a production architecture.
+A WSL/GTK 4 companion to Jim Lehmer's C# challenge and Ken's [Java](../JavaChallenge1/README.md), [Kotlin](../KotlinChallenge1/README.md), [Python](../PythonChallenge1/README.md), and [Go](../GoChallenge1/README.md) versions. The point is to explore expression mechanics through a deliberately ridiculous constraint, not to offer a production architecture.
 
 ## Install and run on Ubuntu under WSL 2
 
