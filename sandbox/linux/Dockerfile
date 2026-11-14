@@ -19,10 +19,11 @@ ARG DEBIAN_FRONTEND=noninteractive
 #   gforth             forth, forth-weird
 #   ghc                haskell, haskell-weird (runghc, with GHC's own boot packages only)
 #   dotnet-sdk-10.0    regex-dotnet (plain net10.0, no NuGet packages)
+#   gnucobol           cobol, cobol-weird (cobc 3.1.2; it compiles through C with build-essential)
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
         ca-certificates curl bzip2 build-essential pkg-config \
-        sqlite3 perl libpcre2-dev make cmake gforth ghc dotnet-sdk-10.0 \
+        sqlite3 perl libpcre2-dev make cmake gforth ghc dotnet-sdk-10.0 gnucobol \
  && rm -rf /var/lib/apt/lists/*
 
 # Upstream builds, each pinned by SHA-256. Hashes recorded 2026-11-14 from the URLs below.
