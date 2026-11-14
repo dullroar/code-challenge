@@ -134,7 +134,7 @@ The project deliberately stays close to the original's shape. A modern idiomatic
 
 ## Rust companion for WSL
 
-[`src/RustChallenge1`](src/RustChallenge1/README.md) translates the challenge into Rust's iterator and closure mechanics: an empty-body `for` with no `;`, `let` or `return` anywhere in `main` (enforced by a test), a GTK 4 window, and local SQLite demo records. The companion README contains Ubuntu APT setup and run instructions, and compares the approach with [Ken Kastl's ports](https://github.com/kastl/one-statement-challenge).
+[`src/RustChallenge1`](src/RustChallenge1/README.md) translates the challenge into Rust's iterator and closure mechanics: an empty-body `for` with no `;`, `let` or `return` anywhere in `main` (enforced by a test), a GTK 4 window, and local SQLite demo records. The companion README contains Ubuntu APT setup and run instructions, and compares the approach with [Ken's ports](https://github.com/kastl/one-statement-challenge).
 
 From WSL, run the Rust version and inspect its saved demo records with:
 
