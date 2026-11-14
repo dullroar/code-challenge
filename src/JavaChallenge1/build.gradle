@@ -1,0 +1,45 @@
+import org.springframework.boot.gradle.tasks.run.BootRun
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.9'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'challenge1'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'org.hibernate.orm:hibernate-community-dialects'
+    runtimeOnly 'org.xerial:sqlite-jdbc'
+}
+
+def javaMain = 'challenge1.javaversion.Program'
+
+springBoot {
+    mainClass = javaMain
+}
+
+tasks.register('runJava', BootRun) {
+    group = 'application'
+    description = 'Runs the Java version of the one-statement program.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = javaMain
+}
+
+// sqlite-jdbc loads a native library. The working directory fixes where data/ is created.
+tasks.withType(BootRun).configureEach {
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+    workingDir = projectDir
+}
