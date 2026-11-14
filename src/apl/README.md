@@ -51,6 +51,32 @@ After that, `SaveRow¨⍳≢Hours` and `ShowRow¨⍳≢Hours` apply a small func
 | `CHECK(demo_only=1)` | Makes a non-demo row unrepresentable in the table. `check.sh` tries to insert one and expects SQLite to refuse |
 | `)OFF` | A *system command*, not APL code. It ends the script. Without it `--script` would sit at the prompt |
 
+## Seeing the glyphs
+
+APL uses symbols that most fonts lack. If the source shows rows of empty boxes, your font has no APL glyphs. Two things to know first:
+
+- **`⎕` is meant to be an empty box.** It is APL's "quad", so `⎕IO` should look like a small hollow square followed by `IO`. Every other symbol (`⍴ ⍳ ⍵ ∇ ⍝ ⍨ ⌽ ⍕`) should look like a letter or mark, not a box.
+- **A terminal that is not UTF-8 will garble them** before the font even matters. GNU APL needs a UTF-8 locale.
+
+**The fix is a font that has the APL range.** [DejaVu Sans Mono](https://dejavu-fonts.github.io/) covers every symbol used in these files. [APL385 Unicode](https://www.dyalog.com/apl-font-keyboard.htm) is the traditional APL font and also works.
+
+On **Ubuntu**, `fonts-dejavu-mono` is usually already installed (`fc-list | grep -i "dejavu sans mono"` will tell you). Fonts installed *inside WSL* are not used by Windows programs, so on **Windows or WSL2** the font has to be installed on the Windows side:
+
+1. Copy the font out of WSL, or download it from the DejaVu site:
+
+   ```bash
+   mkdir -p /mnt/c/Users/<you>/Downloads/DejaVuSansMono
+   cp /usr/share/fonts/truetype/dejavu/DejaVuSansMono*.ttf /mnt/c/Users/<you>/Downloads/DejaVuSansMono/
+   ```
+
+2. In File Explorer, select the four `.ttf` files, right-click, **Show more options**, **Install for all users**.
+3. Quit and reopen your browser and editor. A browser falls back to any installed font that has the glyph, so GitHub's rendering of these files will usually start working with nothing else changed.
+4. If an editor or terminal still shows boxes, name the font explicitly:
+   - VS Code: `editor.fontFamily` and `terminal.integrated.fontFamily` set to `'DejaVu Sans Mono'`.
+   - Windows Terminal: Settings, your profile, Appearance, Font face.
+
+To test, paste `⍳ ⍴ ⍵ ⎕ ∇ ⍝ ⍣ ⍸ ⌽` somewhere. You should see eight letter-like symbols and one empty box (the `⎕`).
+
 ## Gotchas worth knowing
 
 - **Origin.** `⎕IO` is the index origin (1 by default in GNU APL, 0 in some code). The file never assumes it: `?` is the only primitive whose results depend on it, and the draw subtracts `⎕IO` back out. `check.sh` runs with the default; try putting `⎕IO←0` on the first line and see that the cards are still 10-19.
