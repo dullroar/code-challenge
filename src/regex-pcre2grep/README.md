@@ -1,5 +1,7 @@
 # Regex challenge, Track 2b: `pcre2grep` (no custom code at all)
 
+**Teaches you:** program exit codes as control flow.
+
 The "host" here is a stock `pcre2grep` and one command line. There is no C, no Perl, no dispatcher to write: the pattern's callout strings name the programs to run, and the **exit codes of those programs steer the match**. Then the match **returns false**. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
 
 ## Install and run on Ubuntu under WSL 2
@@ -67,3 +69,7 @@ The exit code is the whole trick. SQLite's `random()` and arithmetic live in the
 - **Not concurrency-safe.** A run is identified as `max(id)` in the `runs` table, so two simultaneous runs would tangle. It is a toy.
 - **The ISO week is computed with SQLite date arithmetic**, because Ubuntu 24.04's SQLite (3.45) has no `%G`/`%V`. As in the other versions, the ISO year can differ from the calendar year near New Year.
 - Only the `10.49` build above was tested. I did not try other PCRE2 versions or configure options.
+
+---
+
+See the [root README](../../README.md#the-results-so-far) for how this compares to the other regex entries, and [`CHALLENGE.md`](../../CHALLENGE.md) if you want to write your own.

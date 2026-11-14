@@ -1,5 +1,7 @@
 # Regex challenge, Track 2: PCRE2 callouts as a tiny DSL
 
+**Teaches you:** regex callouts as a tiny instruction set.
+
 One `pcre2_match` call runs the whole timecard demo, then reports **no match**. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
 
 ## Install and run on Ubuntu under WSL 2
@@ -55,3 +57,7 @@ Callouts only mean something if the engine actually visits them. This program co
 - The `*` loop ends because `gate` fails the next iteration (or the four category names run out), not because anything in C decides to stop. The C only answers the question "is the total over 40?" when the engine asks.
 - The state (`total`, `entries`, the file) lives in a C struct that the callouts share, so, unlike Perl's `local`, none of it rewinds on backtracking. That suits this program: nothing is ever un-done.
 - The dispatcher is a ternary chain, not a table, to keep the host free of loops and function-pointer tricks. Unknown opcodes (and I/O errors) abort the match with `PCRE2_ERROR_CALLOUT`, which is deliberately not the `-1` that means "no match", and the host reports success only if `commit` actually ran.
+
+---
+
+See the [root README](../../README.md#the-results-so-far) for how this compares to the other regex entries, and [`CHALLENGE.md`](../../CHALLENGE.md) if you want to write your own.

@@ -1,5 +1,7 @@
 # GNU Make: the build tool is the interpreter
 
+**Teaches you:** arithmetic and looping in plain Make syntax, no shell required.
+
 > **DEMO ONLY.** Fictional time cards, written to a scratch SQLite file under `$XDG_DATA_HOME/MakeChallenge/`.
 > Nothing here touches real time reporting.
 
@@ -76,3 +78,7 @@ make pop      # same, in a new Windows Terminal window that closes itself
 make check    # ./check.sh
 make clean    # remove leftover state after an interrupted run
 ```
+
+---
+
+See the [root README](../../README.md#the-results-so-far) for how this compares to the other entries, and [`CHALLENGE.md`](../../CHALLENGE.md) if you want to write your own.
