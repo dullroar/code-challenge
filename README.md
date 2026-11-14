@@ -10,7 +10,7 @@ It is a joke with a serious job inside it. Underneath every entry is a real less
 
 The deeper point, the one worth keeping after the jokes wear off: **THERE ARE NO BLOCKERS, JUST NOT ENOUGH IMAGINATION.**
 
-It has turned into a small, friendly contagion. [**Ken caught it too.**](https://github.com/kastl/one-statement-challenge) What started as one C# program is now **sixteen** programs in **ten** languages, written by more than one person, and still growing.
+It has turned into a small, friendly contagion. [**Ken caught it too.**](https://github.com/kastl/one-statement-challenge) What started as one C# program is now **twenty-two** programs in **thirteen** languages, written by more than one person, and still growing.
 
 ## Psst, hey kid
 
@@ -47,6 +47,12 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **LINQ, query expression** | Jim | Nearly every line is `from`/`where`/`let`/`select` | C# query syntax, pushed as far as it goes | [`src/LinqChallenge2`](src/LinqChallenge2/README.md) |
 | **GNU Make** | Jim | No `$(shell)`; Make re-executes itself as the loop | Arithmetic and looping in plain Make syntax | [`src/make-gnu`](src/make-gnu/README.md) |
 | **CMake** | Jim | One bodiless `while()`; its condition is a regex machine | `while()` + regex as a tiny register machine | [`src/cmake`](src/cmake/README.md) |
+| **APL** | Jim | Five rolls and one take-while: no loop anywhere | That array thinking can replace control flow | [`src/apl`](src/apl/README.md) |
+| **APL, weirder** | Jim | Each timecard is a function written at run time by the one before it; compress is the stop rule | `⎕FX` and compress instead of loops and `if` | [`src/apl-weird`](src/apl-weird/README.md) |
+| **Haskell** | Jim | One pure function: random hours, `scanl1`, `takeWhile` | A lazy list and one `takeWhile` as the whole stop rule | [`src/haskell`](src/haskell/README.md) |
+| **Haskell on drugs** | Jim | The list of cards is the fixed point of itself: each running total is read off the card before it | Knot-tying with `fix` | [`src/haskell-weird`](src/haskell-weird/README.md) |
+| **Forth** | Jim | One `begin ... until`, and `outfile-execute` points the output at SQLite | A stack language as a whole program | [`src/forth`](src/forth/README.md) |
+| **Forth, weirder** | Jim | No control-flow word anywhere: the loop moves the text interpreter's own `>in` backwards | The parse position as a program counter | [`src/forth-weird`](src/forth-weird/README.md) |
 | **GNU sed regex** | Ken | The program is one line of text, rewritten until it's done | sed substitutions as a Markov algorithm | [`src/regex-sed`](src/regex-sed/README.md) |
 | **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | The same bodiless-loop trick, Java style | [`src/JavaChallenge1`](src/JavaChallenge1/README.md) |
 | **Kotlin** | Ken | The same challenge, built as a sequence | The same trick, with Kotlin's sequence builders | [`src/KotlinChallenge1`](src/KotlinChallenge1/README.md) |
@@ -76,6 +82,12 @@ src/
   LinqChallenge2/             # LINQ: one SQL-like query-expression statement
   make-gnu/                   # GNU Make: no $(shell); Make re-executes itself as the loop
   cmake/                      # CMake: one bodiless while(), a regex machine in its condition
+  apl/                        # APL: five rolls and one take-while
+  apl-weird/                  # APL: functions that write their own successors with ⎕FX
+  haskell/                    # Haskell: one pure function, scanl1 and takeWhile
+  haskell-weird/              # Haskell: the list of cards is a fixed point of itself
+  forth/                      # Forth: one begin ... until and a pipe to SQLite
+  forth-weird/                # Forth: no control-flow words; the loop rewinds >in
   JavaChallenge1/             # Java (Ken): the same bodiless-loop trick, Java style
   KotlinChallenge1/           # Kotlin (Ken): the same challenge, built as a sequence
   PythonChallenge1/           # Python (Ken): the same challenge, Python style

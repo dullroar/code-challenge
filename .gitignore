@@ -17,3 +17,6 @@ src/xaml/data/
 # Root Gradle build for the Java/Kotlin/Python/Go ports
 /.gradle/
 /build/
+
+# GNU APL command history
+.apl.history
