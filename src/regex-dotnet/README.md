@@ -26,6 +26,16 @@ Debugging	18	2026-W46	DEMO ONLY
 # captured total=50 entries=3 DEMO ONLY
 ```
 
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh src/regex-dotnet
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: The .NET SDK builds it in a build stage; the image holds only the compiled dll on the .NET runtime, with no SDK.
+
 ## How the stunt works
 
 The host draws four random hour counts and builds a *unary tape*: `Meetings:aaaaaaaaaaaaaaa;Coding:aaaaaaaaaaaa;...` (one `a` per hour). It fires one match against the tape and reads out what the pattern captured. The pattern does the rest:

@@ -25,6 +25,16 @@ Debugging	15	44	DEMO ONLY
 # committed total=44 entries=3 DEMO ONLY
 ```
 
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh src/regex-pcre2
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: The C host is compiled in a build stage; the image holds only the binary and the shared libpcre2, with no compiler or headers.
+
 ## How the stunt works
 
 The pattern is the whole program:

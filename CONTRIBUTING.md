@@ -10,6 +10,7 @@ Entries from anyone are welcome. This repository is, on purpose, a collection of
 - **A check script** that builds the entry, runs it unattended, checks its own rules, and exits non-zero on any failure. Look at any existing `check.sh` for the pattern.
   - `check.sh` for the Linux sandbox. It runs with **no network**, as an unprivileged user, on a read-only system with a writable scratch folder. Write your demo data under `$XDG_DATA_HOME` (or `mktemp -d`), and finish within 15 minutes.
   - `check.ps1` for Windows-only entries (WPF and the like). It runs in Windows Sandbox with no network, and restores NuGet packages only from what we already have.
+- **Optionally, a `Dockerfile`** that builds a small image to run your entry and show its results (`sandbox/container/run-image.sh src/your-entry`). Copy the one from the closest existing entry: it builds in a stage from our toolchain image, then copies the finished program onto one of our tiny runtime bases. It is held to strict rules (no `ADD`, no `RUN` in the runtime stage, only `CC_*` variables in its `ENV`; see [`sandbox/dockerfile-lint.sh`](sandbox/dockerfile-lint.sh)), and the gate never builds it, so it is a convenience for people who want to try your entry safely, not a way to bring your own packages.
 - Your contribution is under the repository's [MIT license](LICENSE).
 
 ## Your language's toolchain
@@ -18,10 +19,11 @@ Entries run only with what is already in [`sandbox/linux/Dockerfile`](sandbox/li
 
 ## Before you open the pull request
 
-From a Linux, macOS or WSL shell with Docker (or Git Bash with Docker Desktop):
+Set up Docker (and Windows Sandbox, for Windows entries) once, following [`SANDBOX-SETUP.md`](SANDBOX-SETUP.md). Then, from a Linux, macOS or WSL shell (or Git Bash with Docker Desktop):
 
 ```bash
 sandbox/run.sh src/your-entry                 # the same sandbox the gate uses
+sandbox/container/run-image.sh src/your-entry # if you ship a Dockerfile: see what it does
 sandbox/scope-check.sh origin/master HEAD     # the same scope rules, plus the reviewer report
 ```
 

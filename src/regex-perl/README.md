@@ -29,6 +29,16 @@ Debugging	16	45	2026-W46	DEMO ONLY
 sqlite3 -header -column ~/.local/share/RegexPerl/demo-timecards.db 'select * from demo_timecards'
 ```
 
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh src/regex-perl
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: Perl (from the Ubuntu base) and sqlite3. No compiler, no package manager.
+
 ## How the stunt works
 
 Below the `use` lines, `timecards.pl` is one line: a constant scaffold string `=~` one pattern. No host code seeds, loops, or prints. `check.sh` enforces that the file is a single statement, with exactly one match and no loop keywords.

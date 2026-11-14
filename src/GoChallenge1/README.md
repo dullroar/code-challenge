@@ -19,6 +19,26 @@ The window is a page in your default browser. Press Close in the page, or close 
 
 If a running IDE doesn't see `go` after installing it, restart the IDE so it picks up the new PATH.
 
+## Run it in a container
+
+Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#docker).
+
+```bash
+sandbox/container/run-image.sh src/GoChallenge1
+```
+
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: a static Go binary, sqlite3 (for the inspect step) and a tiny `wget`. No Go toolchain. It needs `--online-build` (`sandbox/container/run-image.sh --online-build src/GoChallenge1`) because the build downloads the SQLite module; the run itself has no network. The page the program serves on `127.0.0.1` is fetched from *inside* the container with `wget`, saved as `page.html`, and then "closed", so nothing is ever published to your machine.
+
+## Run it in Windows Sandbox
+
+Prerequisites: Windows Sandbox and this entry's toolchain on your machine, set up once as described in [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md#windows-sandbox).
+
+```powershell
+sandbox\windows\run.ps1 src\GoChallenge1
+```
+
+It runs the entry in a throwaway VM with networking off, screenshots the window, asks it to close, and prints what it saved. The page opens in Edge inside the VM, and the harness also fetches it over loopback and saves it. **Not yet tested on real hardware.**
+
 ## Layout
 
 | File | Role |
