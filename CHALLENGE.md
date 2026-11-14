@@ -33,6 +33,3 @@ The mechanism is yours. The `for` family uses a bodiless loop. Rust twists itera
 Make it work. Make it weird.
 
 And whatever you do, don't tell the boss.
-
-- [Challenge repository](https://github.com/dullroar/code-challenge)
-- [Original One Statement Challenge](https://github.com/kastl/one-statement-challenge)
