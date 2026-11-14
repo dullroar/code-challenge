@@ -1,0 +1,2 @@
+# cobc -xj timecards.cob leaves the compiled program here; binaries are never committed
+/timecards
