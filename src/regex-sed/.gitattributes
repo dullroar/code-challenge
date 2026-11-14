@@ -1,0 +1,2 @@
+# sed and bash scripts must keep LF line endings, even on Windows checkouts with core.autocrlf=true.
+* text eol=lf
