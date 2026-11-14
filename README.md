@@ -70,6 +70,7 @@ sandbox/                      # where entries we didn't write get run: Docker, W
 build.gradle, gradlew*        # root Gradle wrapper: runs the Java, Kotlin, Python, and Go ports
 docs/
   My Code Challenge.pdf       # anonymized source presentation
+  stacked-bar-charts.md       # the 2013 no-code-behind blog post that inspired the XAML entry
   images/                     # screenshots used in the subfolder READMEs
 src/
   ModernChallenge1/           # C#: the original, modernized for .NET 10

@@ -48,6 +48,8 @@ Obfuscation is not the same as lying, so here is what the trick actually costs:
 
 XAML's job is to *describe* a UI tree, declaratively, so a designer tool can read and write it without running any code. This entry shows what happens once you notice the parser does not actually enforce that: given the right combination of built-in types, parsing a file and running a program become the same act. It is not a technique to reuse - it is what happens when you take "XAML is just data" at its word and then push until it stops being true.
 
+The idea is older than this repo. A [2013 blog post](../../docs/stacked-bar-charts.md) did the same thing on ASP.NET Web Forms: it built a stacked bar chart with no code-behind, just a SQL `PIVOT` and markup. That post is where the XAML entry came from. Microsoft never gives up on an idea.
+
 ---
 
 See the [root README](../../README.md) for how this compares to the other entries, and [`CHALLENGE.md`](../../CHALLENGE.md) if you want to write your own.
