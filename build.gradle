@@ -1,6 +1,9 @@
 // Run any of Ken's ports from the repo root:
 //   .\gradlew.bat runJava | runKotlin | runPython | runGo
 // Each task delegates to the port's own folder, so data/ still lands inside that folder.
+//
+// Every other entry has a run task too, and the Docker sandbox has sandbox* tasks. What each
+// group needs, and the -PwslDistro / -PgitBash / -Pforce options: docs/running-with-gradle.md
 
 tasks.register('runJava') {
     group = 'application'
@@ -28,4 +31,128 @@ tasks.register('runGo', Exec) {
     description = 'Runs the Go version (src/GoChallenge1).'
     workingDir = file('src/GoChallenge1')
     commandLine 'go', 'run', '.'
+}
+
+// ── The other entries ───────────────────────────────────────────────────────
+
+def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+
+// .NET apps (needs the .NET 10 SDK).
+def dotnetRun = { String name, String dir, String desc, List extra = [] ->
+    tasks.register(name, Exec) {
+        group = 'application (.NET)'
+        description = desc
+        workingDir = file(dir)
+        commandLine(['dotnet', 'run'] + extra)
+        // regex-dotnet builds its data path from HOME, which Windows only has inside Git Bash;
+        // IntelliJ launches Gradle without it. Fill it in from the user's profile folder.
+        if (!System.getenv('HOME')) {
+            environment 'HOME', System.getProperty('user.home')
+        }
+    }
+}
+
+dotnetRun('runLinq1', 'src/LinqChallenge1', 'Runs the LINQ version 1 (src/LinqChallenge1).')
+dotnetRun('runLinq2', 'src/LinqChallenge2', 'Runs the LINQ version 2 (src/LinqChallenge2).')
+dotnetRun('runModern', 'src/ModernChallenge1', "Runs Jim's original C# version (src/ModernChallenge1).")
+dotnetRun('runXamlStrict', 'src/xaml', 'Runs the XAML version, strict.xaml (src/xaml).', ['--', 'strict.xaml'])
+dotnetRun('runXamlSqlite', 'src/xaml', 'Runs the XAML version, sqlite.xaml (src/xaml).', ['--', 'sqlite.xaml'])
+dotnetRun('runXamlEfcore', 'src/xaml', 'Runs the XAML version, efcore.xaml (src/xaml).', ['--', 'efcore.xaml'])
+dotnetRun('runRegexDotnet', 'src/regex-dotnet', 'Runs the .NET regex version (src/regex-dotnet).', ['-c', 'Release'])
+
+// Linux apps: inside WSL on Windows, in bash anywhere else; each checks for its tool first. The
+// script goes in on stdin because wsl.exe mangles quoted arguments. The login shell (-l) adds
+// ~/.local/bin and ~/.cargo/bin to PATH.
+def wslDistro = providers.gradleProperty('wslDistro').getOrElse('Ubuntu')
+def where = isWindows ? ' in WSL' : ''
+def wslRun = { String name, String dir, String tool, String cmd, String desc ->
+    def script = """\
+        if ! command -v ${tool} >/dev/null; then
+            echo "${tool} is not installed${where}; see ${dir}/README.md" >&2
+            exit 127
+        fi
+        ${cmd}
+        """.stripIndent()
+    tasks.register(name, Exec) {
+        group = isWindows ? 'application (WSL)' : 'application (Linux)'
+        description = desc
+        workingDir = file(dir)
+        commandLine(isWindows
+            ? ['wsl.exe', '-d', wslDistro, '--cd', file(dir).absolutePath, '--', 'bash', '-l', '-s']
+            : ['bash', '-l', '-s'])
+        standardInput = new ByteArrayInputStream(script.getBytes('UTF-8'))
+    }
+}
+
+// target/ lives on the Linux filesystem: on /mnt/d cargo's fingerprint mtimes lose their
+// nanoseconds, every generated file looks newer, and the whole tree rebuilds on each run.
+wslRun('runRust', 'src/RustChallenge1', 'cargo',
+    'CARGO_TARGET_DIR="$HOME/.cache/code-challenge/RustChallenge1-target" cargo run --locked',
+    'Runs the Rust/GTK version (src/RustChallenge1).')
+wslRun('runApl', 'src/apl', 'apl', 'apl --script -f timecards.apl', 'Runs the APL version (src/apl).')
+wslRun('runAplWeird', 'src/apl-weird', 'apl', 'apl --script -f timecards.apl', 'Runs the weird APL version (src/apl-weird).')
+wslRun('runForth', 'src/forth', 'gforth', 'gforth timecards.fs', 'Runs the Forth version (src/forth).')
+wslRun('runForthWeird', 'src/forth-weird', 'gforth', 'gforth timecards.fs', 'Runs the weird Forth version (src/forth-weird).')
+wslRun('runHaskell', 'src/haskell', 'runghc', 'runghc timecards.hs', 'Runs the Haskell version (src/haskell).')
+wslRun('runHaskellWeird', 'src/haskell-weird', 'runghc', 'runghc timecards.hs', 'Runs the weird Haskell version (src/haskell-weird).')
+// cmake appends to /dev/stdout, which cannot be reopened when it is wsl.exe's Windows handle;
+// "| cat" turns it into a plain Linux pipe (pipefail keeps cmake's exit status).
+wslRun('runCmake', 'src/cmake', 'cmake', 'set -o pipefail; cmake -P timecards.cmake | cat', 'Runs the CMake version (src/cmake).')
+wslRun('runMakeGnu', 'src/make-gnu', 'make', 'make', 'Runs the GNU make version (src/make-gnu).')
+wslRun('runRegexPcre2', 'src/regex-pcre2', 'pcre2-config', 'make run', 'Runs the PCRE2 (C) regex version (src/regex-pcre2).')
+wslRun('runRegexPcre2grep', 'src/regex-pcre2grep', '"${PCRE2GREP:-$HOME/.local/bin/pcre2grep}"',
+    'PCRE2GREP="${PCRE2GREP:-$HOME/.local/bin/pcre2grep}" ./timecards.sh',
+    'Runs the pcre2grep regex version (src/regex-pcre2grep).')
+wslRun('runRegexPerl', 'src/regex-perl', 'perl', 'perl timecards.pl', 'Runs the Perl regex version (src/regex-perl).')
+wslRun('runRegexSed', 'src/regex-sed', 'sed', './timecards.sh', 'Runs the sed regex version (src/regex-sed).')
+// cobc -xj compiles and runs; the ./timecards binary it leaves is git-ignored in each folder.
+wslRun('runCobol', 'src/cobol', 'cobc', 'cobc -xj timecards.cob', 'Runs the COBOL version (src/cobol).')
+wslRun('runCobolWeird', 'src/cobol-weird', 'cobc', 'cobc -xj timecards.cob', 'Runs the weird COBOL (ALTER) version (src/cobol-weird).')
+
+// ── The Docker sandbox (sandbox/README.md) ──────────────────────────────────
+// On Windows the sandbox scripts run in Git Bash, which they support with Docker Desktop; WSL may
+// only have Docker Desktop's Windows shim. Anywhere else, plain bash.
+def sandboxBash = isWindows
+    ? providers.gradleProperty('gitBash').getOrElse('C:/Program Files/Git/bin/bash.exe')
+    : 'bash'
+def sandboxTask = { String name, String group, String desc, List args ->
+    tasks.register(name, Exec) {
+        it.group = group
+        description = desc
+        workingDir = rootDir
+        commandLine([sandboxBash] + args)
+    }
+}
+
+// One-time setup (-Pforce rebuilds after changes to sandbox/) and the gate's own self-test.
+sandboxTask('sandboxBuildBases', 'sandbox',
+    'Builds the trusted toolchain and runtime images (once; needs network, ~2.5 GB). -Pforce rebuilds them all.',
+    ['sandbox/container/build-bases.sh'] + (providers.gradleProperty('force').isPresent() ? ['--force'] : []))
+sandboxTask('sandboxSelftest', 'sandbox', 'Proves the sandbox blocks network, host files, root, fork bombs and memory hogs.',
+    ['sandbox/selftest.sh'])
+
+// "Folder-name" -> "FolderName": apl-weird -> AplWeird, GoChallenge1 -> GoChallenge1.
+def entryTaskName = { String dir -> dir.split('-').collect { it.capitalize() }.join() }
+def entries = (file('src').listFiles() ?: []).findAll { it.isDirectory() }.sort { it.name }
+
+// The gate's check: the entry's check.sh in the locked-down toolchain container.
+def checkable = entries.findAll { new File(it, 'check.sh').isFile() }
+checkable.each { dir ->
+    sandboxTask("sandboxCheck${entryTaskName(dir.name)}", 'sandbox (check)',
+        "Runs src/${dir.name}/check.sh in the Linux sandbox, as the gate does.",
+        ['sandbox/run.sh', "src/${dir.name}"])
+}
+sandboxTask('sandboxCheckAll', 'sandbox', 'Runs every Linux entry\'s check.sh in the sandbox (the gate\'s regression run).',
+    ['sandbox/run.sh'] + checkable.collect { "src/${it.name}" })
+
+// Show it: build the entry's image, run it, and copy what it wrote to build/sandbox-out/<entry>/.
+// onlineBuild: entries whose image build downloads dependencies (--online-build; the run never has
+// network). A new entry whose Dockerfile downloads must be added here.
+def onlineBuild = ['GoChallenge1', 'RustChallenge1', 'JavaChallenge1', 'KotlinChallenge1']
+entries.findAll { new File(it, 'Dockerfile').isFile() }.each { dir ->
+    def args = ['sandbox/container/run-image.sh', '--out', "build/sandbox-out/${dir.name}"]
+    if (dir.name in onlineBuild) { args << '--online-build' }
+    sandboxTask("sandboxShow${entryTaskName(dir.name)}", 'sandbox (show)',
+        "Builds src/${dir.name}'s container image, runs it locked down, and shows what it wrote.",
+        args + ["src/${dir.name}"])
 }
