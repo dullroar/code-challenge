@@ -48,10 +48,10 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **GNU Make** | Jim | No `$(shell)`; Make re-executes itself as the loop | Arithmetic and looping in plain Make syntax | [`src/make-gnu`](src/make-gnu/README.md) |
 | **CMake** | Jim | One bodiless `while()`; its condition is a regex machine | `while()` + regex as a tiny register machine | [`src/cmake`](src/cmake/README.md) |
 | **GNU sed regex** | Ken | The program is one line of text, rewritten until it's done | sed substitutions as a Markov algorithm | [`src/regex-sed`](src/regex-sed/README.md) |
-| **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | The same bodiless-loop trick, Java style | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
-| **Kotlin** | Ken | The same challenge, built as a sequence | The same trick, with Kotlin's sequence builders | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
-| **Python** | Ken | The same challenge, Python style | The same trick, in a language with no `;` loops | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
-| **Go** | Ken | The same challenge, serving a pulsing page in your browser | The same trick, as a one-request web server | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
+| **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | The same bodiless-loop trick, Java style | [`src/JavaChallenge1`](src/JavaChallenge1/README.md) |
+| **Kotlin** | Ken | The same challenge, built as a sequence | The same trick, with Kotlin's sequence builders | [`src/KotlinChallenge1`](src/KotlinChallenge1/README.md) |
+| **Python** | Ken | The same challenge, Python style | The same trick, in a language with no `;` loops | [`src/PythonChallenge1`](src/PythonChallenge1/README.md) |
+| **Go** | Ken | The same challenge, serving a pulsing page in your browser | The same trick, as a one-request web server | [`src/GoChallenge1`](src/GoChallenge1/README.md) |
 
 Every "Teaches you" cell above is a promise, not just a label: open the folder's README and that is genuinely what you will walk away understanding.
 
@@ -59,6 +59,7 @@ Every "Teaches you" cell above is a promise, not just a label: open the folder's
 
 ```text
 CHALLENGE.md                  # the rules - start here if you want to play
+build.gradle, gradlew*        # root Gradle wrapper: runs the Java, Kotlin, Python, and Go ports
 docs/
   My Code Challenge.pdf       # anonymized source presentation
   images/                     # screenshots used in the subfolder READMEs
@@ -75,7 +76,11 @@ src/
   LinqChallenge2/             # LINQ: one SQL-like query-expression statement
   make-gnu/                   # GNU Make: no $(shell); Make re-executes itself as the loop
   cmake/                      # CMake: one bodiless while(), a regex machine in its condition
+  JavaChallenge1/             # Java (Ken): the same bodiless-loop trick, Java style
+  KotlinChallenge1/           # Kotlin (Ken): the same challenge, built as a sequence
+  PythonChallenge1/           # Python (Ken): the same challenge, Python style
+  GoChallenge1/               # Go (Ken): the same challenge, serving a pulsing page in your browser
 LICENSE
 ```
 
-Ken's Java, Kotlin, Python, and Go versions live in [his repository](https://github.com/kastl/one-statement-challenge).
+Ken's Java, Kotlin, Python, and Go ports started in [his own repository](https://github.com/kastl/one-statement-challenge) and now live here too, folded in with full credit intact in each one's README.
