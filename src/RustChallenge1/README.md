@@ -1,5 +1,7 @@
 # One Statement, Rust Edition
 
+**Teaches you:** iterators and closures as control flow.
+
 A WSL/GTK 4 companion to Jim Lehmer's C# challenge and [Ken's Java, Kotlin, Python and Go versions](https://github.com/kastl/one-statement-challenge). The point is to explore expression mechanics through a deliberately ridiculous constraint, not to offer a production architecture.
 
 ## Install and run on Ubuntu under WSL 2
@@ -58,3 +60,7 @@ cargo build --locked
 ```
 
 Inspect the database with `sqlite3 data/demo-timecards.db 'select * from demo_timecards;'`.
+
+---
+
+See the [root README](../../README.md#the-results-so-far) for how this compares to the other entries, and [`CHALLENGE.md`](../../CHALLENGE.md) if you want to write your own.

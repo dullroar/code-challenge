@@ -1,5 +1,7 @@
 # CMake: `for (seed; test; iterate) ;`, with `while()` and a regex
 
+**Teaches you:** `while()` plus regex as a tiny register machine.
+
 > **DEMO ONLY.** Fictional time cards, written to a scratch SQLite file under `$XDG_DATA_HOME/CmakeChallenge/`.
 > Nothing here touches real time reporting.
 
@@ -76,3 +78,7 @@ hours), picks the ISO week, writes SQLite and plays the glow. `check.sh` fails i
   `;`-separated, so this needs care).
 - The only programs started are `sqlite3`, `wt.exe` (POP) and CMake itself (for its own `-E sleep`); `check.sh`
   asserts that.
+
+---
+
+See the [root README](../../README.md#the-results-so-far) for how this compares to the other entries, and [`CHALLENGE.md`](../../CHALLENGE.md) if you want to write your own.

@@ -1,5 +1,7 @@
 # Regex challenge, Track 3: .NET balancing groups (the purist's attempt)
 
+**Teaches you:** a regex as a stack-based counter.
+
 One `Regex.Match` call, no callouts, no inline code, no `MatchEvaluator`. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`), which expected this track to hit a wall. It did hit some, and they are listed below, but the core got further than the plan predicted. **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
 
 ## Run it
@@ -53,3 +55,7 @@ I checked the edges with a throwaway prototype (not in the repo, because the rea
 - The host does one iteration-shaped thing: reporting. `string.Concat(...Zip(...))` walks the captured `cat` and `hrs` lists to format the rows. It only reads the final captured state, which the plan allows ("print/report the final state"), and `check.sh` rejects `MatchEvaluator`, `Replace`, `NextMatch`, `Matches` and any loop keyword in the host, and requires exactly one `Regex.Match`. Still, it is a LINQ pass, and I would rather say so than hide it.
 - The total printed is the count of captures on the `s` stack, which the regex built. The per-row hours are the lengths of the `hrs` captures.
 - The pattern is unformatted on purpose, as in the other tracks.
+
+---
+
+See the [root README](../../README.md#the-results-so-far) for how this compares to the other regex entries, and [`CHALLENGE.md`](../../CHALLENGE.md) if you want to write your own.

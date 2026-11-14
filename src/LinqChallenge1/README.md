@@ -1,5 +1,7 @@
 # LINQ challenge, Variant A: one fluent method-chain statement
 
+**Teaches you:** LINQ method chains, end to end.
+
 One `;`-terminated expression statement, built entirely from LINQ method calls. It generates a fixed 40-hour timecard, tracks and saves it through EF Core and SQLite, crosses the `IQueryable<T>` → `IEnumerable<T>` boundary, and builds, shows, pulses, and closes a WPF **DEMO ONLY** terminal window - all inside that one statement. No `RunEverything`-style helper does the real work; `Main` only sets up the STA thread, the `DbContext`, and the `Application` before calling it.
 
 ## Run it
@@ -47,4 +49,4 @@ C# only allows a handful of expression shapes as a top-level expression statemen
 - `Application.Run()` (no window argument) is called from inside a `.Select` lambda, which is what actually pumps WPF dispatcher messages so the window paints and the animation ticks. `ShutdownMode` is set to `OnExplicitShutdown` so the animation's `Completed` handler, not an implicit "last window closed" rule, decides when the app (and `Run()`) exits.
 - `Console.WriteLine` calls inside the window-creation stage exist purely so `check.ps1` can verify the persisted report from stdout, without needing a SQLite CLI tool on the test machine.
 
-See [the repository README](../../README.md#the-family) for how this compares to the other one-statement entries, and [`src/LinqChallenge2`](../LinqChallenge2/README.md) for the query-expression variant of the same idea.
+See [the root README](../../README.md#the-results-so-far) for how this compares to the other one-statement entries, and [`src/LinqChallenge2`](../LinqChallenge2/README.md) for the query-expression variant of the same idea.

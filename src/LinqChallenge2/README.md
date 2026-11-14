@@ -1,5 +1,7 @@
 # LINQ challenge, Variant B: one SQL-like query-expression statement
 
+**Teaches you:** C# query syntax, pushed as far as it goes.
+
 The same demo as [`src/LinqChallenge1`](../LinqChallenge1/README.md) - a fixed 40-hour timecard, tracked and saved through EF Core and SQLite, crossing the `IQueryable<T>` → `IEnumerable<T>` boundary, and a WPF **DEMO ONLY** terminal window that shows, pulses, and closes itself - but written so nearly every component, not just the headline data-shaping stage, is phrased as a C# query expression (`from` / `where` / `let` / `select`). Where a `let` has to smuggle a `void`-returning WPF/EF call into a value, the inline `Func<T>.Invoke()` wrapper is itself nested inside a throwaway one-row query. Turtles all the way down, on purpose.
 
 ## Run it
@@ -63,4 +65,4 @@ Three things in this file cannot be query syntax, because the language simply ha
 - Same prefix-sum cap and mutation-in-place caveats from the earlier draft apply here; see [Variant A's README](../LinqChallenge1/README.md#honest-fine-print) for the shared ones (eager `SaveChanges()` timing, in-place list mutation inside `Aggregate`).
 - `Console.WriteLine` calls inside the `window` `let` exist purely so `check.ps1` can verify the persisted report from stdout.
 
-See [the repository README](../../README.md#the-family) for how this compares to the other one-statement entries, and [`src/LinqChallenge1`](../LinqChallenge1/README.md) for the fluent-chain variant of the same idea.
+See [the root README](../../README.md#the-results-so-far) for how this compares to the other one-statement entries, and [`src/LinqChallenge1`](../LinqChallenge1/README.md) for the fluent-chain variant of the same idea.

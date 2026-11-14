@@ -1,5 +1,7 @@
 # Regex challenge, Track 1: Perl (the whole program is one match)
 
+**Teaches you:** executable code inside a live regex match.
+
 The file's only statement is a single `=~` match. Seeding, the random draws, the SQLite transaction, the terminal pulse and all the printing happen *inside* that match, and then the match **returns false**. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
 
 ## Run it
@@ -52,3 +54,7 @@ Below the `use` lines, `timecards.pl` is one line: a constant scaffold string `=
 - SQL is built by interpolating values into strings. That is safe here only because every value is either a number the match computed or one of four fixed category names; do not copy the habit.
 - Code in patterns is run by Perl as ordinary Perl. The only external program is `sqlite3`, started without a shell with a fixed argument list, and the only I/O is the scratch database and the terminal.
 - The ISO week is computed with `strftime('%G-W%V')`. As in the other versions, the ISO year can differ from the calendar year near New Year.
+
+---
+
+See the [root README](../../README.md#the-results-so-far) for how this compares to the other regex entries, and [`CHALLENGE.md`](../../CHALLENGE.md) if you want to write your own.
