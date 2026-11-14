@@ -1,26 +1,24 @@
-# One Statement, Two Semicolons
+# Code Challenge
 
-> **Obfuscated algorithms.** Like the [old obfuscated C contests](https://www.ioccc.org/), but the thing being obfuscated is the *algorithm*, not just the syntax: take a perfectly ordinary little program and force it through one absurd rule until it comes out the other side working, correct, and almost impossible to read.
+A series of responses to a code challenge that has morphed into a set of educational exercises about programming languages and how to think about programming languages.
 
-The rule: `main` gets **one statement**, and that statement has **no body**. Everything the program does, it does as a side effect of evaluating expressions. This is not a design pattern. It is a flex, a puzzle, and a very bad idea that happens to run - on purpose, in as many languages as we can get it to run in.
+## Why this exists
+
+The first version was a [2008 classroom exercise](/docs/My%20Code%20Challenge.pdf), built to put new C# 3.0 and .NET 3.x features on display. Keeping the one-statement rule and porting it to new languages turned out to be a great way to learn what those languages actually let you do, once you push past the part the tutorials cover. Each entry answers the same question in its own accent: *how far can this language's own machinery - its iterators, its regex engine, its markup parser, its build tool - be pushed before it starts acting like a general-purpose program?*
+
+It is a joke with a serious job inside it. Underneath every entry is a real lesson in a real language construct - LINQ, XAML, GNU Make, regular expressions, iterators, callouts - taught by pushing that construct until it does something its own documentation would not think to show you. That is why every folder's README has a **How the stunt works** section: read it, and you have learned the construct, not just watched a trick. The entertainment gets you in the door; the "oh, THAT'S how that actually works" is what you leave with.
+
+The deeper point, the one worth keeping after the jokes wear off: **THERE ARE NO BLOCKERS, JUST NOT ENOUGH IMAGINATION.**
+
+It has turned into a small, friendly contagion. [**Ken caught it too.**](https://github.com/kastl/one-statement-challenge) What started as one C# program is now **sixteen** programs in **ten** languages, written by more than one person, and still growing.
 
 ## Psst, hey kid
 
-Hey, kid. **Try this at home!** **Don't tell the boss!**
+**Try this at home!** **Don't tell the boss!**
 
 You've spent years writing clean code: small functions, meaningful names, tests. *Boring.* Over here, there's a `for` loop with an empty body that opens a database, starts a thread, draws a window, and fades it in and out - all before the first semicolon is done being weird.
 
 You know you want to write beautifully wrong code. **You know you do.**
-
-## Why this exists
-
-The first version was a 2008 classroom exercise, built to put new C# 3.0 and .NET 3.x features on display. Keeping the one-statement rule and porting it to new languages turned out to be a great way to learn what those languages actually let you do, once you push past the part the tutorials cover. Each entry answers the same question in its own accent: *how far can this language's own machinery - its iterators, its regex engine, its markup parser, its build tool - be pushed before it starts acting like a general-purpose program?*
-
-It is a joke with a serious job inside it. Underneath the costume, every entry is a real lesson in a real language construct - LINQ, XAML, GNU Make, regular expressions, iterators, callouts - taught by pushing that construct until it does something its own documentation would not think to show you. That is why every folder's README has a **How the stunt works** section: read it, and you have learned the construct, not just watched a trick. The entertainment gets you in the door; the "oh, THAT'S how that actually works" is what you leave with.
-
-The deeper point, the one worth keeping after the jokes wear off: **THERE ARE NO BLOCKERS, JUST NOT ENOUGH IMAGINATION.**
-
-It has turned into a small, friendly contagion. **Ken caught it too.** What started as one C# program is now **sixteen** programs in **ten** languages, written by more than one person, and still growing.
 
 ## Ready to play?
 
@@ -29,6 +27,12 @@ The rules, the shared demo, and the do's and don'ts live in **[`CHALLENGE.md`](C
 ## The results so far
 
 Every entry builds the same small demo: make up some *Meetings / Coding / Debugging / Learning* time-card hours, save them to a local **DEMO ONLY** SQLite file, stop once the total passes 40, and show the result. Nothing here touches a real time-reporting system - see the [disclaimer](#disclaimer).
+
+**ALL OF THESE ARE TESTED AND WORK AS ADVERTISED.** Remember that while reading the code.
+
+## Disclaimer
+
+**DEMO ONLY.** Every record any of these programs writes is flagged as demo data in a throwaway local file/SQLite database. None of it connects to, or should ever be used for, a real time-reporting system. And please do **not** try any of this at work. Waste your own tokens. :)
 
 | Version | By | The stunt | Teaches you | Folder |
 | --- | --- | --- | --- | --- |
@@ -50,10 +54,6 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **Go** | Ken | The same challenge, serving a pulsing page in your browser | The same trick, as a one-request web server | [Ken's repo](https://github.com/kastl/one-statement-challenge) |
 
 Every "Teaches you" cell above is a promise, not just a label: open the folder's README and that is genuinely what you will walk away understanding.
-
-## It's a trend: Ken's ports
-
-**[Ken on GitHub](https://github.com/kastl)** took the original idea and ran. His repo, [`kastl/one-statement-challenge`](https://github.com/kastl/one-statement-challenge), ports it to **Java, Kotlin, Python, and Go**, so you can watch four languages bend - or refuse to bend - to the same bodiless statement. His GNU sed regex entry lives here instead, in [`src/regex-sed`](src/regex-sed/README.md), alongside the other regex tracks. Run his ports with `.\gradlew.bat runJava`, `runKotlin`, `runPython`, or `runGo`; see [his README](https://github.com/kastl/one-statement-challenge#readme) for details. Written a new language port? I would love to hear about it.
 
 ## Repository layout
 
@@ -79,7 +79,3 @@ LICENSE
 ```
 
 Ken's Java, Kotlin, Python, and Go versions live in [his repository](https://github.com/kastl/one-statement-challenge).
-
-## Disclaimer
-
-**DEMO ONLY.** Every record any of these programs writes is flagged as demo data in a throwaway local file. None of it connects to, or should ever be used for, a real time-reporting system. And please, for the love of all that is maintainable, do not do any of this at work. (Don't tell the boss.)
