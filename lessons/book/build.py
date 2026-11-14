@@ -4,8 +4,8 @@
     python lessons/book/build.py            # writes lessons/book/out/
     python lessons/book/build.py --check    # build HTML and verify every internal link resolves
 
-Needs pandoc (https://pandoc.org). PDF additionally needs a PDF engine pandoc can find
-(xelatex, lualatex, typst, weasyprint...). Without one, use the EPUB or HTML.
+Needs pandoc (https://pandoc.org). PDF additionally needs WeasyPrint (`uv tool install weasyprint`
+or `pipx install weasyprint`). Without it, use the EPUB or HTML.
 
 The chapters are ordinary Markdown files that link to each other and to the repo with relative
 links, which is what you want on GitHub and is wrong in a single document. This script reads the
@@ -13,6 +13,9 @@ chapters in chapters.txt order and rewrites each relative link before pandoc see
   * to another chapter           -> an in-book anchor (#heading-id)
   * to lessons/README.md         -> plain text (the web index is not part of the book)
   * to anything else in the repo -> its GitHub URL
+
+The title page and copyright page live in lessons/front-matter.md (plain HTML, inserted before the
+table of contents). The PDF and EPUB are written to the repo root as learn-programming-the-weird-way.*.
 """
 import os, re, shutil, subprocess, sys
 from pathlib import PurePosixPath
@@ -85,8 +88,15 @@ def build_markdown():
         f.write("\n\n".join(parts))
     return md
 
+BOOK = "learn-programming-the-weird-way"
+PDF_NAME = BOOK + ".pdf"
+FRONT = os.path.join(LESSONS, "front-matter.md")
+CSS = os.path.join(HERE, "book.css")
+
 def pdf_engine():
-    for e in ("xelatex", "lualatex", "typst", "weasyprint", "wkhtmltopdf", "pdflatex"):
+    # The title/copyright pages and the layout are HTML + CSS, so the PDF needs an HTML-to-PDF engine
+    # (LaTeX engines would drop the front matter).
+    for e in ("weasyprint",):
         if shutil.which(e):
             return e
 
@@ -96,16 +106,17 @@ def main():
         raise SystemExit("pandoc not found (https://pandoc.org/installing.html)")
     md = build_markdown()
     base = ["pandoc", "-f", "gfm+gfm_auto_identifiers+yaml_metadata_block", "--metadata-file", os.path.join(HERE, "metadata.yaml"),
-            "--wrap=none", "--toc", "--toc-depth=2", "--number-sections", md]
+            "--wrap=none", "--toc", "--toc-depth=2", "--number-sections", "--include-before-body", FRONT, md]
     # Pandoc's gfm reader does not read a YAML block from --metadata-file as document metadata
     # for every writer, so pass it explicitly too.
-    outs = [("html", ["-s", "--embed-resources", "-o", os.path.join(OUT, "weird-way.html")]),
-            ("epub", ["-o", os.path.join(OUT, "weird-way.epub")])]
+    outs = [("html", ["-s", "--embed-resources", "--css", CSS, "-o", os.path.join(OUT, "weird-way.html")]),
+            ("epub", ["--epub-title-page=false", "--css", CSS, "-o", os.path.join(REPO, BOOK + ".epub")])]
     engine = pdf_engine()
     if engine and "--check" not in sys.argv:
-        outs.append(("pdf", ["--pdf-engine=" + engine, "-V", "geometry:margin=2.2cm", "-o", os.path.join(OUT, "weird-way.pdf")]))
+        outs.append(("pdf", ["--pdf-engine=" + engine, "--css", CSS, "--lua-filter", os.path.join(HERE, "wrap-code.lua"),
+                             "--metadata", "toc-title=Contents", "-o", os.path.join(REPO, PDF_NAME)]))
     elif "--check" not in sys.argv:
-        print("note: no PDF engine found (xelatex, lualatex, typst, weasyprint...); skipping PDF")
+        print("note: weasyprint not found (uv tool install weasyprint); skipping PDF")
     if "--check" in sys.argv:
         outs = outs[:1]
     for name, extra in outs:

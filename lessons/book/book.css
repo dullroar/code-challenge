@@ -1,0 +1,41 @@
+/* Stylesheet for the HTML and PDF (WeasyPrint) builds of the book. */
+@page {
+  size: Letter;
+  margin: 2.2cm 2.2cm 2.5cm 2.2cm;
+  @bottom-center { content: counter(page); font: 9pt "DejaVu Sans", sans-serif; color: #555; }
+}
+@page :first { @bottom-center { content: none; } }
+
+body { font: 10.5pt/1.45 "DejaVu Serif", Georgia, serif; max-width: 46em; margin: 0 auto; }
+h1, h2, h3, h4 { font-family: "DejaVu Sans", sans-serif; line-height: 1.2; }
+h1 { font-size: 22pt; margin-top: 0; break-before: page; }
+h2 { font-size: 15pt; margin-top: 1.6em; }
+h3 { font-size: 12pt; }
+h1, h2, h3, h4 { break-after: avoid; }
+
+/* Code: DejaVu Sans Mono carries the APL glyphs; wrap long lines instead of running off the page. */
+code, pre, pre code { font-family: "DejaVu Sans Mono", monospace; font-size: 8.6pt; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f5f5f5; border: 1px solid #ddd;
+      border-radius: 3px; padding: .5em .7em; }
+pre, table, figure { break-inside: avoid-page; }
+pre:has(code:only-child) { break-inside: auto; }
+:not(pre) > code { background: #f0f0f0; padding: 0 .15em; border-radius: 2px; }
+
+table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 9.5pt; }
+th, td { border: 1px solid #ccc; padding: .3em .5em; vertical-align: top; text-align: left; }
+th { background: #eee; }
+a { color: #1a4f8b; text-decoration: none; }
+blockquote { margin-left: 0; padding-left: 1em; border-left: 3px solid #ccc; color: #444; }
+
+/* Front matter (lessons/front-matter.md). Pandoc's own title block is hidden: the title page replaces it. */
+header#title-block-header { display: none; }
+.titlepage { height: 22cm; text-align: center; break-after: page; display: flex; flex-direction: column;
+             justify-content: center; }
+.titlepage h1.book-title { font-size: 34pt; break-before: auto; margin: 0 0 .6em; }
+.book-subtitle { font: italic 14pt/1.4 "DejaVu Serif", serif; color: #444; margin: 0 0 4em; }
+.book-authors { font: 16pt/1.6 "DejaVu Sans", sans-serif; }
+.copyrightpage { font-size: 8.5pt; line-height: 1.4; break-after: page; padding-top: 12cm; }
+.copyrightpage p { margin: 0 0 .8em; }
+nav#TOC { break-after: page; }
+nav#TOC ul { list-style: none; padding-left: 1.2em; }
+nav#TOC > ul { padding-left: 0; }
