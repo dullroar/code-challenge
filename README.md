@@ -1,12 +1,12 @@
 # Code Challenge
 
-A series of responses to a code challenge that has morphed into a set of educational exercises about programming languages and how to think about programming languages.
+A series of responses to a code challenge that has morphed into a set of educational exercises about programming languages and how to think about programming languages. **New: [Learn Programming the Weird Way!](lessons/README.md)**, a set of lessons built on these examples.
 
 ## Why this exists
 
 The first version was a [2008 classroom exercise](/docs/My%20Code%20Challenge.pdf), built to put new C# 3.0 and .NET 3.x features on display. Keeping the one-statement rule and porting it to new languages turned out to be a great way to learn what those languages actually let you do, once you push past the part the tutorials cover. Each entry answers the same question in its own accent: *how far can this language's own machinery - its iterators, its regex engine, its markup parser, its build tool - be pushed before it starts acting like a general-purpose program?*
 
-It is a joke with a serious job inside it. Underneath every entry is a real lesson in a real language construct - LINQ, XAML, GNU Make, regular expressions, iterators, callouts - taught by pushing that construct until it does something its own documentation would not think to show you. That is why every folder's README has a **How the stunt works** section: read it, and you have learned the construct, not just watched a trick. The entertainment gets you in the door; the "oh, THAT'S how that actually works" is what you leave with.
+It is a joke with a serious job inside it. Underneath every entry is a real lesson in a real language construct - LINQ, XAML, GNU Make, regular expressions, iterators, callouts - taught by pushing that construct until it does something its own documentation would not think to show you. That is why every folder's README has a **How the stunt works** section: read it, and you have learned the construct, not just watched a trick. The entertainment gets you in the door; the "oh, THAT'S how that actually works" is what you leave with. The full curriculum, with exercises, is in **[Learn Programming the Weird Way!](lessons/intro.md)**.
 
 The deeper point, the one worth keeping after the jokes wear off: **THERE ARE NO BLOCKERS, JUST NOT ENOUGH IMAGINATION.**
 
@@ -19,6 +19,10 @@ It has turned into a small, friendly contagion. **Ken caught it too.** What star
 You've spent years writing clean code: small functions, meaningful names, tests. *Boring.* Over here, there's a `for` loop with an empty body that opens a database, starts a thread, draws a window, and fades it in and out - all before the first semicolon is done being weird.
 
 You know you want to write beautifully wrong code. **You know you do.**
+
+## Want to learn from it?
+
+**[Learn Programming the Weird Way!](lessons/README.md)** *Programs you shouldn't write. Language features you should understand.* Lessons by [goals](lessons/goals.md), by [language](lessons/languages/README.md) (including [COBOL's `ALTER`](lessons/languages/cobol.md#alter) and [APL on the whiteboard](lessons/languages/apl.md)) and by [solution pattern](lessons/patterns.md), plus [problems overcome](lessons/problems-overcome.md), [blocking problems](lessons/blocking-problems.md) and [exercises](lessons/exercises.md) you can run in a container.
 
 ## Ready to play?
 
@@ -63,7 +67,7 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **Rust** | Jim | No `;`, `let`, or `return` in `main` - a test enforces it | Iterators and closures as control flow | [`src/RustChallenge1`](src/RustChallenge1/README.md) |
 | **XAML** | Jim | The program *is* a `.xaml` file, run by the parser that loads it | XAML as a runtime interpreter, not just markup | [`src/xaml`](src/xaml/README.md) |
 
-Every "Teaches you" cell above is a promise, not just a label: open the folder's README and that is genuinely what you will walk away understanding.
+Every "Teaches you" cell above is a promise, not just a label: open the folder's README and that is genuinely what you will walk away understanding. For the same material organized by [language](lessons/languages/README.md) and by [mechanism](lessons/patterns.md), with exercises, see [Learn Programming the Weird Way!](lessons/README.md).
 
 ## Repository layout
 
@@ -71,6 +75,7 @@ Every "Teaches you" cell above is a promise, not just a label: open the folder's
 CHALLENGE.md                  # the rules - start here if you want to play
 CONTRIBUTING.md               # how to send in an entry, and how it gets reviewed
 SANDBOX-SETUP.md              # how to install Docker / Windows Sandbox to run entries safely
+lessons/                      # Learn Programming the Weird Way!: lessons, patterns, blockers, exercises
 sandbox/                      # where entries get run safely: Docker images, Windows Sandbox, the Actions gate
 build.gradle, gradlew*        # root Gradle wrapper: runs the Java, Kotlin, Python, and Go ports
 docs/
@@ -106,3 +111,5 @@ LICENSE
 ```
 
 Ken's COBOL, Java, Kotlin, Python, and Go ports live here too, folded in with full credit intact in each one's README.
+
+Ready to dig into any of them as a lesson? Start at [Learn Programming the Weird Way!](lessons/README.md).
