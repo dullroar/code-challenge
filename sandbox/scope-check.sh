@@ -21,6 +21,8 @@
 # Exit status: 0 pass, 1 fail, 2 usage or git error.
 set -uo pipefail
 export LC_ALL=C.UTF-8
+# Git Bash: don't let MSYS rewrite "ref/name:path" arguments into Windows path lists.
+export MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL='*'
 
 [[ $# -ge 2 ]] || { echo "usage: $0 <base> <head> [--entries-out FILE]" >&2; exit 2; }
 base=$1 head=$2 entries_out=
@@ -67,8 +69,9 @@ for entry in "${!entries[@]}"; do
     done < <(git diff --numstat "$mb" "$head" -- "$dir")
 done
 
-# Every text file the PR adds or changes, for the character checks and the report.
-mapfile -t files < <(git diff --name-only --diff-filter=AM "$mb" "$head" | grep -v '^README\.md$')
+# Every text file the PR adds or changes, for the character checks and the report. Binary files
+# are skipped here (git's numstat shows them as "-"); inside src/ they have already failed above.
+mapfile -t files < <(git diff --numstat --diff-filter=AM "$mb" "$head" | awk -F'\t' '$1 != "-" && $3 != "README.md" { print $3 }')
 (( readme_changed )) && files+=(README.md)
 
 hidden='[\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{2064}\x{2066}-\x{2069}\x{FEFF}\x{00AD}\x{2028}\x{2029}]'
@@ -98,7 +101,8 @@ for p in "${patterns[@]}"; do
     label=${p%%|*} re=${p#*|}
     out=
     for f in "${files[@]}"; do
-        hits=$(content "$f" | grep -nP -- "$re" | cut -c1-200 | sed "s|^|  $f:|")
+        r=$re; [[ $f == *.md ]] && r=${re//'|`[^`]+`'/}   # Markdown code spans aren't shell backticks
+        hits=$(content "$f" | grep -nP -- "$r" | cut -c1-200 | sed "s|^|  $f:|")
         [[ -n $hits ]] && out+=$hits$'\n'
     done
     if [[ -n $out ]]; then echo "--- $label"; printf '%s' "$out"; fi
