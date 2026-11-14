@@ -28,7 +28,7 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh --online-build --out ./results src/RustChallenge1
 ```
 
-This is the Linux home of this entry, and it needs no WSLg: the [`Dockerfile`](Dockerfile) compiles it with Ubuntu's Rust in a build stage, then runs the one binary on a base with the GTK 4 runtime, a virtual display (Xvfb) and a screenshot tool, and no Rust, headers or compiler. The window opens on that virtual display *inside* the container, the entrypoint screenshots it after a few seconds and closes it, and the run prints the SQLite rows it wrote. With `--out`, `results/screenshot.png` is the window. `--online-build` is needed because the build downloads the locked crates (the run itself has no network). The image is about 350 MB, the largest of the set, because GTK 4 is.
+This is the Linux home of this entry, and it needs no WSLg: the [`Dockerfile`](Dockerfile) compiles it with Ubuntu's Rust in a build stage, then runs the one binary on a base with the GTK 4 runtime, a virtual display (Xvfb) and a screenshot tool, and no Rust, headers or compiler. The window opens on that virtual display *inside* the container, the entrypoint screenshots it after a few seconds and closes it, and the run prints the SQLite rows it wrote. With `--out`, `results/screenshot.png` is the window. `--online-build` is needed because the build downloads the locked crates (the run itself has no network). The image is about 350 MB, because GTK 4 is big.
 
 ## How the stunt works
 

