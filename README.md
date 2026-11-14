@@ -10,7 +10,7 @@ It is a joke with a serious job inside it. Underneath every entry is a real less
 
 The deeper point, the one worth keeping after the jokes wear off: **THERE ARE NO BLOCKERS, JUST NOT ENOUGH IMAGINATION.**
 
-It has turned into a small, friendly contagion. **Ken caught it too.** What started as one C# program is now **twenty-two** programs in **thirteen** languages, written by more than one person, and still growing.
+It has turned into a small, friendly contagion. **Ken caught it too.** What started as one C# program is now **twenty-four** programs in **fourteen** languages, written by more than one person, and still growing.
 
 ## Psst, hey kid
 
@@ -56,6 +56,8 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **Forth** | Jim | One `begin ... until`, and `outfile-execute` points the output at SQLite | A stack language as a whole program | [`src/forth`](src/forth/README.md) |
 | **Forth, weirder** | Jim | No control-flow word and no variable: the state rides the data stack while the loop moves the text interpreter's own `>in` backwards | The parse position as a program counter | [`src/forth-weird`](src/forth-weird/README.md) |
 | **GNU sed regex** | Ken | The program is one line of text, rewritten until it's done | sed substitutions as a Markov algorithm | [`src/regex-sed`](src/regex-sed/README.md) |
+| **COBOL** | Ken | `PERFORM DRAW-CARD UNTIL OVER-FORTY`: the stop rule is declared as data on the total, not coded in the procedure | A stop rule declared as data, and a number's picture doing your rounding | [`src/cobol`](src/cobol/README.md) |
+| **COBOL, weirder** | Ken | No `IF`, `PERFORM` or `UNTIL`: `ALTER` rewires a `GO TO` at run time, and a two-digit field overflowing is the stop rule | Why structured programming won, via self-rewriting control flow | [`src/cobol-weird`](src/cobol-weird/README.md) |
 | **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | The same bodiless-loop trick, Java style | [`src/JavaChallenge1`](src/JavaChallenge1/README.md) |
 | **Kotlin** | Ken | The same challenge, built as a sequence | The same trick, with Kotlin's sequence builders | [`src/KotlinChallenge1`](src/KotlinChallenge1/README.md) |
 | **Python** | Ken | The same challenge, Python style | The same trick, in a language with no `;` loops | [`src/PythonChallenge1`](src/PythonChallenge1/README.md) |
@@ -84,6 +86,8 @@ src/
   regex-pcre2grep/            # pcre2grep: callouts run sqlite3, exit codes steer the match
   regex-dotnet/               # .NET: balancing groups only, and the walls it hits
   regex-sed/                  # GNU sed (Ken): the program is one line of text, rewritten by substitutions
+  cobol/                      # COBOL (Ken): PERFORM ... UNTIL, with the stop rule declared as data
+  cobol-weird/                # COBOL (Ken): no IF or PERFORM; ALTER rewires a GO TO and an overflow stops it
   LinqChallenge1/             # LINQ: one fluent method-chain expression statement
   LinqChallenge2/             # LINQ: one SQL-like query-expression statement
   make-gnu/                   # GNU Make: no $(shell); Make re-executes itself as the loop
@@ -101,4 +105,4 @@ src/
 LICENSE
 ```
 
-Ken's Java, Kotlin, Python, and Go ports live here too, folded in with full credit intact in each one's README.
+Ken's COBOL, Java, Kotlin, Python, and Go ports live here too, folded in with full credit intact in each one's README.
