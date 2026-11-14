@@ -39,9 +39,9 @@ Every version builds the same demo: generate 10 to 19 random hours at a time for
 
 The C# version is where it all began (a 2008 class exercise, later modernized), so it keeps pride of place below. But the Rust and XAML versions are first-class citizens here, not footnotes.
 
-## It's a trend! Ken Kastl's ports
+## It's a trend! Ken's ports
 
-**[Ken Kastl](https://github.com/kastl) took this and ran.** His repo, [`kastl/one-statement-challenge`](https://github.com/kastl/one-statement-challenge), ports the challenge to **Java, Kotlin, Python, and Go** so you can compare how each language bends (or refuses to bend) to a single bodiless statement. He started with Java and Kotlin, then kept going, because apparently that is what happens when someone catches the bug.
+**[Ken on GitHub](https://github.com/kastl) took this and ran.** His repo, [`kastl/one-statement-challenge`](https://github.com/kastl/one-statement-challenge), ports the challenge to **Java, Kotlin, Python, and Go** so you can compare how each language bends (or refuses to bend) to a single bodiless statement. He started with Java and Kotlin, then kept going, because apparently that is what happens when someone catches the bug.
 
 Ken's repo is a great reading list for anyone who wants to see the same perversion expressed four different ways:
 
