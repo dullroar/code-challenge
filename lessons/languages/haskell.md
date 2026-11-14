@@ -52,7 +52,7 @@ Legitimate uses: lazy IO exists for streaming (`getContents` over a large input)
 
 ### 5. Now break it yourself
 
-See [exercises](../exercises.md#haskell-break-the-laziness): replace `unsafeInterleaveIO` with plain IO, or move the `evaluate`, and predict the output.
+See [exercises](../exercises.md#b2-haskell-break-the-laziness-verified): replace `unsafeInterleaveIO` with plain IO, or move the `evaluate`, and predict the output.
 
 ## Quirks
 

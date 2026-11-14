@@ -120,7 +120,7 @@ The Linux script entries share a reporting shape (rows, a committed total, a stu
 
 ## Open challenges
 
-Each of these is an [exercise](exercises.md#close-a-blocker):
+Each of these is an [exercise](exercises.md#g-open-challenges-not-verified-may-be-impossible):
 
 1. Give the LINQ entries random 10-19 hour cards while staying in one statement.
 2. Make `regex-dotnet` fail on purpose without losing its captures.

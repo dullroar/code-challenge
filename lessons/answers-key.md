@@ -1,0 +1,269 @@
+# Answers key
+
+Worked solutions for the [exercises](exercises.md). **Try the exercise first**: write your prediction down, run it, and only then read here.
+
+Every solution below was run against the real entries:
+
+- Docker exercises by [`tools/verify-exercises.sh`](tools/verify-exercises.sh) (every mutation is made on a *copy* of the entry);
+- Windows Sandbox exercises by [`tools/verify-windows.ps1`](tools/verify-windows.ps1) on Windows 11 Pro.
+
+Output is random, so numbers here are *examples*. What is guaranteed is the **property** each exercise asks you to observe. Folder variables: `WORK=$(mktemp -d)`, and `cp -r src/<entry> "$WORK/"` before you edit.
+
+## A1. Read the rows
+
+Example output from `src/cobol-weird`:
+
+```text
+Meetings   15   15
+Coding     19   34
+Debugging  12   46      <- crossing card: the total before it was 34, which is <= 40
+# committed total=46 entries=3 DEMO ONLY
+```
+
+- The card that crosses is the first whose running total is **over 40**; the total before it is always **at most 40** (otherwise the run would have stopped earlier). The totals can end anywhere from 41 to 59.
+- Exactly 40 does not stop the run because every stop rule asks "is the total *over* 40?" (`<= 40` keeps going, `41` or more stops). Four 10-hour cards total exactly 40, so a fifth card is drawn. [`regex-dotnet`](../src/regex-dotnet/README.md) prints no running-total column, so `check-demo.sh` adds the hours itself.
+
+## B1. COBOL: predict, then break ALTER
+
+```bash
+cp -r src/cobol-weird "$WORK/"                                   # run everything from the repo root
+sed -i 's/PIC 99 VALUE 59\./PIC 99 VALUE 49./' "$WORK/cobol-weird/timecards.cob"
+sandbox/container/run-image.sh "$WORK/cobol-weird" > out.txt 2>&1
+bash lessons/tools/check-demo.sh out.txt 50                      # PASS: 4 rows, total 59 (limit 50)
+sandbox/run.sh "$WORK/cobol-weird"                               # FAIL run N: kept going after the total passed 40
+```
+
+- **Prediction:** `WS-HEADROOM` is `PIC 99`. It overflows when `headroom + total` reaches 100, i.e. when `total >= 100 - 49 = 51`. So the run stops on the first card that takes the total **above 50**. (With the original 59 it is above 40.)
+- The run ends with totals from 51 to 69; `check-demo.sh ... 50` passes. The entry's own `check.sh` fails because it hard-codes 40.
+- **`DISPLAY "x"` inside `NEXT-CARD`:** the *build* fails, because `ALTER` may only rewrite a paragraph that is exactly one `GO TO`:
+
+```text
+timecards.cob:158: error: 'NEXT-CARD' is not an alterable paragraph
+```
+
+  (five of these, one per `ALTER`). The compiler has to know that the paragraph's only content is a jump whose target it can patch.
+
+## B2. Haskell: break the laziness
+
+1. `let entries = length cards` (a lazy binding) ends the run with:
+
+   ```text
+   timecards: fd:5: hPutStr: illegal operation (handle is closed)
+   ```
+
+   Nothing demands the cards until the summary line is printed, which is *after* the `COMMIT` and after the pipe to `sqlite3` was closed; forcing a cell then fires its effect on a closed handle. `check-demo.sh` fails (a row or two, no summary).
+2. Replacing `unsafeInterleaveIO $ case ...` with `id $ case ...` does **not** hang. It dies at once with:
+
+   ```text
+   timecards: cyclic evaluation in fixIO
+   ```
+
+   Without the interleave, building the list of actions pattern-matches `before`, which needs `cards`, which `fixIO` has not produced yet. (Only the first row, `Meetings 10 10`, is printed before the loop is detected.) The `case` has to sit *inside* the deferred action.
+
+## B3. Forth: move the anchor
+
+- **(a)** `0 0` on its own line, then `>in @ step rewind?`: **works**. `>in @` captures the position *after* the `@`, and the rewind jumps back to that anchor, which is after the `0 0`. So `0 0` is never re-executed. `check-demo.sh` passes.
+- **(b)** `>in @ 0 0 step rewind?`: the anchor is now *before* `0 0`, so every rewind re-runs `0 0` and pushes a fresh zero state. The total restarts from zero on every pass, and the stop rule never fires. With `SANDBOX_TIMEOUT=30` you get hundreds of rows (678 in the verification run), every row has total = hours, and there is no `# committed` line.
+- **(c)** `41 <` to `51 <`: `check-demo.sh out.txt 50` passes (stops when the total reaches 51).
+- **Why only (b)?** The parse position is a program counter: where it jumps back to decides which tokens are the loop body. State must stay *outside* the body (before the anchor).
+
+## B4. Make: remove the no-op, and override the clock
+
+1. Without `@:` the recipe `$(if ...,$(file >$@,...))` expands to nothing, so Make runs no command and **does not count the makefile as remade**. It never restarts, so no card is ever included:
+
+   ```text
+   # committed total=0 entries=0 DEMO ONLY
+   # make re-executed itself 0 times, once per card
+   ```
+
+   The card file *was* written at expansion time, but Make only notices a remade makefile when a command ran. (`sandbox/run.sh` fails: "unexpected stderr".)
+2. `lessons/tools/run-in-sandbox.sh src/make-gnu make NOW=1700000000` prints rows labelled `2023-W46`. `date -u -d @1700000000 +%G-W%V` prints `2023-W46`.
+
+## B5. CMake: mutate the literal
+
+With 31 `x`s (`"^xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"`) the loop stops once the total reaches 31, i.e. **passes 30**. `check-demo.sh out.txt 30` passes on every run; with the default limit of 40 it passes only when the final total happens to be 41 or more, so do not rely on it. `sandbox/run.sh` fails because the entry's own check expects 40.
+
+The stop test must come **first** in the condition because a failed `MATCHES` clears every `CMAKE_MATCH_n` register and a successful one rewrites them. The *main* match has to run last for its captures to be the ones that survive into the next pass.
+
+## B6. APL: the off-by-one rewrite
+
+1. `4↓` drops only the header and *three* gene lines, so the child's body keeps its parent's `T←H` gene (the fourth). Every child resets its running total to just its own hours, and `Alive←40≥T` is always 1. The program recurses until the timeout:
+
+   ```text
+   Meetings    18    18    ...
+   Coding    17    17    ...        <- total equals hours on every row
+   ...
+   TIMEOUT after 40s          (exit 124)
+   ```
+
+   That is why [`apl-weird/check.sh`](../src/apl-weird/check.sh) runs under `timeout`: this failure is silent and structural.
+2. `⎕IO←1` gives an `INDEX ERROR` on `Card0[5]`, the line `Show(⊃Categories[C])...`. `C` counts categories from 0 (`C←0`, `4|C+1`), which is a valid index only with origin 0. No rows are printed.
+
+## B7. LINQ: enumerate twice
+
+The program (also in [`solutions/b7-linq`](solutions/b7-linq)):
+
+```csharp
+var q = Enumerable.Range(1, 3).Select(i => { Console.WriteLine($"effect {i}"); return i; });
+Console.WriteLine("-- (a) declared q");
+Console.WriteLine("-- (b) q.Sum()");
+_ = q.Sum();
+Console.WriteLine("-- (c) q.Sum() and q.ToList()");
+_ = q.Sum(); _ = q.ToList();
+Console.WriteLine("-- (d) q.ToList() once, then sum the list");
+var list = q.ToList(); _ = list.Sum();
+var r = new Random(42);
+Console.WriteLine(string.Join(" ", Enumerable.Range(0, 5).Select(_ => r.Next(10, 20))));
+```
+
+| Step | `effect` lines | Why |
+| --- | --- | --- |
+| (a) declare | 0 | `Select` is **deferred**: it builds a description, not a result. |
+| (b) `Sum()` | 3 | Enumerating runs the lambda once per element. |
+| (c) `Sum()` and `ToList()` | 6 | Each enumeration re-runs the pipeline and every side effect in it. |
+| (d) `ToList()` then sum the list | 3 | `ToList()` is eager and snapshots the values; summing a list re-runs nothing. |
+
+Seed 42 gives `16 11 11 15 11`. A `System.Random` with a fixed seed is a deterministic sequence, and the `.xaml` file creates `new Random(42)` with no other entropy, so every run produces the same cards. The eager operator that forces the lazy tail in `LinqChallenge1` is the final `.Aggregate(0, (count, _) => count + 1)`.
+
+## B8. Regex: what survives a failed match
+
+- **.NET:** with `(?!)` appended the match can never succeed; the host's `match.Success` is false and a failed `Match` exposes **no captures**, so every card accumulated in the stacks is lost:
+
+  ```text
+  match returned: false
+  # captured total=0 entries=0 DEMO ONLY
+  ```
+
+  This is why the .NET entry must *return true* while the Perl and PCRE2 entries can return false after writing everything: their output is a side effect, `regex-dotnet`'s output is the captures.
+- **pcre2grep:** `pcre2grep` starts a callout program with `fork` and `execv`, which does not search `PATH`. A bare `sqlite3` fails to start, which the engine treats exactly like a callout that returned non-zero, i.e. a vetoed branch. The run prints **nothing**, exits 0, and writes no rows.
+- **Contrast (three sentences):** In Perl, `local` variables unwind on backtracking but `print`s and `INSERT`s already happened, so the work survives a failed match. In PCRE2 the callout state lives in a C struct that backtracking never touches, so everything survives. In .NET the only output *is* the captures, and a failed match discards them, so nothing survives.
+
+## B9. sed: watch a computation
+
+```bash
+lessons/tools/run-in-sandbox.sh -e TRACE=1 src/regex-sed ./timecards.sh 2> trace.txt
+grep -c 'tot:' trace.txt                  # e.g. 48 for a three-card run
+grep -E 'tot:#{41}' trace.txt | tail -1   # the final state: 41+ tally marks
+```
+
+- The state is one line, e.g. `run:... k:### rng:0110101000001111 cats:Coding,... tot: n: c:Meetings`; `tot:` grows by tally marks (`#`). About 16 lines per card in the verification run, but it **varies** because of rejection.
+- [L29](../src/regex-sed/timecards.sed#L29), `/ rng:1(01|1)/b draw`, redraws when the 4-bit nibble is 10-15. `1(01|1)` matches `101x` (10, 11) and `11xx` (12-15): the values a 10-19 hour draw cannot use. A rejected draw repeats the shift-register steps, which is why the per-card line count is not constant.
+
+## C1. Weird next to boring
+
+Measured with the verification script (non-comment lines):
+
+| Pair | Idiomatic | Weird |
+| --- | --- | --- |
+| COBOL | 156 | 170 |
+| Haskell | 91 | 108 |
+| Forth | 97 | 84 |
+| APL | 41 | 47 |
+
+Sample comparison for Haskell: the idiomatic `timecards` is one **pure function** (`span`), so a unit test needs no database, and a debugger shows plain lists. The weird version cannot be tested without running its effects and the order of effects depends on the consumer; but it can do something the idiomatic one cannot: *write each row exactly when that card is first demanded*, with no loop or accumulator in the program. It is the right choice for a lazy streaming library or a teaching demo, not for application code.
+
+Forth is the instructive exception: the weird version is *shorter* because it deletes the `variable`s and the word that updates them, trading them for stack discipline.
+
+## C2. Make the constraint real
+
+A reference check, [`solutions/c2-forth-rule-check.sh`](solutions/c2-forth-rule-check.sh):
+
+```bash
+code=$(tr -d '\r' < "$f" | sed -E -e 's/(^|[[:space:]])[\]([[:space:]].*)?$//' \
+                                  -e 's/[(][^)]*[)]//g' -e 's/[.]"[^"]*"//g')   # strip \ comments, ( ) comments, ." strings
+grep -Eiqw 'begin|until|while|repeat|again|if|then|else|do|loop|case|of|recurse|exit|leave' <<<"$code" && fail
+grep -Eiqw 'variable|buffer:' <<<"$code" && fail
+(( $(grep -o '>in @' <<<"$code" | wc -l) >= 2 )) || fail
+```
+
+Run against the real file it prints `OK: no control words, no variables, >in @ x3`. The three mutations (verified):
+
+```bash
+sed 's/^drop /begin drop /'              timecards.fs > m1.fs   # FAIL: banned control word: begin
+sed 's/^utime drop/variable v utime drop/' timecards.fs > m2.fs # FAIL: a variable is declared
+sed 's/>in @/0/g'                         timecards.fs > m3.fs  # FAIL: >in @ appears 0 time(s)
+```
+
+A `begin if until` placed after a `\` on a line is stripped first, so it does not trigger.
+
+## C3. A loop whose state is not a variable
+
+```bash
+seq 10 | awk '{ print ++c }'          # prints 1..10
+```
+
+The loop is awk's **implicit main loop**: it runs the rule once per input record. The state ("how many times") lives in the *input stream*, which the caller controls (`seq N` supplies N records). `c` only counts. No `for`, `while`, `do`, `function` or `goto` appears. Verified for N = 1, 3, 10. Knowledge level: **guaranteed**: POSIX defines the record-processing model.
+
+## D. Port the challenge
+
+A complete reference answer in awk is in [`solutions/awk-port`](solutions/awk-port): `timecards.awk`, a `Dockerfile`, and a `check.sh`. Run it:
+
+```bash
+sandbox/container/run-image.sh lessons/solutions/awk-port   # build and run, shows the rows and the SQLite table
+sandbox/run.sh lessons/solutions/awk-port                   # its own check: 25 runs
+```
+
+How it satisfies the criteria:
+
+| Criterion | How |
+| --- | --- |
+| The stop rule is the trick | `total <= 40 { ... }` is a *pattern*; the five records come from `seq 5`, and once the total passes 40 no later record matches. Five records always suffice (5 x 10 >= 50). |
+| DEMO ONLY enforced | `CHECK(demo_only = 1)` in the table; `check.sh` tries to insert `demo_only = 0` and fails if it is accepted. |
+| 25 runs, varied hours | `check.sh` loops 25 times, compares the printed rows with the `# committed` line and the SQLite row count, and requires at least 5 distinct hour values. |
+| Constraint is real | `check.sh` strips comments and strings and fails on `for`, `while`, `do`, `function`, `func` or `goto`. |
+
+Verified mutations: adding a `for` loop makes the check fail; making the hours constant (`hours = 10`) makes it fail (fewer than five distinct hour values).
+
+## E1. Run and read the evidence (Windows Sandbox)
+
+```powershell
+sandbox\windows\run.ps1 src\LinqChallenge1
+sandbox\windows\run.ps1 src\xaml -RunArgs strict.xaml
+```
+
+Verified output highlights:
+
+```text
+network: blocked
+OK: no orchestration helper, build clean, one run persisted exactly 40.0h across 5 fixed rows, and the process exited on its own
+PASS LinqChallenge1 (check.ps1 exited 0)
+...
+wrote: C:\work\xaml\data\xaml-demo-timecards.xml (607 bytes)
+screenshot: ...\out\screenshot.png
+PASS xaml (still running with a window after 20s; closed cleanly by the harness)
+```
+
+Fixed-data entries: the LINQ ones always total exactly 40.0h (a fixed work week). Random: `ModernChallenge1` and every other entry; `xaml` is *seeded* random (`Random(42)`), so it is the same every run. Needs the .NET 10 SDK on the host.
+
+## E2. Change the XAML interpreter's seed
+
+Replacing `<sys:Int32>42</sys:Int32>` with `7` in `strict.xaml` and running it in Windows Sandbox still passes (the window is shown and closed by the harness). The sandbox does not print the hours, so read them with the B7 program: seed 42 gives `16 11 11 15 11`; `new Random(7)` gives a different sequence. The same seed always gives the same sequence because `System.Random` is deterministic given its seed.
+
+"The variable" is the `<sys:Random x:Key="rnd">` resource plus the **carrier arrays**: each `ObjectDataProvider` call fills a `char[]`/`byte[]` in place and the next one reads it. The loop is unrolled (four copied passes, per the [README](../src/xaml/README.md)) because XAML has no loop construct: the file needs one copy of the draw-and-store sequence per card.
+
+## F. Prove a README claim
+
+Claim, from [`src/haskell/README.md`](../src/haskell/README.md): "`takeWhile` is not enough: `takeWhile (<= 40)` drops the card that crosses the line, and the challenge needs it. `span` hands back both halves."
+
+[`solutions/f-takewhile.hs`](solutions/f-takewhile.hs):
+
+```haskell
+main :: IO ()
+main = do
+  let totals = scanl1 (+) [15, 11, 12, 11] :: [Int]            -- 15, 26, 38, 49
+  putStrLn ("takeWhile: " ++ show (takeWhile (<= 40) totals))
+  let (under, over) = span (<= 40) totals
+  putStrLn ("span: " ++ show (under ++ take 1 over))
+```
+
+```bash
+lessons/tools/run-in-sandbox.sh lessons/solutions runghc f-takewhile.hs
+# takeWhile: [15,26,38]          <- the crossing total, 49, is dropped
+# span: [15,26,38,49]            <- kept
+```
+
+Negative control: change the limit to `<= 50` and `takeWhile` returns all four totals. **Tag: guaranteed**, since both functions are specified by the Haskell `Prelude`, and your test does not depend on the implementation.
+
+## G. Open challenges
+
+No answers: these are unsolved. If you close one, send it in.

@@ -1,0 +1,11 @@
+var q = Enumerable.Range(1, 3).Select(i => { Console.WriteLine($"effect {i}"); return i; });
+Console.WriteLine("-- (a) declared q");
+Console.WriteLine("-- (b) q.Sum()");
+_ = q.Sum();
+Console.WriteLine("-- (c) q.Sum() and q.ToList()");
+_ = q.Sum(); _ = q.ToList();
+Console.WriteLine("-- (d) q.ToList() once, then sum the list");
+var list = q.ToList(); _ = list.Sum();
+Console.WriteLine("-- (e) Random(42), five hours");
+var r = new Random(42);
+Console.WriteLine(string.Join(" ", Enumerable.Range(0, 5).Select(_ => r.Next(10, 20))));

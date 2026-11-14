@@ -47,7 +47,7 @@ Tags: stack effects and flags are **guaranteed** by standard Forth. `>in` manipu
 ### 4. Do this in production and you're fired
 
 - **It only works at the top level, or in `evaluate`d / `included` text.** `>in` is the parse position of the current input line. Compile the loop *into* a word and there is no line to rewind.
-- **Moving one token breaks it silently.** If the `0 0` before `>in @` moves onto the previous line, the state resets every pass and the program never stops. A correct-looking program, a runaway loop.
+- **Moving one token breaks it silently.** If the `0 0` moves to *after* the `>in @` (`>in @ 0 0 step rewind?`), the anchor is now before the state, so every rewind pushes a fresh `0 0`: the total resets every pass and the program never stops (verified: hundreds of rows, no `# committed` line). A correct-looking program, a runaway loop. Moving `0 0` to the previous line is harmless, because the anchor is still after it.
 - **No tooling will understand it.** Linters, tracers and humans all assume that parse position is not state.
 - **Portability.** Gforth-specific words; `3dup` is not in Gforth 0.7.3, so the file defines it with `2 pick` three times ([L37](../../src/forth-weird/timecards.fs#L37)).
 
@@ -55,7 +55,7 @@ Legitimate uses: interpreters, debuggers, and parsing words, where manipulating 
 
 ### 5. Now break it yourself
 
-See [exercises](../exercises.md#forth-move-the-anchor).
+See [exercises](../exercises.md#b3-forth-move-the-anchor-verified).
 
 ## Quirks
 

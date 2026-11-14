@@ -79,7 +79,7 @@ Tags: deferred vs. immediate execution of each operator is **guaranteed** (docum
 
 ### Break it yourself
 
-See [exercises](../exercises.md#linq-enumerate-twice).
+See [exercises](../exercises.md#b7-linq-enumerate-twice-verified).
 
 ## XAML
 
