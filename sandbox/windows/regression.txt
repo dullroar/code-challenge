@@ -1,0 +1,6 @@
+# Existing Windows entries the gate runs when no PR number is given: <folder> [program args...]
+# Entries with check.ps1 run it; the others get a build, start, screenshot and close smoke test.
+src/LinqChallenge1
+src/LinqChallenge2
+src/ModernChallenge1
+src/xaml strict.xaml

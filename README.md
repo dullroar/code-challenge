@@ -22,7 +22,7 @@ You know you want to write beautifully wrong code. **You know you do.**
 
 ## Ready to play?
 
-The rules, the shared demo, and the do's and don'ts live in **[`CHALLENGE.md`](CHALLENGE.md)**. Pick a language. Pick a constraint. Make something terrible that works.
+The rules, the shared demo, and the do's and don'ts live in **[`CHALLENGE.md`](CHALLENGE.md)**. Pick a language. Pick a constraint. Make something terrible that works. Sending it in? See **[`CONTRIBUTING.md`](CONTRIBUTING.md)**.
 
 ## The results so far
 
@@ -65,6 +65,8 @@ Every "Teaches you" cell above is a promise, not just a label: open the folder's
 
 ```text
 CHALLENGE.md                  # the rules - start here if you want to play
+CONTRIBUTING.md               # how to send in an entry, and how it gets reviewed
+sandbox/                      # where entries we didn't write get run: Docker, Windows Sandbox, the Actions gate
 build.gradle, gradlew*        # root Gradle wrapper: runs the Java, Kotlin, Python, and Go ports
 docs/
   My Code Challenge.pdf       # anonymized source presentation
