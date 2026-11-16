@@ -10,7 +10,7 @@ It is a joke with a serious job inside it. Underneath every entry is a real less
 
 The deeper point, the one worth keeping after the jokes wear off: **THERE ARE NO BLOCKERS, JUST NOT ENOUGH IMAGINATION.**
 
-It has turned into a small, friendly contagion. **Ken caught it too.** What started as one C# program is now **twenty-four** programs in **fourteen** languages, written by more than one person, and still growing.
+It has turned into a small, friendly contagion. **Ken caught it too.** What started as one C# program is now **thirty-one** programs in **eighteen** languages, written by more than one person, and still growing.
 
 ## Psst, hey kid
 
@@ -44,6 +44,8 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | --- | --- | --- | --- | --- |
 | **APL** | Jim | Five rolls and one take-while: no loop anywhere | That array thinking can replace control flow | [`src/apl`](src/apl/README.md) |
 | **APL, weirder** | Jim | Each timecard is a function that copies its own source with `⎕CR`, rewrites it and defines the copy with `⎕FX`; compress over that source is the stop rule | Self-replicating functions instead of loops and `if` | [`src/apl-weird`](src/apl-weird/README.md) |
+| **AWK** | Jim | One `while` in a `BEGIN` block, written to run unchanged on gawk, mawk, the one-true-awk and busybox awk | Portable POSIX awk, and exactly where the four implementations disagree | [`src/awk`](src/awk/README.md) |
+| **AWK, weirder** | Jim | gawk reads `/dev/urandom` with `RS="[0-9]"`, so each digit (`RT`) is a die roll and each record a card; `t > 40 { exit }` is the stop rule, with no loop, `if` or random call | A regex record separator, `RT`, and awk's implicit main loop | [`src/awk-weird`](src/awk-weird/README.md) |
 | **C# (the original)** | Jim | Empty-body `for`; everything else lives in its three clauses | Runtime XAML, LINQ, EF Core, WPF animation | [`src/ModernChallenge1`](src/ModernChallenge1/README.md) |
 | **COBOL** | Ken | `PERFORM DRAW-CARD UNTIL OVER-FORTY`: the stop rule is declared as data on the total, not coded in the procedure | A stop rule declared as data, and a number's picture doing your rounding | [`src/cobol`](src/cobol/README.md) |
 | **COBOL, weirder** | Ken | No `IF`, `PERFORM` or `UNTIL`: `ALTER` rewires a `GO TO` at run time, and a two-digit field overflowing is the stop rule | Why structured programming won, via self-rewriting control flow | [`src/cobol-weird`](src/cobol-weird/README.md) |
@@ -56,6 +58,9 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **Kotlin** | Ken | The same challenge, built as a sequence | The same trick, with Kotlin's sequence builders | [`src/KotlinChallenge1`](src/KotlinChallenge1/README.md) |
 | **LINQ, fluent chain** | Jim | One LINQ method chain is the entire program | LINQ method chains, end to end | [`src/LinqChallenge1`](src/LinqChallenge1/README.md) |
 | **LINQ, query expression** | Jim | Nearly every line is `from`/`where`/`let`/`select` | C# query syntax, pushed as far as it goes | [`src/LinqChallenge2`](src/LinqChallenge2/README.md) |
+| **Lisp** | Jim | One `LOOP` form that sums, collects and stops, in Common Lisp | `LOOP` clause order, structs, and hand-written ISO-week arithmetic | [`src/lisp`](src/lisp/README.md) |
+| **Lisp, weirder** | Jim | Each card is a CLOS method chained through a class hierarchy; the built-in `or` method combination stops at the first true result | Method combination as control flow | [`src/lisp-weird`](src/lisp-weird/README.md) |
+| **m4** | Jim | A macro whose last word is itself: m4 rescans its own output, and a Park-Miller generator is built from 32-bit `eval` | Quoting as lazy evaluation, in a language that is only text | [`src/m4`](src/m4/README.md) |
 | **Make, CMake** | Jim | One bodiless `while()`; its condition is a regex machine | `while()` + regex as a tiny register machine | [`src/cmake`](src/cmake/README.md) |
 | **Make, GNU** | Jim | No `$(shell)`; Make re-executes itself as the loop | Arithmetic and looping in plain Make syntax | [`src/make-gnu`](src/make-gnu/README.md) |
 | **Python** | Ken | The same challenge, Python style | The same trick, in a language with no `;` loops | [`src/PythonChallenge1`](src/PythonChallenge1/README.md) |
@@ -65,6 +70,8 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **RegEx, pcre2grep** | Jim | No custom code at all: a stock `pcre2grep`, one command line | Program exit codes as control flow | [`src/regex-pcre2grep`](src/regex-pcre2grep/README.md) |
 | **RegEx, Perl** | Jim | One `=~` match does everything, then deliberately returns false | Executable code inside a live regex match | [`src/regex-perl`](src/regex-perl/README.md) |
 | **Rust** | Jim | No `;`, `let`, or `return` in `main` - a test enforces it | Iterators and closures as control flow | [`src/RustChallenge1`](src/RustChallenge1/README.md) |
+| **Tcl** | Jim | A `while` loop over dicts, SQL parameters bound straight from Tcl variables, and an optional Tk window that is tested headless | Idiomatic Tcl: braces, dicts, `db eval` bindings and Tk | [`src/tcl`](src/tcl/README.md) |
+| **Tcl, weirder** | Jim | The program is text in a SQLite table, fetched by an overridden `unknown`; a recursive trigger is the loop and `INSERT ... WHERE` is the stop rule | Code as data, and a database trigger as control flow | [`src/tcl-weird`](src/tcl-weird/README.md) |
 | **XAML** | Jim | The program *is* a `.xaml` file, run by the parser that loads it | XAML as a runtime interpreter, not just markup | [`src/xaml`](src/xaml/README.md) |
 
 Every "Teaches you" cell above is a promise, not just a label: open the folder's README and that is genuinely what you will walk away understanding. For the same material organized by [language](lessons/languages/README.md) and by [mechanism](lessons/patterns.md), with exercises, see [Learn Programming the Weird Way!](lessons/README.md).
@@ -103,6 +110,13 @@ src/
   haskell-weird/              # Haskell: an infinite list of cards whose elements write their own rows
   forth/                      # Forth: one begin ... until and a pipe to SQLite
   forth-weird/                # Forth: no control-flow words; the loop rewinds >in
+  lisp/                       # Common Lisp: one LOOP form
+  lisp-weird/                 # Common Lisp: a class hierarchy is the loop; the or method combination stops it
+  m4/                         # m4: a macro that expands itself until ifelse says stop
+  tcl/                        # Tcl: a while loop, dicts, bound SQL parameters, optional Tk window
+  tcl-weird/                  # Tcl: the program lives in SQLite; a recursive trigger is the loop
+  awk/                        # AWK: portable POSIX awk, one while in BEGIN
+  awk-weird/                  # AWK (gawk): RS="[0-9]" over /dev/urandom; each digit is a die roll
   JavaChallenge1/             # Java (Ken): the same bodiless-loop trick, Java style
   KotlinChallenge1/           # Kotlin (Ken): the same challenge, built as a sequence
   PythonChallenge1/           # Python (Ken): the same challenge, Python style
