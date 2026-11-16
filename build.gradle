@@ -108,6 +108,14 @@ wslRun('runRegexSed', 'src/regex-sed', 'sed', './timecards.sh', 'Runs the sed re
 // cobc -xj compiles and runs; the ./timecards binary it leaves is git-ignored in each folder.
 wslRun('runCobol', 'src/cobol', 'cobc', 'cobc -xj timecards.cob', 'Runs the COBOL version (src/cobol).')
 wslRun('runCobolWeird', 'src/cobol-weird', 'cobc', 'cobc -xj timecards.cob', 'Runs the weird COBOL (ALTER) version (src/cobol-weird).')
+wslRun('runLisp', 'src/lisp', 'sbcl', 'sbcl --script timecards.lisp', 'Runs the Common Lisp version (src/lisp).')
+wslRun('runLispWeird', 'src/lisp-weird', 'sbcl', 'sbcl --script timecards.lisp', 'Runs the weird Common Lisp (CLOS method combination) version (src/lisp-weird).')
+wslRun('runM4', 'src/m4', 'm4', 'm4 timecards.m4', 'Runs the m4 version (src/m4); needs GNU m4.')
+// Text mode only; add --gui (and --seconds N) when running tclsh yourself to see the Tk window.
+wslRun('runTcl', 'src/tcl', 'tclsh', 'tclsh timecards.tcl', 'Runs the Tcl version (src/tcl).')
+wslRun('runTclWeird', 'src/tcl-weird', 'tclsh', 'tclsh timecards.tcl', 'Runs the weird Tcl (SQLite holds the program) version (src/tcl-weird).')
+wslRun('runAwk', 'src/awk', 'awk', 'awk -f timecards.awk', 'Runs the portable AWK version (src/awk).')
+wslRun('runAwkWeird', 'src/awk-weird', 'gawk', 'gawk -f timecards.awk', 'Runs the weird AWK version (src/awk-weird); needs GNU awk.')
 
 // ── The Docker sandbox (sandbox/README.md) ──────────────────────────────────
 // On Windows the sandbox scripts run in Git Bash, which they support with Docker Desktop; WSL may
