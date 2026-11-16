@@ -12,6 +12,7 @@
 #   cc-rt-gtk      + Xvfb, scrot, GTK 4 runtime (GUI entries on a virtual display)
 #   cc-rt-pytk     + Python 3 with Tk, Xvfb, scrot (Python/Tk GUI entries)
 #   cc-rt-java     + OpenJDK 25 JRE (with AWT), Xvfb, scrot (Java and Kotlin Swing entries)
+#   cc-rt-sbcl, -m4, -tcl, -awk   Common Lisp, GNU m4, Tcl/Tk + tcl sqlite3 + Xvfb, GNU awk
 #   ...            (the list lives in build-bases.sh)
 #
 # What is deliberately NOT here: a compiler, curl, git, pip, an editor, or a package manager

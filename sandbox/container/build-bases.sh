@@ -29,6 +29,10 @@ bases=(
     'dotnet|dotnet-runtime-10.0 libicu74'
     'apl|libpcre2-32-0 libstdc++6'
     'cobol|libcob4t64'
+    'sbcl|sbcl'
+    'm4|m4'
+    'tcl|tcl8.6 tk8.6 libsqlite3-tcl xvfb scrot fonts-dejavu-core'
+    'awk|gawk'
 )
 
 if (( force )) || ! $docker image inspect code-challenge-sandbox:local >/dev/null 2>&1; then

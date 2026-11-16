@@ -137,7 +137,7 @@ Acceptance criteria:
 
 Acceptance criteria:
 
-- Step 2: `TIMEOUT after 40s` and exit `124`. Rows appear whose running total equals their own hours: each child keeps its parent's `T←H` line and restarts the total, so the stop rule never fires. Explain why the entry's own `check.sh` runs under `timeout`.
+- Step 2: the run never ends by itself: you get `TIMEOUT after 40s` (exit `124`), or on a machine where the recursion eats memory faster than that, the container is killed for exceeding its memory limit (`Killed`, exit `137`). No `# committed` line either way. Rows appear whose running total equals their own hours: each child keeps its parent's `T←H` line and restarts the total, so the stop rule never fires. Explain why the entry's own `check.sh` runs under `timeout`.
 - Step 3: an `INDEX ERROR` is printed and no rows appear. Explain which indexing in the program assumes origin 0.
 
 ### B7. LINQ: enumerate twice (verified)
@@ -182,11 +182,71 @@ Acceptance criteria:
 - Find, in [`timecards.sed`](../src/regex-sed/timecards.sed), the rule that rejects a draw of 10-15 for the 4-bit value ([L29](../src/regex-sed/timecards.sed#L29)) and say what the pattern `1(01|1)` matches.
 - The number of state lines per card is *not* constant: say why (rejected draws repeat a step).
 
+### B10. Lisp: swap the method combination (verified)
+
+**Lesson:** [Common Lisp](languages/lisp.md#method-combination-as-control-flow). **Entry:** copies of `src/lisp-weird`.
+
+1. **Predict:** on a copy, replace `or` with `progn` in both places: `(:method-combination or)` ([L61](../src/lisp-weird/timecards.lisp#L61)) and `(defmethod punch or ...)` inside `defcard` ([L39](../src/lisp-weird/timecards.lisp#L39)). `progn` runs *every* method. How many cards will every run print?
+2. **Predict**, on a fresh copy: change *only* the generic function's `(:method-combination or)` to `progn` and leave the `or` qualifiers alone.
+3. **Predict**, on a fresh copy: change the stop test `(> (total ledger) 40)` ([L84](../src/lisp-weird/timecards.lisp#L84)) to `(> (total ledger) 100)`.
+4. Run each with `run-image.sh` (or `lessons/tools/run-in-sandbox.sh <copy> sbcl --script timecards.lisp`).
+
+Acceptance criteria:
+
+- Step 1: **exactly five card rows on every run** (run it five times), and the closing note says `PUNCH had 0 OR methods and 5 ran`. The entry's own `check.sh` **fails** on your copy.
+- Step 2: SBCL prints warnings that contain `Invalid qualifiers for PROGN method combination`. Say what the rule is: a method's qualifiers must belong to the combination of its generic function.
+- Step 3: **exactly five rows on every run**, a final total of at most 95, and `check-demo.sh out.txt 100` fails with "does not pass 100". Say why five is the most this program can ever deal, and what you would have to change to support a limit of 100.
+- In one sentence: which single word is the stop rule, and why does removing it not make the program fail with an error?
+
+### B11. m4: quote the recursion (verified)
+
+**Lesson:** [m4](languages/m4.md#a-loop-made-of-rescanning). **Entry:** copies of `src/m4`.
+
+1. **Predict:** run `lessons/tools/run-in-sandbox.sh src/m4 m4 -Dtc_seed=12345 timecards.m4` twice. What differs between the runs, and what does not?
+2. **Predict:** on a copy, remove the brackets around the recursive call: change `[tc_card()]` at the end of `tc_card` ([L82](../src/m4/timecards.m4#L82)) to `tc_card()`. Run it with `SANDBOX_TIMEOUT=20`, then again as `m4 -L 50 -Dtc_seed=7 timecards.m4`. (`-L` limits nesting.)
+3. On a fresh copy change `eval(tc_total > 40)` to `eval(tc_total > 60)`.
+
+Acceptance criteria:
+
+- Step 1: the card rows are identical both times (`Meetings 19`, `Coding 13`, `Debugging 16`, with totals 19, 32, 48); only the run id (it contains the clock) can differ. Say why a pinned seed gives the same cards: the generator is a formula, and the program holds no other source of randomness.
+- Step 2: without `-L` the run ends in `TIMEOUT after 20s` (exit 124) and prints nothing; with `-L 50` m4 stops with `recursion limit of 50 exceeded`, exits non-zero, and there is no `# committed` line. Explain, in terms of *when m4 expands arguments*, why the brackets are the stop rule.
+- Step 3: `check-demo.sh out.txt 60` passes.
+
+### B12. Tcl: edit the program in the database (verified)
+
+**Lesson:** [Tcl](languages/tcl.md#sqlite-as-the-program). **Entry:** copies of `src/tcl-weird`.
+
+1. **Predict:** on a copy, change `PRAGMA recursive_triggers = ON;` ([L55](../src/tcl-weird/timecards.tcl#L55)) to `OFF`. How many card rows will be printed? How many will the summary count?
+2. **Predict:** on a fresh copy, change the body of the `hours` row ([L73](../src/tcl-weird/timecards.tcl#L73)) from `expr {10 + int(rand() * 10)}` to `expr {10}`. You are editing *text inside an SQL string*, not a Tcl proc.
+3. Run each: `sandbox/container/run-image.sh <copy>`.
+
+Acceptance criteria:
+
+- Step 1: **exactly one card row** is printed and the summary says `entries=2`: the trigger fired once (so card 2 was inserted and counted) but an insert made by a trigger does not fire the trigger again unless recursion is enabled, so card 2 was never printed. `check-demo.sh` fails.
+- Step 2: every run prints **exactly five rows**, hours all 10, totals 10, 20, 30, 40, 50, and `check-demo.sh` **passes**. Explain why the run does not stop at 40 (compare the last question of [A1](#a1-read-the-rows-verified)).
+- Name the three hooks (an SQL function that calls Tcl, `unknown`, a trigger) and say which one you changed in step 2.
+
+### B13. AWK: the missing RT (verified)
+
+**Lesson:** [AWK](languages/awk.md#2-records-from-a-random-byte-stream-awk-weird). **Entry:** copies of `src/awk-weird`.
+
+1. **Predict:** on a copy, make a digit file `printf '1 2\n' > d.txt` in the copy's folder and run `lessons/tools/run-in-sandbox.sh <copy> gawk -f timecards.awk d.txt`. What are the cards? (Dice: `10 + RT`.)
+2. **Predict:** on a fresh copy, delete rule 1, the line `RT == "" { next }` ([L52](../src/awk-weird/timecards.awk#L52)), and run the same command.
+3. Run the *unmodified* program under mawk **on the finite file only**: `lessons/tools/run-in-sandbox.sh <copy> mawk -f timecards.awk d.txt`. Do **not** run it under mawk on `/dev/urandom`: it never stops and eats memory until it dies.
+4. On a fresh copy change the stop rule `t > 40 { exit }` ([L69](../src/awk-weird/timecards.awk#L69)) to `t > 80 { exit }` and run it on `/dev/urandom` (`run-image.sh`).
+
+Acceptance criteria:
+
+- Step 1: two cards, `Meetings 11 11` and `Coding 12 23`, and `# committed total=23 entries=2`. The trailing newline of the file leaves an empty last record that rule 1 skips.
+- Step 2: **three** cards; the third is `Debugging 10 33` and the summary says `entries=3`. Explain why an empty `RT` counted as a 10-hour card (`10 + ""`).
+- Step 3: the header and `# committed total=0 entries=0`, no error, exit 0. Explain why: mawk has no `RT`, so `RT == ""` is true for every record and rule 1 skips them all. Say what this teaches about "portable-looking" code, and which [knowledge level](intro.md#three-kinds-of-knowledge) `RT` is.
+- Step 4: `check-demo.sh out.txt 80` passes.
+
 ## C. By solution pattern
 
 ### C1. Weird next to boring (verified)
 
-**Lesson:** [Weird next to boring](intro.md#weird-next-to-boring). The repo has four ready-made pairs: `cobol`/`cobol-weird`, `haskell`/`haskell-weird`, `forth`/`forth-weird`, `apl`/`apl-weird`.
+**Lesson:** [Weird next to boring](intro.md#weird-next-to-boring). The repo has seven ready-made pairs: `cobol`/`cobol-weird`, `haskell`/`haskell-weird`, `forth`/`forth-weird`, `apl`/`apl-weird`, `lisp`/`lisp-weird`, `tcl`/`tcl-weird` and `awk`/`awk-weird`.
 
 Compare one pair. Run both, and count code lines (not comments) in each program.
 
@@ -222,7 +282,7 @@ Acceptance criteria:
 
 ## D. Port the challenge (verified: reference answer in awk)
 
-**Goal:** implement the shared demo in a language not yet in the repo (Lua, awk, Tcl, m4, a SQL recursive CTE, PowerShell...) under the rules of [`CHALLENGE.md`](../CHALLENGE.md), and run it only in the sandbox.
+**Goal:** implement the shared demo in a language not yet in the repo (Lua, Ruby, Prolog, a SQL recursive CTE, PowerShell, Scheme, Perl...). The repo has since gained Common Lisp, m4, Tcl and awk entries, so those are no longer open under the rules of [`CHALLENGE.md`](../CHALLENGE.md), and run it only in the sandbox.
 
 Acceptance criteria:
 
@@ -240,7 +300,7 @@ for i in $(seq 25); do
 done
 ```
 
-See [`CONTRIBUTING.md`](../CONTRIBUTING.md) if you want to send it in. A reference answer lives in [`lessons/solutions/awk-port`](solutions/awk-port) (see the [answers key](answers-key.md#d-port-the-challenge)); try yours first.
+See [`CONTRIBUTING.md`](../CONTRIBUTING.md) if you want to send it in. A reference answer lives in [`lessons/solutions/awk-port`](solutions/awk-port) (see the [answers key](answers-key.md#d-port-the-challenge)); try yours first. It was written before awk was in the repo and is a short third design (the caller pipes in five records and a pattern is the stop rule), distinct from [`src/awk`](../src/awk/README.md) (a `BEGIN` loop) and [`src/awk-weird`](../src/awk-weird/README.md) (gawk and `RS`/`RT`): compare all three.
 
 ## E. Windows Sandbox track (verified on Windows 11 Pro)
 
@@ -298,3 +358,6 @@ These are the gaps from [blocking problems](blocking-problems.md). **Nobody has 
 | Make needs a shell | Replace `mkdir -p`, `sqlite3` or `rm` with something Make-native for **one** of them | Output unchanged; the shell-program list in `check.sh` shrinks by one |
 | Only some entries use threads | Add a worker thread to a script entry | Rows are written from the thread, main only waits; `check-demo.sh` passes |
 | `sed`'s RNG is a toy | Replace the 16-bit LFSR with a 32-bit one | Over 25 runs more than 16 distinct first draws appear; `check.sh` passes |
+| `awk-weird` needs gawk | Get a die roll without `RT` so it also runs under mawk | Same shape of output under gawk **and** mawk; no `rand`, `srand`, loop or `if`; `check.sh` passes under both |
+| `m4` needs a shell for its seed and week | Produce the seed and the ISO week without `esyscmd` | The seed differs between runs and the week is right, with only m4 builtins; if you cannot, write down exactly what m4 cannot reach |
+| `lisp-weird` is SBCL-only | Run it on a second Common Lisp (ECL or CCL) changing only the implementation-specific calls | Same output and the same `or`/`progn` proof on both; list the lines you changed |

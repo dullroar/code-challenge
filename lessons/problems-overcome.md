@@ -39,6 +39,22 @@ What stood in each approach's way, and how it got around it. Each row came from 
 | **Go** | A three-clause `for` cannot hold statements | Helper functions (`Seq`, `After`) in a separate file | Cost of the constraint made explicit |
 | **Python** | No `;` loops and no statement expressions | `iter(<lambda>, False)` plus tuple-and-`[-1]` | Expressions standing in for statements |
 | **Kotlin** | No `for(;;)` | `generateSequence`, ending on null | A sequence is a loop |
+| **Lisp** | SBCL has no ISO-week function, and a hand-written one can be wrong near New Year | The calendar arithmetic was written by hand and checked against `date(1)` on 22 edge dates, then against Python's `isocalendar` on 1,139 dates | Verify an algorithm against an independent oracle |
+| **Lisp weird** | A class must exist before another can inherit from it, and five near-identical classes and methods are tedious | A `defcard` macro writes each pair, tail first; the name-building code runs at compile time inside `eval-when` | Macros are programs that run before yours |
+| **Lisp weird** | The closing note first said "6 methods", counting the `:around` method | Count only methods whose qualifiers are `(or)` | Introspection reports what you ask, not what you meant |
+| **m4** | `eval` is 32-bit, so a generator's `16807 * seed` overflows silently (`2147483647*4` is `-4`) | Park-Miller with Schrage's trick keeps every intermediate value in 32 bits; checked against Python over 20,000 draws | Know the width of your integers |
+| **m4** | `ifelse` with eight arguments warned "excess arguments": after the first group it continues in threes | `tc_pick` repeats the value under test in every group | Read the arity rules, not just the example |
+| **m4** | A string that grows, in a language with no variables | `defn` returns a macro's text, so a macro redefines itself as itself plus more | State can be text that rewrites itself |
+| **m4** | Quoting: a loop that must not evaluate its own call early | `[tc_card()]` in brackets, so the call is only expanded after `ifelse` has chosen it | Eager arguments, lazy quotes |
+| **Tcl** | A `tclsh` that has loaded Tk never exits at the end of the script | End with `catch {destroy .}` | Event loops outlive scripts |
+| **Tcl weird** | A trigger cannot use a qualified table name in `INSERT` | The unqualified name inside the trigger | Know what each SQL clause lets you qualify |
+| **Tcl weird** | SQL cannot call Tcl, and Tcl cannot be given a library of code that is in a table | `db function tcl call` and an `unknown` override that defines procs from rows | The library path is yours to redefine |
+| **Tcl weird** | Widget rows with fragments (`pack -fill ...`) failed without a widget path | Each `ui` row is a whole command, run through `uplevel #0` | A table of strings, evaluated at the right scope |
+| **AWK** | Function parameters that share a name with a global are flagged by `--lint` | Rename them; extra parameters are the locals | Scope in awk is by convention |
+| **AWK** | `close()` returns different values in each awk (status, status x 256, always 0) | The entry only tests for non-zero; the READMEs say so, after testing all four awks | Test every implementation you claim to support |
+| **AWK weird** | `RS` applies to every read, so `getline` from `date` returned an empty week | Fetch the week before setting `RS`, then `close` the command | State that is global affects every reader |
+| **AWK weird** | A finite file leaves an empty last record, which would count as a card | `RT == "" { next }` | Guard the edge of a stream |
+| **AWK weird** | mawk has no `RT`, so the program reads forever | Documented as gawk-only; never run it without a memory limit and a timeout | A portable-looking failure is the worst kind |
 | **All the script entries** | Real data could leak into a demo | `CHECK(demo_only=1)` makes a non-demo row unrepresentable, and `check.sh` tries to violate it | Enforce invariants in the schema |
 | **All the script entries** | Proving the constraint is real | Each `check.sh` greps the source for banned constructs and runs 25 times; Rust has a test scanning for `;` | A test is how a stunt becomes a lesson |
 

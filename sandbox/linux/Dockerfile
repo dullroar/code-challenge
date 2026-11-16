@@ -20,10 +20,17 @@ ARG DEBIAN_FRONTEND=noninteractive
 #   ghc                haskell, haskell-weird (runghc, with GHC's own boot packages only)
 #   dotnet-sdk-10.0    regex-dotnet (plain net10.0, no NuGet packages)
 #   gnucobol           cobol, cobol-weird (cobc 3.1.2; it compiles through C with build-essential)
+#   sbcl               lisp, lisp-weird (Steel Bank Common Lisp, run as a script)
+#   m4                 m4 (GNU m4; the macro processor does the whole computation)
+#   tcl, tk, libsqlite3-tcl   tcl, tcl-weird (tclsh with its sqlite3 package; Tk for --gui)
+#   xvfb, xauth        a virtual display, so check.sh can run Tk windows headless (xvfb-run)
+#   gawk, original-awk, busybox-static   awk, awk-weird (gawk; the portable entry is also checked under
+#                      the one-true-awk and busybox awk, next to Ubuntu's default mawk)
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
         ca-certificates curl bzip2 build-essential pkg-config \
         sqlite3 perl libpcre2-dev make cmake gforth ghc dotnet-sdk-10.0 gnucobol \
+        sbcl m4 tcl tk libsqlite3-tcl xvfb xauth gawk original-awk busybox-static \
  && rm -rf /var/lib/apt/lists/*
 
 # Upstream builds, each pinned by SHA-256. Hashes recorded 2026-11-14 from the URLs below.

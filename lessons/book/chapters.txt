@@ -10,6 +10,10 @@ languages/forth.md
 languages/make-cmake.md
 languages/regex.md
 languages/apl.md
+languages/lisp.md
+languages/m4.md
+languages/tcl.md
+languages/awk.md
 patterns.md
 problems-overcome.md
 blocking-problems.md

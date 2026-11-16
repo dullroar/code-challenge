@@ -96,6 +96,8 @@ The stop test must come **first** in the condition because a failed `MATCHES` cl
    TIMEOUT after 40s          (exit 124)
    ```
 
+   On the laptop used for the 2026-11-16 re-run the recursion filled the container's 2 GB memory limit first, so the run ended with `Killed` (exit 137) after about 2,000 lines instead of the timeout. Either way it never reaches `# committed`; which one you see depends on the machine.
+
    That is why [`apl-weird/check.sh`](../src/apl-weird/check.sh) runs under `timeout`: this failure is silent and structural.
 2. `⎕IO←1` gives an `INDEX ERROR` on `Card0[5]`, the line `Show(⊃Categories[C])...`. `C` counts categories from 0 (`C←0`, `4|C+1`), which is a valid index only with origin 0. No rows are printed.
 
@@ -149,6 +151,97 @@ grep -E 'tot:#{41}' trace.txt | tail -1   # the final state: 41+ tally marks
 - The state is one line, e.g. `run:... k:### rng:0110101000001111 cats:Coding,... tot: n: c:Meetings`; `tot:` grows by tally marks (`#`). About 16 lines per card in the verification run, but it **varies** because of rejection.
 - [L29](../src/regex-sed/timecards.sed#L29), `/ rng:1(01|1)/b draw`, redraws when the 4-bit nibble is 10-15. `1(01|1)` matches `101x` (10, 11) and `11xx` (12-15): the values a 10-19 hour draw cannot use. A rejected draw repeats the shift-register steps, which is why the per-card line count is not constant.
 
+## B10. Lisp: swap the method combination
+
+1. With `progn` in both places every run deals **all five cards**, because `progn` calls every applicable method and ignores their return values:
+
+   ```text
+   Meetings	13	78	2026-W47	DEMO ONLY
+   # committed total=78 entries=5 DEMO ONLY
+   # PUNCH had 0 OR methods and 5 ran: the class precedence list is the loop, and OR is the stop rule
+   ```
+
+   The totals end anywhere from 50 to 95. The method count says `0 OR methods` because the note counts methods qualified `or`, and there are none now. `check.sh` fails on your copy because it insists on `(:method-combination or)`. (The unmodified entry's own check runs this same mutation to prove `or` is the stop rule.)
+2. Changing only the generic function leaves five methods with a qualifier that `progn` does not accept. SBCL warns:
+
+   ```text
+   WARNING:
+      Invalid qualifiers for PROGN method combination in method
+      #<STANDARD-METHOD TIMECARDS-WEIRD::PUNCH OR (CARD-5) ...>:
+        (OR).
+   ```
+
+   A method's qualifiers have to match its generic function's combination: the combination is the generic function's choice, not the method's.
+3. With `100` there are always five rows and a total of at most 95. The program stops because it **runs out of classes**, not because the rule was met; `check-demo.sh out.txt 100` fails with `final total N does not pass 100`. Five is the most it can deal: cards are at least 10 hours, so four cards total at least 40, and a fifth always crosses 40. A limit of 100 needs eleven classes (ten cards of 10 total exactly 100, so an eleventh must cross), so you would add `defcard` forms and renumber.
+- **The stop rule is `or`**, and the program does not fail without it, because `progn` is a valid combination: the program just never stops early. A silent change of meaning is the whole risk of the technique.
+
+## B11. m4: quote the recursion
+
+1. Same seed, same cards:
+
+   ```text
+   Meetings	19	19
+   Coding	13	32
+   Debugging	16	48
+   ```
+
+   Only the run id (`1794869456-12345`: the clock and the seed) can differ. The generator is the Park-Miller formula and nothing else supplies randomness. `ifdef([tc_seed], [], ...)` ([L34](../src/m4/timecards.m4#L34)) creates a random seed only when you have not already defined one.
+2. Unbracketed, `tc_card()` is *called while `ifelse`'s arguments are being collected*, so every call makes another call before `ifelse` can choose anything. m4 expands arguments before it runs the macro. With `SANDBOX_TIMEOUT=20` the run ends in a timeout (exit 124) and prints nothing: m4 buffers its output and was killed before it flushed. With `-L 50`:
+
+   ```text
+   m4:timecards.m4:87: recursion limit of 50 exceeded, use -L<N> to change it
+   ```
+
+   and exit status 1. The brackets turn `tc_card()` into text that is only expanded when `ifelse` returns it, after the test; that is the only stop rule the program has.
+3. `eval(tc_total > 60)`: the run stops on the first card that takes the total above 60. `check-demo.sh out.txt 60` passes.
+
+## B12. Tcl: edit the program in the database
+
+1. With `recursive_triggers = OFF` the first `INSERT` fires the trigger once; the trigger inserts card 2; **that** insert does not fire the trigger again, because a trigger does not fire itself unless recursion is on. So card 1 is printed (by `tcl('born', ...)` in the trigger), card 2 is in the database but was never printed:
+
+   ```text
+   Meetings	17	17	2026-W47	DEMO ONLY
+   # committed total=31 entries=2 DEMO ONLY
+   ```
+
+   `check-demo.sh` fails: "final total 17 does not pass 40", and the summary line disagrees with the single row.
+2. The text of the `hours` row is the Tcl program for the dice. With `expr {10}` every card is 10 hours:
+
+   ```text
+   Meetings	10	10
+   Coding	10	20
+   Debugging	10	30
+   Learning	10	40
+   Meetings	10	50
+   # committed total=50 entries=5 DEMO ONLY
+   ```
+
+   The trigger's rule is `NEW.running_total <= 40`, so a total of exactly 40 draws another card (the same reason as in A1). `check-demo.sh` passes: five cards of 10 hours is a legal run.
+- **The three hooks:** `db function tcl call` (SQL calls Tcl), the `unknown` override (the table is the library), and the recursive trigger (the loop). In step 2 you changed a row that `unknown` fetches: the *program* changed without editing a line of Tcl.
+
+## B13. AWK: the missing RT
+
+The digit file is `1 2` followed by a newline. With `RS="[0-9]"` the records are: `""` ending in `1` (RT=1), `" "` ending in `2` (RT=2), and `"\n"` with **no** digit after it (RT is empty).
+
+1. Dice 1 and 2 make hours 11 and 12:
+
+   ```text
+   Meetings	11	11	2026-W47	DEMO ONLY
+   Coding	12	23	2026-W47	DEMO ONLY
+   # committed total=23 entries=2 DEMO ONLY
+   ```
+
+   The third record is skipped by rule 1, `RT == "" { next }`.
+2. Without the guard the third record is dealt like the others, and `10 + RT` with an empty `RT` is `10 + 0`: a phantom card, `Debugging 10 33`, `entries=3`. It is a real INSERT too.
+3. mawk has no `RT`. The variable is never set, so `RT == ""` is true for **every** record, rule 1 skips them all, `t` never grows and `t > 40` never fires:
+
+   ```text
+   # committed total=0 entries=0 DEMO ONLY
+   ```
+
+   No error, exit 0. On `/dev/urandom` the same program never stops and mawk reads until it runs out of memory (verified under a 400 MB limit). A program that *looks* portable and silently computes nothing is worse than one that crashes. `RT` is a **gawk extension**: implementation-permitted, not part of POSIX.
+4. `t > 80 { exit }`: the run stops on the first card that takes the total above 80, and `check-demo.sh out.txt 80` passes. The pattern *is* the stop rule: `check.sh` makes the same edit on a stream of 5s to prove it (three cards become six).
+
 ## C1. Weird next to boring
 
 Measured with the verification script (non-comment lines):
@@ -159,10 +252,15 @@ Measured with the verification script (non-comment lines):
 | Haskell | 91 | 108 |
 | Forth | 97 | 84 |
 | APL | 41 | 47 |
+| Lisp | 150 | 110 |
+| Tcl | 138 | 118 |
+| AWK | 85 | 41 |
 
 Sample comparison for Haskell: the idiomatic `timecards` is one **pure function** (`span`), so a unit test needs no database, and a debugger shows plain lists. The weird version cannot be tested without running its effects and the order of effects depends on the consumer; but it can do something the idiomatic one cannot: *write each row exactly when that card is first demanded*, with no loop or accumulator in the program. It is the right choice for a lazy streaming library or a teaching demo, not for application code.
 
 Forth is the instructive exception: the weird version is *shorter* because it deletes the `variable`s and the word that updates them, trading them for stack discipline.
+
+Lisp, Tcl and AWK also come out shorter in the weird version, but mostly because the weird versions *do less*, not because the stunt is more compact: `lisp` works out the ISO week itself (calendar arithmetic, plus an optional date argument and a `card` struct) where `lisp-weird` just asks `date`; `tcl` has a namespace with separate `draw`, `save`, `row` and window procs where `tcl-weird` has two procs and some SQL; `awk` has six helper functions where `awk-weird` has none. Line count measures what each program carries, not how hard it is to understand (the weird entries put the difficulty into comments and READMEs). Counts include blank lines and exclude comment-only lines.
 
 ## C2. Make the constraint real
 
