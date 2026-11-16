@@ -23,7 +23,7 @@ They need the .NET 10 SDK. All but `runRegexDotnet` are WPF, so they're Windows 
 
 ## application (WSL) / application (Linux)
 
-`runRust`, `runApl`, `runAplWeird`, `runForth`, `runForthWeird`, `runHaskell`, `runHaskellWeird`, `runCmake`, `runMakeGnu`, `runRegexPcre2`, `runRegexPcre2grep`, `runRegexPerl`, `runRegexSed`, `runCobol`, `runCobolWeird`
+`runRust`, `runApl`, `runAplWeird`, `runForth`, `runForthWeird`, `runHaskell`, `runHaskellWeird`, `runCmake`, `runMakeGnu`, `runRegexPcre2`, `runRegexPcre2grep`, `runRegexPerl`, `runRegexSed`, `runCobol`, `runCobolWeird`, `runLisp`, `runLispWeird`, `runM4`, `runTcl`, `runTclWeird`, `runAwk`, `runAwkWeird`
 
 On Windows they run inside WSL 2 (distribution `Ubuntu`, or `-PwslDistro=Name`). Elsewhere they run in `bash`. Each checks for its tool first, and if it's missing, names it and stops with exit code 127.
 
@@ -31,8 +31,11 @@ On Ubuntu 24.04 this installs nearly everything:
 
 ```bash
 sudo apt install build-essential pkg-config sqlite3 perl make cmake gforth ghc gnucobol \
-    libpcre2-dev cargo rustc libgtk-4-dev libsqlite3-dev
+    libpcre2-dev cargo rustc libgtk-4-dev libsqlite3-dev \
+    sbcl m4 tcl tk libsqlite3-tcl gawk
 ```
+
+The last line is for the Lisp, m4, Tcl and AWK entries. `runTclWeird` and `runTcl` need the Tcl `sqlite3` package (`libsqlite3-tcl`), and the tasks run text mode only: the optional Tk window (`tk`) is for running `tclsh timecards.tcl --gui` yourself. `runAwkWeird` needs gawk (it uses `RT`); the tool check names `gawk`, so Ubuntu's default mawk is not enough for that one.
 
 The two exceptions are built from source:
 
