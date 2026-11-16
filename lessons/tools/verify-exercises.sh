@@ -11,7 +11,13 @@
 set -uo pipefail
 here=$(cd "$(dirname "$0")" && pwd); repo=$(cd "$here/../.." && pwd); cd "$repo"
 W=$(mktemp -d); trap 'rm -rf "$W"' EXIT
-chk=$here/check-demo.sh; sbx=$here/run-in-sandbox.sh; sol=$here/../solutions
+sol=$here/../solutions
+# The helper scripts are run through bash, so this works whatever their file mode is (a Windows checkout
+# loses the executable bit). chk, sbx and c2 hold function NAMES, which "$chk" ... runs like a command.
+chk_run() { bash "$here/check-demo.sh" "$@"; }
+sbx_run() { bash "$here/run-in-sandbox.sh" "$@"; }
+c2_run()  { bash "$sol/c2-forth-rule-check.sh" "$@"; }
+chk=chk_run; sbx=sbx_run
 pass=0; failn=0; failed=()
 want=("$@")
 selected() { [[ ${#want[@]} -eq 0 ]] && return 0; local w; for w in "${want[@]}"; do [[ $1 == $w* ]] && return 0; done; return 1; }
@@ -19,7 +25,10 @@ ok()  { echo "  PASS  $1"; pass=$((pass+1)); }
 bad() { echo "  FAIL  $1: $2"; failn=$((failn+1)); failed+=("$1"); }
 # expect LABEL COMMAND...  (must succeed)      expectnot LABEL COMMAND...  (must fail)
 expect()    { local l=$1; shift; if "$@" >"$W/last" 2>&1; then ok "$l"; else bad "$l" "$(tail -2 "$W/last" | tr '\n' ' ')"; fi; }
-expectnot() { local l=$1; shift; if "$@" >"$W/last" 2>&1; then bad "$l" "expected a failure but it passed"; else ok "$l"; fi; }
+expectnot() { local l=$1; shift; "$@" >"$W/last" 2>&1; local rc=$?
+              if (( rc == 0 )); then bad "$l" "expected a failure but it passed"
+              elif (( rc == 126 || rc == 127 )); then bad "$l" "the command could not be run (exit $rc), so this proves nothing: $(tail -1 "$W/last")"
+              else ok "$l"; fi; }
 copy() { rm -rf "$W/$2"; mkdir -p "$W/$2"; cp -r "$1" "$W/$2/"
          { grep -rlI $'\r' "$W/$2" | xargs -r sed -i $'s/\r$//'; } 2>/dev/null   # a Windows checkout has CRLF; mutations match LF
          echo "$W/$2/$(basename "$1")"; }   # copy SRC SLOT -> path of the copy
@@ -90,7 +99,7 @@ fi
 
 if selected B6; then echo "B6 APL"
   d=$(copy src/apl-weird b6); mutate "$d/timecards.apl" ',5↓⊂[1]' ',4↓⊂[1]'
-  SANDBOX_TIMEOUT=40 img "$d" "$W/b6a.txt"; if contains "$W/b6a.txt" "TIMEOUT"; then ok "B6 4-down: runs forever (TIMEOUT)"; else bad B6a "no timeout"; fi
+  SANDBOX_TIMEOUT=40 img "$d" "$W/b6a.txt"; if ! contains "$W/b6a.txt" "# committed" && (contains "$W/b6a.txt" "TIMEOUT" || contains "$W/b6a.txt" "Killed") && (( $(grep -cE $'^(Meetings|Coding|Debugging|Learning)\t([0-9]+)\t\\2\t' "$W/b6a.txt") > 20 )); then ok "B6 4-down: never commits, total == hours on every row (TIMEOUT, or killed for memory)"; else bad B6a "did not run away as described"; fi
   d=$(copy src/apl-weird b6b); mutate "$d/timecards.apl" $'\n⎕IO←0\n' $'\n⎕IO←1\n'
   img "$d" "$W/b6b.txt"; if contains "$W/b6b.txt" "INDEX ERROR"; then ok "B6 IO=1: INDEX ERROR"; else bad B6b "no INDEX ERROR"; fi
 fi
@@ -118,15 +127,65 @@ if selected B9; then echo "B9 sed trace"
   if grep -q 'rng:1(01|1)' src/regex-sed/timecards.sed; then ok "B9 the reject rule is in timecards.sed"; else bad B9r "reject rule moved"; fi
 fi
 
+# rows_of FILE : count card rows in the first run's block (between "# DEMO ONLY" and "# committed")
+rows_of() { awk '/^# DEMO ONLY/{go=1} go && /^# (committed|captured)/{exit} go' "$1" | grep -cE $'^(Meetings|Coding|Debugging|Learning)\t'; }
+
+if selected B10; then echo "B10 Lisp method combination"
+  d=$(copy src/lisp-weird b10); mutate "$d/timecards.lisp" '(:method-combination or)' '(:method-combination progn)'; mutate "$d/timecards.lisp" '(defmethod punch or ' '(defmethod punch progn '
+  ok5=1; for i in 1 2 3 4 5; do img "$d" "$W/b10-$i.txt"; [[ $(rows_of "$W/b10-$i.txt") == 5 ]] && contains "$W/b10-$i.txt" "PUNCH had 0 OR methods and 5 ran" || ok5=0; done
+  if (( ok5 )); then ok "B10 progn: exactly 5 cards on all 5 runs"; else bad B10a "not always 5 cards"; fi
+  expectnot "B10 ...and the entry's own check.sh fails" sandbox/run.sh "$d"
+  d=$(copy src/lisp-weird b10b); mutate "$d/timecards.lisp" '(:method-combination or)' '(:method-combination progn)'
+  img "$d" "$W/b10b.txt"; if contains "$W/b10b.txt" "Invalid qualifiers for PROGN method combination"; then ok "B10 generic only: 'Invalid qualifiers for PROGN method combination'"; else bad B10b "warning not seen"; fi
+  d=$(copy src/lisp-weird b10c); mutate "$d/timecards.lisp" '(> (total ledger) 40)' '(> (total ledger) 100)'
+  ok5=1; for i in 1 2 3; do img "$d" "$W/b10c-$i.txt"; [[ $(rows_of "$W/b10c-$i.txt") == 5 ]] || ok5=0; msg=$("$chk" "$W/b10c-$i.txt" 100 2>&1); [[ $msg == *"does not pass 100"* ]] || ok5=0; done
+  if (( ok5 )); then ok "B10 limit 100: always 5 cards, never passes 100"; else bad B10c "unexpected card count or total"; fi
+fi
+
+if selected B11; then echo "B11 m4 quoting"
+  "$sbx" src/m4 m4 -Dtc_seed=12345 timecards.m4 > "$W/b11a.txt" 2>&1; "$sbx" src/m4 m4 -Dtc_seed=12345 timecards.m4 > "$W/b11b.txt" 2>&1
+  ra=$(grep -E $'^(Meetings|Coding|Debugging|Learning)\t' "$W/b11a.txt"); rb=$(grep -E $'^(Meetings|Coding|Debugging|Learning)\t' "$W/b11b.txt")
+  if [[ -n $ra && $ra == "$rb" ]] && [[ $(cut -f2,3 <<<"$ra" | tr '\n\t' ' ') == "19 19 13 32 16 48 " ]]; then ok "B11 seed 12345: identical rows 19/19 13/32 16/48"; else bad B11a "rows differ: $(tr '\n' ' ' <<<"$ra")"; fi
+  d=$(copy src/m4 b11); mutate "$d/timecards.m4" '1, [], [tc_card()])' '1, [], tc_card())'
+  SANDBOX_TIMEOUT=20 "$sbx" "$d" m4 timecards.m4 > "$W/b11c.txt" 2>&1; rc=$?
+  if [[ $rc == 124 ]] && ! contains "$W/b11c.txt" "# committed"; then ok "B11 no brackets: runs until the timeout (exit 124), prints nothing"; else bad B11c "exit $rc"; fi
+  "$sbx" "$d" m4 -L 50 -Dtc_seed=7 timecards.m4 > "$W/b11d.txt" 2>&1; rc=$?
+  if [[ $rc != 0 ]] && contains "$W/b11d.txt" "recursion limit of 50 exceeded" && ! contains "$W/b11d.txt" "# committed"; then ok "B11 no brackets, -L 50: 'recursion limit of 50 exceeded', no commit"; else bad B11d "exit $rc"; fi
+  d=$(copy src/m4 b11e); mutate "$d/timecards.m4" 'eval(tc_total > 40)' 'eval(tc_total > 60)'
+  img "$d" "$W/b11e.txt"; expect "B11 '> 60' stops above 60" "$chk" "$W/b11e.txt" 60
+fi
+
+if selected B12; then echo "B12 Tcl SQLite program"
+  d=$(copy src/tcl-weird b12); mutate "$d/timecards.tcl" 'PRAGMA recursive_triggers = ON;' 'PRAGMA recursive_triggers = OFF;'
+  img "$d" "$W/b12a.txt"; if [[ $(rows_of "$W/b12a.txt") == 1 ]] && contains "$W/b12a.txt" "entries=2"; then ok "B12 recursion off: 1 card printed, summary counts 2"; else bad B12a "rows $(rows_of "$W/b12a.txt")"; fi
+  expectnot "B12 ...and check-demo fails" "$chk" "$W/b12a.txt"
+  d=$(copy src/tcl-weird b12b); mutate "$d/timecards.tcl" "'expr {10 + int(rand() * 10)}'" "'expr {10}'"
+  ok5=1; for i in 1 2 3; do img "$d" "$W/b12b-$i.txt"; [[ $(rows_of "$W/b12b-$i.txt") == 5 ]] && contains "$W/b12b-$i.txt" "total=50 entries=5" && "$chk" "$W/b12b-$i.txt" >/dev/null || ok5=0; done
+  if (( ok5 )); then ok "B12 hours row = expr {10}: always 5 cards, total 50, check-demo passes"; else bad B12b "not five tens"; fi
+fi
+
+if selected B13; then echo "B13 AWK RT"
+  d=$(copy src/awk-weird b13); printf '1 2\n' > "$d/d.txt"
+  "$sbx" "$d" gawk -f timecards.awk d.txt > "$W/b13a.txt" 2>&1
+  if grep -qE $'^Meetings\t11\t11\t' "$W/b13a.txt" && grep -qE $'^Coding\t12\t23\t' "$W/b13a.txt" && contains "$W/b13a.txt" "total=23 entries=2"; then ok "B13 file '1 2': cards 11 and 12, total 23"; else bad B13a "$(tr '\n' ' ' < "$W/b13a.txt")"; fi
+  "$sbx" "$d" mawk -f timecards.awk d.txt > "$W/b13c.txt" 2>&1
+  if contains "$W/b13c.txt" "total=0 entries=0" && ! grep -qE $'^(Meetings|Coding)\t' "$W/b13c.txt"; then ok "B13 mawk on the file: no RT, so zero cards and no error"; else bad B13c "$(tr '\n' ' ' < "$W/b13c.txt")"; fi
+  d=$(copy src/awk-weird b13b); printf '1 2\n' > "$d/d.txt"; mutate "$d/timecards.awk" 'RT == "" { next }' ''
+  "$sbx" "$d" gawk -f timecards.awk d.txt > "$W/b13b.txt" 2>&1
+  if grep -qE $'^Debugging\t10\t33\t' "$W/b13b.txt" && contains "$W/b13b.txt" "total=33 entries=3"; then ok "B13 no guard: a phantom 10-hour third card"; else bad B13b "$(tr '\n' ' ' < "$W/b13b.txt")"; fi
+  d=$(copy src/awk-weird b13d); mutate "$d/timecards.awk" 't > 40 { exit }' 't > 80 { exit }'
+  img "$d" "$W/b13d.txt"; expect "B13 't > 80' stops above 80" "$chk" "$W/b13d.txt" 80
+fi
+
 if selected C1; then echo "C1 weird next to boring (measured)"
-  for p in cobol haskell forth apl; do
-    a=$(cat src/$p/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝)'); b=$(cat src/$p-weird/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝)')
+  for p in cobol haskell forth apl lisp tcl awk; do
+    a=$(cat src/$p/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)'); b=$(cat src/$p-weird/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)')
     echo "     $p: $a code lines vs $p-weird: $b"
   done; ok "C1 pairs measurable"
 fi
 
 if selected C2; then echo "C2 rule check"
-  c2=$sol/c2-forth-rule-check.sh; src=src/forth-weird/timecards.fs
+  c2=c2_run; src=src/forth-weird/timecards.fs
   expect "C2 passes on the real entry" "$c2" "$src"
   sed 's/^drop /begin drop /' "$src" > "$W/m1.fs";                expectnot "C2 mutation 1 (begin added)" "$c2" "$W/m1.fs"
   sed 's/^utime drop/variable v utime drop/' "$src" > "$W/m2.fs"; expectnot "C2 mutation 2 (variable added)" "$c2" "$W/m2.fs"

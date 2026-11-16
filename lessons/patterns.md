@@ -13,6 +13,10 @@ A formal language is a notation with strict rules that a machine can process. Th
 | **CMake** | Configuring builds | A register machine in a `while()` condition | [`cmake`](../src/cmake/README.md) |
 | **XAML** | Describing a UI tree | An interpreter that runs methods as it parses | [`xaml`](../src/xaml/README.md) |
 | **LINQ query expressions** | Querying collections | An execution pipeline with lazy and eager stages and provider boundaries | [`LinqChallenge2`](../src/LinqChallenge2/README.md) |
+| **m4** | Expanding text templates | A loop: a macro whose replacement text contains itself is read again | [`m4`](../src/m4/README.md) |
+| **SQL triggers** | Reacting to a change in a table | A recursive loop whose stop rule is a `WHERE` that selects nothing, and a host for another language's code | [`tcl-weird`](../src/tcl-weird/README.md) |
+| **CLOS method combination** | Combining the methods that apply to a call | A loop over a class hierarchy, stopped by `or` | [`lisp-weird`](../src/lisp-weird/README.md) |
+| **AWK pattern-action rules** | Filtering and reshaping records | A program whose only loop is the input, and whose conditionals are the pattern column | [`awk-weird`](../src/awk-weird/README.md) |
 
 What to take away:
 
@@ -33,6 +37,9 @@ Several entries replace "loop with an accumulator" with a transformation of a wh
 | **Sequence generator** | Kotlin `generateSequence` | The sequence ends when the generator yields null |
 | **Rewrite to a fixed point** | [sed](languages/regex.md#gnu-sed) | Apply substitutions until none applies; the final text is the answer |
 | **Reshape and recycle** | [APL](../src/apl/timecards.apl#L39) `(≢Hours)⍴Categories` | A modulo you get for free |
+| **Accumulate and stop in one clause list** | [Lisp `LOOP`](../src/lisp/timecards.lisp#L42-L46) `sum ... into`, `collect`, `until` | The clause order is the order of execution, so `until` after `collect` keeps the crossing card |
+| **A circular list** | [Lisp reader `#1=`](../src/lisp-weird/timecards.lisp#L44-L46) | The categories repeat forever with no `mod` |
+| **Stream of records, one rule per step** | [AWK `{ t += h = 10 + RT }` ... `t > 40 { exit }`](../src/awk-weird/timecards.awk#L56-L69) | The input supplies the iterations; each rule is one step of the pipeline |
 
 The common shape: *describe the full answer, then say how much of it you want.* The differences are about **when** the work happens (eager `Aggregate` and APL arrays vs. lazy Haskell lists and LINQ `Select`) and **where** state lives. Compare how LINQ and Haskell answer "when does it run?" in [C#](languages/csharp-linq-xaml.md#deferred-execution-and-the-void-to-value-trick) and [Haskell](languages/haskell.md#lazy-io-as-control-flow).
 
@@ -50,6 +57,10 @@ Where does "where am I in the program?" live when you have no loop counter?
 | Document order in a markup file | [XAML](languages/csharp-linq-xaml.md#xaml) |
 | One line of text | [sed](languages/regex.md#gnu-sed) |
 | The data stack | [Forth](languages/forth.md) |
+| The class precedence list | [Lisp `or` method combination](languages/lisp.md#method-combination-as-control-flow) |
+| The macro text that has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning) |
+| The depth of trigger recursion, and procs stored as rows | [Tcl + SQLite](languages/tcl.md#sqlite-as-the-program) |
+| The input stream and the record separator | [AWK `RS` and `RT`](languages/awk.md#2-records-from-a-random-byte-stream-awk-weird) |
 
 A reader who arrives for one meets the rest. That is the point.
 
@@ -75,7 +86,11 @@ LINQ, Haskell and XAML each put an effect inside something that looks like a pur
 | Arithmetic overflow *is* the stop rule: `ON SIZE ERROR` | [COBOL](languages/cobol.md#alter) |
 | A program's exit code steers the match | [pcre2grep](languages/regex.md#pcre2grep-exit-codes-as-control-flow) |
 | A process exits 1 on purpose, and the wrapper maps it back to 0 | [sed](languages/regex.md#gnu-sed) |
-| A runaway program is caught by a timeout, not an error | [APL weird](languages/apl.md#2-self-modifying-functions-apl-weird) |
+| A runaway program is caught by a timeout, not an error | [APL weird](languages/apl.md#2-self-modifying-functions-apl-weird), and [m4](languages/m4.md) when a quote is missing |
+| A return value short-circuits a chain of methods (`or`) | [Lisp weird](languages/lisp.md#method-combination-as-control-flow) |
+| A pattern stops matching and an `exit` ends the loop | [AWK weird](languages/awk.md#2-records-from-a-random-byte-stream-awk-weird) |
+| An `INSERT ... SELECT ... WHERE` that selects nothing ends a recursive trigger | [Tcl weird](languages/tcl.md#sqlite-as-the-program) |
+| A missing guard does not fail: it counts a phantom card (empty `RT`) or no cards at all (mawk) | [AWK weird](languages/awk.md#do-this-in-production-and-youre-fired) |
 | An unexpected failure code is deliberately *not* "no match" (`PCRE2_ERROR_CALLOUT`, not `-1`) | [PCRE2](languages/regex.md#pcre2-callouts-as-an-instruction-set) |
 
 Notice that **`CHECK(demo_only=1)` appears in nearly every entry**: a table that makes a non-demo row unrepresentable, which each `check.sh` tries to violate. That is error handling used as a *guarantee* rather than a control flow, and a pattern worth keeping.

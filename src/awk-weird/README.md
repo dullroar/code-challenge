@@ -93,7 +93,7 @@ You should not do this in production because: it is a GNU extension; the program
 
 ## Gotchas and limitations
 
-- **gawk only.** The GNU-specific parts: `RT`, `systime()`, `PROCINFO["pid"]`. A regex `RS` is not POSIX but mawk, the one-true-awk and busybox awk all accepted `RS="[0-9]"` when tried here; none of them has `RT`, so they cannot see *which* digit ended the record, and the trick needs exactly that. `gawk --lint` reports the extensions.
+- **gawk only.** The GNU-specific parts: `RT`, `systime()`, `PROCINFO["pid"]`. A regex `RS` is not POSIX but mawk, the one-true-awk and busybox awk all accepted `RS="[0-9]"` when tried here; none of them has `RT`, so they cannot see *which* digit ended the record, and the trick needs exactly that. Worse, the failure is not an error: under mawk `RT` is always empty, so rule 1 skips every record and the stop rule never fires. On `/dev/urandom` mawk 1.3.4 keeps reading until it dies with `out of memory` (tried under a 400 MB limit, which it hit after about a thousand records); on a finite digit file it prints a header and `total=0 entries=0`. Do not run this under another awk without a memory limit and a timeout. `gawk --lint` reports the extensions.
 - **A finite input can end before the total passes 40.** `/dev/urandom` never does. With a file, the program stops at end of input and reports whatever total it reached (`check.sh` tests `1 2` and gets 2 cards, 23 hours).
 - **Trailing empty record.** A file ending in a newline makes one extra record with empty `RT`; rule 1 handles it. Without rule 1 it would count as a 10-hour card.
 - **The run id** is the epoch seconds and the awk's process id.

@@ -35,6 +35,11 @@ The comparison is not "who is better". It is "which pieces of that list can this
 | `make-gnu` | yes | host (`sqlite3`) | terminal glow | no | restart is the loop |
 | `cmake` | host (digit tape) | host | terminal glow | no | host reports |
 | Java / Kotlin / Python / Go / Rust | yes | yes | yes (window or page) | yes | one `for`/iterator; Go needs helpers |
+| `lisp`, `lisp-weird` | yes | via `sqlite3` pipe | terminal only | no | `or` stops the method chain; one-statement not the rule |
+| `m4` | yes (own Park-Miller; host seeds it) | host (`syscmd` + `sqlite3`) | terminal only | no | self-expansion ends when `ifelse` says so |
+| `tcl`, `tcl-weird` | yes | yes (in-process `sqlite3` package) | optional Tk window (`--gui`) | no | recursive trigger stops on an empty `INSERT ... SELECT` |
+| `awk` | yes (`rand`, seeded from the host) | via `sqlite3` pipe | terminal only | no | one `while`; not a one-statement entry |
+| `awk-weird` | yes (the dice are `RT` from `/dev/urandom`) | via `sqlite3` pipe | terminal only | no | `t > 40 { exit }`; **gawk only** |
 | `apl`, `apl-weird`, `cobol`, `cobol-weird`, `forth`, `forth-weird`, `haskell`, `haskell-weird` | yes | via `sqlite3` pipe or script | terminal only | no | one-statement not the rule |
 
 The Linux script entries share a reporting shape (rows, a committed total, a stunt note) and do not open windows. Treat "Window / pulse" in this table as "terminal output" for them.
@@ -113,6 +118,14 @@ The Linux script entries share a reporting shape (rows, a committed total, a stu
 - **APL weird**: relies on `⎕IO←0`; a bad rewrite fails by recursing forever; `⎕FIO` and `⊃`/`↑` are interpreter-specific. The straight entry needs a pinned GNU APL build.
 - **None of these open a window or run a thread.**
 
+### Lisp, m4, Tcl and AWK
+
+- **Lisp (both)**: SBCL only (`sb-ext:run-program` and friends; the `or` combination and `defcard` are standard). No formatter exists. **`lisp-weird`**: the limit is baked into the design (five classes handle "10-19 hours, stop over 40"; a rule needing more cards needs more classes), and its method count uses the MOP.
+- **m4**: needs GNU m4 for `esyscmd` and `format`. The clock, the entropy and SQLite all come through the shell; m4 has no I/O of its own. `eval` is 32-bit, so the generator is built around that. Recursion deepens with every card, fine for 3-5 cards and not a pattern for thousands. A missing quote makes a runaway, not an error. There is no `m4-weird` by design.
+- **Tcl**: the `sqlite3` package is separate from Tcl. A `tclsh` that has loaded Tk does not exit at the end of a script unless the script destroys the window, and `DISPLAY=:0` under WSL hangs Tk (the checks use Xvfb). **`tcl-weird`**: relies on SQLite evaluating `tcl('hours')` once per trigger run, which SQLite does not promise (`check.sh` would notice); `unknown` runs whatever is in the table, so it is not a pattern for tables others can edit; SQLite caps trigger recursion (1000 by default).
+- **AWK**: `close()` of a pipe returns different values in different awks, and the one-true-awk build tested returns 0, so a failing `sqlite3` would pass unnoticed there. **`awk-weird`**: gawk only (`RT`); mawk quietly runs forever or reports zero cards. A directory name containing a single quote breaks the shell command that makes the data folder.
+- **None of the four** opens a thread; only the Tcl entries open a window (optional `--gui`).
+
 ### The ports
 
 - Java, Kotlin and Go **Windows Sandbox** profiles are not yet tested on real hardware; Rust has no Windows Sandbox profile; the GUI ports have no check script and the gate does not cover them yet ([`sandbox/README.md`](../sandbox/README.md)).
@@ -129,5 +142,8 @@ Each of these is an [exercise](exercises.md#g-open-challenges-not-verified-may-b
 5. Give Make a pure-Make random source and calendar that does not read `/proc`.
 6. Add a thread to any Linux script entry.
 7. Run the Windows entries on Linux, or add a Windows Sandbox profile for Rust.
+8. Make `awk-weird` work under mawk (or any non-GNU awk): get a die roll without `RT`.
+9. Give m4 its seed and week without `esyscmd`.
+10. Port `lisp-weird` to a second Common Lisp (ECL or CCL) by replacing only the SBCL-specific calls.
 
 > **THERE ARE NO BLOCKERS, JUST NOT ENOUGH IMAGINATION.** The list above is the imagination budget.

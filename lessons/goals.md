@@ -19,6 +19,10 @@ Every weird entry forces you to name the machine hiding inside a language. Once 
 | COBOL (`ALTER`) | A program whose jump targets are mutable | The target of one `GO TO` | [cobol](languages/cobol.md#alter) |
 | Haskell | A lazy graph reducer | Thunks: which parts of a list have been demanded | [haskell](languages/haskell.md) |
 | APL | An array machine, with code that is also an array | Arrays, and the source text of functions | [apl](languages/apl.md) |
+| Common Lisp | A method dispatcher with a pluggable combination rule | The class precedence list, and each method's return value | [lisp](languages/lisp.md#method-combination-as-control-flow) |
+| m4 | A text-rescanning machine | The input stream: whatever macro text has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning) |
+| Tcl + SQLite | A string-command interpreter whose command lookup can be hooked | A TEMP table of proc source, and the depth of trigger recursion | [tcl](languages/tcl.md#sqlite-as-the-program) |
+| AWK | A record-processing loop that you can aim at any byte stream | The input stream and the record separator `RS` | [awk](languages/awk.md#2-records-from-a-random-byte-stream-awk-weird) |
 | XAML | An object-graph constructor that runs methods as it parses | Document order, plus "carrier" arrays | [csharp-linq-xaml](languages/csharp-linq-xaml.md#xaml) |
 | C# `for` | Three expression slots | Fields of one anonymous object | [csharp-linq-xaml](languages/csharp-linq-xaml.md#the-original-modernchallenge1) |
 
@@ -33,7 +37,7 @@ The repo's motto is **THERE ARE NO BLOCKERS, JUST NOT ENOUGH IMAGINATION.** The 
 Three habits to take from that:
 
 - **Ask where the work is allowed to happen.** The rule was one statement, so the loop's clauses, a LINQ pipeline, a parser, an iterator and a regex engine's backtracking all became places for work. Which parts of your usual stack are "just the way it's done" and which are actually required?
-- **Compare the weird with the ordinary.** [`apl`](../src/apl/README.md) uses five rolls and a take-while; [`apl-weird`](../src/apl-weird/README.md) uses a function that copies and rewrites itself. [`haskell`](../src/haskell/README.md) uses one `span`; [`haskell-weird`](../src/haskell-weird/README.md) puts the effects inside the list. The pair shows what each approach buys and what it costs.
+- **Compare the weird with the ordinary.** [`apl`](../src/apl/README.md) uses five rolls and a take-while; [`apl-weird`](../src/apl-weird/README.md) uses a function that copies and rewrites itself. [`haskell`](../src/haskell/README.md) uses one `span`; [`haskell-weird`](../src/haskell-weird/README.md) puts the effects inside the list. [`lisp`](../src/lisp/README.md) is one `LOOP`; [`lisp-weird`](../src/lisp-weird/README.md) has no loop at all and lets a class hierarchy do the counting. [`tcl`](../src/tcl/README.md) is a `while`; [`tcl-weird`](../src/tcl-weird/README.md) keeps its code in a database table. The pair shows what each approach buys and what it costs.
 - **Document walls honestly.** [`CHALLENGE.md`](../CHALLENGE.md) says "A well-demonstrated limitation is more interesting than cheating around it." The [blocking problems](blocking-problems.md) page is built from those walls.
 
 Think outside the box, then write down where the box turned out to be load-bearing. See [problems overcome](problems-overcome.md).
@@ -52,6 +56,10 @@ You do not know what a feature is for until you know what happens when you push 
 | CMake | `while()` re-expands its condition, and `MATCHES` leaves captures in variables | Its regex has no counted repetition, lookahead or backreferences |
 | Regex engines | Backtracking is a general search; callouts and code blocks make it a program | Performance cliffs; engine differences; failure discards captures (in .NET) |
 | APL | Array thinking replaces most loops; code is data | Hard to read, hard to type, and hard to whiteboard (see [APL](languages/apl.md)) |
+| Common Lisp | The reader, macros and the object system are all programmable, so control flow can be rebuilt from types | The result is invisible: nothing in the code says "loop", and tools show only generic-function calls |
+| m4 | Quoting gives lazy evaluation in a language with nothing else; ideal for generating text | Everything is global text: no scope, no types, and one missing bracket is infinite recursion |
+| Tcl | Everything is a string command, so code can be loaded, hooked and generated from anywhere (even a database row) | Two levels of quoting, and strings all the way down: errors surface late |
+| AWK | The record loop and pattern-action rules make parsing and filtering tiny | The portable subset is small, and the standard stops short of regex `RS` and `RT`, which are gawk extensions |
 | XAML | A declarative format, so tools can read and write it | The parser can run arbitrary methods, which declarative formats are not meant to do |
 
 Every language page also tags each trick as **guaranteed**, **implementation-permitted** or **accidentally exploited**, as explained in the [intro](intro.md#three-kinds-of-knowledge). A strength you rely on is only as strong as the tag next to it.
