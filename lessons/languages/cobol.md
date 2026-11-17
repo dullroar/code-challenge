@@ -88,3 +88,9 @@ See [exercises](../exercises.md#b1-cobol-predict-then-break-alter-verified): pre
 ## Under what circumstances would this terrible idea become reasonable?
 
 Rarely in the form shown. The `88`-level stop rule, though, is a good design wherever business rules change more often than code. The `ALTER` form was reasonable when memory and cycles were the constraint and the engineers owning the system understood every jump. It stopped being reasonable when teams, tools and maintenance horizons grew.
+
+## Computer science behind this page
+
+<!-- BEGIN GENERATED concepts:languages/cobol.md -->
+The computer-science ideas behind this page: [Representing state](../cs/02-what-counts-as-a-machine.md#representing-state), [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [Goto and structured programming](../cs/03-control-flow-and-continuations.md#goto-and-structured-programming), [The program counter](../cs/03-control-flow-and-continuations.md#the-program-counter), [Self-modifying code](../cs/03-control-flow-and-continuations.md#self-modifying-code), [Declarative programming](../cs/05-formal-languages-as-computational-substrates.md#declarative-programming), [State](../cs/06-state-beyond-variables.md#state), [Exception handling](../cs/07-effects-errors-and-commitment.md#exception-handling), [Integrity constraints](../cs/07-effects-errors-and-commitment.md#integrity-constraints), [Undefined, unspecified and implementation-defined behavior](../cs/08-abstraction-leaks-and-implementation-dependence.md#undefined-unspecified-and-implementation-defined-behavior).
+<!-- END GENERATED concepts:languages/cobol.md -->

@@ -71,3 +71,9 @@ See [exercises](../exercises.md#b2-haskell-break-the-laziness-verified): replace
 ## Under what circumstances would this terrible idea become reasonable?
 
 Inside a library that implements lazy streaming and has been carefully tested for ordering. Not in application code, where `evaluate`, strict IO and streaming libraries give the same results without the surprises.
+
+## Computer science behind this page
+
+<!-- BEGIN GENERATED concepts:languages/haskell.md -->
+The computer-science ideas behind this page: [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [Evaluation strategies](../cs/04-evaluation-and-demand.md#evaluation-strategies), [Lazy evaluation](../cs/04-evaluation-and-demand.md#lazy-evaluation), [Iterators and generators](../cs/04-evaluation-and-demand.md#iterators-and-generators), [Referential transparency](../cs/04-evaluation-and-demand.md#referential-transparency), [State](../cs/06-state-beyond-variables.md#state), [Side effects](../cs/07-effects-errors-and-commitment.md#side-effects), [Monads and effect systems](../cs/07-effects-errors-and-commitment.md#monads-and-effect-systems).
+<!-- END GENERATED concepts:languages/haskell.md -->

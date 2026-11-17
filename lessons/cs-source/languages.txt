@@ -1,0 +1,28 @@
+# The language vocabulary: the ids that an entry's `languages: [...]` list may use, and how the book
+# prints them. One `id: Display name` per line. Entries and tags are different things: a language says
+# WHAT the entry is written in or runs on; a tag says WHICH computer-science idea it shows.
+# A maintainer adds a line here when a new language arrives.
+apl: APL
+awk: AWK
+c: C
+c-sharp: "C#"
+cmake: CMake
+cobol: COBOL
+common-lisp: Common Lisp
+forth: Forth
+go: Go
+haskell: Haskell
+java: Java
+kotlin: Kotlin
+linq: LINQ
+m4: m4
+make: GNU Make
+pcre2: PCRE2
+perl: Perl
+python: Python
+regex: Regular expressions
+rust: Rust
+sed: GNU sed
+sqlite: SQLite
+tcl: Tcl
+xaml: XAML

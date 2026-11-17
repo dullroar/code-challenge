@@ -1,0 +1,14 @@
+# The only external hosts that the computer-science chapters may link to (one per line).
+# Policy: Wikipedia first. Anything else must be long-lived and openly licensed or freely readable.
+# Ask before adding a host. `build.py --check` fails on any other host.
+#
+# en.wikipedia.org                CC BY-SA
+# www.rfc-editor.org              IETF RFCs, free to reuse
+# owasp.org                       OWASP community pages, CC BY-SA 4.0
+# cheatsheetseries.owasp.org      OWASP cheat sheets, CC BY-SA 4.0
+# developer.mozilla.org           MDN, CC BY-SA 2.5 or later
+en.wikipedia.org
+www.rfc-editor.org
+owasp.org
+cheatsheetseries.owasp.org
+developer.mozilla.org

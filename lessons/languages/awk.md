@@ -99,3 +99,9 @@ See [exercises](../exercises.md#b13-awk-the-missing-rt-verified). There is also 
 ## Under what circumstances would this terrible idea become reasonable?
 
 When the input *is* the loop. A regex record separator is the idiomatic way to read paragraphs, blocks of a config file or entries of a log. Slicing `/dev/urandom` for dice is a stunt, but the same mechanism (a pattern decides where a record ends; a pattern decides whether it matters) is what gives awk its reputation for doing in one line what takes a page elsewhere.
+
+## Computer science behind this page
+
+<!-- BEGIN GENERATED concepts:languages/awk.md -->
+The computer-science ideas behind this page: [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [Regular expressions](../cs/05-formal-languages-as-computational-substrates.md#regular-expressions), [Declarative programming](../cs/05-formal-languages-as-computational-substrates.md#declarative-programming), [Domain-specific languages](../cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages), [State](../cs/06-state-beyond-variables.md#state), [Portability](../cs/08-abstraction-leaks-and-implementation-dependence.md#portability).
+<!-- END GENERATED concepts:languages/awk.md -->

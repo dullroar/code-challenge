@@ -1,3 +1,15 @@
+---
+name: "APL"
+teaches: "that five rolls and a take-while can replace a loop."
+kind: idiomatic
+languages: [apl]
+lesson: "languages/apl.md"
+loop-by: bulk-array
+evaluation: eager
+assurance: implementation-permitted
+pairs-with: apl-weird
+tags: [array-programming, eager-evaluation, referential-transparency]
+---
 # APL
 
 **Teaches you:** that five rolls and a take-while can replace a loop.
@@ -8,7 +20,7 @@ The whole challenge ("add 10-19 hour cards until the total passes 40") is three 
 
 ## Run it
 
-GNU APL (`apl`, built from [gnu.org/software/apl](https://www.gnu.org/software/apl/)) and `sqlite3`.
+You need GNU APL (`apl`, built from [gnu.org/software/apl](https://www.gnu.org/software/apl/)) and `sqlite3`.
 
 ```bash
 cd src/apl
@@ -26,7 +38,7 @@ Debugging	16	52	2026-W46	DEMO ONLY
 # committed total=52 entries=3 DEMO ONLY
 ```
 
-## How it works
+## How the stunt works
 
 Read the three lines under "The challenge" in the source with this walk-through beside them.
 
@@ -93,4 +105,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/apl
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: GNU APL (built from the pinned gnu.org tarball in the toolchain image) and sqlite3 on a minimal Ubuntu. No compiler, no package manager.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds GNU APL (built from the pinned gnu.org tarball in the toolchain image) and sqlite3 on a minimal Ubuntu. It has no compiler and no package manager.

@@ -119,3 +119,9 @@ Both entries are APL, and neither is idiomatic in the sense a C programmer means
 ## Under what circumstances would this terrible idea become reasonable?
 
 The first isn't a terrible idea; it is how APL programmers actually think. The second becomes reasonable when you are generating code from data in an environment designed for it. And as a *design* notation, APL's real home, it was reasonable from the start: it was meant for describing computation on a blackboard, long before anyone ran it.
+
+## Computer science behind this page
+
+<!-- BEGIN GENERATED concepts:languages/apl.md -->
+The computer-science ideas behind this page: [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [Self-modifying code](../cs/03-control-flow-and-continuations.md#self-modifying-code), [Eager evaluation](../cs/04-evaluation-and-demand.md#eager-evaluation), [Referential transparency](../cs/04-evaluation-and-demand.md#referential-transparency), [Array programming](../cs/04-evaluation-and-demand.md#array-programming), [State](../cs/06-state-beyond-variables.md#state), [Scope and binding](../cs/06-state-beyond-variables.md#scope-and-binding), [Homoiconicity: code as data](../cs/06-state-beyond-variables.md#homoiconicity-code-as-data), [Reflection and metaprogramming](../cs/06-state-beyond-variables.md#reflection-and-metaprogramming).
+<!-- END GENERATED concepts:languages/apl.md -->

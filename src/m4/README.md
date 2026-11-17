@@ -1,3 +1,16 @@
+---
+name: "m4"
+teaches: "that a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again."
+kind: weird
+languages: [m4]
+lesson: "languages/m4.md#a-loop-made-of-rescanning"
+loop-by: rewrite-and-rescan
+evaluation: rewriting
+assurance: implementation-permitted
+machine: "A text-rescanning machine"
+state: "The input stream: whatever macro text has not been read yet"
+tags: [fixed-point-iteration, lazy-evaluation, macro-processing, recursion, scope-and-binding, state, term-rewriting, turing-completeness]
+---
 # m4
 
 **Teaches you:** that a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again.
@@ -8,7 +21,7 @@ There is one m4 entry and no `m4-weird`, because a whole program written in a ma
 
 ## Run it
 
-GNU m4 (tested with 1.4.19) and `sqlite3`. The shell is `sh`; `date`, `od`, `tr` and `mkdir` are used for the seed, the clock and the folder.
+You need GNU m4 (tested with 1.4.19) and `sqlite3`. The shell is `sh`; `date`, `od`, `tr` and `mkdir` are used for the seed, the clock and the folder.
 
 ```bash
 cd src/m4
@@ -30,7 +43,7 @@ Debugging	15	41	2026-W47	DEMO ONLY
 
 ## What it does
 
-Draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept). It prints the rows and saves them to SQLite in one transaction.
+It draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept). It prints the rows and saves them to SQLite in one transaction.
 
 ## How the stunt works
 
@@ -80,7 +93,7 @@ Expanding `tc_card()` produces: a row of text (the output), some definitions tha
 define([tc_append], [define([tc_sql], defn([tc_sql])[$1])])
 ```
 
-`defn(name)` returns a macro's definition *quoted*, so it is not scanned again. Appending is "redefine the macro as itself plus the new text". That is how the SQL script accumulates card by card. Diversions are m4's other way to collect text (`divert(1)` sends output to a numbered buffer, `undivert(1)` pours it back), and `divert(-1)` is the bit bucket this file uses to silence the definitions. The SQL is not collected in a diversion because `undivert` does not *return* text: inside an argument list it prints directly and the argument comes out empty, so a diversion cannot be passed to `syscmd`.
+`defn(name)` returns a macro's definition *quoted*, so it is not scanned again. Appending is "redefine the macro as itself plus the new text". That is how the SQL script accumulates card by card. Diversions are m4's other way to collect text (`divert(1)` sends output to a numbered buffer, `undivert(1)` pours it back), and `divert(-1)` is the "bit bucket" (a place where output just disappears) that this file uses to silence the definitions. The SQL is not collected in a diversion because `undivert` does not *return* text: inside an argument list it prints directly and the argument comes out empty, so a diversion cannot be passed to `syscmd`.
 
 ### 7. The empty quote `[]`
 
@@ -101,22 +114,22 @@ The quoting here switches in and out: the first and last pieces are literal shel
 
 `ifdef([tc_seed], [], [define(...)])` means "only compute a seed if none was given on the command line with `-D`". That is what makes a run reproducible, which is what lets the tests compare it with a reference.
 
-## Why this qualifies as weird
+## Why this is weird
 
 Because it works. m4 was designed to preprocess text, in the 1970s, as the macro layer that shipped with Unix tools and later powered `sendmail.cf` and GNU `autoconf`. It has no loops, no variables, no arithmetic of its own beyond `eval`, no strings in any usual sense: everything is text being rewritten. The challenge needs state, repetition, random numbers and a stop rule, and each of those is built here from define, rescan and quoting. If you can write this, you can read `configure`.
 
 ## What you can learn
 
-- Rescanning: how text-in, text-out evaluation works, and why quoting is the whole game.
+- Rescanning: how text-in, text-out evaluation works, and why quoting is the whole point.
 - `define`/`defn`/`pushdef`-style state, and recursion as the only repetition.
 - The `ifelse` grouping rule, `dnl`, `[]` and `changequote`.
 - Diversions, and what `undivert` does not do.
 - That 32-bit `eval` is a design limit you have to work around, not a bug.
 - Why `#` comments are dangerous in a language where comments are not skipped.
 
-## Gotchas and limitations
+## Gotchas worth knowing
 
-- **GNU m4 extensions: two.** `esyscmd` (capture a command's output: seed, clock, week) and `format` (used once, to make a tab character). Everything else (`define`, `defn`, `ifelse`, `ifdef`, `eval`, `incr`, `divert`, `changecom`, `changequote`, `syscmd`, `sysval`, `dnl`, `-D`) is POSIX. BSD m4 has `esyscmd` but not `format`. One more GNU-specific *behaviour* to know about: `eval` is 32-bit there, and the generator is built around that limit; another m4 may have a different width.
+- **GNU m4 extensions: two.** `esyscmd` (capture a command's output: seed, clock, week) and `format` (used once, to make a tab character). Everything else (`define`, `defn`, `ifelse`, `ifdef`, `eval`, `incr`, `divert`, `changecom`, `changequote`, `syscmd`, `sysval`, `dnl`, `-D`) is POSIX. BSD m4 has `esyscmd` but not `format`. One more GNU-specific *behavior* to know about: `eval` is 32-bit there, and the generator is built around that limit; another m4 may have a different width.
 - **Recursion depth.** Every card nests one more expansion. At 3 to 5 cards that is nothing; a rule that needed thousands of cards would need a different shape (m4 can do tail-recursion tricks, but this file does not).
 - **The SQL is not escaped.** Every value is a number or one of four fixed words. Do not feed user text into `tc_insert`.
 - **The seed.** Three random bytes from `/dev/urandom`, scaled: about 24 bits of entropy, ample for a demo. A pinned seed must be 1 to 2147483646.
@@ -135,4 +148,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/m4
 ```
 
-In the image: GNU m4 and sqlite3 on a minimal Ubuntu.
+The image holds GNU m4 and sqlite3 on a minimal Ubuntu.

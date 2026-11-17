@@ -1,3 +1,15 @@
+---
+name: "Java"
+teaches: "A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`."
+kind: port
+languages: [java]
+lesson: "languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery"
+loop-by: loop-statement
+evaluation: eager
+assurance: guaranteed
+pairs-with: ModernChallenge1
+tags: [control-flow, side-effect, thread-safety]
+---
 # One Statement, Java Edition
 
 Ken's Java port of Jim Lehmer's C# challenge. It is one of four sibling ports, along with [Kotlin](../KotlinChallenge1/README.md), [Python](../PythonChallenge1/README.md) and [Go](../GoChallenge1/README.md), written so the languages can be compared. This README also holds the [side-by-side comparison](#side-by-side) of all four.
@@ -16,7 +28,7 @@ All four ports do the same thing, in the same order:
 
 The cards are flagged `is_demo`. Nothing here connects to a real time-reporting system. Delete the `data` folder to start over; git ignores it.
 
-## Run
+## Run it
 
 You need JDK 25. The Gradle wrapper does the rest. Run it from a desktop session:
 
@@ -59,7 +71,7 @@ It runs the entry in a throwaway VM with networking off, screenshots the window,
 
 As in the original, the entity and the data-access type are the only code outside `main`.
 
-## How the one statement is built
+## How the stunt works
 
 Every port splits the work three ways: an **initializer** that builds the loop's state, a **condition** that decides whether to keep going (and, on the last check, shows the window), and an **update** that does one pass of work. Comment banners in the source mark the boundaries.
 
@@ -67,10 +79,10 @@ Java uses the literal original shape: `for (init; condition; update) { }`, with 
 
 - **Initializer.** `var i = new Object() { ... }`. An anonymous class is the state holder, because the `for` initializer allows only one declaration. `var` keeps the anonymous type so its fields stay reachable. Fields: the Spring Boot context, the repository, the hours list, a category iterator, a lock, and an XML fragment.
 - **Condition.** `total <= 40 && categories.hasNext() ? true : (BooleanSupplier) () -> ...`. When the loop should end, the else branch builds the window, shows it, and turns the result into `false` with `Double.isNaN(int)`, the original's trick.
-- **Update.** A comma-separated list: lock, add hours, stage a card, unlock, then `new Thread(...).start()`.
-- **Several steps in one expression.** `Stream.of(x).peek(...).peek(...)`.
-- **Window.** A Swing `JDialog` described by Spring XML bean definitions built at runtime (`GenericXmlApplicationContext` over a string). A `javax.swing.Timer` bean fades the label colors. The modal dialog blocks until closed.
-- **Saving.** Spring Data JPA `saveAll`, invoked through Spring's `ReflectionUtils`.
+- **Update.** The update is a comma-separated list: lock, add hours, stage a card, unlock, then `new Thread(...).start()`.
+- **Several steps in one expression.** Chain them: `Stream.of(x).peek(...).peek(...)`.
+- **Window.** The window is a Swing `JDialog`, described by Spring XML bean definitions that are built at runtime (`GenericXmlApplicationContext` over a string). A `javax.swing.Timer` bean fades the label colors. The modal dialog blocks until closed.
+- **Saving.** The program saves with Spring Data JPA `saveAll`, invoked through Spring's `ReflectionUtils`.
 
 ## Side by side
 

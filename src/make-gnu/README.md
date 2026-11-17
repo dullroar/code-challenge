@@ -1,3 +1,17 @@
+---
+name: "GNU Make"
+teaches: "arithmetic and looping in plain Make syntax, no shell required."
+kind: weird
+languages: [make]
+lesson: "languages/make-cmake.md#gnu-make"
+loop-by: rewrite-and-rescan
+evaluation: declarative
+assurance: accidentally-exploited
+pairs-with: cmake
+machine: "A dependency graph that can restart itself"
+state: "Which `.tc-N.mk` files exist, and `MAKE_RESTARTS`"
+tags: [build-automation, control-flow, declarative-programming, dependency-graph, fixed-point-iteration, hyrums-law, state, turing-completeness]
+---
 # GNU Make: the build tool is the interpreter
 
 **Teaches you:** arithmetic and looping in plain Make syntax, no shell required.
@@ -28,7 +42,7 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/make-gnu
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: GNU Make and sqlite3 on a minimal Ubuntu. The Makefile runs from a private folder that starts out holding nothing else.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds GNU Make and sqlite3 on a minimal Ubuntu. The Makefile runs from a private folder that starts out holding nothing else.
 
 ## How the stunt works
 
@@ -43,7 +57,7 @@ It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no n
 | Clock | `btime` from `/proc/stat` + whole seconds from `/proc/uptime`, added digit by digit with a carry (`NOW=<epoch>` overrides it for tests) | no |
 | ISO week | epoch ÷ 86400 by long division (÷100, then ÷864 digit by digit), a year-by-year calendar walk from 1970, then the Thursday-of-the-week rule | no |
 | Report | `$(info)` with a tab variable; the report is a chain of phony targets (`init`, `rows`, `footer`, frames) so output stays in order | no |
-| Glow | on a terminal only: 25 phony targets, one per frame, each printing a 256-colour **DEMO ONLY** banner one grey shade brighter, then dimmer, then erased (about 1.5 s). "Is stdout a terminal?" is `$(realpath /proc/self/fd/1)` being `/dev/pts/N` | no (frames pause with `sleep 0.06`) |
+| Glow | on a terminal only: 25 phony targets, one per frame, each printing a 256-color **DEMO ONLY** banner one gray shade brighter, then dimmer, then erased (about 1.5 s). "Is stdout a terminal?" is `$(realpath /proc/self/fd/1)` being `/dev/pts/N` | no (frames pause with `sleep 0.06`) |
 | Pop-up | `make pop` runs `wt.exe` (Windows Terminal) to open a window that runs the demo; the window closes itself when `make` exits | **yes** (`wt.exe`) |
 | Persistence | `$(file)` writes a `.sql` script, then `sqlite3 db < script` | **yes** |
 | Plumbing | `mkdir -p`, `rm -f`, and `:` (see below) | **yes** |
@@ -51,7 +65,7 @@ It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no n
 The stop rule is also checked by SQLite: the last statement inserts `total <= 40` into a table whose only column has
 `CHECK(ok=1)`, so the named constraint error on stderr is the stop rule announcing itself, as in the other entries.
 
-## Walls and fine print
+## Gotchas worth knowing
 
 - **A recipe that expands to nothing doesn't count as remaking the file.** The card file is written while the recipe
   line is *expanded*, but Make only notices (and restarts) if a command actually ran. So each card carries a `@:`,

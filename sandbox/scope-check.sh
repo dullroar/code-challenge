@@ -14,7 +14,10 @@
 #   - Plain path names only ([A-Za-z0-9._/-]); no symlinks, no submodules.
 #   - No binary files, and nothing over 256 KiB.
 #   - No invisible or direction-changing characters (Trojan Source), and no control characters.
-#   - An optional Dockerfile in the new folder must pass dockerfile-lint.sh (trusted bases only, no RUN in the runtime stage).
+#   - The README starts with the frontmatter block described in CONTRIBUTING.md (the book is built from it),
+#     and has the shared section headings (Run it, How the stunt works, What check.sh enforces, Gotchas worth knowing).
+#   - The new folder is easy to try: it ships a Dockerfile, or its README has a "## Run it in Windows Sandbox" section.
+#   - A Dockerfile in the new folder must pass dockerfile-lint.sh (trusted bases only, no RUN in the runtime stage).
 #
 # The report (never fails the PR; it tells the reviewer where to look): network-looking text,
 # anything that starts processes or evaluates code, and long encoded blobs.
@@ -55,6 +58,42 @@ for entry in "${!entries[@]}"; do
     git cat-file -e "$head:$dir/README.md" 2>/dev/null || fail "$dir has no README.md"
     git cat-file -e "$head:$dir/check.sh" 2>/dev/null || git cat-file -e "$head:$dir/check.ps1" 2>/dev/null         || fail "$dir has no check.sh or check.ps1"
 
+    readme=$(git show "$head:$dir/README.md" 2>/dev/null || true)
+    fm=$(awk 'NR==1 && $0 != "---" { exit } NR>1 && $0 == "---" { exit } NR>1 { print }' <<<"$readme")
+    if [[ -z $fm ]]; then
+        fail "$dir/README.md must start with the frontmatter block described in CONTRIBUTING.md"
+    else
+        for key in name teaches kind languages lesson loop-by evaluation assurance tags; do
+            grep -q "^$key:" <<<"$fm" || fail "$dir/README.md frontmatter is missing '$key:'"
+        done
+        tags=$(sed -nE 's/^tags:[[:space:]]*\[(.*)\][[:space:]]*$/\1/p' <<<"$fm" | tr -d ' ')
+        [[ -n $tags ]] || fail "$dir/README.md frontmatter needs a non-empty tags: [a, b] list"
+        # An unknown tag is not a failure: a maintainer adds the concept at merge. Say so.
+        for t in ${tags//,/ }; do
+            git cat-file -e "$mb:lessons/cs-source/concepts/$t.md" 2>/dev/null || echo "NOTE  $dir/README.md: tag '$t' is not a concept yet; a maintainer decides whether to add it"
+        done
+        langs=$(sed -nE 's/^languages:[[:space:]]*\[(.*)\][[:space:]]*$/\1/p' <<<"$fm" | tr -d ' ')
+        for l in ${langs//,/ }; do
+            git show "$mb:lessons/cs-source/languages.txt" 2>/dev/null | grep -q "^$l:" || echo "NOTE  $dir/README.md: language '$l' is not in lessons/cs-source/languages.txt yet; a maintainer adds it"
+        done
+        role=$(sed -nE 's/^loop-by:[[:space:]]*([A-Za-z0-9-]+).*/\1/p' <<<"$fm")
+        git cat-file -e "$mb:lessons/cs-source/roles/$role.md" 2>/dev/null || echo "NOTE  $dir/README.md: loop-by '$role' is not a known role"
+    fi
+
+    # The section headings every entry shares, so readers and the book can rely on them.
+    for h in '## Run it' '## How the stunt works' '## Gotchas worth knowing'; do
+        grep -qxF "$h" <<<"$readme" || fail "$dir/README.md needs a section headed exactly '$h' (see CONTRIBUTING.md)"
+    done
+    if git cat-file -e "$head:$dir/check.sh" 2>/dev/null; then
+        grep -qxF '## What `check.sh` enforces' <<<"$readme" || fail "$dir/README.md needs a section headed exactly '## What \`check.sh\` enforces'"
+    elif git cat-file -e "$head:$dir/check.ps1" 2>/dev/null; then
+        grep -qxF '## What `check.ps1` enforces' <<<"$readme" || fail "$dir/README.md needs a section headed exactly '## What \`check.ps1\` enforces'"
+    fi
+
+    if ! git cat-file -e "$head:$dir/Dockerfile" 2>/dev/null; then
+        git show "$head:$dir/README.md" 2>/dev/null | grep -q '^## Run it in Windows Sandbox' \
+            || fail "$dir needs a Dockerfile, or a '## Run it in Windows Sandbox' section in its README, so a reviewer can try it safely"
+    fi
     if git cat-file -e "$head:$dir/Dockerfile" 2>/dev/null; then
         lint=$(git show "$head:$dir/Dockerfile" | "$(dirname "$0")/dockerfile-lint.sh" - 2>&1) || { fail "$dir/Dockerfile breaks the container rules:"; sed 's/^/        /' <<<"$lint"; }
     fi

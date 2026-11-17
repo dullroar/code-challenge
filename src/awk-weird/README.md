@@ -1,3 +1,17 @@
+---
+name: "AWK"
+teaches: "that a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program."
+kind: weird
+languages: [awk]
+lesson: "languages/awk.md#2-records-from-a-random-byte-stream-awk-weird"
+loop-by: input-driven
+evaluation: eager
+assurance: implementation-permitted
+pairs-with: awk
+machine: "A record-processing loop that you can aim at any byte stream"
+state: "The input stream and the record separator `RS`"
+tags: [control-flow, declarative-programming, portability, regular-expression, state]
+---
 # AWK, weirder
 
 **Teaches you:** that a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program.
@@ -17,7 +31,7 @@ The straight version is [`awk`](../awk/README.md).
 
 ## Run it
 
-**GNU awk** (`gawk`, tested with 5.2.1) and `sqlite3`.
+You need **GNU awk** (`gawk`, tested with 5.2.1) and `sqlite3`.
 
 ```bash
 cd src/awk-weird
@@ -54,12 +68,12 @@ Read the rules in order: awk runs **every rule whose pattern matches, for every 
 { $0 = C[n++ % 4 + 1] "," h "," t "," week }          # rule 3: the card, as a comma record
 ```
 
-An assignment is an expression, so `t += h = 10 + RT` sets `h` and adds it to `t` in one statement (both start as "" which is 0, no initialisation needed). Assigning to `$0` makes awk **re-split** the record into fields with `FS`, which `BEGIN` set to a comma: `$1` is the category, `$2` the hours, `$3` the total, `$4` the week.
+An assignment is an expression, so `t += h = 10 + RT` sets `h` and adds it to `t` in one statement (both start as "" which is 0, no initialization needed). Assigning to `$0` makes awk **re-split** the record into fields with `FS`, which `BEGIN` set to a comma: `$1` is the category, `$2` the hours, `$3` the total, `$4` the week.
 
 ### 3. The same fields, three ways
 
 - **Rule 4:** an `INSERT` built from `$1`..`$4`, printed to `| sql`, a pipe to `sqlite3`.
-- **Rule 5:** `{ OFS = "\t"; $1 = $1; print $0, "DEMO ONLY" }`. `$1 = $1` looks like a no-op, and is the famous AWK way to force a rebuild of `$0` joined by `OFS`: the commas become tabs, so the people-readable row is the same record with a different separator.
+- **Rule 5:** `{ OFS = "\t"; $1 = $1; print $0, "DEMO ONLY" }`. `$1 = $1` looks like a no-op, and is the famous AWK way to force a rebuild of `$0` joined by `OFS`: the commas become tabs, so the human-readable row is the same record with a different separator.
 - The `DEMO ONLY` rule is in the table: `CHECK(demo_only=1)`.
 
 ### 4. The stop rule is a bare pattern
@@ -78,9 +92,9 @@ t > 40 { exit }
 
 ## Why this is weird
 
-AWK is a language where **the program is the body of a loop you did not write**. Here the loop is over a random byte stream cut up by a regular expression, and the language's built-in record machinery stands in for a random-number generator. Most AWK programmers know `RS` as "newline, or maybe an empty line for paragraph mode", and never use `RT`. Seeing `RS="[0-9]"` on `/dev/urandom` is the "wait, you can DO that?".
+AWK is a language where **the program is the body of a loop you did not write**. Here the loop is over a random byte stream cut up by a regular expression, and the language's built-in record machinery takes the place of a random-number generator. Most AWK programmers know `RS` as "newline, or maybe an empty line for paragraph mode", and never use `RT`. Seeing `RS="[0-9]"` on `/dev/urandom` is a real "wait, you can DO that?" moment.
 
-You should not do this in production because: it is a GNU extension; the program's behaviour depends on a device file; "random digit" is hidden inside an I/O setting; and the stream, not the program, decides how long it runs (a finite file simply ends early, as `check.sh` shows).
+You should not do this in production because: it is a GNU extension; the program's behavior depends on a device file; "random digit" is hidden inside an I/O setting; and the stream, not the program, decides how long it runs (a finite file simply ends early, as `check.sh` shows).
 
 ## What you can learn
 
@@ -91,7 +105,7 @@ You should not do this in production because: it is a GNU extension; the program
 - Editing `ARGV`/`ARGC` in `BEGIN` to choose input files.
 - That a finite input makes the program a *function of its input*: swap the file and the dice change.
 
-## Gotchas and limitations
+## Gotchas worth knowing
 
 - **gawk only.** The GNU-specific parts: `RT`, `systime()`, `PROCINFO["pid"]`. A regex `RS` is not POSIX but mawk, the one-true-awk and busybox awk all accepted `RS="[0-9]"` when tried here; none of them has `RT`, so they cannot see *which* digit ended the record, and the trick needs exactly that. Worse, the failure is not an error: under mawk `RT` is always empty, so rule 1 skips every record and the stop rule never fires. On `/dev/urandom` mawk 1.3.4 keeps reading until it dies with `out of memory` (tried under a 400 MB limit, which it hit after about a thousand records); on a finite digit file it prints a header and `total=0 entries=0`. Do not run this under another awk without a memory limit and a timeout. `gawk --lint` reports the extensions.
 - **A finite input can end before the total passes 40.** `/dev/urandom` never does. With a file, the program stops at end of input and reports whatever total it reached (`check.sh` tests `1 2` and gets 2 cards, 23 hours).
@@ -113,4 +127,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/awk-weird
 ```
 
-In the image: gawk and sqlite3 on a minimal Ubuntu.
+The image holds gawk and sqlite3 on a minimal Ubuntu.

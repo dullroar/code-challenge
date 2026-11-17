@@ -1,3 +1,15 @@
+---
+name: "LINQ"
+teaches: "LINQ method chains, end to end."
+kind: weird
+languages: [c-sharp, linq]
+lesson: "languages/csharp-linq-xaml.md#deferred-execution-and-the-void-to-value-trick"
+loop-by: lazy-demand
+evaluation: deferred
+assurance: guaranteed
+pairs-with: LinqChallenge2
+tags: [control-flow, deferred-execution, lazy-evaluation, side-effect, thread-safety]
+---
 # LINQ challenge, Variant A: one fluent method-chain statement
 
 **Teaches you:** LINQ method chains, end to end.
@@ -6,7 +18,7 @@ One `;`-terminated expression statement, built entirely from LINQ method calls. 
 
 ## Run it
 
-Needs Windows and the .NET 10 SDK.
+You need Windows and the .NET 10 SDK.
 
 ```powershell
 cd src\LinqChallenge1
@@ -14,7 +26,7 @@ dotnet restore
 dotnet run
 ```
 
-A small terminal-styled window appears, pulses three times, and closes itself; the process then exits on its own. Records land in `%LOCALAPPDATA%\LinqChallenge1\timecards.db`; delete that file to start fresh (each run's rows are tagged with a fresh `RunId`, so the window's report always shows just that run's 40.0h, even though the file keeps every run's history, like the other entries in this repo).
+A small terminal-styled window appears, pulses three times, and closes itself; the process then exits on its own. Records land in `%LOCALAPPDATA%\LinqChallenge1\timecards.db`; delete that file to start fresh. Each run's rows are tagged with a fresh `RunId`, so the window's report always shows just that run's 40.0h. The file keeps every run's history, like the other entries in this repo.
 
 ```powershell
 .\check.ps1    # build, structural check, one end-to-end run against a throwaway DB
@@ -50,11 +62,11 @@ WPF and EF Core are full of `void` methods - `Add`, `Show`, `BeginAnimation`, `C
 
 ## Why two nested `Enumerable.Repeat(…, 1)` calls
 
-C# only allows a handful of expression shapes as a top-level expression statement - invocation, object creation, assignment, increment/decrement, `await` - not an arbitrary `&&` or `is` expression. That rules out binding intermediate stages to a pattern-matched local (`x is var report && …`) at the top level: the statement has to *end* in an invocation. So instead of naming the fold-result or the report, each is nested directly as the argument to the next `Enumerable.Repeat(…, 1)`, which turns a single computed value back into a one-element sequence so the next stage can stay a genuine LINQ operator (`SelectMany`, `Select`) rather than a bare method call. The whole statement is one deeply nested expression tree whose outermost call is `.Aggregate(…)` - an invocation, which is legal.
+C# only allows a handful of expression shapes as a top-level expression statement - invocation, object creation, assignment, increment/decrement, `await` - not an arbitrary `&&` or `is` expression. That rules out binding intermediate stages to a pattern-matched local (`x is var report && …`) at the top level: the statement has to *end* in an invocation. So the program does not name the fold result or the report. Instead, each one is nested directly as the argument to the next `Enumerable.Repeat(…, 1)`. That call turns a single computed value back into a one-element sequence, so the next stage can stay a genuine LINQ operator (`SelectMany`, `Select`) and not a bare method call. The whole statement is one deeply nested expression tree whose outermost call is `.Aggregate(…)` - an invocation, which is legal.
 
-## Honest fine print
+## Gotchas worth knowing
 
-- `SaveChanges()` is called once, eagerly, at the point where the outer `Enumerable.Repeat(…, 1)` call evaluates its argument - before any of the lazy LINQ-to-Objects/EF stages begin enumerating. That is still entirely inside the one statement; it just is not deferred to the final `Aggregate`'s enumeration the way `Select`/`SelectMany` stages are. `Aggregate` is an eager LINQ operator by definition, so some eagerness here is unavoidable.
+- `SaveChanges()` is called once, eagerly, at the point where the outer `Enumerable.Repeat(…, 1)` call evaluates its argument - before any of the lazy LINQ-to-Objects/EF stages begin enumerating. That is still entirely inside the one statement. It is just not deferred to the final `Aggregate`'s enumeration, the way `Select`/`SelectMany` stages are. `Aggregate` is an eager LINQ operator by definition, so some eagerness here is unavoidable.
 - The accumulator state in both `Aggregate` calls is mutated in place (`list.Add(...)`) rather than rebuilt immutably. That mirrors the mutation shortcut the original `ModernChallenge1` takes with `i.totalHours.Add(...)`, and is called out here for the same reason: it is a pragmatic shortcut, not a LINQ-purity claim.
 - `Application.Run()` (no window argument) is called from inside a `.Select` lambda, which is what actually pumps WPF dispatcher messages so the window paints and the animation ticks. `ShutdownMode` is set to `OnExplicitShutdown` so the animation's `Completed` handler, not an implicit "last window closed" rule, decides when the app (and `Run()`) exits.
 - `Console.WriteLine` calls inside the window-creation stage exist purely so `check.ps1` can verify the persisted report from stdout, without needing a SQLite CLI tool on the test machine.

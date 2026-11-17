@@ -62,7 +62,7 @@ Inserting a card fires the trigger, which prints the card (via `tcl('born', ...)
 - **Every hook point is a loop opportunity.** SQLite lets you register functions and triggers; Tcl lets you intercept lookups. Either alone is a feature, together they are a runtime.
 - **Braces versus substitution** decides everything in Tcl. (Compare [Make's expansion time versus run time](make-cmake.md#gnu-make) and [m4's quoting](m4.md).)
 
-Tags: `proc`, `unknown`, `uplevel`, `namespace`, `dict`, and `try` are **guaranteed** by Tcl 8.6. `db function` and `db eval` variable binding belong to the **sqlite3 Tcl package** (**implementation-permitted**: the interface is stable but is not part of Tcl). Recursive triggers need `PRAGMA recursive_triggers`, **documented SQLite** behaviour. That `SELECT tcl('hours')` is called *once* per trigger run is **accidentally exploited**: SQLite evaluates the subquery a single time, but does not promise that.
+Tags: `proc`, `unknown`, `uplevel`, `namespace`, `dict`, and `try` are **guaranteed** by Tcl 8.6. `db function` and `db eval` variable binding belong to the **sqlite3 Tcl package** (**implementation-permitted**: the interface is stable but is not part of Tcl). Recursive triggers need `PRAGMA recursive_triggers`, **documented SQLite** behavior. That `SELECT tcl('hours')` is called *once* per trigger run is **accidentally exploited**: SQLite evaluates the subquery a single time, but does not promise that.
 
 ### 4. Do this in production and you're fired
 
@@ -92,4 +92,10 @@ See [exercises](../exercises.md#b12-tcl-edit-the-program-in-the-database-verifie
 
 ## Under what circumstances would this terrible idea become reasonable?
 
-When your code genuinely belongs with your data: a rules engine where rules are rows, a game where scripts live in the save file, a tool that must patch behaviour in a running system. Using a recursive trigger as a `while` loop is a stunt; storing procs in a table is a design.
+When your code genuinely belongs with your data: a rules engine where rules are rows, a game where scripts live in the save file, a tool that must patch behavior in a running system. Using a recursive trigger as a `while` loop is a stunt; storing procs in a table is a design.
+
+## Computer science behind this page
+
+<!-- BEGIN GENERATED concepts:languages/tcl.md -->
+The computer-science ideas behind this page: [Arbitrary code execution](../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution), [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [Recursion](../cs/03-control-flow-and-continuations.md#recursion), [State](../cs/06-state-beyond-variables.md#state), [Scope and binding](../cs/06-state-beyond-variables.md#scope-and-binding), [Homoiconicity: code as data](../cs/06-state-beyond-variables.md#homoiconicity-code-as-data), [Reflection and metaprogramming](../cs/06-state-beyond-variables.md#reflection-and-metaprogramming), [Database triggers](../cs/06-state-beyond-variables.md#database-triggers), [Transactions](../cs/07-effects-errors-and-commitment.md#transactions).
+<!-- END GENERATED concepts:languages/tcl.md -->

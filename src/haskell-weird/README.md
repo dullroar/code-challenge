@@ -1,3 +1,17 @@
+---
+name: "Haskell"
+teaches: "lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work."
+kind: weird
+languages: [haskell]
+lesson: "languages/haskell.md#lazy-io-as-control-flow"
+loop-by: lazy-demand
+evaluation: lazy
+assurance: implementation-permitted
+pairs-with: haskell
+machine: "A lazy graph reducer"
+state: "Thunks: which parts of a list have been demanded"
+tags: [control-flow, evaluation-strategy, lazy-evaluation, monad-and-effect-systems, referential-transparency, side-effect, state]
+---
 # Haskell on drugs
 
 **Teaches you:** lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work.
@@ -10,7 +24,7 @@ The program builds an **infinite list of cards**, and *forcing the n-th cell of 
 
 ## Run it
 
-GHC (`runghc`) and `sqlite3`. Only packages that ship with GHC are used.
+You need GHC (`runghc`) and `sqlite3`. Only packages that ship with GHC are used.
 
 ```bash
 cd src/haskell-weird
@@ -30,9 +44,9 @@ Learning	10	44	2026-W46	DEMO ONLY
 # the list of cards is a fixed point of itself, and reading it is what wrote the rows
 ```
 
-## How it works
+## How the stunt works
 
-Three tricks stacked on each other.
+There are three tricks, stacked on each other.
 
 ### 1. A list defined in terms of itself (`fix`)
 
@@ -69,7 +83,7 @@ lazily = fix $ \self actions -> unsafeInterleaveIO $ case actions of ...
 - **Why it is `unsafe`.** The order of effects is decided by the evaluator, not the text of the program. Here the order is safe because card n cannot be forced before card n-1 (its total depends on it).
 - **`lazily` must defer its own pattern match.** The `case` is *inside* `unsafeInterleaveIO`. If the list of actions were matched when `lazily` was called, forcing it would need `before`, which needs `cards`, which does not exist yet: `<<loop>>`.
 - **`take 1 over` fires one more effect.** The crossing card has to be read to see that it crosses, so its row is written. That is why the card is kept rather than dropped.
-- **Production code should not do this.** Lazy IO is why `System.IO`'s `hGetContents` has famously surprising behaviour; this program turns that surprise into the algorithm.
+- **Production code should not do this.** Lazy IO is why `System.IO`'s `hGetContents` has famously surprising behavior; this program turns that surprise into the algorithm.
 
 ## What `check.sh` enforces
 
@@ -87,4 +101,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/haskell-weird
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: GHC compiles the script to one binary in a build stage; the image holds only that binary and sqlite3, with no GHC.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In a build stage, GHC compiles the script to one binary. The image holds only that binary and sqlite3, with no GHC.

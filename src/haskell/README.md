@@ -1,3 +1,15 @@
+---
+name: "Haskell"
+teaches: "that a lazy list and one `span` are the whole stop rule."
+kind: idiomatic
+languages: [haskell]
+lesson: "languages/haskell.md"
+loop-by: lazy-demand
+evaluation: lazy
+assurance: guaranteed
+pairs-with: haskell-weird
+tags: [evaluation-strategy, generators, lazy-evaluation, referential-transparency]
+---
 # Haskell
 
 **Teaches you:** that a lazy list and one `span` are the whole stop rule.
@@ -8,7 +20,7 @@ This is straightforward Haskell: the challenge is one pure function, `timecards`
 
 ## Run it
 
-GHC (`runghc`) and `sqlite3`. Only packages that ship with GHC are used (`base`, `time`, `process`, `directory`, `filepath`, `unix`).
+You need GHC (`runghc`) and `sqlite3`. Only packages that ship with GHC are used (`base`, `time`, `process`, `directory`, `filepath`, `unix`).
 
 ```bash
 cd src/haskell
@@ -28,7 +40,7 @@ Learning	12	49	2026-W46	DEMO ONLY
 # the whole challenge is one pure function, timecards; main is just plumbing
 ```
 
-## How it works
+## How the stunt works
 
 The file reads top to bottom as four steps, each a small function with a type signature.
 
@@ -47,7 +59,7 @@ Haskell is lazy: a value is computed only when something needs it. `span` looks 
 - **Partial functions.** `head`, `last` and `!!` crash on an empty list. Nothing here uses them: the total is a `sum` and the count is a `length`.
 - **`Int` vs `Integer` vs `Word64`.** Hours and totals are small, so `Int`. The generator's state wants exactly 64 unsigned bits, so `Word64`, and its wraparound is a feature. With `Integer` you would have to write `mod 2^64` yourself.
 - **`quote` doubles embedded `'`.** The inputs are fixed words and numbers here, so it never fires, but SQL assembled by string concatenation should always go through one escaping function.
-- **`getXdgDirectory XdgData`** honours `$XDG_DATA_HOME` and otherwise falls back to `~/.local/share`, replacing a hand-written `lookupEnv` dance.
+- **`getXdgDirectory XdgData`** honors `$XDG_DATA_HOME` and otherwise falls back to `~/.local/share`, which replaces a hand-written `lookupEnv` routine.
 - **The generator is for demos.** LCGs are fine for fictional hours and terrible for anything else.
 
 ## Format and lint
@@ -62,4 +74,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/haskell
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: GHC compiles the script to one binary in a build stage; the image holds only that binary and sqlite3, with no GHC.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In a build stage, GHC compiles the script to one binary. The image holds only that binary and sqlite3, with no GHC.

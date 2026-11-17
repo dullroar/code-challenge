@@ -1,9 +1,25 @@
+---
+name: "CMake"
+teaches: "`while()` plus regex as a tiny register machine."
+kind: weird
+languages: [cmake]
+lesson: "languages/make-cmake.md#cmake"
+loop-by: loop-statement
+evaluation: eager
+assurance: accidentally-exploited
+pairs-with: make-gnu
+machine: "A register machine"
+state: "`CMAKE_MATCH_1`..`5`, rebuilt every pass"
+tags: [build-automation, control-flow, domain-specific-language, hyrums-law, register-machine, regular-expression, state]
+---
 # CMake: `for (seed; test; iterate) ;`, with `while()` and a regex
 
 **Teaches you:** `while()` plus regex as a tiny register machine.
 
 > **DEMO ONLY.** Fictional time cards, written to a scratch SQLite file under `$XDG_DATA_HOME/CmakeChallenge/`.
 > Nothing here touches real time reporting.
+
+## Run it
 
 ```bash
 cmake -P timecards.cmake            # one run (glows if stdout is a terminal, silent in a pipe)
@@ -21,7 +37,7 @@ Runtime error near line 4: CHECK constraint failed: stop rule fired: total excee
 # an empty while() went round 3 times, once per card
 ```
 
-## The stunt
+## How the stunt works
 
 An earlier version of this file was a normal script: `while()`, `math(EXPR)`, `list(GET)`. That is `RunEverything()`
 in CMake's accent, so it was thrown away. The program is now **one `while()` with an empty body**. Everything that
@@ -47,7 +63,7 @@ of the previous pass's captures. That is a register machine, and the match is th
 | State | numbers are runs of `x`: 1 = total so far, 2 = the digit peeked last pass, 3 = rest of the digit tape, 4 = the log of finished cards, 5 = hours of the card added last pass |
 | Hours 10-19 | the table `0:xxxxxxxxxx|1:xxxxxxxxxxx|...` is *in the subject*; the pattern splices the previous pass's digit in (`${CMAKE_MATCH_2}:`) and captures that row. The staircase is the 10-19 |
 | Running total | the next subject starts with `${CMAKE_MATCH_1}${CMAKE_MATCH_5}`: string concatenation of unary numbers |
-| Stop rule | the first test: `NOT` (total so far + last card matches a **41-character literal**). Exactly 40 continues. Mutating the literal changes the behaviour (`check.sh` does) |
+| Stop rule | the first test: `NOT` (total so far + last card matches a **41-character literal**). Exactly 40 continues. Mutating the literal changes the behavior (`check.sh` does) |
 | Loop control | the loop ends when the match says no. The regex stunt entries' "return no match, on purpose" is simply what stops this one |
 | Order of tests | the stop test goes **first**: a match that fails clears every register and one that succeeds rewrites them, so the main match must run last for its captures to be the ones that survive |
 
@@ -57,10 +73,10 @@ hours), picks the ISO week, writes SQLite and plays the glow. `check.sh` fails i
 `macro()`, `include()` or `cmake_language()`, anything between `while()` and `endwhile()`, or any computation
 (`math`, `list`, `foreach`, `string` surgery) before the loop.
 
-## Walls and fine print
+## Gotchas worth knowing
 
 - **CMake's regex has no counted repetition** (`x{41}` is not supported; the test is literally 41 x's). It also has no
-  lookahead and no backreferences, so a pattern parameterised by a *register* (`${CMAKE_MATCH_2}:`) is the only way to
+  lookahead and no backreferences, so a pattern parameterized by a *register* (`${CMAKE_MATCH_2}:`) is the only way to
   do a lookup. A tempting `(x?x?x?...)` x 40 for "at most 40" would backtrack exponentially on failure, hence the
   separate literal test.
 - **The hours are looked up one pass late.** Pass *j* peeks the digit for card *j+1* and looks up the hours of card
@@ -91,4 +107,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/cmake
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: CMake and sqlite3 on a minimal Ubuntu. No compiler, no Make.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds CMake and sqlite3 on a minimal Ubuntu. It has no compiler and no Make.

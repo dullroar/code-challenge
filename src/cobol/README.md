@@ -1,3 +1,15 @@
+---
+name: "COBOL"
+teaches: "that a stop rule can be declared as data, and that a number's picture can do your rounding."
+kind: idiomatic
+languages: [cobol]
+lesson: "languages/cobol.md"
+loop-by: loop-statement
+evaluation: eager
+assurance: guaranteed
+pairs-with: cobol-weird
+tags: [control-flow, declarative-programming, integrity-constraint, state-encoding]
+---
 # COBOL
 
 **Teaches you:** that a stop rule can be declared as data, and that a number's picture can do your rounding.
@@ -8,7 +20,7 @@ COBOL (1959) was built for exactly this kind of program: records, totals and a r
 
 ## Run it
 
-GnuCOBOL (`cobc`, 3.1 or later; `sudo apt install gnucobol` on Ubuntu) and `sqlite3`.
+You need GnuCOBOL (`cobc`, 3.1 or later; `sudo apt install gnucobol` on Ubuntu) and `sqlite3`.
 
 ```bash
 cd src/cobol
@@ -72,4 +84,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/cobol
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: the compiled program, GnuCOBOL's runtime library (libcob) and sqlite3 on a minimal Ubuntu. No compiler, no package manager.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds the compiled program, GnuCOBOL's runtime library (libcob) and sqlite3 on a minimal Ubuntu. It has no compiler and no package manager.

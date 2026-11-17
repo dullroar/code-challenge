@@ -1,12 +1,24 @@
+---
+name: "LINQ"
+teaches: "C# query syntax, pushed as far as it goes."
+kind: weird
+languages: [c-sharp, linq]
+lesson: "languages/csharp-linq-xaml.md#deferred-execution-and-the-void-to-value-trick"
+loop-by: lazy-demand
+evaluation: deferred
+assurance: guaranteed
+pairs-with: LinqChallenge1
+tags: [declarative-programming, deferred-execution, domain-specific-language, lazy-evaluation, side-effect, thread-safety]
+---
 # LINQ challenge, Variant B: one SQL-like query-expression statement
 
 **Teaches you:** C# query syntax, pushed as far as it goes.
 
-The same demo as [`src/LinqChallenge1`](../LinqChallenge1/README.md) - a fixed 40-hour timecard, tracked and saved through EF Core and SQLite, crossing the `IQueryable<T>` → `IEnumerable<T>` boundary, and a WPF **DEMO ONLY** terminal window that shows, pulses, and closes itself - but written so nearly every component, not just the headline data-shaping stage, is phrased as a C# query expression (`from` / `where` / `let` / `select`). Where a `let` has to smuggle a `void`-returning WPF/EF call into a value, the inline `Func<T>.Invoke()` wrapper is itself nested inside a throwaway one-row query. Turtles all the way down, on purpose.
+The same demo as [`src/LinqChallenge1`](../LinqChallenge1/README.md) - a fixed 40-hour timecard, tracked and saved through EF Core and SQLite, crossing the `IQueryable<T>` → `IEnumerable<T>` boundary, and a WPF **DEMO ONLY** terminal window that shows, pulses, and closes itself - but written so nearly every component, not just the headline data-shaping stage, is phrased as a C# query expression (`from` / `where` / `let` / `select`). Where a `let` has to turn a `void`-returning WPF/EF call into a value, the inline `Func<T>.Invoke()` wrapper is itself nested inside a throwaway one-row query. Turtles all the way down, on purpose.
 
 ## Run it
 
-Needs Windows and the .NET 10 SDK.
+You need Windows and the .NET 10 SDK.
 
 ```powershell
 cd src\LinqChallenge2
@@ -32,7 +44,7 @@ It runs the entry in a throwaway VM with networking off, screenshots the window,
 
 ## How the stunt works
 
-C# query syntax is surface sugar over the same `Select`/`SelectMany`/`Where` calls Variant A uses directly - it is not a different execution engine. [`Program.cs`](Program.cs) pushes that sugar as far as it goes, in two headline places and then everywhere else for good measure:
+C# query syntax is syntactic sugar (a friendlier way to write the same thing) over the same `Select`/`SelectMany`/`Where` calls Variant A uses directly - it is not a different execution engine. [`Program.cs`](Program.cs) pushes that sugar as far as it goes, in two headline places and then everywhere else for good measure:
 
 **The two places query syntax genuinely carries the EF Core round trip:**
 
@@ -55,11 +67,11 @@ from persisted in
     ).AsEnumerable()
 ```
 
-is a genuine second `from` clause crossing the `IQueryable<T>` → `IEnumerable<T>` boundary - exactly the shape the plan's own sketch calls for ("`from persisted item in DbContext.Timecards ...`"). The inner query is not a stand-in for a fluent `Where`/`OrderBy`/`Select` chain; `where`/`orderby`/`select` lower to exactly those calls, so EF Core's SQLite provider translates it exactly as it would the fluent version. `AsEnumerable()` is still the one piece no query keyword replaces - it stays a trailing call, like `ToList`/`Sum`/`Single` elsewhere, marking the boundary explicitly.
+is a genuine second `from` clause crossing the `IQueryable<T>` → `IEnumerable<T>` boundary - exactly the shape the plan's own sketch calls for ("`from persisted item in DbContext.Timecards ...`"). The inner query is not a stand-in for a fluent `Where`/`OrderBy`/`Select` chain. The compiler lowers `where`/`orderby`/`select` to exactly those calls, so EF Core's SQLite provider translates it exactly as it would the fluent version. `AsEnumerable()` is still the one piece no query keyword replaces. It stays a trailing call, like `ToList`/`Sum`/`Single` elsewhere, and it marks the boundary explicitly.
 
-**Everywhere else, for the sake of the bit:** every `let` that needs a value back from a `void` WPF/EF call (`tracked`, `saved`, `line`, `window`, `pulse`) wraps its `new Func<T>(() => {...}).Invoke()` inside its own `from _x in Enumerable.Repeat(0, 1) select ....Invoke()` one-row query, then calls `.Single()` to pull the value back out. The window's text join (`string.Join("\n", from l in r.Lines select l)`) is the same idea applied to code that did not need it at all. None of this makes the program more correct; all of it makes the point that query syntax *can* reach into almost every corner, once you stop asking whether it should.
+**Everywhere else, just for fun:** every `let` that needs a value back from a `void` WPF/EF call (`tracked`, `saved`, `line`, `window`, `pulse`) wraps its `new Func<T>(() => {...}).Invoke()` inside its own `from _x in Enumerable.Repeat(0, 1) select ....Invoke()` one-row query, then calls `.Single()` to pull the value back out. The window's text join (`string.Join("\n", from l in r.Lines select l)`) is the same idea applied to code that did not need it at all. None of this makes the program more correct; all of it makes the point that query syntax *can* reach into almost every corner, once you stop asking whether it should.
 
-The whole thing is two nested query expressions (the second supplies the single already-folded report to the window/pulse `let`s, because `Aggregate` - folding many persisted rows into one report - has no query-syntax keyword and has to happen as a trailing method call in between), ending in one `.Single()`, which both forces the lazy pipeline to run and extracts the one value the outer pseudo-row was always going to produce.
+The whole thing is two nested query expressions, ending in one `.Single()`. That call both forces the lazy pipeline to run and extracts the one value that the outer pseudo-row was always going to produce. The second query supplies the single already-folded report to the window/pulse `let`s. It is needed because `Aggregate` - folding many persisted rows into one report - has no query-syntax keyword, so it has to happen as a trailing method call in between.
 
 ## Important language constraint
 
@@ -69,10 +81,10 @@ Three things in this file cannot be query syntax, because the language simply ha
 - **`Enumerable.Repeat` / `.Take` / `.Sum` / `.ToList` / `.Single`** - every place a value needs to become a one-row sequence, be capped, be summed, be forced, or be pulled back out. Query syntax lowers to these same calls; it never replaces them.
 - **`ctx.Timecards.Add(...)`, `window.Show()`, `app.Run()`, `window.BeginAnimation(...)`, `app.Shutdown()`** - the actual WPF/EF Core side effects. No syntax, query or fluent, turns a `void` method into an expression; that is what every inline `Func<T>.Invoke()` wrapper is for, with or without a throwaway query around it.
 
-## Honest fine print
+## Gotchas worth knowing
 
 - The embedded one-row queries around `tracked`, `saved`, `line`, `window`, `pulse`, the `Lines` fold step, and the window's text join are gratuitous. Removing any of them and calling the wrapped expression directly would behave identically and read more plainly. They exist because the challenge asked for maximum, deliberate perversity - "twisted thinking is good thinking" - not because they improve the code. The EF phase's `where`/`orderby`/`select`, by contrast, is not gratuitous: it replaced an actual fluent `Where`/`OrderBy`/`Select` chain that was doing real work.
-- Same prefix-sum cap and mutation-in-place caveats from the earlier draft apply here; see [Variant A's README](../LinqChallenge1/README.md#honest-fine-print) for the shared ones (eager `SaveChanges()` timing, in-place list mutation inside `Aggregate`).
+- Same prefix-sum cap and mutation-in-place caveats from the earlier draft apply here; see [Variant A's README](../LinqChallenge1/README.md#gotchas-worth-knowing) for the shared ones (eager `SaveChanges()` timing, in-place list mutation inside `Aggregate`).
 - `Console.WriteLine` calls inside the `window` `let` exist purely so `check.ps1` can verify the persisted report from stdout.
 
 See [the root README](../../README.md#the-results-so-far) for how this compares to the other one-statement entries, and [`src/LinqChallenge1`](../LinqChallenge1/README.md) for the fluent-chain variant of the same idea.

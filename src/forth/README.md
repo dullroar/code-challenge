@@ -1,3 +1,15 @@
+---
+name: "Forth"
+teaches: "that a stack language needs one `begin ... until` and a pipe to be a whole program."
+kind: idiomatic
+languages: [forth]
+lesson: "languages/forth.md"
+loop-by: loop-statement
+evaluation: eager
+assurance: guaranteed
+pairs-with: forth-weird
+tags: [control-flow, stack-data-structure, stack-machine, transaction]
+---
 # Forth
 
 **Teaches you:** that a stack language needs one `begin ... until` and a pipe to be a whole program.
@@ -8,7 +20,7 @@ The challenge ("add 10-19 hour cards until the total passes 40") is one word, `r
 
 ## Run it
 
-Gforth (`gforth`, 0.7.3 or later) and `sqlite3`.
+You need Gforth (`gforth`, 0.7.3 or later) and `sqlite3`.
 
 ```bash
 cd src/forth
@@ -26,9 +38,9 @@ Debugging	14	48	2026-W46	DEMO ONLY
 # committed total=48 entries=3 DEMO ONLY
 ```
 
-## How it works
+## How the stunt works
 
-Forth has no syntax to speak of: the interpreter reads a space-delimited word, looks it up, and runs it. A `:` definition is a new word; words pass values on a **stack**. Every definition in the file carries a *stack comment* such as `( hours -- )`, meaning "takes one number, leaves nothing". Read those first and most of the file explains itself.
+Forth has almost no syntax: the interpreter reads a space-delimited word, looks it up, and runs it. A `:` definition is a new word; words pass values on a **stack**. Every definition in the file carries a *stack comment* such as `( hours -- )`, meaning "takes one number, leaves nothing". Read those first and most of the file explains itself.
 
 The file is built bottom-up, so each word is made of words above it:
 
@@ -58,4 +70,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/forth
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: Gforth and sqlite3 on a minimal Ubuntu. No compiler, no package manager.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds Gforth and sqlite3 on a minimal Ubuntu. It has no compiler and no package manager.

@@ -22,7 +22,7 @@ You know you want to write beautifully wrong code. **You know you do.**
 
 ## Want to learn from it?
 
-**[Learn Programming the Weird Way!](lessons/README.md)** *Programs you shouldn't write. Language features you should understand.* Lessons by [goals](lessons/goals.md), by [language](lessons/languages/README.md) (including [COBOL's `ALTER`](lessons/languages/cobol.md#alter) and [APL on the whiteboard](lessons/languages/apl.md)) and by [solution pattern](lessons/patterns.md), plus [problems overcome](lessons/problems-overcome.md), [blocking problems](lessons/blocking-problems.md) and [exercises](lessons/exercises.md) you can run in a container.
+**[Learn Programming the Weird Way!](lessons/README.md)** *Programs you shouldn't write. Language features you should understand.* Lessons by [goals](lessons/goals.md), by [computer science concept](lessons/cs/README.md), by [language](lessons/languages/README.md) (including [COBOL's `ALTER`](lessons/languages/cobol.md#alter) and [APL on the whiteboard](lessons/languages/apl.md)) and by [solution pattern](lessons/patterns.md), plus [problems overcome](lessons/problems-overcome.md), [blocking problems](lessons/blocking-problems.md) and [exercises](lessons/exercises.md) you can run in a container.
 
 ## Ready to play?
 

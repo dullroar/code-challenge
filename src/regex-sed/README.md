@@ -1,10 +1,23 @@
+---
+name: "GNU sed"
+teaches: "That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock."
+kind: weird
+languages: [sed, regex]
+lesson: "languages/regex.md#gnu-sed"
+loop-by: rewrite-and-rescan
+evaluation: rewriting
+assurance: accidentally-exploited
+machine: "A string-rewriting system (a Markov algorithm)"
+state: "One line of text, rewritten until no rule applies"
+tags: [exit-status, fixed-point-iteration, markov-algorithm, redos, regular-expression, state, state-encoding, term-rewriting, time-complexity, turing-completeness]
+---
 # Regex challenge, Track 4: GNU sed (the program is one line of text, rewritten until it's done)
 
 One `sed` command runs the whole timecard demo, writes the records to a real SQLite transaction, pulses a banner, and then **exits 1**. There are no variables, no numbers and no arithmetic anywhere in it. The entire program state is a single line of text, and every step is a regex substitution on that line. This entry goes beyond the original regex plan (it lives in git history as `plans/regex.md`), but it follows the same rules. **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
 
 ## Run it
 
-GNU sed (Ubuntu's default), `sqlite3` (`sudo apt install sqlite3`) and coreutils' `basenc` (9.x on Ubuntu 24.04). Under WSL 2:
+You need GNU sed (Ubuntu's default), `sqlite3` (`sudo apt install sqlite3`) and coreutils' `basenc` (9.x on Ubuntu 24.04). Under WSL 2:
 
 ```bash
 cd src/regex-sed
@@ -24,11 +37,11 @@ Debugging	14	43	2026-W46	DEMO ONLY
 # sed now exits with status 1 (failure), on purpose
 ```
 
-## The idea
+## How the stunt works
 
 The other regex entries make **one match** do the work. The engine's quantifiers and backtracking are the loop, and a host language (Perl code blocks, a C struct, SQLite) does the arithmetic. This entry takes the opposite approach: **many small substitutions, one after another, on a single string**. Nothing outside that string holds any state. Random numbers, addition, comparison and decimal formatting are all done by rewriting text. That is an old and well-understood model of computation, the Markov algorithm.
 
-## Markov algorithms: computing by find-and-replace
+### Markov algorithms: computing by find-and-replace
 
 A **Markov algorithm** (Andrey Markov Jr. called them *normal algorithms*, in the early 1950s; not the Markov of Markov chains) is a program made of nothing but an ordered list of rewrite rules, `pattern → replacement`. It runs like this:
 
@@ -39,7 +52,7 @@ A **Markov algorithm** (Andrey Markov Jr. called them *normal algorithms*, in th
 
 That's the whole model: no variables, no memory but the string, no instructions but "replace this with that." And it is **Turing-complete**. Anything a computer can compute, some list of rewrite rules can compute too, given a long enough string.
 
-### A tiny example: binary to unary
+#### A tiny example: binary to unary
 
 Three rules convert a binary number into that many tally marks:
 
@@ -63,9 +76,9 @@ Run on `101` (five), always restarting from rule 1:
 | `0\|\|\|\|\|` | 3 |
 | `\|\|\|\|\|` | no rule applies: stop. Five marks |
 
-### The same algorithm in sed
+#### The same algorithm in sed
 
-sed can run a Markov algorithm almost word for word. `s` replaces the leftmost match, and `t top` ("jump to `top` if the last substitution matched") supplies the "start again from the first rule":
+sed can run a Markov algorithm almost exactly as it is written. `s` replaces the leftmost match, and `t top` ("jump to `top` if the last substitution matched") supplies the "start again from the first rule":
 
 ```sed
 :top
@@ -79,7 +92,7 @@ t top
 
 `echo 101 | sed -f b2u.sed` prints `|||||`. (I ran this, and `sed --debug` shows exactly the nine strings in the table above.)
 
-### How `timecards.sed` relates to that
+#### How `timecards.sed` relates to that
 
 `timecards.sed` is not written as one flat Markov rule list. That would work in principle, but it would be thousands of rules and unreadable even by this entry's standards. It is a **Markov-style machine with a program counter**: the string is still the only memory and every operation is still a substitution, but labels and jumps (`b`, `/regex/b`) decide which group of rules runs next. Inside the groups, pure Markov behavior shows up all over:
 
@@ -88,7 +101,7 @@ t top
 - The **loops** (`/ k:#/b step`) are "keep applying this group while its pattern still matches," which is the Markov restart in a different form.
 - Every **decision** is "does this pattern occur in the string?" That's step 1 of a Markov algorithm, used as an `if`.
 
-## The program state: one line of text
+### The program state: one line of text
 
 `timecards.sh` writes one line (the *tape*) and runs one `sed` command on it:
 
@@ -123,11 +136,11 @@ echo 'run:1794625386-3788 wk:2026-W46 rng:1011001110100101 tty:1 trace:0' \
 
 That fixed seed always produces the run shown at the top of this README. The trace below is taken from that `--debug` output.
 
-## One iteration, traced step by step
+### One iteration, traced step by step
 
 This is the **second** iteration of that run: it books *Coding, 14 hours*, taking the total from 15 to 29. It's a good one to follow because its first random draw is **rejected** and redrawn. It takes 137 sed commands, 58 of them substitutions that actually matched. In the snapshots below, `…` stands for the unchanging prefix `run:1794625386-3788 wk:2026-W46 tty:1 trace:0`.
 
-### Step 1: the loop head and the stop rule
+#### Step 1: the loop head and the stop rule
 
 ```text
 … rng:0101101100111010 cats:Coding,Debugging,Learning, tot:############### n:%
@@ -142,7 +155,7 @@ This is the **second** iteration of that run: it books *Coding, 14 hours*, takin
 
 The second line prints the state if tracing is on. The third is the **stop rule**: if the total contains 41 marks, it's over 40, so jump to the finish. Here it has 15, so no match. The fourth stops if the category list is empty, and it isn't. Two "comparisons," and neither one compares numbers. Each asks whether a pattern occurs.
 
-### Step 2: take the next category
+#### Step 2: take the next category
 
 ```sed
 s/ cats:([A-Za-z]+),(.*)$/ cats:\2 c:\1/
@@ -154,7 +167,7 @@ The first category moves off the list into a scratch field `c:` at the end:
 … rng:0101101100111010 cats:Debugging,Learning, tot:############### n:% c:Coding
 ```
 
-### Step 3: draw a random nibble (four shift-register steps)
+#### Step 3: draw a random nibble (four shift-register steps)
 
 ```sed
 :draw
@@ -205,7 +218,7 @@ The three remaining steps go the same way:
 
 After four steps, the first four characters are four brand-new bits: `1010`, which is 10.
 
-### Step 4: reject and redraw
+#### Step 4: reject and redraw
 
 ```sed
 s/ k: / /
@@ -223,7 +236,7 @@ The empty counter is removed. A digit must be 0-9, so `1010` through `1111` (10-
 
 `0100` doesn't match `1(01|1)`, so execution continues.
 
-### Step 5: bits to a digit (a lookup table)
+#### Step 5: bits to a digit (a lookup table)
 
 ```sed
 s/ rng:([01]{4})(.*)$/ rng:\1\2 d:\1/
@@ -241,7 +254,7 @@ The nibble is copied to the end as `d:0100`, and a ten-rule lookup table rewrite
 
 The hours are now *the text* `1` followed by `4`. Nothing ever adds 10 to 4.
 
-### Step 6: the digit to tally marks (another lookup table)
+#### Step 6: the digit to tally marks (another lookup table)
 
 ```sed
 s/ d:([0-9])$/ d:\1 D:##########\1/
@@ -257,7 +270,7 @@ A scratch field `D:` starts as ten marks plus the digit (`D:##########4`). The t
 … tot:############### n:% c:Coding d:4 D:##############
 ```
 
-### Step 7: addition is concatenation
+#### Step 7: addition is concatenation
 
 ```sed
 s/ tot:(#*) (.*) D:(#*)$/ tot:\1\3 \2/
@@ -270,7 +283,7 @@ The 14 marks in `D:` move onto the end of the 15 in `tot:`. That is the entire a
 … tot:############################# n:%% c:Coding d:4
 ```
 
-### Step 8: save the state and build the output row
+#### Step 8: save the state and build the output row
 
 ```sed
 h
@@ -287,7 +300,7 @@ ret:row Coding	14	#############################	2026-W46	DEMO ONLY
 
 `ret:row` at the front is a **return address**. sed has no call or return, so the caller writes where to come back to into the text, then jumps to the subroutine.
 
-### Step 9: the subroutine, tally marks to decimal
+#### Step 9: the subroutine, tally marks to decimal
 
 ```sed
 :dec
@@ -312,7 +325,7 @@ ret:row Coding	14	29	2026-W46	DEMO ONLY
 
 Then the subroutine "returns": it matches `^ret:row ` against the text and jumps to `:row`.
 
-### Step 10: print the row, then turn it into SQL
+#### Step 10: print the row, then turn it into SQL
 
 ```sed
 :row
@@ -333,7 +346,7 @@ Then the same text is rewritten into an `INSERT`, using the run id after the new
 INSERT INTO demo_timecards(run_id,category,hours,running_total,iso_week,created_at) VALUES('1794625386-3788','Coding',14,29,'2026-W46',datetime('now','localtime'));
 ```
 
-### Step 11: restore the state and loop
+#### Step 11: restore the state and loop
 
 ```sed
 g
@@ -349,11 +362,11 @@ b entry
 
 The third iteration books Debugging 14, for a total of 43. Then step 1's stop rule finds 41 marks in a row, and `b done` ends the loop.
 
-## Finishing: the summary, the pulse, and exit 1
+### Finishing: the summary, the pulse, and exit 1
 
 After the loop, `:done` builds the summary line, borrows the same `:dec` subroutine (with `ret:sum`), prints it, and sends `COMMIT;` down fd 3. If sed never got that far, SQLite would roll the whole run back at end of input, so a half-finished run leaves no rows.
 
-**The pulse** runs only if `tty:0`. sed has no `sleep`, so each frame is timed by making the regex engine **grind**: the state is swapped out for `aaa…acb`, and `/^(a+)\1*(a+)\2*b/` is tested against it. That can never match (a `c` is always in the way), but glibc's backreference matcher tries every way of splitting the `a`s before giving up, roughly 50 ms per frame on the test machine. Then the state comes back, the next shade is read off a list of 60 grey levels appended to it, and the banner is redrawn in place with `\x1b[A` (cursor up). This is the denial-of-service-shaped worst case that regex engines are criticized for, used as a clock.
+**The pulse** runs only if `tty:0`. sed has no `sleep`, so each frame is timed by making the regex engine **grind**: the state is swapped out for `aaa…acb`, and `/^(a+)\1*(a+)\2*b/` is tested against it. That can never match (a `c` is always in the way), but glibc's backreference matcher tries every way of splitting the `a`s before giving up, roughly 50 ms per frame on the test machine. Then the state comes back, the next shade is read off a list of 60 gray levels appended to it, and the banner is redrawn in place with `\x1b[A` (cursor up). This is the denial-of-service-shaped worst case that regex engines are criticized for, used as a clock.
 
 Finally `Q1` quits with exit status 1. In shell terms the program "fails" after doing all of its work. That is the sed form of the signature move.
 
@@ -365,7 +378,7 @@ Finally `Q1` quits with exit status 1. In shell terms the program "fails" after 
 - **The data structures had to be invented.** Integers are tally marks, addition is concatenation, `> 40` is "does `#{41}` match," XOR is deleting zeros and checking whether the count of `1`s is odd, a random number generator is a 16-character string, and a function call is a return address written into the text.
 - **Each regex is simple; the composition is what's hard.** The Perl and PCRE2 entries are one monstrous pattern each. Here almost every regex is short and readable on its own, and the baffling part is that 137 of them in a row book one timecard.
 
-## The walls and the fine print
+## Gotchas worth knowing
 
 - **sed has a goto.** `b` and `t` jump, which the Perl and PCRE entries don't have. Those entries had to get their loops out of quantifiers and backtracking, which is arguably the stricter constraint. Here almost every jump is behind an address (`/regex/b label`), so a regex match still makes every decision, but the structure is a rewriting machine with a program counter, not a single match.
 - **"Returning false" is weaker.** In Perl and PCRE the *match itself* reports failure after doing the work. sed has no match result that spans the whole program, so the closest equivalent is the process exit status.
@@ -385,4 +398,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/regex-sed
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: GNU sed, bash and coreutils (from the Ubuntu base) and sqlite3. No compiler, no package manager.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds GNU sed, bash and coreutils (from the Ubuntu base) and sqlite3. It has no compiler and no package manager.
