@@ -162,6 +162,16 @@ def source_date_epoch():
         raise SystemExit("metadata.yaml needs a `date: YYYY-MM-DD` line (it fixes the build timestamp)")
     return str(calendar.timegm(time.strptime(m.group(1), "%Y-%m-%d")))
 
+def counts(model):
+    """Print the two numbers the root README shows near the top, and warn (never fail) if it is stale."""
+    n = len(model.entries)
+    langs = len({l for e in model.entries.values() for l in e["languages"]})
+    print(f"counts for the root README: {n} challenges in {langs} languages")
+    with open(os.path.join(REPO, "README.md"), encoding="utf-8") as f:
+        m = re.search(r"\*\*(\d+) challenges in (\d+) languages\*\*", f.read())
+    if not m or (int(m.group(1)), int(m.group(2))) != (n, langs):
+        print(f"NOTE    the root README says {m.group(0) if m else 'nothing'}; update it to **{n} challenges in {langs} languages**")
+
 def generate(check):
     """Validate the metadata and refresh (or, with --check, verify) the generated files."""
     model = cs.Model()
@@ -169,6 +179,7 @@ def generate(check):
     if model.problems:
         print("\n".join("PROBLEM " + p for p in model.problems))
         raise SystemExit(f"{len(model.problems)} metadata problem(s)")
+    counts(model)
     if check:
         bad = cs.drift(files)
         if bad:

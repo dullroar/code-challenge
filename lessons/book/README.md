@@ -39,4 +39,8 @@ External links must follow the policy in [`link-hosts.txt`](link-hosts.txt): Wik
 
 The same sources give the same bytes. Every list is sorted, nothing reads the clock, and `SOURCE_DATE_EPOCH` is set from the `date:` line in [`metadata.yaml`](metadata.yaml), which also holds a fixed EPUB identifier. Bump `date:` when you publish new books. The check is simple: build twice with `--artifacts-dir` pointing at two empty folders and compare the files with `sha256sum`. They match for the same pandoc and WeasyPrint versions (tested with pandoc 3.1.3 and WeasyPrint on Ubuntu 24.04).
 
+### When an entry is added (for maintainers)
+
+After merging a new entry: add its row to the root `README.md` table, add any new tag, role or language to `lessons/cs-source/`, run `python lessons/book/build.py` (it regenerates the chapters, the index and the PDF and EPUB), and update the bold **"N challenges in M languages"** line at the top of the root `README.md`. The build prints the right numbers and warns when that line is stale. It is the one count that is kept by hand.
+
 To keep the book building: give every chapter exactly one `# ` title, link between chapters with relative `.md` links, and put exercises' answers in [`answers-key.md`](../answers-key.md).

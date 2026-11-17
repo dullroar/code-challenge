@@ -1,5 +1,8 @@
 # Code Challenge
 
+> **31 challenges in 24 languages**
+<!-- Keep this line current whenever an entry is added: challenges = the folders in src/; languages = the distinct ids that entries list under `languages:` (the same languages as the book's Index of languages). `python lessons/book/build.py --check` prints both numbers and warns when this line is stale. -->
+
 A series of responses to a code challenge that has morphed into a set of educational exercises about programming languages and how to think about programming languages. **New: [Learn Programming the Weird Way!](lessons/README.md)**, a set of lessons built on these examples.
 
 ## Why this exists
@@ -10,7 +13,7 @@ It is a joke with a serious job inside it. Underneath every entry is a real less
 
 The deeper point, the one worth keeping after the jokes wear off: **THERE ARE NO BLOCKERS, JUST NOT ENOUGH IMAGINATION.**
 
-It has turned into a small, friendly contagion. **Ken caught it too.** What started as one C# program is now **thirty-one** programs in **eighteen** languages, written by more than one person, and still growing.
+It has turned into a small, friendly contagion. **Ken caught it too.** What started as one C# program has grown into a collection written by more than one person, and it is still growing.
 
 ## Psst, hey kid
 
