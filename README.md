@@ -1,4 +1,4 @@
-# Code Challenge
+# Code Challenge - Learn Programming the Weird Way!
 
 > **31 challenges in 24 languages**
 <!-- Keep this line current whenever an entry is added: challenges = the folders in src/; languages = the distinct ids that entries list under `languages:` (the same languages as the book's Index of languages). `python lessons/book/build.py --check` prints both numbers and warns when this line is stale. -->
