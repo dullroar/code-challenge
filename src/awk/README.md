@@ -1,3 +1,15 @@
+---
+name: "AWK"
+teaches: "portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream."
+kind: idiomatic
+languages: [awk]
+lesson: "languages/awk.md"
+loop-by: input-driven
+evaluation: eager
+assurance: guaranteed
+pairs-with: awk-weird
+tags: [control-flow, declarative-programming, domain-specific-language, regular-expression]
+---
 # AWK
 
 **Teaches you:** portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream.
@@ -8,7 +20,7 @@ This is the straight version, the one that shows how AWK is *meant* to be writte
 
 ## Run it
 
-Any POSIX `awk`, `sqlite3`, and the usual `date`, `od`, `mkdir`.
+You need any POSIX `awk`, `sqlite3`, and the usual `date`, `od` and `mkdir`.
 
 ```bash
 cd src/awk
@@ -29,9 +41,9 @@ Debugging	10	46	2026-W47	DEMO ONLY
 
 ## What it does
 
-Draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept), prints each row, and saves all of them to SQLite in one transaction.
+It draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept), prints each row, and saves all of them to SQLite in one transaction.
 
-## How it works
+## How the stunt works
 
 An AWK program is a list of `pattern { action }` rules that run once per input record, plus `BEGIN` and `END` rules. This program has **no input**, so everything happens in `BEGIN`, which is the idiomatic shape for a generator.
 
@@ -70,7 +82,7 @@ An AWK program is a list of `pattern { action }` rules that run once per input r
 - Why you always seed `rand()`.
 - Which AWK features are POSIX and which are GNU: this file is a small list of the portable ones.
 
-## Gotchas and limitations
+## Gotchas worth knowing
 
 - **Arrays from `split` start at 1**, not 0.
 - **Uninitialized variables are `""` and `0` at once.** `total` and `cards` are set to 0 anyway, for readers and for the linter.
@@ -92,4 +104,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/awk
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result (under mawk, to show the portability) with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: gawk, mawk and sqlite3 on a minimal Ubuntu.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result (under mawk, to show the portability) with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds gawk, mawk and sqlite3 on a minimal Ubuntu.

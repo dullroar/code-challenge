@@ -1,3 +1,17 @@
+---
+name: "Forth"
+teaches: "that the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory."
+kind: weird
+languages: [forth]
+lesson: "languages/forth.md"
+loop-by: self-modifying-control
+evaluation: eager
+assurance: implementation-permitted
+pairs-with: forth
+machine: "A stack machine with a movable instruction pointer"
+state: "The data stack and the parse position `>in`"
+tags: [control-flow, parsing, program-counter, reflection-and-metaprogramming, register-machine, stack-data-structure, stack-machine, state]
+---
 # Forth, weirder
 
 **Teaches you:** that the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory.
@@ -15,7 +29,7 @@ There is no `begin`, `until`, `while`, `if`, `do`, `case` or recursion anywhere.
 
 ## Run it
 
-Gforth (`gforth`, 0.7.3 or later) and `sqlite3`.
+You need Gforth (`gforth`, 0.7.3 or later) and `sqlite3`.
 
 ```bash
 cd src/forth-weird
@@ -34,7 +48,7 @@ Debugging	19	49	2026-W46	DEMO ONLY
 # no loop word anywhere: the text interpreter was rewound until the total passed 40
 ```
 
-## How it works
+## How the stunt works
 
 The Forth text interpreter is a loop you never see: it reads the next word from the input line, runs it, and repeats. `>in` is a variable holding *how far it has read*. Read it with `>in @`, set it with `>in !`. Set it to an earlier value and the interpreter will cheerfully read the same words again.
 
@@ -56,7 +70,7 @@ Read it left to right as the interpreter does:
    ```
 
    A Forth flag is **-1** (all bits set) for true and **0** for false, so it works as a bit mask. `anchor - >in` is the distance back to the anchor; `and` with the flag keeps that distance if the flag was true and zeroes it if false; adding it to `>in` gives either the anchor or "stay where you are". There is no `if`. The jump is arithmetic.
-5. The line ends. If `>in` was rewound, the interpreter's next word is `step` again and the stack is exactly as the last pass left it. If not, it carries on to the line after: `drop` (discard the anchor), commit, report.
+5. The line ends. If `>in` was rewound, the interpreter's next word is `step` again and the stack is exactly as the last pass left it. If not, it continues with the line after: `drop` (discard the anchor), commit, report.
 
 ### Where the state goes
 
@@ -92,4 +106,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/forth-weird
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: Gforth and sqlite3 on a minimal Ubuntu. No compiler, no package manager.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds Gforth and sqlite3 on a minimal Ubuntu. It has no compiler and no package manager.

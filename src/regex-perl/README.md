@@ -1,12 +1,26 @@
+---
+name: "Perl"
+teaches: "executable code inside a live regex match."
+kind: weird
+languages: [perl, regex]
+lesson: "languages/regex.md#perl-code-inside-the-match"
+loop-by: backtracking-search
+evaluation: search
+assurance: implementation-permitted
+pairs-with: regex-pcre2
+machine: "A backtracking search with hooks"
+state: "`local` variables that unwind (effects do not)"
+tags: [arbitrary-code-execution, backtracking, cut, regular-expression, side-effect, state, transaction]
+---
 # Regex challenge, Track 1: Perl (the whole program is one match)
 
 **Teaches you:** executable code inside a live regex match.
 
-The file's only statement is a single `=~` match. Seeding, the random draws, the SQLite transaction, the terminal pulse and all the printing happen *inside* that match, and then the match **returns false**. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
+The file's only statement is a single `=~` match. Seeding, the random draws, the SQLite transaction, the terminal pulse and all the printing happen *inside* that match, and then the match **returns false**. It follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
 
 ## Run it
 
-Perl 5 and the `sqlite3` command-line tool (`sudo apt install sqlite3`). `POSIX` and `File::Path` are core Perl modules.
+You need Perl 5 and the `sqlite3` command-line tool (`sudo apt install sqlite3`). `POSIX` and `File::Path` are core Perl modules.
 
 ```bash
 cd src/regex-perl
@@ -37,7 +51,7 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/regex-perl
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: Perl (from the Ubuntu base) and sqlite3. No compiler, no package manager.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds Perl (from the Ubuntu base) and sqlite3. It has no compiler and no package manager.
 
 ## How the stunt works
 
@@ -54,12 +68,12 @@ Below the `use` lines, `timecards.pl` is one line: a constant scaffold string `=
 | `[A-Za-z]*(?:(?(?{-t STDOUT})~(?{ frame }) \| (?!)))*` | The pulse: one frame per `~` at the end of the scaffold, but only if stdout is a terminal (the conditional is a code block), so pipes and `check.sh` skip it |
 | `(*COMMIT)(?{ settle })(*FAIL)` | Clears the banner, then the signature move: the match gives up after doing all the work |
 
-`local` is the interesting bit. Perl unwinds `local` assignments when the engine backtracks, so the running total and category counter are properly backtrack-aware, but the `INSERT`s and `print`s are not and cannot be un-done. The engine abandons the branch, and the side effects stay written. The SQLite transaction is real and commits; the *match* is what lies.
+`local` is the interesting bit. Perl unwinds `local` assignments when the engine backtracks, so the running total and category counter are properly backtrack-aware, but the `INSERT`s and `print`s are not and cannot be undone. The engine abandons the branch, and the side effects stay written. The SQLite transaction is real and commits; the *match* is what lies.
 
-## Fine print
+## Gotchas worth knowing
 
-- The pattern is not formatted. `/x` is on only so the scaffold is parsed sanely; there are no comments, no named groups, and no helper functions inside it. That is deliberate.
-- State lives in package variables (`$::t`, `$::n`, ...) because code in a pattern runs with the file's `strict` rules and `local` only works on globals. They are all initialised inside the match.
+- The pattern is not formatted. `/x` is on only so the scaffold is parsed in a sensible way; there are no comments, no named groups, and no helper functions inside it. That is deliberate.
+- State lives in package variables (`$::t`, `$::n`, ...) because code in a pattern runs with the file's `strict` rules and `local` only works on globals. They are all initialized inside the match.
 - The null-iteration warning Perl would otherwise raise about the loop body is silenced with `no warnings 'regexp'`, since the body is dynamic and Perl cannot prove it consumes input. It always does: it only proceeds after matching a category name or a `~`.
 - SQL is built by interpolating values into strings. That is safe here only because every value is either a number the match computed or one of four fixed category names; do not copy the habit.
 - Code in patterns is run by Perl as ordinary Perl. The only external program is `sqlite3`, started without a shell with a fixed argument list, and the only I/O is the scratch database and the terminal.

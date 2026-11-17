@@ -1,12 +1,24 @@
+---
+name: "Rust"
+teaches: "iterators and closures as control flow."
+kind: port
+languages: [rust]
+lesson: "languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery"
+loop-by: lazy-demand
+evaluation: lazy
+assurance: guaranteed
+pairs-with: JavaChallenge1
+tags: [generators, lazy-evaluation, side-effect, thread-safety]
+---
 # One Statement, Rust Edition
 
 **Teaches you:** iterators and closures as control flow.
 
 A WSL/GTK 4 companion to Jim Lehmer's C# challenge and Ken's [Java](../JavaChallenge1/README.md), [Kotlin](../KotlinChallenge1/README.md), [Python](../PythonChallenge1/README.md), and [Go](../GoChallenge1/README.md) versions. The point is to explore expression mechanics through a deliberately ridiculous constraint, not to offer a production architecture.
 
-## Install and run on Ubuntu under WSL 2
+## Run it
 
-A working WSLg desktop session is required. In Ubuntu 24.04, install the APT toolchain and native libraries:
+You need a working WSLg desktop session. In Ubuntu 24.04, install the APT toolchain and the native libraries:
 
 ```bash
 sudo apt-get update
@@ -42,12 +54,12 @@ Rust has no `;`-separated three-clause `for`, but `std::iter::successors(first, 
 | Condition | `next` returns `None` to end the loop; as in the C#, the window is launched from inside it |
 | Iterator | `next` returns `Some(batch.extended(hours))`, the batch plus one more card |
 
-Two tricks stand in for the statements Rust would normally use:
+Two tricks take the place of the statements Rust would normally use:
 
 - `match value { name => ... }` is a `let` that is an expression.
 - `(a, b, c).2` is the comma operator: it evaluates `a`, `b`, `c` in order and yields the last.
 
-The loop checks the running total before each record: while it is at most 40 and categories remain, it adds 10-19 hours for the next category. When the batch is finished, a scoped worker thread (which borrows the cards, with no clone) saves it in one SQLite transaction and is joined before the window claims anything was saved. Errors terminate with a message rather than reporting success, except inside the GTK draw callback, where Cairo errors are ignored because a panic there would abort across the C boundary. The calendar year and ISO week match the original's separate fields; around New Year the ISO week-based year can differ from the calendar year.
+The loop checks the running total before each record: while it is at most 40 and categories remain, it adds 10-19 hours for the next category. When the batch is finished, a scoped worker thread saves it in one SQLite transaction. The thread borrows the cards, so nothing is cloned. The program joins the thread (waits for it to finish) before the window claims that anything was saved. Errors end the program with a message, and the program never reports success after a failure. The one exception is the GTK draw callback, where Cairo errors are ignored, because a panic there would abort across the C boundary. The calendar year and ISO week match the original's separate fields. Around New Year the ISO week-based year can differ from the calendar year.
 
 | Original and Ken's ports | Rust companion |
 | --- | --- |
@@ -59,7 +71,7 @@ The loop checks the running total before each record: while it is at most 40 and
 | Background save and reflective method calls | A joined scoped thread; no reflection is needed, since `()` is an ordinary value in Rust |
 | `Environment.UserName` | `$USER`, then `$LOGNAME`, ignoring empty values, else "unknown" |
 
-The worker does not touch GTK. The UI and its event loop stay on the main thread. This explicitly waits for persistence, unlike the original's intentionally awkward shared-context thread, so the thread is a nod to the original and not a source of concurrency. The application is a language exercise, not a recommendation to hide work inside iterator expressions.
+The worker does not touch GTK. The UI and its event loop stay on the main thread. This version waits for persistence on purpose, unlike the original's intentionally awkward shared-context thread. So the thread is only a nod to the original, not a source of concurrency. The application is a language exercise, not a recommendation to hide work inside iterator expressions.
 
 ## Check it
 

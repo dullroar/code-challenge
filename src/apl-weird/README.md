@@ -1,3 +1,17 @@
+---
+name: "APL"
+teaches: "that `⎕CR`, `⎕FX` and compress make \"if\" and \"loop\" optional, and that a function can be its own successor."
+kind: weird
+languages: [apl]
+lesson: "languages/apl.md#2-self-modifying-functions-apl-weird"
+loop-by: self-modifying-control
+evaluation: eager
+assurance: implementation-permitted
+pairs-with: apl
+machine: "An array machine, with code that is also an array"
+state: "Arrays, and the source text of functions"
+tags: [array-programming, control-flow, eager-evaluation, homoiconicity, reflection-and-metaprogramming, scope-and-binding, self-modifying-code, state]
+---
 # APL, weirder
 
 **Teaches you:** that `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor.
@@ -10,7 +24,7 @@ The host defines exactly one function, `Card0`. Every other card is a function t
 
 ## Run it
 
-GNU APL (`apl`, from [gnu.org/software/apl](https://www.gnu.org/software/apl/)) and `sqlite3`.
+You need GNU APL (`apl`, from [gnu.org/software/apl](https://www.gnu.org/software/apl/)) and `sqlite3`.
 
 ```bash
 cd src/apl-weird
@@ -34,7 +48,7 @@ Debugging	15	45	2026-W46	DEMO ONLY
 
 The three `# CardN ⇐` lines are read back from the workspace *after* the run (`⎕NL 3` lists its functions). `Card1` and `Card2` exist only because `Card0` and `Card1` wrote them, and their hours are literals in their own source.
 
-## How it works
+## How the stunt works
 
 A function in GNU APL is a block of text between two `∇` marks. Its first line is the header. Here is `Card0`, with the lines numbered the way `⎕CR` (which returns a function's source as a character matrix) numbers them:
 
@@ -82,4 +96,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/apl-weird
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: GNU APL (built from the pinned gnu.org tarball in the toolchain image) and sqlite3 on a minimal Ubuntu. No compiler, no package manager.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds GNU APL (built from the pinned gnu.org tarball in the toolchain image) and sqlite3 on a minimal Ubuntu. It has no compiler and no package manager.

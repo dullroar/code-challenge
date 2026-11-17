@@ -1,12 +1,26 @@
+---
+name: ".NET regex"
+teaches: "a regex as a stack-based counter."
+kind: weird
+languages: [c-sharp, regex]
+lesson: "languages/regex.md#net-balancing-groups"
+loop-by: backtracking-search
+evaluation: search
+assurance: guaranteed
+pairs-with: regex-perl
+machine: "A counter built from a stack"
+state: "Balancing-group capture stacks"
+tags: [backtracking, parsing, register-machine, regular-expression, stack-data-structure, state]
+---
 # Regex challenge, Track 3: .NET balancing groups (the purist's attempt)
 
 **Teaches you:** a regex as a stack-based counter.
 
-One `Regex.Match` call, no callouts, no inline code, no `MatchEvaluator`. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`), which expected this track to hit a wall. It did hit some, and they are listed below, but the core got further than the plan predicted. **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
+One `Regex.Match` call, no callouts, no inline code, no `MatchEvaluator`. It follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`), which expected this track to hit a wall. It did hit some, and they are listed below, but the core got further than the plan predicted. **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
 
 ## Run it
 
-Needs the .NET 10 SDK (cross-platform; nothing here is Windows-specific).
+You need the .NET 10 SDK (cross-platform; nothing here is Windows-specific).
 
 ```bash
 cd src/regex-dotnet
@@ -34,7 +48,7 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/regex-dotnet
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: The .NET SDK builds it in a build stage; the image holds only the compiled dll on the .NET runtime, with no SDK.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The .NET SDK builds it in a build stage. The image holds only the compiled dll on the .NET runtime, with no SDK.
 
 ## How the stunt works
 
@@ -52,7 +66,7 @@ An entry can push the total over 40 from anywhere in its 10-19 hours; the budget
 
 I checked the edges with a throwaway prototype (not in the repo, because the real program has no way to inject a fixed draw): totals of exactly 40 (all four categories, one token left), 41 on the fourth entry, and 45 and 57 stopping after three all came out right. `check.sh` verifies the stop rule on every random run: three entries only when the first three already exceed 40, four only when they do not.
 
-## The walls (the plan predicted some; here is what actually happened)
+## Gotchas worth knowing
 
 1. **A regex cannot draw random numbers.** The random 10-19 draws had to be seeded by the host, as four unary strings. The plan allows the host to "seed the initial data", so this is within the rules, but the regex does not choose the hours. It only bounds them (`{10,19}`) and accumulates them.
 2. **A regex cannot write anything.** There are no side effects in this track. The pattern's whole output is its captures; the host formats them and does the one `File.AppendAllText`. That makes the "persist as a side effect of matching" idea of the other two tracks impossible here.
@@ -60,7 +74,7 @@ I checked the edges with a throwaway prototype (not in the repo, because the rea
 4. **No pulse.** The terminal pulse needs side effects during the match. This track has none, and a host loop to animate it would break the rules.
 5. **Unrolled randomness, not a random loop.** The tape always holds four draws even when only three are needed (any draw left over once the budget runs dry is ignored). The `*` loop is real, but the draws are fixed up front.
 
-## Honest fine print
+### Honest fine print
 
 - The host does one iteration-shaped thing: reporting. `string.Concat(...Zip(...))` walks the captured `cat` and `hrs` lists to format the rows. It only reads the final captured state, which the plan allows ("print/report the final state"), and `check.sh` rejects `MatchEvaluator`, `Replace`, `NextMatch`, `Matches` and any loop keyword in the host, and requires exactly one `Regex.Match`. Still, it is a LINQ pass, and I would rather say so than hide it.
 - The total printed is the count of captures on the `s` stack, which the regex built. The per-row hours are the lengths of the `hrs` captures.

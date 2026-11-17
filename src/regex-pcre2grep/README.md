@@ -1,10 +1,24 @@
+---
+name: "pcre2grep"
+teaches: "program exit codes as control flow."
+kind: weird
+languages: [pcre2, regex]
+lesson: "languages/regex.md#pcre2grep-exit-codes-as-control-flow"
+loop-by: backtracking-search
+evaluation: search
+assurance: implementation-permitted
+pairs-with: regex-pcre2
+machine: "A backtracking search that runs one program per callout"
+state: "SQLite rows, and the exit code of each callout"
+tags: [backtracking, cut, exit-status, integrity-constraint, portability, regular-expression, side-effect]
+---
 # Regex challenge, Track 2b: `pcre2grep` (no custom code at all)
 
 **Teaches you:** program exit codes as control flow.
 
-The "host" here is a stock `pcre2grep` and one command line. There is no C, no Perl, no dispatcher to write: the pattern's callout strings name the programs to run, and the **exit codes of those programs steer the match**. Then the match **returns false**. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
+The "host" here is a stock `pcre2grep` and one command line. There is no C, no Perl, no dispatcher to write: the pattern's callout strings name the programs to run, and the **exit codes of those programs steer the match**. Then the match **returns false**. It follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
 
-## Install and run on Ubuntu under WSL 2
+## Run it
 
 Ubuntu's own `pcre2grep` is built *without* callout scripts, so it needs an upstream build. In a throwaway shell:
 
@@ -50,11 +64,11 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/regex-pcre2grep
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: A callout-enabled `pcre2grep` (built from the pinned PCRE2 release in the toolchain image) and sqlite3 on a minimal Ubuntu.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds a callout-enabled `pcre2grep` (built from the pinned PCRE2 release in the toolchain image) and sqlite3 on a minimal Ubuntu.
 
 ## How the stunt works
 
-`pcre2grep` supports two kinds of callout string. `(?C{|text$n})` echoes text. `(?C{/abs/path/prog|arg|arg})` runs a program: **exit 0 lets the match continue; any other exit code, or a program that cannot run, fails that branch and the engine backtracks.** The subject is a one-line "tape": `MeetingsCodingDebuggingLearning` followed by 60 three-digit grey shades.
+`pcre2grep` supports two kinds of callout string. `(?C{|text$n})` echoes text. `(?C{/abs/path/prog|arg|arg})` runs a program: **exit 0 lets the match continue; any other exit code, or a program that cannot run, fails that branch and the engine backtracks.** The subject is a one-line "tape": `MeetingsCodingDebuggingLearning` followed by 60 three-digit gray shades.
 
 | Piece | Job |
 | --- | --- |
@@ -67,9 +81,9 @@ It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no n
 | `[A-Za-z]*(?:(?C{/usr/bin/test\|-t\|1})(\d{3})(?C{\|$r$e[48;5;$2m ...})(?C{/bin/sleep\|0.05}))*` | The pulse. `test -t 1` is the predicate "is stdout a terminal?" (nonzero on a pipe, so the loop never starts and pipes and `check.sh` skip it). Each frame's shade is read back from the tape through `$2` |
 | `(*COMMIT)(?:test -t 1, clear)?+(?C{\|# the match now returns false...})(*FAIL)` | Clear the banner (if there was one), then the signature move. The `?+` is possessive on purpose: without it, `(*FAIL)` backtracks into skipping the optional group and prints the final message twice |
 
-The exit code is the whole trick. SQLite's `random()` and arithmetic live in the helper program, but the *decisions* (go round again, stop, pulse or not) are the pattern consuming exit codes.
+The exit code is the whole trick. SQLite's `random()` and arithmetic live in the helper program, but the *decisions* (go around again, stop, pulse or not) are the pattern consuming exit codes.
 
-## The walls and the fine print
+## Gotchas worth knowing
 
 - **State cannot live in the pattern.** `pcre2grep` has no variables, so the running total lives in SQLite and each callout re-reads it. That makes the arithmetic the helper's job, not PCRE2's; the pattern supplies the loop, the order, the branching and the failing.
 - **No transaction this time.** Each helper is its own `sqlite3` process, so each statement commits immediately and nothing can be rolled back. Unlike the Perl track's single transaction, here "abandoned branch, side effects stay" is literal: the rows are already in the database before the match fails.

@@ -1,3 +1,15 @@
+---
+name: "Tcl"
+teaches: "idiomatic Tcl: procs in a namespace, dicts for records, braced `expr`, and `db eval` binding Tcl variables straight into SQL."
+kind: idiomatic
+languages: [tcl]
+lesson: "languages/tcl.md"
+loop-by: loop-statement
+evaluation: eager
+assurance: implementation-permitted
+pairs-with: tcl-weird
+tags: [reflection-and-metaprogramming, scope-and-binding, transaction]
+---
 # Tcl
 
 **Teaches you:** idiomatic Tcl: procs in a namespace, dicts for records, braced `expr`, and `db eval` binding Tcl variables straight into SQL.
@@ -8,7 +20,7 @@ This is the straight version, the one that shows how Tcl is *meant* to be writte
 
 ## Run it
 
-Tcl 8.6 (`tclsh`) with the `sqlite3` Tcl package (Ubuntu: `tcl8.6` and `libsqlite3-tcl`). Tk (`tk8.6`) only for `--gui`.
+You need Tcl 8.6 (`tclsh`) with the `sqlite3` Tcl package (Ubuntu: `tcl8.6` and `libsqlite3-tcl`). You need Tk (`tk8.6`) only for `--gui`.
 
 ```bash
 cd src/tcl
@@ -34,9 +46,9 @@ With `--gui` a small table window appears, with a "DEMO ONLY" line under it. **H
 
 ## What it does
 
-Draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept), prints each card, and saves them to SQLite in one transaction.
+It draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept), prints each card, and saves them to SQLite in one transaction.
 
-## How it works
+## How the stunt works
 
 1. **A namespace for the rules.** `namespace eval timecards { variable ... }` holds the categories and limits; every proc is `timecards::name`. That is how a one-file Tcl program avoids polluting the global namespace.
 2. **`randomHours`.** `expr {$minHours + int(rand() * ($maxHours - $minHours + 1))}`. Always brace the expression: Tcl would otherwise substitute and then parse it a second time, which is slower (no bytecode) and a classic injection hole.
@@ -52,7 +64,7 @@ Draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and L
    The test is made *before* each draw, so the card that pushes the total over 40 is the last one added: that is why it is kept. A card is a **dict** (a key-value list with a real data structure behind it).
 4. **`save`.** `sqlite3 [namespace current]::db path` makes a *command* named `db`; everything you do to the database is a subcommand. `db transaction {...}` commits or rolls back for you. In `db eval {INSERT ... VALUES ($runId, $category, ...)}` the `$names` are **bound parameters**: Tcl hands the *values* to SQLite instead of pasting text into the SQL, so there is no quoting problem. `dict with card { ... }` unpacks a card's keys into local variables first, so the names are just there to bind.
 5. **`try ... finally`** closes the database even when something fails.
-6. **`main`** parses `--gui` and `--seconds` with a `while`/`lassign`/`switch` loop (the standard way to walk `argv`), seeds `rand()` from the microsecond clock and the process id, draws, saves, prints.
+6. **`main`** parses `--gui` and `--seconds` with a `while`/`lassign`/`switch` loop (the standard way to walk `argv`), seeds `rand()` from the microsecond clock and the process id, draws, saves and prints.
 7. **The guard.** `if {[info exists argv0] && [file normalize $argv0] eq [file normalize [info script]]}` runs `main` only when the file is the script. That is the Tcl `if __name__ == "__main__"`, and it is what lets `check.sh` `source` the file and unit-test `draw` 2,000 times in one process.
 8. **Tk, only if asked.** `package require Tk` happens inside `showWindow`. It builds a `ttk::treeview` with a heading and a row per card.
 
@@ -73,7 +85,7 @@ Draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and L
 - The `sqlite3` package's command-per-database model, `eval`, `transaction`, bound variables.
 - The `info script` / `argv0` guard for a file that is both a program and a library.
 
-## Gotchas and limitations
+## Gotchas worth knowing
 
 - **A tclsh that has loaded Tk does not exit when the script ends** while the main window exists. `showWindow` ends with `destroy .` for that reason; without it the process hangs (this showed up under `xvfb-run`).
 - **ISO weeks.** `clock format -format %G-W%V` gives the ISO-8601 year and week. `%Y` and `%U` are different things and disagree around New Year.
@@ -94,4 +106,4 @@ sandbox/container/run-image.sh src/tcl
 sandbox/container/run-image.sh --out ./results src/tcl     # copies screenshot.png and the rows there (the folder must be writable by user nobody)
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs `--gui` on a virtual display (Xvfb) with no network, a read-only file system and user `nobody`, takes a screenshot of the window, and prints the output and a read-only look at the rows written. In the image: Tcl/Tk, the Tcl sqlite3 package and sqlite3 on a minimal Ubuntu.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs `--gui` on a virtual display (Xvfb) with no network, a read-only file system and user `nobody`, takes a screenshot of the window, and prints the output and a read-only look at the rows written. The image holds Tcl/Tk, the Tcl sqlite3 package and sqlite3 on a minimal Ubuntu.

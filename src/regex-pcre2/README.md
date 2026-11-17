@@ -1,10 +1,24 @@
+---
+name: "PCRE2"
+teaches: "regex callouts as a tiny instruction set."
+kind: weird
+languages: [c, pcre2, regex]
+lesson: "languages/regex.md#pcre2-callouts-as-an-instruction-set"
+loop-by: backtracking-search
+evaluation: search
+assurance: implementation-permitted
+pairs-with: regex-perl
+machine: "A backtracking search with hooks"
+state: "A C struct that never rewinds"
+tags: [backtracking, compiler-optimization, cut, domain-specific-language, regular-expression, side-effect, state]
+---
 # Regex challenge, Track 2: PCRE2 callouts as a tiny DSL
 
 **Teaches you:** regex callouts as a tiny instruction set.
 
-One `pcre2_match` call runs the whole timecard demo, then reports **no match**. Follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
+One `pcre2_match` call runs the whole timecard demo, then reports **no match**. It follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
 
-## Install and run on Ubuntu under WSL 2
+## Run it
 
 ```bash
 sudo apt install -y build-essential pkg-config libpcre2-dev
@@ -33,7 +47,7 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/regex-pcre2
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: The C host is compiled in a build stage; the image holds only the binary and the shared libpcre2, with no compiler or headers.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The C host is compiled in a build stage. The image holds only the binary and the shared libpcre2, with no compiler or headers.
 
 ## How the stunt works
 
@@ -47,7 +61,7 @@ The C host (`timecards.c`) compiles it, registers one callout dispatcher, calls 
 
 | Opcode | Does | Return value to the engine |
 | --- | --- | --- |
-| `init` | opens the scratch file, writes the header | 0 (carry on) |
+| `init` | opens the scratch file, writes the header | 0 (continue) |
 | `gate` | the stop rule | 1 (fail this branch) once the total is over 40, which ends the `*` loop; else 0 |
 | `book` | draws 10-19 hours, adds to the total, writes the record for the category that was just matched (read from capture group 1) | 0 |
 | `commit` | writes the summary line, closes the file | 0 |
@@ -56,16 +70,16 @@ PCRE2 supplies the iteration (`*`), the category walk (the subject string and th
 
 ## The pulse
 
-On a real terminal, the match finishes the records, then pulses a **DEMO ONLY** banner through a grey ramp for about three seconds (60 frames, 50 ms each), then clears it. `pulse` and `settle` are two more opcodes: the host appends 60 `~` characters to the subject, and `[A-Za-z]*(?:~(?C"pulse"))*(*COMMIT)(?C"settle")` draws one frame per tick. The host still has no loop. The second `(*COMMIT)` stops the final `(*FAIL)` from backtracking into shorter tick counts and re-running `settle`. Nothing is appended when stdout is not a terminal, so pipes and `check.sh` skip it.
+On a real terminal, the match finishes the records, then pulses a **DEMO ONLY** banner through a gray ramp for about three seconds (60 frames, 50 ms each), then clears it. `pulse` and `settle` are two more opcodes: the host appends 60 `~` characters to the subject, and `[A-Za-z]*(?:~(?C"pulse"))*(*COMMIT)(?C"settle")` draws one frame per tick. The host still has no loop. The second `(*COMMIT)` stops the final `(*FAIL)` from backtracking into shorter tick counts and re-running `settle`. Nothing is appended when stdout is not a terminal, so pipes and `check.sh` skip it.
 
 ## The optimizer caveat, as the plan asks
 
 Callouts only mean something if the engine actually visits them. This program compiles with `PCRE2_NO_AUTO_POSSESS | PCRE2_NO_START_OPTIMIZE | PCRE2_NO_DOTSTAR_ANCHOR`, so the optimizer cannot skip or reorder the callout points. It also does **not** use the PCRE2 JIT, which does not support callouts at all. `check.sh` verifies that every run's committed total and entry count agree with the rows actually written, which is the evidence that no callout was silently skipped. This was tested with the system PCRE2 (10.42 on Ubuntu 24.04); I did not test with those flags removed to see which callouts the optimizer would elide.
 
-## Fine print
+## Gotchas worth knowing
 
 - The `*` loop ends because `gate` fails the next iteration (or the four category names run out), not because anything in C decides to stop. The C only answers the question "is the total over 40?" when the engine asks.
-- The state (`total`, `entries`, the file) lives in a C struct that the callouts share, so, unlike Perl's `local`, none of it rewinds on backtracking. That suits this program: nothing is ever un-done.
+- The state (`total`, `entries`, the file) lives in a C struct that the callouts share, so, unlike Perl's `local`, none of it rewinds on backtracking. That suits this program: nothing is ever undone.
 - The dispatcher is a ternary chain, not a table, to keep the host free of loops and function-pointer tricks. Unknown opcodes (and I/O errors) abort the match with `PCRE2_ERROR_CALLOUT`, which is deliberately not the `-1` that means "no match", and the host reports success only if `commit` actually ran.
 
 ---

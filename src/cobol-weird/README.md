@@ -1,3 +1,17 @@
+---
+name: "COBOL"
+teaches: "why structured programming won, by running a program whose control flow rewrites itself."
+kind: weird
+languages: [cobol]
+lesson: "languages/cobol.md#alter"
+loop-by: self-modifying-control
+evaluation: eager
+assurance: implementation-permitted
+pairs-with: cobol
+machine: "A program whose jump targets are mutable"
+state: "The target of one `GO TO`"
+tags: [control-flow, exception-handling, goto-and-structured-programming, program-counter, self-modifying-code, state, undefined-behavior]
+---
 # COBOL, weirder
 
 **Teaches you:** why structured programming won, by running a program whose control flow rewrites itself.
@@ -10,7 +24,7 @@ The stop rule isn't a comparison either. It's a two-digit number overflowing.
 
 ## Run it
 
-GnuCOBOL (`cobc`, 3.1 or later; `sudo apt install gnucobol` on Ubuntu) and `sqlite3`.
+You need GnuCOBOL (`cobc`, 3.1 or later; `sudo apt install gnucobol` on Ubuntu) and `sqlite3`.
 
 ```bash
 cd src/cobol-weird
@@ -52,7 +66,7 @@ COBOL paragraphs run in the order they're written, falling from one into the nex
    END-ADD
    ```
 
-   59 + total fits in two digits while the total is 40 or less. The add that would take it to 100 or more is a *size error*. COBOL then leaves the field unchanged and runs the `ON SIZE ERROR` clause, which `ALTER`s `NEXT-CARD` one last time, to `FINISH-RUN`. The `GO TO NEXT-CARD` that follows is the same statement as every other time round, but now it ends the run. Four 10-hour cards make 59 + 40 = 99, which still fits, so a fifth card is drawn, exactly as the rule requires.
+   59 + total fits in two digits while the total is 40 or less. The add that would take it to 100 or more is a *size error*. COBOL then leaves the field unchanged and runs the `ON SIZE ERROR` clause, which `ALTER`s `NEXT-CARD` one last time, to `FINISH-RUN`. The `GO TO NEXT-CARD` that follows is the same statement as it was every earlier time, but now it ends the run. Four 10-hour cards make 59 + 40 = 99, which still fits, so a fifth card is drawn, exactly as the rule requires.
 5. **`FINISH-RUN`** commits the SQL script through `sqlite3` and prints the summary.
 
 ### What this version refuses to use, and the honest price
@@ -83,4 +97,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/cobol-weird
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: the compiled program, GnuCOBOL's runtime library (libcob) and sqlite3 on a minimal Ubuntu. No compiler, no package manager.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds the compiled program, GnuCOBOL's runtime library (libcob) and sqlite3 on a minimal Ubuntu. It has no compiler and no package manager.

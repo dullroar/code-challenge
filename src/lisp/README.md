@@ -1,3 +1,15 @@
+---
+name: "Common Lisp"
+teaches: "how `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop."
+kind: idiomatic
+languages: [common-lisp]
+lesson: "languages/lisp.md"
+loop-by: loop-statement
+evaluation: eager
+assurance: guaranteed
+pairs-with: lisp-weird
+tags: [control-flow, domain-specific-language, homoiconicity, macro-processing]
+---
 # Common Lisp
 
 **Teaches you:** how `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop.
@@ -8,7 +20,7 @@ This is the straight version, the one that shows how Common Lisp is *meant* to b
 
 ## Run it
 
-[SBCL](https://www.sbcl.org/) (tested with 2.2.9) and `sqlite3`. No Quicklisp, no ASDF, no libraries: only what ships in the standard and in SBCL itself.
+You need [SBCL](https://www.sbcl.org/) (tested with 2.2.9) and `sqlite3`. Nothing else is needed: no Quicklisp, no ASDF, no libraries. The program uses only what ships in the standard and in SBCL itself.
 
 ```bash
 cd src/lisp
@@ -30,9 +42,9 @@ Debugging	12	43	2026-W47	DEMO ONLY
 
 ## What it does
 
-Draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept). It prints each card, then writes all of them to SQLite in one transaction.
+It draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept). It prints each card, then writes all of them to SQLite in one transaction.
 
-## How it works
+## How the stunt works
 
 Read the file top to bottom; each section only uses what is above it.
 
@@ -50,7 +62,7 @@ Read the file top to bottom; each section only uses what is above it.
 4. **Categories** repeat through `(aref *categories* (mod (1- number) 4))`: a vector and `mod`, the plain way. (The weird version does it with a circular list.)
 5. **The calendar.** SQLite and `date(1)` are not needed to know the ISO week; Common Lisp has `decode-universal-time`, which returns day of week and year, and the rest is arithmetic (`iso-week`, `weeks-in-year`). `check.sh` compares it with `date(1)` on awkward dates (and a one-off sweep of 1,139 dates around year boundaries matched Python's `isocalendar()`). The optional date argument exists so that this arithmetic can be tested on awkward dates such as 2021-01-03 (which is in week 53 of **2020**).
 6. **SQLite.** SBCL has no database library in its core, so the program builds one SQL script as a string (`with-output-to-string`, `format` with a `~A` per value, `sql-quote` doubling quotes) and hands it to the `sqlite3` command line tool with `sb-ext:run-program`. The `DEMO ONLY` rule is in the table: `CHECK(demo_only=1)`.
-7. **`main`.** Seeds a fresh `random-state` from the OS (`(make-random-state t)`), draws, saves, prints.
+7. **`main`.** It seeds a fresh `random-state` from the OS (`(make-random-state t)`), draws, saves and prints.
 
 ## Why this is idiomatic
 
@@ -69,7 +81,7 @@ Read the file top to bottom; each section only uses what is above it.
 - How SBCL runs scripts: `--script` implies `--disable-debugger` and ends the runtime options, so `sb-ext:*posix-argv*` is `("sbcl" "2026-01-01")` with no `--script file` in it.
 - ISO weeks: week 1 is the week with the year's first Thursday; a year has 53 weeks when it starts or ends on a Thursday.
 
-## Gotchas and limitations
+## Gotchas worth knowing
 
 - **SBCL only.** `sb-ext:run-program`, `sb-ext:posix-getenv` and `sb-ext:parse-native-namestring` are SBCL's. Other implementations have equivalents (`uiop:run-program`, `uiop:getenv`) but they are not the same functions.
 - **Pathnames are not strings.** `*` and `[` in a path mean something to a Lisp pathname, so the program converts with `parse-native-namestring` and back with `native-namestring`. A home directory with a `[` in its name would otherwise be treated as a wildcard.
@@ -89,4 +101,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/lisp
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. In the image: SBCL and sqlite3 on a minimal Ubuntu.
+It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds SBCL and sqlite3 on a minimal Ubuntu.

@@ -1,3 +1,17 @@
+---
+name: "XAML"
+teaches: "how far a markup parser can be pushed before it stops describing a UI and starts *running* a program."
+kind: weird
+languages: [xaml, c-sharp]
+lesson: "languages/csharp-linq-xaml.md#xaml"
+loop-by: document-order
+evaluation: declarative
+assurance: accidentally-exploited
+pairs-with: ModernChallenge1
+machine: "An object-graph constructor that runs methods as it parses"
+state: "Document order, plus \"carrier\" arrays"
+tags: [arbitrary-code-execution, declarative-programming, langsec, markup-language, parsing, reflection-and-metaprogramming, side-effect, state, weird-machine]
+---
 # XAML challenge: the program isn't even C# code
 
 **Teaches you:** how far a markup parser can be pushed before it stops describing a UI and starts *running* a program.
@@ -12,7 +26,7 @@ Every piece of behavior - the random draws, the arithmetic, the stop rule, the d
 
 ## Run it
 
-Needs Windows and the .NET 10 SDK.
+You need Windows and the .NET 10 SDK.
 
 ```powershell
 cd src\xaml
@@ -25,18 +39,18 @@ Records land in `src\xaml\data`; delete that folder to start fresh (the stop rul
 
 ![XAML demo window](../../docs/images/xaml-demo.png)
 
-## How is that even possible?
+## How the stunt works
 
-A markup language has no `for`, no `if`, and no assignment - on paper. In practice, WPF's XAML parser ships with a few features that, combined, add up to a small interpreter:
+A markup language has no `for`, no `if`, and no assignment - in theory. In practice, WPF's XAML parser ships with a few features that, combined, add up to a small interpreter:
 
 - **`XamlReader.Load` is the interpreter.** The `.xaml` file is the program; parsing it *is* running it.
 - **`ObjectDataProvider` is the instruction.** It can construct any object and call any method, and it fires the moment it is parsed. Document order becomes the program counter.
-- **`Refresh` is the goto.** One provider can re-run another one, smuggled through an `x:Array` so XAML does not try to unwrap it first.
+- **`Refresh` is the goto.** One provider can re-run another one. The call is passed through an `x:Array` so that XAML does not try to unwrap it first.
 - **"Carrier" arrays are the variables.** One `ObjectDataProvider` call fills a `char[]` or `byte[]` in place; the next one reads it back. That is how a random number travels from `Random.Next` into a SQL parameter, an XML element, or an EF Core entity.
 - **Expression engines are the ALU.** `DataTable.Compute("Sum(h)")`, `DataView.RowFilter`, and SQL itself do the arithmetic and the conditionals. A SQL string inside a XAML attribute is still XAML.
 - **A `Thread` is built entirely in markup**, using `Delegate.CreateDelegate`, then started and joined - all as `ObjectDataProvider` calls. The window's fade is an ordinary WPF `Storyboard`.
 
-## Honest fine print
+## Gotchas worth knowing
 
 Obfuscation is not the same as lying, so here is what the trick actually costs:
 
@@ -44,7 +58,7 @@ Obfuscation is not the same as lying, so here is what the trick actually costs:
 - **Conditional *effects* come from the expression engines**, not from WPF's `Trigger`/`DataTrigger` system. `DataTable.Compute` and SQL branch on data; XAML triggers are not used for program logic here.
 - **Three files, three flavors of the same program.** `strict.xaml` uses nothing outside .NET itself, so it saves XML rather than a database. `sqlite.xaml` adds the SQLite package. `efcore.xaml` adds EF Core, through two small model classes copied from the [C# original](../ModernChallenge1/README.md).
 
-## The why
+## Why this is weird
 
 XAML's job is to *describe* a UI tree, declaratively, so a designer tool can read and write it without running any code. This entry shows what happens once you notice the parser does not actually enforce that: given the right combination of built-in types, parsing a file and running a program become the same act. It is not a technique to reuse - it is what happens when you take "XAML is just data" at its word and then push until it stops being true.
 

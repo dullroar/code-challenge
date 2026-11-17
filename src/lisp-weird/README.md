@@ -1,3 +1,17 @@
+---
+name: "Common Lisp"
+teaches: "that CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule."
+kind: weird
+languages: [common-lisp]
+lesson: "languages/lisp.md#method-combination-as-control-flow"
+loop-by: dispatch-and-triggers
+evaluation: eager
+assurance: implementation-permitted
+pairs-with: lisp
+machine: "A method dispatcher with a pluggable combination rule"
+state: "The class precedence list, and each method's return value"
+tags: [control-flow, homoiconicity, macro-processing, reflection-and-metaprogramming, scope-and-binding, short-circuit-evaluation, state]
+---
 # Common Lisp, weirder
 
 **Teaches you:** that CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule.
@@ -10,7 +24,7 @@ The straight version is [`lisp`](../lisp/README.md).
 
 ## Run it
 
-[SBCL](https://www.sbcl.org/) (tested with 2.2.9) and `sqlite3`. Nothing else: no libraries, no ASDF.
+You need [SBCL](https://www.sbcl.org/) (tested with 2.2.9) and `sqlite3`. Nothing else is needed: no libraries, no ASDF.
 
 ```bash
 cd src/lisp-weird
@@ -43,7 +57,7 @@ When you call a generic function, CLOS finds every method whose specializers mat
 (defmethod punch or ((ledger card-3)) ...)    ; "or" here is the method qualifier
 ```
 
-`punch` becomes `(or (method-1 ledger) (method-2 ledger) ...)`, in specificity order. Same short-circuit as the ordinary `or` special operator: the first true result ends it and **later methods never run**.
+`punch` becomes `(or (method-1 ledger) (method-2 ledger) ...)`, in specificity order. It is the same short-circuit as the ordinary `or` special operator: the first true result ends it and **later methods never run**.
 
 ### 2. The class hierarchy as a counter
 
@@ -83,7 +97,7 @@ An `:around` method on `ledger` wraps the whole chain. It binds the special vari
 
 A Lisp programmer reads `or` as a *form*. Here it appears as a *qualifier on a method*, and the thing being or-ed is a chain of classes. Control flow is made out of the object system: dispatch is the iteration, specificity order is the sequence, and the return value is the "break". Nothing is doing the work in a thin wrapper: delete `:method-combination or` and the program no longer stops (see the proof below).
 
-You should not do this in production because the control flow is invisible: nothing near `punch` says "this loops". A maintainer would have to know that `defclass` ordering decides execution order, and splicing a class into the chain would change behaviour without touching any method.
+You should not do this in production because the control flow is invisible: nothing near `punch` says "this loops". A maintainer would have to know that `defclass` ordering decides execution order, and splicing a class into the chain would change behavior without touching any method.
 
 ## What you can learn
 
@@ -98,7 +112,7 @@ You should not do this in production because the control flow is invisible: noth
 
 `check.sh` rewrites the file, replacing `or` with `progn` (the combination that runs *every* method) and runs it five times: every run deals **all five** cards, the total ending anywhere up to 95. The unmodified file stops after three or four cards. Nothing else changes between the two files, so the combination is what stops it.
 
-## Gotchas and limitations
+## Gotchas worth knowing
 
 - **SBCL only.** `sb-mop`, `sb-ext:run-program`, `sb-ext:posix-getenv` are SBCL's. The CLOS parts (`or` combination, `:around`, `defcard`) are standard Common Lisp.
 - **Order of definitions.** Superclasses must exist before subclasses, so `defcard` goes tail first (`card-5`, then `card-4`, ...). A forward reference would work in some implementations and warn in others.
@@ -118,4 +132,4 @@ Prerequisite: Docker, set up once as described in [`SANDBOX-SETUP.md`](../../SAN
 sandbox/container/run-image.sh src/lisp-weird
 ```
 
-In the image: SBCL and sqlite3 on a minimal Ubuntu.
+The image holds SBCL and sqlite3 on a minimal Ubuntu.

@@ -1,3 +1,17 @@
+---
+name: "Tcl"
+teaches: "that Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow."
+kind: weird
+languages: [tcl, sqlite]
+lesson: "languages/tcl.md#sqlite-as-the-program"
+loop-by: dispatch-and-triggers
+evaluation: eager
+assurance: accidentally-exploited
+pairs-with: tcl
+machine: "A string-command interpreter whose command lookup can be hooked"
+state: "A TEMP table of proc source, and the depth of trigger recursion"
+tags: [arbitrary-code-execution, control-flow, database-trigger, homoiconicity, recursion, reflection-and-metaprogramming, scope-and-binding, state]
+---
 # Tcl, weirder
 
 **Teaches you:** that Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow.
@@ -10,7 +24,7 @@ The straight version is [`tcl`](../tcl/README.md).
 
 ## Run it
 
-Tcl 8.6 (`tclsh`) with the `sqlite3` Tcl package (Ubuntu: `tcl8.6`, `libsqlite3-tcl`), and `tk8.6` for `--gui`.
+You need Tcl 8.6 (`tclsh`) with the `sqlite3` Tcl package (Ubuntu: `tcl8.6`, `libsqlite3-tcl`), and `tk8.6` for `--gui`.
 
 ```bash
 cd src/tcl-weird
@@ -143,14 +157,14 @@ Why you might get fired: the control flow of a program is hidden in a trigger an
 - **No loop command.** With comments removed, none of `while`, `for`, `foreach`, `lmap`, `dict for` appears in the file.
 - **Nothing left behind.** After a run the file's `sqlite_master` lists only `demo_timecards`.
 
-## Gotchas and limitations
+## Gotchas worth knowing
 
 - **Statements are evaluated once per call, and SQLite owns the order.** The trigger depends on `h` being the same value in `h` and in `NEW.running_total + h`. Here SQLite evaluates the subquery's function call once per row; `check.sh` would fail if it did not (running totals must equal the sum), but SQLite does not promise this for non-deterministic functions. A hardened version would draw the hours once and store them.
 - **Qualified names in triggers.** `INSERT INTO main.demo_timecards` is rejected inside a trigger ("qualified table names are not allowed"), so the trigger body uses the bare name. The trigger is `TEMP`, so the bare name resolves to the one table in `main`.
 - **A tclsh that has loaded Tk does not exit** at the end of the script while the main window exists, so the script ends with `destroy .`.
 - **Depth.** SQLite limits trigger recursion (1000 by default); the challenge needs 3 to 5.
 - **Trust.** `unknown` runs whatever text is in the table. Here the table is built by the program itself in memory; this is not a pattern for data other people can edit.
-- **Needs** the Tcl `sqlite3` package and, for the window, Tk. Tested with Tcl 8.6.14 and SQLite 3.45.
+- **Requirements.** The program needs the Tcl `sqlite3` package and, for the window, Tk. It was tested with Tcl 8.6.14 and SQLite 3.45.
 - **Formatting.** No Tcl formatter was available; the layout is by hand. The SQL is laid out like the SQL in the other entries.
 
 ## What `check.sh` enforces
@@ -166,4 +180,4 @@ sandbox/container/run-image.sh src/tcl-weird
 sandbox/container/run-image.sh --out ./results src/tcl-weird    # the folder must be writable by user nobody
 ```
 
-It builds this folder's [`Dockerfile`](Dockerfile), runs `--gui` on a virtual display with no network, a read-only file system and user `nobody`, takes a screenshot of the window, and prints the output and the rows written. In the image: Tcl/Tk, the Tcl sqlite3 package and sqlite3 on a minimal Ubuntu.
+It builds this folder's [`Dockerfile`](Dockerfile), runs `--gui` on a virtual display with no network, a read-only file system and user `nobody`, takes a screenshot of the window, and prints the output and the rows written. The image holds Tcl/Tk, the Tcl sqlite3 package and sqlite3 on a minimal Ubuntu.
