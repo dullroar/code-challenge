@@ -285,7 +285,7 @@ class Model:
             u = urlparse(url)
             if u.scheme != "https":
                 self.problems.add(where, f"external link must be https: {url}")
-            elif u.hostname not in self.hosts:
+            elif u.hostname not in self.hosts and not any("/" in h and (u.hostname + u.path).startswith(h) for h in self.hosts):
                 self.problems.add(where, f"link host {u.hostname!r} is not in lessons/book/link-hosts.txt: {url}")
             elif u.hostname == "en.wikipedia.org" and not re.match(r"/wiki/[^/?#]+$", u.path):
                 self.problems.add(where, f"Wikipedia links must look like https://en.wikipedia.org/wiki/Title: {url}")

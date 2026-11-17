@@ -87,7 +87,7 @@ The next two parts read the same material from other directions: [By language](.
 | [The program counter](03-control-flow-and-continuations.md#the-program-counter) | Control flow and continuations | `cobol-weird`, `forth-weird` |
 | [The stack as a data structure](06-state-beyond-variables.md#the-stack-as-a-data-structure) | State beyond variables | `forth`, `forth-weird`, `regex-dotnet` |
 | [Thread safety and thread affinity](07-effects-errors-and-commitment.md#thread-safety-and-thread-affinity) | Effects, errors and commitment | `GoChallenge1`, `JavaChallenge1`, `KotlinChallenge1`, `LinqChallenge1`, `LinqChallenge2`, `ModernChallenge1`, `PythonChallenge1`, `RustChallenge1` |
-| [Threat model](01-reading-an-adversarial-program.md#threat-model) | How to read an adversarial program |  |
+| [Threat model](01-reading-an-adversarial-program.md#threat-model) | How to read an adversarial program | `regex-perl`, `xaml` |
 | [Transactions](07-effects-errors-and-commitment.md#transactions) | Effects, errors and commitment | `forth`, `regex-perl`, `tcl` |
 | [Transition systems and state machines](02-what-counts-as-a-machine.md#transition-systems-and-state-machines) | What counts as a machine? |  |
 | [Trojan Source: characters you cannot see](01-reading-an-adversarial-program.md#trojan-source-characters-you-cannot-see) | How to read an adversarial program |  |

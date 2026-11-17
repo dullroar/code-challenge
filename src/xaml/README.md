@@ -10,7 +10,7 @@ assurance: accidentally-exploited
 pairs-with: ModernChallenge1
 machine: "An object-graph constructor that runs methods as it parses"
 state: "Document order, plus \"carrier\" arrays"
-tags: [arbitrary-code-execution, declarative-programming, langsec, markup-language, parsing, reflection-and-metaprogramming, side-effect, state, weird-machine]
+tags: [arbitrary-code-execution, declarative-programming, langsec, markup-language, parsing, reflection-and-metaprogramming, side-effect, state, threat-model, weird-machine]
 ---
 # XAML challenge: the program isn't even C# code
 
