@@ -114,3 +114,9 @@ The "boring" CMake version was the first draft: `while()`, `math(EXPR)`, `list(G
 ## Under what circumstances would this terrible idea become reasonable?
 
 Never as a loop. But "a build system that regenerates its own inputs and restarts" is exactly what auto-dependency generation relies on, and CMake's regex captures are a legitimate way to parse versions and paths. The stunt is those features used for everything.
+
+## Computer science behind this page
+
+<!-- BEGIN GENERATED concepts:languages/make-cmake.md -->
+The computer-science ideas behind this page: [Register machines and counter machines](../cs/02-what-counts-as-a-machine.md#register-machines-and-counter-machines), [Turing completeness](../cs/02-what-counts-as-a-machine.md#turing-completeness), [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [Fixed-point iteration](../cs/03-control-flow-and-continuations.md#fixed-point-iteration), [Regular expressions](../cs/05-formal-languages-as-computational-substrates.md#regular-expressions), [Declarative programming](../cs/05-formal-languages-as-computational-substrates.md#declarative-programming), [Domain-specific languages](../cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages), [Build automation](../cs/05-formal-languages-as-computational-substrates.md#build-automation), [State](../cs/06-state-beyond-variables.md#state), [Dependency graphs](../cs/06-state-beyond-variables.md#dependency-graphs), [Hyrum's law](../cs/08-abstraction-leaks-and-implementation-dependence.md#hyrums-law).
+<!-- END GENERATED concepts:languages/make-cmake.md -->

@@ -39,3 +39,10 @@ header#title-block-header { display: none; }
 nav#TOC { break-after: page; }
 nav#TOC ul { list-style: none; padding-left: 1.2em; }
 nav#TOC > ul { padding-left: 0; }
+
+/* The generated index (lessons/index.md): compact, and in the PDF a page number follows every link that points
+   inside the book (WeasyPrint's target-counter). Browsers and e-readers ignore the rule, which is fine. */
+.book-index ul { list-style: none; padding-left: 0; margin: 0; columns: 1; }
+.book-index li { margin: 0 0 .25em 1.2em; text-indent: -1.2em; font-size: 9.5pt; }
+.book-index p strong { display: block; margin-top: .9em; font: bold 11pt "DejaVu Sans", sans-serif; }
+.book-index a[href^="#"]::after { content: " " target-counter(attr(href), page); color: #555; }

@@ -72,3 +72,9 @@ See [exercises](../exercises.md#b3-forth-move-the-anchor-verified).
 ## Under what circumstances would this terrible idea become reasonable?
 
 When you are writing the interpreter, a parsing word or a debugger. Rewinding the parser is a stunt in a loop; it is a tool in a language implementer's kit.
+
+## Computer science behind this page
+
+<!-- BEGIN GENERATED concepts:languages/forth.md -->
+The computer-science ideas behind this page: [Stack machines](../cs/02-what-counts-as-a-machine.md#stack-machines), [Register machines and counter machines](../cs/02-what-counts-as-a-machine.md#register-machines-and-counter-machines), [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [The program counter](../cs/03-control-flow-and-continuations.md#the-program-counter), [Parsing](../cs/05-formal-languages-as-computational-substrates.md#parsing), [State](../cs/06-state-beyond-variables.md#state), [The stack as a data structure](../cs/06-state-beyond-variables.md#the-stack-as-a-data-structure), [Reflection and metaprogramming](../cs/06-state-beyond-variables.md#reflection-and-metaprogramming), [Transactions](../cs/07-effects-errors-and-commitment.md#transactions).
+<!-- END GENERATED concepts:languages/forth.md -->

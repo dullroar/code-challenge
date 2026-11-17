@@ -47,20 +47,27 @@ The common shape: *describe the full answer, then say how much of it you want.* 
 
 Where does "where am I in the program?" live when you have no loop counter?
 
+<!-- BEGIN GENERATED control-state -->
 | Place | Entry |
 | --- | --- |
-| The target of a `GO TO` | [COBOL `ALTER`](languages/cobol.md#alter) |
-| The text interpreter's parse position | [Forth `>in`](languages/forth.md) |
-| Which files exist, plus `MAKE_RESTARTS` | [Make](languages/make-cmake.md#gnu-make) |
-| Regex captures rebuilt every pass | [CMake](languages/make-cmake.md#cmake) |
-| The source text of functions | [APL `⎕CR`/`⎕FX`](languages/apl.md#2-self-modifying-functions-apl-weird) |
-| Document order in a markup file | [XAML](languages/csharp-linq-xaml.md#xaml) |
-| One line of text | [sed](languages/regex.md#gnu-sed) |
-| The data stack | [Forth](languages/forth.md) |
-| The class precedence list | [Lisp `or` method combination](languages/lisp.md#method-combination-as-control-flow) |
-| The macro text that has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning) |
-| The depth of trigger recursion, and procs stored as rows | [Tcl + SQLite](languages/tcl.md#sqlite-as-the-program) |
-| The input stream and the record separator | [AWK `RS` and `RT`](languages/awk.md#2-records-from-a-random-byte-stream-awk-weird) |
+| Balancing-group capture stacks | [regex](languages/regex.md#net-balancing-groups): [`regex-dotnet`](../src/regex-dotnet/README.md) |
+| Arrays, and the source text of functions | [apl](languages/apl.md#2-self-modifying-functions-apl-weird): [`apl-weird`](../src/apl-weird/README.md) |
+| The input stream and the record separator `RS` | [awk](languages/awk.md#2-records-from-a-random-byte-stream-awk-weird): [`awk-weird`](../src/awk-weird/README.md) |
+| Fields of one anonymous object | [csharp-linq-xaml](languages/csharp-linq-xaml.md#the-original-modernchallenge1): [`ModernChallenge1`](../src/ModernChallenge1/README.md) |
+| `CMAKE_MATCH_1`..`5`, rebuilt every pass | [make-cmake](languages/make-cmake.md#cmake): [`cmake`](../src/cmake/README.md) |
+| The target of one `GO TO` | [cobol](languages/cobol.md#alter): [`cobol-weird`](../src/cobol-weird/README.md) |
+| The class precedence list, and each method's return value | [lisp](languages/lisp.md#method-combination-as-control-flow): [`lisp-weird`](../src/lisp-weird/README.md) |
+| The data stack and the parse position `>in` | [forth](languages/forth.md): [`forth-weird`](../src/forth-weird/README.md) |
+| Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | [make-cmake](languages/make-cmake.md#gnu-make): [`make-gnu`](../src/make-gnu/README.md) |
+| One line of text, rewritten until no rule applies | [regex](languages/regex.md#gnu-sed): [`regex-sed`](../src/regex-sed/README.md) |
+| Thunks: which parts of a list have been demanded | [haskell](languages/haskell.md#lazy-io-as-control-flow): [`haskell-weird`](../src/haskell-weird/README.md) |
+| The input stream: whatever macro text has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning): [`m4`](../src/m4/README.md) |
+| A C struct that never rewinds | [regex](languages/regex.md#pcre2-callouts-as-an-instruction-set): [`regex-pcre2`](../src/regex-pcre2/README.md) |
+| SQLite rows, and the exit code of each callout | [regex](languages/regex.md#pcre2grep-exit-codes-as-control-flow): [`regex-pcre2grep`](../src/regex-pcre2grep/README.md) |
+| `local` variables that unwind (effects do not) | [regex](languages/regex.md#perl-code-inside-the-match): [`regex-perl`](../src/regex-perl/README.md) |
+| A TEMP table of proc source, and the depth of trigger recursion | [tcl](languages/tcl.md#sqlite-as-the-program): [`tcl-weird`](../src/tcl-weird/README.md) |
+| Document order, plus "carrier" arrays | [csharp-linq-xaml](languages/csharp-linq-xaml.md#xaml): [`xaml`](../src/xaml/README.md) |
+<!-- END GENERATED control-state -->
 
 A reader who arrives for one meets the rest. That is the point.
 

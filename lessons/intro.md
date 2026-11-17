@@ -55,8 +55,9 @@ Sometimes the answer is "never, given the alternatives." Sometimes it is "when y
 
 Pair each weird program with the small, idiomatic version of the same behavior (the repo has several: [`cobol`](../src/cobol/README.md) beside [`cobol-weird`](../src/cobol-weird/README.md), [`haskell`](../src/haskell/README.md) beside [`haskell-weird`](../src/haskell-weird/README.md), [`lisp`](../src/lisp/README.md) beside [`lisp-weird`](../src/lisp-weird/README.md), and so on). The point is not that the idiomatic one is morally superior. It is to see what got easier, what got harder, and what surprising capability the weird version revealed.
 
-## Two ways in
+## Three ways in
 
+- **By computer science concept**, if you want the theory first: [cs/](cs/README.md). Each idea gets a short explanation of why it exists, why people use it, when it fits and when it does not, with links to Wikipedia and other long-lived, freely reusable sources.
 - **By language**, if you want to deepen the one you use: [languages/](languages/README.md).
 - **By mechanism**, if you want to explore an unfamiliar way of computing: [patterns](patterns.md). A reader who arrives for C# may meet Haskell's laziness and realize both raise the same question: *when does the computation actually run?* One who arrives for COBOL's `ALTER` meets Make's restart machinery and CMake's regex registers, which are other ways of keeping control state outside ordinary variables. That cross-pollination is the point.
 

@@ -41,7 +41,8 @@ repo=$(mktemp -d); trap 'rm -rf "$repo"' EXIT
 (
     set -e; cd "$repo"; git init -q -b master
     git config user.email selftest@example.invalid; git config user.name selftest
-    mkdir -p src/existing sandbox; echo '# Code Challenge' > README.md
+    mkdir -p src/existing sandbox lessons/cs-source/concepts lessons/cs-source/roles; echo '# Code Challenge' > README.md
+    echo x > lessons/cs-source/concepts/control-flow.md; echo x > lessons/cs-source/roles/loop-statement.md
     echo 'echo ok' > src/existing/check.sh; echo 'trusted' > sandbox/run.sh
     git add -A; git commit -qm base
 ) || { echo "could not build the scratch repo"; exit 2; }
@@ -49,10 +50,13 @@ repo=$(mktemp -d); trap 'rm -rf "$repo"' EXIT
 case_branch() {   # case_branch <name> <shell commands run in the repo on a new branch>
     (cd "$repo" && git checkout -q master && git checkout -q -b "$1" && bash -c "$2" && git add -A && git commit -qm "$1")
 }
-good='mkdir -p src/newentry && printf "# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
+FM="---\nname: New\nteaches: x\nkind: weird\nlanguages: [new]\nlesson: languages/new.md\nloop-by: loop-statement\nevaluation: eager\nassurance: guaranteed\ntags: [control-flow]\n---\n"
+HB='# New\n\n## Run it\n\n## How the stunt works\n\n## What \`check.sh\` enforces\n\n## Gotchas worth knowing\n\n'
+HP='# New\n\n## Run it\n\n## How the stunt works\n\n## What \`check.ps1\` enforces\n\n## Gotchas worth knowing\n\n'
+good='mkdir -p src/newentry && printf -- "'"$FM$HB"'## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
 case_branch good          "$good && echo '| new | row |' >> README.md"
-case_branch good-windows 'mkdir -p src/newentry && printf "# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "exit 0\n" > src/newentry/check.ps1'
-case_branch no-run-instructions 'mkdir -p src/newentry && printf "# New\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
+case_branch good-windows 'mkdir -p src/newentry && printf -- "'"$FM$HP"'## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "exit 0\n" > src/newentry/check.ps1'
+case_branch no-run-instructions 'mkdir -p src/newentry && printf -- "'"$FM$HB"'" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
 case_branch sandbox-edit  "$good && echo 'evil' >> sandbox/run.sh"
 case_branch workflow      "$good && mkdir -p .github/workflows && echo 'on: push' > .github/workflows/x.yml"
 case_branch existing      "$good && echo 'curl evil' >> src/existing/check.sh"
@@ -109,19 +113,27 @@ dockerfile_case $'FROM cc-rt-sqlite:local
 ENV CC_RUN=x \
     PATH=/evil
 ' dockerfile-env-multiline
-case_branch docker-only   'mkdir -p src/newentry && printf "# New\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh && printf "FROM cc-rt-sqlite:local\nENV CC_RUN=x\n" > src/newentry/Dockerfile'
+case_branch docker-only   'mkdir -p src/newentry && printf -- "'"$FM$HB"'" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh && printf "FROM cc-rt-sqlite:local\nENV CC_RUN=x\n" > src/newentry/Dockerfile'
+case_branch no-how-heading "$good && sed -i 's/^## How the stunt works/## How it works/' src/newentry/README.md"
+case_branch no-gotchas-heading "$good && sed -i 's/^## Gotchas worth knowing/## Fine print/' src/newentry/README.md"
+case_branch no-check-heading "$good && sed -i 's/^## What .check.sh. enforces/## Checks/' src/newentry/README.md"
+case_branch no-frontmatter 'mkdir -p src/newentry && printf "# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
+case_branch incomplete-frontmatter 'mkdir -p src/newentry && printf -- "---\nname: New\ntags: [control-flow]\n---\n# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
+case_branch no-tags 'mkdir -p src/newentry && printf -- "---\nname: New\nteaches: x\nkind: weird\nlanguages: [new]\nlesson: l.md\nloop-by: loop-statement\nevaluation: eager\nassurance: guaranteed\ntags: []\n---\n# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
+case_branch unknown-tag "$good && sed -i 's/tags: \[control-flow\]/tags: [control-flow, brand-new-idea]/' src/newentry/README.md"
 case_branch readme-blob   "$good && printf 'abc \xe2\x80\xae evil\n' >> README.md"
 
 scope() { (cd "$repo" && "$here/scope-check.sh" master "$1" >/tmp/scope-$$.log 2>&1); local rc=$?; sed 's/^/    /' /tmp/scope-$$.log | grep -E 'FAIL|PASS'; rm -f /tmp/scope-$$.log; return $rc; }
 expect 0 "well-formed new entry passes" scope good
 expect 0 "well-formed Windows entry (check.ps1) passes" scope good-windows
+expect 0 "an unknown tag is a note, not a failure" scope unknown-tag
 expect 0 "entry with a clean Dockerfile passes" scope good-dockerfile
 expect 0 "entry with a Dockerfile and no Windows section passes" scope docker-only
 expect 0 "entry with a multi-line build-stage RUN passes" scope good-dockerfile-multiline
 for b in dockerfile-run-multiline dockerfile-env-multiline dockerfile-bad-from dockerfile-run-final dockerfile-add dockerfile-env-path dockerfile-user-root dockerfile-copy-external; do
     expect 1 "rejects: $b" scope "$b"
 done
-for b in no-run-instructions sandbox-edit workflow existing two-entries no-check binary symlink bidi zero-width control-chars odd-path too-large readme-blob; do
+for b in no-how-heading no-gotchas-heading no-check-heading no-frontmatter incomplete-frontmatter no-tags no-run-instructions sandbox-edit workflow existing two-entries no-check binary symlink bidi zero-width control-chars odd-path too-large readme-blob; do
     expect 1 "rejects: $b" scope "$b"
 done
 

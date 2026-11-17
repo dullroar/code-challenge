@@ -62,7 +62,7 @@ Tags: `or` method combination, `:around`, `#n=` syntax, `defmacro` and `eval-whe
 
 ### 4. Do this in production and you're fired
 
-- **The control flow is invisible.** Nothing near `punch` says "this loops". A maintainer has to know that class-definition order decides execution order; splicing a class into the chain changes behaviour without touching a method.
+- **The control flow is invisible.** Nothing near `punch` says "this loops". A maintainer has to know that class-definition order decides execution order; splicing a class into the chain changes behavior without touching a method.
 - **The limit is baked into the design.** Five classes handle "10 to 19 hours, stop over 40". Different rules need a longer or shorter chain; the straight version has no such limit. (Try it in [B10](../exercises.md#b10-lisp-swap-the-method-combination-verified).)
 - **Debuggers and tracers show a stack of generic-function calls**, not a loop, and a profiler attributes the time to methods nobody wrote by hand.
 - **SBCL only** as shipped: the `sb-` functions are SBCL's, while the CLOS parts are standard.
@@ -87,3 +87,9 @@ See [exercises](../exercises.md#b10-lisp-swap-the-method-combination-verified).
 ## Under what circumstances would this terrible idea become reasonable?
 
 When the "loop" is really *a set of independently-registered participants* (plug-ins, validators, listeners) and the language gives you a combination rule for them. Using five empty classes to count to five is a stunt; using `or` to find the first listener that accepts an event is the intended design.
+
+## Computer science behind this page
+
+<!-- BEGIN GENERATED concepts:languages/lisp.md -->
+The computer-science ideas behind this page: [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [Short-circuit evaluation](../cs/04-evaluation-and-demand.md#short-circuit-evaluation), [Macros and text expansion](../cs/05-formal-languages-as-computational-substrates.md#macros-and-text-expansion), [Domain-specific languages](../cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages), [State](../cs/06-state-beyond-variables.md#state), [Scope and binding](../cs/06-state-beyond-variables.md#scope-and-binding), [Homoiconicity: code as data](../cs/06-state-beyond-variables.md#homoiconicity-code-as-data), [Reflection and metaprogramming](../cs/06-state-beyond-variables.md#reflection-and-metaprogramming).
+<!-- END GENERATED concepts:languages/lisp.md -->

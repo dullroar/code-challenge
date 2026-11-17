@@ -35,7 +35,7 @@ The window is built from a string of raw XAML via `XamlReader.Load` at run time 
 
 ### 4. Do this in production and you're fired
 
-- **`DbContext` is not thread-safe.** The `Mutex` exists only to keep the thread-plus-reflection shape working at all ([README](../../src/ModernChallenge1/README.md#one-caveat-left-visible-on-purpose)); it is a historical artifact.
+- **`DbContext` is not thread-safe.** The `Mutex` exists only to keep the thread-plus-reflection shape working at all ([README](../../src/ModernChallenge1/README.md#gotchas-worth-knowing)); it is a historical artifact.
 - **Reflection and a thread add nothing.** They are a deliberate 2008-style time capsule; modern code would `await SaveChangesAsync()`.
 - **WPF needs `[STAThread]`** and a single UI thread ([L30](../../src/ModernChallenge1/Program.cs#L30)).
 - **Readability, testing, debugging**: nothing in that `for` header can be stepped through, unit-tested or reused.
@@ -126,3 +126,9 @@ Ken's ports keep the bodiless-loop rule and swap in each language's own parts. A
 ## Under what circumstances would this terrible idea become reasonable?
 
 Putting everything in a `for` header: never. But knowing that LINQ is lazy, that `IQueryable` and `IEnumerable` are different worlds, that `DbContext` is not thread-safe, and that XAML's parser can call methods are all things you want to learn *before* the production bug that teaches them.
+
+## Computer science behind this page
+
+<!-- BEGIN GENERATED concepts:languages/csharp-linq-xaml.md -->
+The computer-science ideas behind this page: [Arbitrary code execution](../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution), [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [Evaluation strategies](../cs/04-evaluation-and-demand.md#evaluation-strategies), [Lazy evaluation](../cs/04-evaluation-and-demand.md#lazy-evaluation), [Deferred execution](../cs/04-evaluation-and-demand.md#deferred-execution), [Iterators and generators](../cs/04-evaluation-and-demand.md#iterators-and-generators), [Parsing](../cs/05-formal-languages-as-computational-substrates.md#parsing), [Declarative programming](../cs/05-formal-languages-as-computational-substrates.md#declarative-programming), [Domain-specific languages](../cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages), [Markup languages](../cs/05-formal-languages-as-computational-substrates.md#markup-languages), [Language-theoretic security](../cs/05-formal-languages-as-computational-substrates.md#language-theoretic-security), [Weird machines](../cs/05-formal-languages-as-computational-substrates.md#weird-machines), [State](../cs/06-state-beyond-variables.md#state), [Reflection and metaprogramming](../cs/06-state-beyond-variables.md#reflection-and-metaprogramming), [Side effects](../cs/07-effects-errors-and-commitment.md#side-effects), [Thread safety and thread affinity](../cs/07-effects-errors-and-commitment.md#thread-safety-and-thread-affinity).
+<!-- END GENERATED concepts:languages/csharp-linq-xaml.md -->

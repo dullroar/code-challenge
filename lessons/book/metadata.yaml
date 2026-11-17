@@ -8,4 +8,7 @@ lang: en-US
 rights: "Copyright (c) 2026 Jim Lehmer and Ken Astl. MIT License."
 toc: true
 toc-depth: 2
+date: 2026-11-16
+# A fixed book identifier (a UUIDv5 of the repository URL), so the EPUB does not get a random one.
+identifier: "urn:uuid:1cb8694e-e636-50f5-9ff2-0f33ae51404a"
 ---
