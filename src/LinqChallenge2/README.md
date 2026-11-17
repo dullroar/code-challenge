@@ -81,6 +81,10 @@ Three things in this file cannot be query syntax, because the language simply ha
 - **`Enumerable.Repeat` / `.Take` / `.Sum` / `.ToList` / `.Single`** - every place a value needs to become a one-row sequence, be capped, be summed, be forced, or be pulled back out. Query syntax lowers to these same calls; it never replaces them.
 - **`ctx.Timecards.Add(...)`, `window.Show()`, `app.Run()`, `window.BeginAnimation(...)`, `app.Shutdown()`** - the actual WPF/EF Core side effects. No syntax, query or fluent, turns a `void` method into an expression; that is what every inline `Func<T>.Invoke()` wrapper is for, with or without a throwaway query around it.
 
+## What `check.ps1` enforces
+
+`check.ps1` does what the Variant A check does (no orchestration helper, a clean build, a run against a throwaway folder with a 15-second timeout, the 5-row 40.0h report and the database file). It also checks that the query syntax is real. `Program.cs` must contain a genuine `from day in WorkWeek ... where ... let tracked ... select tracked` expression. It must also contain a second query, `from persisted in (from e in ctx.Timecards ... orderby e.WorkDate ...)`, and no fluent `ctx.Timecards.Where(` or `.OrderBy(e =>` chain. Finally, it must have at least eight `from ... in` clauses, counting the throwaway one-row queries.
+
 ## Gotchas worth knowing
 
 - The embedded one-row queries around `tracked`, `saved`, `line`, `window`, `pulse`, the `Lines` fold step, and the window's text join are gratuitous. Removing any of them and calling the wrapped expression directly would behave identically and read more plainly. They exist because the challenge asked for maximum, deliberate perversity - "twisted thinking is good thinking" - not because they improve the code. The EF phase's `where`/`orderby`/`select`, by contrast, is not gratuitous: it replaced an actual fluent `Where`/`OrderBy`/`Select` chain that was doing real work.

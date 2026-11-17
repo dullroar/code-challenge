@@ -71,3 +71,10 @@ Kotlin has no three-part `for` and no semicolons, so the loop iterates a sequenc
 - **Several steps in one expression.** Chain them: `x.also { ... }.also { ... }`.
 - **Window and saving.** The same Swing, Spring XML and Spring Data JPA as the Java port. The XML is one raw string with `${...}` templates instead of joined text blocks.
 - **One behavior difference.** The Kotlin loop body runs once before the first condition check, where Java checks first. The body is empty, so both programs do the same things in the same order.
+
+## Gotchas worth knowing
+
+- **The loop body runs once before the first condition check.** Java checks first. The body is empty, so both programs do the same things in the same order.
+- **Run it from the right place.** The data path is relative to the working directory, which the Gradle run tasks set to this folder.
+- **The container image is the biggest of the set** (about 770 MB), and `--online-build` is needed because the build downloads Gradle and the Maven dependencies. The run itself has no network.
+- **The Windows Sandbox profile is not yet tested on real hardware.** It needs a JDK and a populated Gradle home on the host, and this port has no check script, so the sandbox gate does not cover it yet.

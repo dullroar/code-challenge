@@ -52,6 +52,10 @@ The file is built bottom-up, so each word is made of words above it:
 6. **The loop.** `: run  begin card over-40? until ;`. `until` consumes a flag from `over-40?` and repeats the body until the flag is true. `begin ... until` is the ordinary Forth loop, and the only control-flow word in the file.
 7. **`main`.** Sets up, writes the schema, calls `run`, commits, closes the pipe and reports.
 
+## What `check.sh` enforces
+
+`check.sh` checks that `timecards.fs` carries the `DEMO ONLY` marker and has no network-looking text. Then it runs the program 25 times. Every run must print a sane record set: categories in order, hours from 10 to 19, running totals that add up, a `DEMO ONLY` mark on every row, and a stop exactly when the total passes 40. SQLite must agree with the printed rows. The 25 runs must be 25 different runs, and the hours must show at least six different values, so the "random" draws really look random. Last, it tries to insert a non-demo row and expects SQLite to refuse it, which proves that `CHECK(demo_only=1)` is real.
+
 ## Gotchas worth knowing
 
 - **Control words only work inside definitions.** Typing `begin ... until` at the top level is an error in standard Forth. That is why `run` is a word. (The weird version cheats the other way.)

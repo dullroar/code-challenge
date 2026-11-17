@@ -65,6 +65,14 @@ It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no n
 The stop rule is also checked by SQLite: the last statement inserts `total <= 40` into a table whose only column has
 `CHECK(ok=1)`, so the named constraint error on stderr is the stop rule announcing itself, as in the other entries.
 
+## What `check.sh` enforces
+
+`check.sh` makes sure the stunt is real. The Makefile may not use `$(shell)`, `!=`, `.ONESHELL` or `load`, and its recipes may run only `mkdir`, `sqlite3`, `rm`, `sleep` and the no-op `:`.
+
+Then it runs `make` 25 times in a directory that holds nothing but the Makefile, and that directory must hold nothing else afterward. Each run must print as many rows as it has entries and report that Make re-executed itself once per entry. The usual rules apply: hours 10-19, categories in order, running totals right, `DEMO ONLY` on every row, a stop exactly when the total passes 40, an ISO week that matches SQLite's, and a database that agrees with the output. The stop-rule error must appear on stderr exactly once and nothing else may.
+
+More tests follow. The pure-Make calendar is compared with `date -u` at boundary instants (`NOW` overrides the clock). The glow must be silent in a pipe, and on a pseudo-terminal it must draw 24 frames in 1 to 3 seconds. `make -n pop` must print its `wt.exe` command and write nothing. A leftover `.tc-0.mk` from an interrupted run must be refused, and `make clean` must remove it. Last, a non-demo row must be refused.
+
 ## Gotchas worth knowing
 
 - **A recipe that expands to nothing doesn't count as remaking the file.** The card file is written while the recipe

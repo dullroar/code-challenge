@@ -378,6 +378,12 @@ Finally `Q1` quits with exit status 1. In shell terms the program "fails" after 
 - **The data structures had to be invented.** Integers are tally marks, addition is concatenation, `> 40` is "does `#{41}` match," XOR is deleting zeros and checking whether the count of `1`s is odd, a random number generator is a 16-character string, and a function call is a return address written into the text.
 - **Each regex is simple; the composition is what's hard.** The Perl and PCRE2 entries are one monstrous pattern each. Here almost every regex is short and readable on its own, and the baffling part is that 137 of them in a row book one timecard.
 
+## What `check.sh` enforces
+
+`check.sh` checks the host first: exactly one `sed` command, and no `for`, `while`, `until`, `select`, `if` or `case`. Then it checks the sed script. It may use no `e`, `r`, `R` or `W` command and no `s///e` flag, and the only files it may write are file descriptor 3 (the SQL) and stderr (the trace). The script must exit with status 1 (the "returns false" move) and with status 2 on a malformed tape, and the same seed must always give the same timecards.
+
+Then it runs the real thing 25 times. In every run, each running total must equal the previous one plus the hours, hours must be from 10 to 19, the program must stop as soon as the total passes 40, and the summary must agree with the rows. SQLite must agree with the output, the database must hold 25 distinct runs, and the hours must show at least six different values, so the shift register is not stuck. Last, a non-demo row must be refused.
+
 ## Gotchas worth knowing
 
 - **sed has a goto.** `b` and `t` jump, which the Perl and PCRE entries don't have. Those entries had to get their loops out of quantifiers and backtracking, which is arguably the stricter constraint. Here almost every jump is behind an address (`/regex/b label`), so a regex match still makes every decision, but the structure is a rewriting machine with a program counter, not a single match.

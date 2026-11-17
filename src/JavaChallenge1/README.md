@@ -84,6 +84,12 @@ Java uses the literal original shape: `for (init; condition; update) { }`, with 
 - **Window.** The window is a Swing `JDialog`, described by Spring XML bean definitions that are built at runtime (`GenericXmlApplicationContext` over a string). A `javax.swing.Timer` bean fades the label colors. The modal dialog blocks until closed.
 - **Saving.** The program saves with Spring Data JPA `saveAll`, invoked through Spring's `ReflectionUtils`.
 
+## Gotchas worth knowing
+
+- **Run it from the right place.** The data path is relative to the working directory, which the Gradle run tasks set to this folder. If you run the JAR from somewhere else, `data` is created there.
+- **The container image is the biggest of the set** (about 760 MB), and `--online-build` is needed because the build downloads Gradle and the Maven dependencies. The run itself has no network.
+- **The Windows Sandbox profile is not yet tested on real hardware.** It needs a JDK and a populated Gradle home on the host, and this port has no check script, so the sandbox gate does not cover it yet.
+
 ## Side by side
 
 | | Java | Kotlin | Python | Go |

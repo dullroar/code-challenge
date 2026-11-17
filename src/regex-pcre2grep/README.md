@@ -83,6 +83,10 @@ It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no n
 
 The exit code is the whole trick. SQLite's `random()` and arithmetic live in the helper program, but the *decisions* (go around again, stop, pulse or not) are the pattern consuming exit codes.
 
+## What `check.sh` enforces
+
+`check.sh` checks that `timecards.sh` has no loop keyword and runs exactly one `pcre2grep`. The callouts may run only `/bin/sleep`, `/usr/bin/sqlite3` and `/usr/bin/test`, never a shell or an interpreter. If a `pcre2grep` without callout support is installed, the script must refuse it with exit code 2. Then it runs the program 25 times. Each run must print the "returns false" line, as many rows as it has entries, hours from 10 to 19, and the right stop rule (three entries only when the first three pass 40). The stop-rule error must appear on stderr exactly once when the total is over 40 and never otherwise, and nothing else may be written to stderr. SQLite must agree with the output, the database must hold 25 runs and no probe rows, and a non-demo row must be refused.
+
 ## Gotchas worth knowing
 
 - **State cannot live in the pattern.** `pcre2grep` has no variables, so the running total lives in SQLite and each callout re-reads it. That makes the arithmetic the helper's job, not PCRE2's; the pattern supplies the loop, the order, the branching and the failing.

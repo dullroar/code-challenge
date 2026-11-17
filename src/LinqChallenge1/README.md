@@ -64,6 +64,10 @@ WPF and EF Core are full of `void` methods - `Add`, `Show`, `BeginAnimation`, `C
 
 C# only allows a handful of expression shapes as a top-level expression statement - invocation, object creation, assignment, increment/decrement, `await` - not an arbitrary `&&` or `is` expression. That rules out binding intermediate stages to a pattern-matched local (`x is var report && …`) at the top level: the statement has to *end* in an invocation. So the program does not name the fold result or the report. Instead, each one is nested directly as the argument to the next `Enumerable.Repeat(…, 1)`. That call turns a single computed value back into a one-element sequence, so the next stage can stay a genuine LINQ operator (`SelectMany`, `Select`) and not a bare method call. The whole statement is one deeply nested expression tree whose outermost call is `.Aggregate(…)` - an invocation, which is legal.
 
+## What `check.ps1` enforces
+
+`check.ps1` first makes sure no orchestration helper hides the workflow: `RunEverything`, `BuildAndPersistCards`, `ShowTerminal`, `DoChallenge` and `Orchestrate` may not appear in `Program.cs`. Then it builds the project and runs it against a throwaway data folder, with a hard 15-second timeout in case the dispatcher gets stuck. The program must exit with code 0 and print `PERSISTED 5 rows, total=40.0h`. All five rows (2024-01-01 to 2024-01-05, 8.0h each, Planning to Documentation) must be in the report, and `timecards.db` must exist.
+
 ## Gotchas worth knowing
 
 - `SaveChanges()` is called once, eagerly, at the point where the outer `Enumerable.Repeat(…, 1)` call evaluates its argument - before any of the lazy LINQ-to-Objects/EF stages begin enumerating. That is still entirely inside the one statement. It is just not deferred to the final `Aggregate`'s enumeration, the way `Select`/`SelectMany` stages are. `Aggregate` is an eager LINQ operator by definition, so some eagerness here is unavoidable.

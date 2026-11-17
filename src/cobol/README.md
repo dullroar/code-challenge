@@ -66,6 +66,10 @@ A COBOL program has four *divisions*, always in the same order: `IDENTIFICATION`
 | `CALL "SYSTEM"` in `COMMIT-SCRIPT` | Runs `sqlite3 -bail db < script && rm -f script`. The script is deleted only if `sqlite3` succeeded. Otherwise the program prints where it is and exits 1 |
 | `CHECK(demo_only=1)` | Makes a non-demo row unrepresentable in the table. `check.sh` tries to insert one and expects SQLite to refuse |
 
+## What `check.sh` enforces
+
+`check.sh` first checks the source. The file has the `DEMO ONLY` marker and no network-looking text, and no line goes past column 72 (fixed format). The stop rule must really be the 88-level `OVER-FORTY VALUE 41 THRU 99` on the total, and there must be exactly one `PERFORM DRAW-CARD UNTIL OVER-FORTY`. It builds the program once (binaries are never committed), then runs it 25 times with the same checks on every run: categories in order, hours from 10 to 19, running totals that add up, a stop exactly when the total passes 40, and an ISO week that agrees with `date(1)`. SQLite must agree with the printed rows, and the 25 runs must be 25 different runs with at least six different hour values. Last, it tries to insert a non-demo row and expects SQLite to refuse it, which proves that `CHECK(demo_only=1)` is real.
+
 ## Gotchas worth knowing
 
 - **Columns matter.** This is *fixed format*, from punched cards: columns 1-6 were a sequence number, a `*` in column 7 makes a comment, division and paragraph names start in column 8 ("area A"), statements start in column 12 ("area B"), and **nothing past column 72 is read**. A long line is silently cut, not rejected. `check.sh` fails if any line is longer than 72. GnuCOBOL also accepts `cobc -free`, which drops all of this.

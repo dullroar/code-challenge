@@ -81,6 +81,10 @@ COBOL paragraphs run in the order they're written, falling from one into the nex
 
 The same as the plain version: `CALL "C$GETPID"` for the run id and seed, `CALL "SYSTEM"` once for `mkdir -p` and once to run `sqlite3` on the finished script, and `CHECK(demo_only=1)` in the table, which `check.sh` tests.
 
+## What `check.sh` enforces
+
+`check.sh` first checks the source. The file has the `DEMO ONLY` marker and no network-looking text, and no line goes past column 72 (fixed format). With comments and string literals removed, none of `IF`, `PERFORM`, `EVALUATE`, `UNTIL`, `VARYING`, `DEPENDING`, `SEARCH` or `WHEN` may appear. There must be exactly five `ALTER`s (four categories and the stop) and exactly one `ON SIZE ERROR` (the stop rule). It then builds the program once and runs it 25 times with the usual checks, including an ISO week that agrees with `date(1)`. SQLite must agree with the printed rows, and the runs must differ from each other. Last, it tries to insert a non-demo row and expects SQLite to refuse it, which proves that `CHECK(demo_only=1)` is real.
+
 ## Gotchas worth knowing
 
 - **`ALTER` only works on a one-`GO TO` paragraph.** That's why `NEXT-CARD` has nothing else in it. Put a `DISPLAY` in there and the compiler refuses the `ALTER`.

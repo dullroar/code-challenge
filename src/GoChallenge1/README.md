@@ -73,3 +73,11 @@ Go is the strictest: a `for` clause allows only simple statements, and Go has no
 - **The price.** Anything that needs a statement (`Lock`, `Append`, `Pop`, `Spawn`, `ShowDialog`) is a small value-returning function in `helpers.go`. The goroutine's body is one `Seq(...)` call.
 - **Window.** Go has no standard-library GUI, so `ShowDialog` serves a page on a loopback port and opens it in the default browser. The pulse is a CSS animation fragment, as the original had an animation fragment. The page posts to `/closed` when you press Close or leave it, which unblocks the loop.
 - **Saving.** The driver is `modernc.org/sqlite`, a pure-Go driver that needs no C compiler. `reflect`'s `MethodByName` calls `SaveAll`. `WaitForSaves` stops the process from exiting before the goroutines finish.
+
+## Gotchas worth knowing
+
+- **Helper functions are the price.** Go has no statement-expressions, so every statement-only operation (`Lock`, `Append`, `Pop`, `Spawn`, `ShowDialog`) lives in a small function in `helpers.go`. That is the stated cost of this version.
+- **The window is a web page.** Go has no standard-library GUI, so the program serves a page on a loopback port and opens your default browser. Press Close in the page, or close the tab, to finish.
+- **Run it from this folder.** The data path is relative to the working directory.
+- **The container build needs the network.** `--online-build` is needed because the build downloads the SQLite module. The run itself has no network.
+- **The Windows Sandbox profile is not yet tested on real hardware,** and this port has no check script, so the sandbox gate does not cover it yet.
