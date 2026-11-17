@@ -7,8 +7,10 @@
 # owasp.org                       OWASP community pages, CC BY-SA 4.0
 # cheatsheetseries.owasp.org      OWASP cheat sheets, CC BY-SA 4.0
 # developer.mozilla.org           MDN, CC BY-SA 2.5 or later
+# github.com/dullroar/            this project's own repositories (a host with a path is allowed only under that path)
 en.wikipedia.org
 www.rfc-editor.org
 owasp.org
 cheatsheetseries.owasp.org
 developer.mozilla.org
+github.com/dullroar/

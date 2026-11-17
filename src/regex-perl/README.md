@@ -10,7 +10,7 @@ assurance: implementation-permitted
 pairs-with: regex-pcre2
 machine: "A backtracking search with hooks"
 state: "`local` variables that unwind (effects do not)"
-tags: [arbitrary-code-execution, backtracking, cut, regular-expression, side-effect, state, transaction]
+tags: [arbitrary-code-execution, backtracking, cut, regular-expression, side-effect, state, threat-model, transaction]
 ---
 # Regex challenge, Track 1: Perl (the whole program is one match)
 

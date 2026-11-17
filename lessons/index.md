@@ -116,7 +116,7 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 - [The program counter](cs/03-control-flow-and-continuations.md#the-program-counter): [`cobol-weird`](../src/cobol-weird/README.md), [`forth-weird`](../src/forth-weird/README.md)
 - [The stack as a data structure](cs/06-state-beyond-variables.md#the-stack-as-a-data-structure): [`forth`](../src/forth/README.md), [`forth-weird`](../src/forth-weird/README.md), [`regex-dotnet`](../src/regex-dotnet/README.md)
 - [Thread safety and thread affinity](cs/07-effects-errors-and-commitment.md#thread-safety-and-thread-affinity): [`GoChallenge1`](../src/GoChallenge1/README.md), [`JavaChallenge1`](../src/JavaChallenge1/README.md), [`KotlinChallenge1`](../src/KotlinChallenge1/README.md), [`LinqChallenge1`](../src/LinqChallenge1/README.md), [`LinqChallenge2`](../src/LinqChallenge2/README.md), [`ModernChallenge1`](../src/ModernChallenge1/README.md), [`PythonChallenge1`](../src/PythonChallenge1/README.md), [`RustChallenge1`](../src/RustChallenge1/README.md)
-- [Threat model](cs/01-reading-an-adversarial-program.md#threat-model): background for the others
+- [Threat model](cs/01-reading-an-adversarial-program.md#threat-model): [`regex-perl`](../src/regex-perl/README.md), [`xaml`](../src/xaml/README.md)
 - [Transactions](cs/07-effects-errors-and-commitment.md#transactions): [`forth`](../src/forth/README.md), [`regex-perl`](../src/regex-perl/README.md), [`tcl`](../src/tcl/README.md)
 - [Transition systems and state machines](cs/02-what-counts-as-a-machine.md#transition-systems-and-state-machines): background for the others
 - [Trojan Source: characters you cannot see](cs/01-reading-an-adversarial-program.md#trojan-source-characters-you-cannot-see): background for the others
