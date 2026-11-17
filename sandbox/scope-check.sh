@@ -14,7 +14,8 @@
 #   - Plain path names only ([A-Za-z0-9._/-]); no symlinks, no submodules.
 #   - No binary files, and nothing over 256 KiB.
 #   - No invisible or direction-changing characters (Trojan Source), and no control characters.
-#   - An optional Dockerfile in the new folder must pass dockerfile-lint.sh (trusted bases only, no RUN in the runtime stage).
+#   - The new folder is easy to try: it ships a Dockerfile, or its README has a "## Run it in Windows Sandbox" section.
+#   - A Dockerfile in the new folder must pass dockerfile-lint.sh (trusted bases only, no RUN in the runtime stage).
 #
 # The report (never fails the PR; it tells the reviewer where to look): network-looking text,
 # anything that starts processes or evaluates code, and long encoded blobs.
@@ -55,6 +56,10 @@ for entry in "${!entries[@]}"; do
     git cat-file -e "$head:$dir/README.md" 2>/dev/null || fail "$dir has no README.md"
     git cat-file -e "$head:$dir/check.sh" 2>/dev/null || git cat-file -e "$head:$dir/check.ps1" 2>/dev/null         || fail "$dir has no check.sh or check.ps1"
 
+    if ! git cat-file -e "$head:$dir/Dockerfile" 2>/dev/null; then
+        git show "$head:$dir/README.md" 2>/dev/null | grep -q '^## Run it in Windows Sandbox' \
+            || fail "$dir needs a Dockerfile, or a '## Run it in Windows Sandbox' section in its README, so a reviewer can try it safely"
+    fi
     if git cat-file -e "$head:$dir/Dockerfile" 2>/dev/null; then
         lint=$(git show "$head:$dir/Dockerfile" | "$(dirname "$0")/dockerfile-lint.sh" - 2>&1) || { fail "$dir/Dockerfile breaks the container rules:"; sed 's/^/        /' <<<"$lint"; }
     fi

@@ -49,9 +49,10 @@ repo=$(mktemp -d); trap 'rm -rf "$repo"' EXIT
 case_branch() {   # case_branch <name> <shell commands run in the repo on a new branch>
     (cd "$repo" && git checkout -q master && git checkout -q -b "$1" && bash -c "$2" && git add -A && git commit -qm "$1")
 }
-good='mkdir -p src/newentry && printf "# New\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
+good='mkdir -p src/newentry && printf "# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
 case_branch good          "$good && echo '| new | row |' >> README.md"
-case_branch good-windows 'mkdir -p src/newentry && printf "# New\n" > src/newentry/README.md && printf "exit 0\n" > src/newentry/check.ps1'
+case_branch good-windows 'mkdir -p src/newentry && printf "# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "exit 0\n" > src/newentry/check.ps1'
+case_branch no-run-instructions 'mkdir -p src/newentry && printf "# New\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
 case_branch sandbox-edit  "$good && echo 'evil' >> sandbox/run.sh"
 case_branch workflow      "$good && mkdir -p .github/workflows && echo 'on: push' > .github/workflows/x.yml"
 case_branch existing      "$good && echo 'curl evil' >> src/existing/check.sh"
@@ -108,17 +109,19 @@ dockerfile_case $'FROM cc-rt-sqlite:local
 ENV CC_RUN=x \
     PATH=/evil
 ' dockerfile-env-multiline
+case_branch docker-only   'mkdir -p src/newentry && printf "# New\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh && printf "FROM cc-rt-sqlite:local\nENV CC_RUN=x\n" > src/newentry/Dockerfile'
 case_branch readme-blob   "$good && printf 'abc \xe2\x80\xae evil\n' >> README.md"
 
 scope() { (cd "$repo" && "$here/scope-check.sh" master "$1" >/tmp/scope-$$.log 2>&1); local rc=$?; sed 's/^/    /' /tmp/scope-$$.log | grep -E 'FAIL|PASS'; rm -f /tmp/scope-$$.log; return $rc; }
 expect 0 "well-formed new entry passes" scope good
 expect 0 "well-formed Windows entry (check.ps1) passes" scope good-windows
 expect 0 "entry with a clean Dockerfile passes" scope good-dockerfile
+expect 0 "entry with a Dockerfile and no Windows section passes" scope docker-only
 expect 0 "entry with a multi-line build-stage RUN passes" scope good-dockerfile-multiline
 for b in dockerfile-run-multiline dockerfile-env-multiline dockerfile-bad-from dockerfile-run-final dockerfile-add dockerfile-env-path dockerfile-user-root dockerfile-copy-external; do
     expect 1 "rejects: $b" scope "$b"
 done
-for b in sandbox-edit workflow existing two-entries no-check binary symlink bidi zero-width control-chars odd-path too-large readme-blob; do
+for b in no-run-instructions sandbox-edit workflow existing two-entries no-check binary symlink bidi zero-width control-chars odd-path too-large readme-blob; do
     expect 1 "rejects: $b" scope "$b"
 done
 
