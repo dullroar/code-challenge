@@ -70,6 +70,10 @@ Below the `use` lines, `timecards.pl` is one line: a constant scaffold string `=
 
 `local` is the interesting bit. Perl unwinds `local` assignments when the engine backtracks, so the running total and category counter are properly backtrack-aware, but the `INSERT`s and `print`s are not and cannot be undone. The engine abandons the branch, and the side effects stay written. The SQLite transaction is real and commits; the *match* is what lies.
 
+## What `check.sh` enforces
+
+`check.sh` checks that the file really is one statement: everything except comments, blank lines and `use` lines must be a single line, with exactly one top-level match and no loop keyword outside comments. Then it runs the program 25 times. Each run must print the "returns false" line, as many rows as it has entries, hours from 10 to 19, no early stop (four entries, or a total over 40), at least three entries and a total of at most 59. SQLite must agree with the output, the database must hold 25 distinct runs, and a non-demo row must be refused.
+
 ## Gotchas worth knowing
 
 - The pattern is not formatted. `/x` is on only so the scaffold is parsed in a sensible way; there are no comments, no named groups, and no helper functions inside it. That is deliberate.

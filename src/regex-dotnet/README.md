@@ -66,6 +66,10 @@ An entry can push the total over 40 from anywhere in its 10-19 hours; the budget
 
 I checked the edges with a throwaway prototype (not in the repo, because the real program has no way to inject a fixed draw): totals of exactly 40 (all four categories, one token left), 41 on the fourth entry, and 45 and 57 stopping after three all came out right. `check.sh` verifies the stop rule on every random run: three entries only when the first three already exceed 40, four only when they do not.
 
+## What `check.sh` enforces
+
+`check.sh` makes sure the host stays honest. `Program.cs` may have no loop keyword and none of `MatchEvaluator`, `Replace`, `NextMatch` or `Matches`, and it must contain exactly one `Regex.Match` call. Then it runs the program 25 times. Each run must report that the match returned `true` (this track cannot fail on purpose). Each run must print as many rows as it has entries, the hours must sum to the total, and every hour count must be from 10 to 19. The stop rule must be right: three entries only when the first three already pass 40, and four entries only when they do not. The total can never be more than 59.
+
 ## Gotchas worth knowing
 
 1. **A regex cannot draw random numbers.** The random 10-19 draws had to be seeded by the host, as four unary strings. The plan allows the host to "seed the initial data", so this is within the rules, but the regex does not choose the hours. It only bounds them (`{10,19}`) and accumulates them.

@@ -79,6 +79,10 @@ The recursion is therefore a chain of different functions rather than a function
 
 If the APL symbols show as empty boxes, see [Seeing the glyphs](../apl/README.md#seeing-the-glyphs) in the straight entry's README. (`⎕` is *supposed* to be an empty box.)
 
+## What `check.sh` enforces
+
+`check.sh` reads the source first and enforces the constraint. There is no `⍣` (the power operator) and no `→` (branch) outside comments. There is exactly one `∇ ... ∇` definition (`Card0`) and exactly one `⎕FX`, so every other card must be written at run time. The file has the `DEMO ONLY` marker and no network-looking text. Then it runs the program 25 times. Every run must print a sane record set: categories in order, hours from 10 to 19, running totals that add up, a `DEMO ONLY` mark on every row, and a stop exactly when the total passes 40. SQLite must agree with the printed rows. It runs the program under `timeout`, because a broken stop rule does not fail: it recurses forever. The 25 runs must be 25 different runs, and the hours must show at least six different values, so the "random" draws really look random. Last, it tries to insert a non-demo row and expects SQLite to refuse it, which proves that `CHECK(demo_only=1)` is real.
+
 ## Gotchas worth knowing
 
 - **Dynamic scope.** APL local variables are visible to everything *called* from the function, not just to its own text. Every card must declare `N;C;H;T;…` in its header (that is what `Locals` is for) or a child's genes would overwrite its parent's.

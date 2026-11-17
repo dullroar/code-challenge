@@ -82,7 +82,7 @@ All entries use the **same section titles**, so a reader (and the book, and link
 
 These optional headings also have fixed titles. Use them when they fit: `## What it does`, `## Why this is weird` (or `## Why this is idiomatic`, for the ordinary version of a weird entry), `## What you can learn`, `## Layout`, `## Format and lint`. Add any other `##` section your entry needs under its own, specific title.
 
-The order above is the recommended order, but it is not enforced. `sandbox/scope-check.sh` fails a new entry that lacks one of the required headings. Some older entries do not have a ``## What `check.sh` enforces`` section yet, because they describe their checks in other sections. A maintainer will add it when they next touch the entry, and you do not need to copy that gap.
+The order above is the recommended order, but it is not enforced. `sandbox/scope-check.sh` fails a new entry that lacks one of the required headings. The earliest one-statement ports (Go, Java, Kotlin, Python and Rust) have no check script, so they have no check section; a new entry must have both.
 
 ### 4. Voice and tone
 

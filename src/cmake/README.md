@@ -73,6 +73,14 @@ hours), picks the ISO week, writes SQLite and plays the glow. `check.sh` fails i
 `macro()`, `include()` or `cmake_language()`, anything between `while()` and `endwhile()`, or any computation
 (`math`, `list`, `foreach`, `string` surgery) before the loop.
 
+## What `check.sh` enforces
+
+`check.sh` makes sure the stunt is real. The whole program must be exactly one `while()` whose body is empty, with nothing between the condition and `endwhile()`. There may be no `function`, `macro`, `include`, `cmake_language`, `add_custom` or `variable_watch`, and nothing before the loop may compute (no `math`, `list`, `foreach` or `string` surgery except drawing the digit tape). The only programs the file may start are `sqlite3`, `wt.exe` (for `POP`) and CMake itself (for `-E sleep`).
+
+Then it runs the program 25 times in an empty working directory, which must stay empty. Each run must print as many rows as it has entries, report that the empty loop went around once per entry, and keep the usual rules (hours 10-19, categories in order, running totals right, `DEMO ONLY` on every row, a stop exactly when the total passes 40, an ISO week that matches SQLite's). The stop-rule error must appear on stderr exactly once and nothing else may. The database must agree with the output and must hold no probe rows or scratch `.sql` files.
+
+Three more tests follow. A sweep of year boundaries (using `SOURCE_DATE_EPOCH`) compares the ISO week with `date -u`. The glow must be silent in a pipe, and on a pseudo-terminal it must draw 24 frames in 1 to 3 seconds. And a mutation test changes the 41-character stop literal to 51 and expects some total to go over the legal maximum of 59, which proves that the literal is the stop rule. Last, a non-demo row must be refused.
+
 ## Gotchas worth knowing
 
 - **CMake's regex has no counted repetition** (`x{41}` is not supported; the test is literally 41 x's). It also has no

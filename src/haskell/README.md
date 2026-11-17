@@ -53,6 +53,10 @@ The file reads top to bottom as four steps, each a small function with a type si
 
 Haskell is lazy: a value is computed only when something needs it. `span` looks at one card at a time and stops at the first one that fails the test, so only a handful of cards are ever built. The "infinite" lists are *descriptions*, not data. That is the lesson of the file: the stop rule is not a loop condition, it is *how much of a list you choose to read*.
 
+## What `check.sh` enforces
+
+`check.sh` first checks that the challenge really is a pure function: `timecards :: Word64 -> [Card]` must exist, so its type has no `IO`, and no `System.Random`, network or HTTP import may sneak in. The file also needs the `DEMO ONLY` marker. Then it runs the program 25 times. Every run must print a sane record set: categories in order, hours from 10 to 19, running totals that add up, a `DEMO ONLY` mark on every row, and a stop exactly when the total passes 40. SQLite must agree with the printed rows. The 25 runs must be 25 different runs, and the hours must show at least six different values, so the "random" draws really look random. Last, it tries to insert a non-demo row and expects SQLite to refuse it, which proves that `CHECK(demo_only=1)` is real.
+
 ## Gotchas worth knowing
 
 - **`takeWhile` is not enough.** `takeWhile (<= 40)` drops the card that crosses the line, and the challenge needs it. `span` hands back both halves.

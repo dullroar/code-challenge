@@ -73,6 +73,15 @@ The loop checks the running total before each record: while it is at most 40 and
 
 The worker does not touch GTK. The UI and its event loop stay on the main thread. This version waits for persistence on purpose, unlike the original's intentionally awkward shared-context thread. So the thread is only a nod to the original, not a source of concurrency. The application is a language exercise, not a recommendation to hide work inside iterator expressions.
 
+## Gotchas worth knowing
+
+- **A test enforces the one-statement rule.** `tests/one_statement.rs` scans `src/main.rs` and fails if a `;`, a `let` or a `return` appears in `main`.
+- **You need a desktop session.** Outside the container, the window needs WSLg. The locked dependencies were tested with Ubuntu's Rust and Cargo 1.75, and Cargo needs the network to download crates on the first build.
+- **Cairo errors are ignored in the draw callback,** because a panic there would abort across the C boundary. Everywhere else, errors end the program with a message.
+- **Around New Year, the ISO week-based year can differ from the calendar year.**
+- **The thread is a nod to the original.** The worker waits for persistence on purpose, so it is not a source of concurrency.
+- **There is no Windows Sandbox profile and no check script,** so the sandbox gate does not cover this port yet. The container image is about 350 MB, because GTK 4 is big.
+
 ## Check it
 
 ```bash

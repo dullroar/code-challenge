@@ -76,6 +76,10 @@ On a real terminal, the match finishes the records, then pulses a **DEMO ONLY** 
 
 Callouts only mean something if the engine actually visits them. This program compiles with `PCRE2_NO_AUTO_POSSESS | PCRE2_NO_START_OPTIMIZE | PCRE2_NO_DOTSTAR_ANCHOR`, so the optimizer cannot skip or reorder the callout points. It also does **not** use the PCRE2 JIT, which does not support callouts at all. `check.sh` verifies that every run's committed total and entry count agree with the rows actually written, which is the evidence that no callout was silently skipped. This was tested with the system PCRE2 (10.42 on Ubuntu 24.04); I did not test with those flags removed to see which callouts the optimizer would elide.
 
+## What `check.sh` enforces
+
+`check.sh` checks that the C host has no loop keyword (comments excluded). Then it runs the program 25 times. Each run must exit cleanly and report `pcre2_match returned -1 (no match)`. Each run must print as many rows as it has entries, with at least three entries, hours from 10 to 19, no early stop (four entries, or a total over 40), and a total of at most 59.
+
 ## Gotchas worth knowing
 
 - The `*` loop ends because `gate` fails the next iteration (or the four category names run out), not because anything in C decides to stop. The C only answers the question "is the total over 40?" when the engine asks.

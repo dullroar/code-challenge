@@ -65,3 +65,11 @@ Python has no three-part `for`, no comma expressions and no statements inside ex
 - **Window.** The window is a Tk window, described by an XML string that is parsed at runtime with `xml.etree.ElementTree`, one widget per element via `getattr(tkinter, tag)`. `after()` repeats a timer that blends each label's color toward the background (Tk labels have no alpha). `mainloop()` blocks until the window closes.
 - **Saving.** The program uses the standard-library `sqlite3`. `getattr(repo, "save_all")` plays the role of reflection.
 - **Caveat.** `main` is exactly one `for` statement, but the lambdas and comprehensions inside it are expressions only. Imports, the entity and the repository sit outside `main`.
+
+## Gotchas worth knowing
+
+- **`main` is one `for` statement, but not everything is.** The lambdas and comprehensions inside it are expressions only. Imports, the entity and the repository sit outside `main`.
+- **The empty body is `...`.** A `pass` would be a second statement.
+- **The data lives beside the program.** Records land in `data/` next to `program.py`, whatever the working directory.
+- **Tk labels have no alpha.** So the pulse blends each label's color toward the background instead of fading it.
+- **This port has no check script,** so the sandbox gate does not cover it yet. Its Windows Sandbox profile has been tested.

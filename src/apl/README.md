@@ -89,6 +89,10 @@ On **Ubuntu**, `fonts-dejavu-mono` is usually already installed (`fc-list | grep
 
 To test, paste `⍳ ⍴ ⍵ ⎕ ∇ ⍝ ⍣ ⍸ ⌽` somewhere. You should see eight letter-like symbols and one empty box (the `⎕`).
 
+## What `check.sh` enforces
+
+`check.sh` is the referee. It checks that `timecards.apl` carries the `DEMO ONLY` marker and contains no network-looking text (`http`, `socket`, `curl`, `wget`). Then it runs the program 25 times. Every run must print a sane record set: categories in order, hours from 10 to 19, running totals that add up, a `DEMO ONLY` mark on every row, and a stop exactly when the total passes 40. SQLite must agree with the printed rows. The 25 runs must be 25 different runs, and the hours must show at least six different values, so the "random" draws really look random. Last, it tries to insert a non-demo row and expects SQLite to refuse it, which proves that `CHECK(demo_only=1)` is real.
+
 ## Gotchas worth knowing
 
 - **Origin.** `⎕IO` is the index origin (1 by default in GNU APL, 0 in some code). The file never assumes it: `?` is the only primitive whose results depend on it, and the draw subtracts `⎕IO` back out. `check.sh` runs with the default; try putting `⎕IO←0` on the first line and see that the cards are still 10-19.
