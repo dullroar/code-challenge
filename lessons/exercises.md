@@ -290,6 +290,24 @@ Acceptance criteria:
 - Step 3: the inspector prints the line `REFUSE (unknown record type)` and exits 4. `interpret.sh` exits 4 and says that nothing was run. No `pwned` file exists. Explain why plain `tar -xf` of the same archive would also not create it.
 - In one sentence each: which step *parsed* the program, which step *ran* it, and where was the trust boundary?
 
+### B17. tar, weirder: predict the clock (verified)
+
+**Lesson:** [tar](languages/tar.md#the-archive-is-the-clock). **Entry:** a copy of `src/tar-gnu-weird`.
+
+For seed 42 the cards are `Meetings 12`, `Coding 17`, `Debugging 17`, so the total reaches 12, 29 and 46 hours. The run needs 46 ticks.
+
+1. **Predict**, then run: `sh run-clock.sh --seed 42 --ticks 45`, and then `--ticks 46`. Look at the exit status of each (`echo $?`).
+2. **Predict** how many ticks you get from `sh run-clock.sh --seed 42 --ticks 92 --interval 2`, and from `--ticks 91 --interval 2`. Then run both.
+3. **Predict** the output of `sh run-clock.sh --seed 42 --ticks 260 --blocking 4`. How many records does tar write?
+4. Open the tape of the last run (`tr -d '\000' < tape.tar | wc -c` counts the bytes that are not zero). What is in it, and does the content matter?
+
+Acceptance criteria:
+
+- Step 1: with 45 ticks the third card is not finished, so you see two cards, the message `the clock ran out`, and exit status 3. With 46 ticks the run ends with three cards and exit status 0.
+- Step 2: with `--interval 2` the callback runs once per two records. 92 records give 46 ticks, so the run finishes. 91 records give 45 ticks, so it stalls. The last `TAR_CHECKPOINT` in the finished run is 92, which is the number of records, and the machine counted 46 calls.
+- Step 3: `-b 4` makes a record four blocks. 260 blocks make 65 records and 65 ticks. The run finishes with the same three cards, and 19 ticks are idle.
+- Step 4: Almost all of `tape.tar` is zeros. The only other bytes are the member's 512-byte header (its name, mode and so on), fewer than 100 of them. The payload does not matter. Its *size* is the clock.
+
 ## C. By solution pattern
 
 ### C1. Weird next to boring (verified)

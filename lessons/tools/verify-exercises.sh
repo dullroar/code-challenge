@@ -223,6 +223,31 @@ if selected B16; then echo "B16 tar: read the program, then run it"
   if grep -q '^---IGN' "$W/b16.txt"; then ok "B16 step 3: inspector and interpreter exit 4, no pwned, plain tar -xf inert"; else bad B16c "$(tail -3 "$W/b16.txt" | tr '\n' ' ')"; fi
 fi
 
+if selected B17; then echo "B17 tar weirder: predict the clock"
+  d=$(copy src/tar-gnu-weird b17)
+  "$sbx" "$d" sh -c '
+    set +e
+    sh run-clock.sh --seed 42 --ticks 45 > s45.txt 2> s45.err; echo $? > s45.rc
+    rm -rf "$XDG_DATA_HOME/TarGnuWeird"
+    sh run-clock.sh --seed 42 --ticks 46 > s46.txt 2>/dev/null; echo $? > s46.rc
+    rm -rf "$XDG_DATA_HOME/TarGnuWeird"
+    sh run-clock.sh --seed 42 --ticks 92 --interval 2 > i92.txt 2>/dev/null; echo $? > i92.rc
+    sqlite3 "$XDG_DATA_HOME/TarGnuWeird/demo-timecards.db" "select tick from fsm" > i92.tick
+    rm -rf "$XDG_DATA_HOME/TarGnuWeird"
+    sh run-clock.sh --seed 42 --ticks 91 --interval 2 > i91.txt 2>/dev/null; echo $? > i91.rc
+    rm -rf "$XDG_DATA_HOME/TarGnuWeird"
+    sh run-clock.sh --seed 42 --ticks 260 --blocking 4 > b4.txt 2>/dev/null; echo $? > b4.rc
+    echo "tape=$(wc -c < "$XDG_DATA_HOME/TarGnuWeird/tape.tar") idle=$(sqlite3 "$XDG_DATA_HOME/TarGnuWeird/demo-timecards.db" "select idle from fsm") nonzero=$(tr -d "\\000" < "$XDG_DATA_HOME/TarGnuWeird/tape.tar" | wc -c)" > b4.info
+    for f in s45.rc s45.err s46.rc i92.rc i92.tick i91.rc b4.rc b4.info; do echo "== $f"; cat $f; done
+    echo "== s45rows"; grep -c "^[A-Z][a-z]*	" s45.txt; echo "== s46rows"; grep -c "^[A-Z][a-z]*	" s46.txt' > "$W/b17.txt" 2>&1
+  b=$(tr '\n' '|' < "$W/b17.txt")
+  if [[ $b == *"== s45.rc|3|"* && $b == *"clock ran out"* && $b == *"== s45rows|2|"* ]]; then ok "B17 45 ticks: two cards, the clock ran out, exit 3"; else bad B17a "$b"; fi
+  if [[ $b == *"== s46.rc|0|"* && $b == *"== s46rows|3|"* ]]; then ok "B17 46 ticks: three cards, exit 0"; else bad B17b "$b"; fi
+  if [[ $b == *"== i92.rc|0|"* && $b == *"== i92.tick|92|"* && $b == *"== i91.rc|3|"* ]]; then ok "B17 --interval 2: 92 records finish (last TAR_CHECKPOINT 92), 91 stall"; else bad B17c "$b"; fi
+  nz=$(sed -nE 's/.*nonzero=([0-9]+).*/\1/p' "$W/b17.txt")
+  if [[ $b == *"== b4.rc|0|"* && $b == *"tape=133120 idle=19 nonzero="* && ${nz:-999} -lt 100 ]]; then ok "B17 -b 4: 65 ticks, 19 idle, a 133120-byte tape that is zeros but for one header"; else bad B17d "$b"; fi
+fi
+
 if selected C1; then echo "C1 weird next to boring (measured)"
   for p in cobol haskell forth apl lisp tcl awk; do
     a=$(cat src/$p/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)'); b=$(cat src/$p-weird/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)')

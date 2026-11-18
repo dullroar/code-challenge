@@ -18,7 +18,11 @@ An abstraction hides details so that you can think at a higher level. A *leaky* 
 - [Leaky abstraction](https://en.wikipedia.org/wiki/Leaky_abstraction) (Wikipedia)
 - [Abstraction (computer science)](https://en.wikipedia.org/wiki/Abstraction_(computer_science)) (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | What it teaches |
+| --- | --- | --- |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Undefined, unspecified and implementation-defined behavior
 
@@ -58,6 +62,7 @@ Software is portable if it runs correctly in more than one environment: another 
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`awk-weird`](../../src/awk-weird/README.md) | AWK | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 | [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
@@ -100,6 +105,7 @@ Hyrum's law says: with enough users of an interface, *every* observable behavior
 | [`cmake`](../../src/cmake/README.md) | CMake | `while()` plus regex as a tiny register machine. |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Performance cliffs and time complexity

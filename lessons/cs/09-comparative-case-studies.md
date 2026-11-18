@@ -97,6 +97,7 @@ The rule fires the next step. In [`lisp-weird`](../../src/lisp-weird/README.md) 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | A method dispatcher with a pluggable combination rule | The class precedence list, and each method's return value | eager | implementation-permitted |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | A finite-state machine, driven by a logical clock that tar supplies | One SQLite row (the machine's registers) and the number of records tar has written | eager | implementation-permitted |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | A string-command interpreter whose command lookup can be hooked | A TEMP table of proc source, and the depth of trigger recursion | eager | accidentally-exploited |
 
 ## The input is the loop
@@ -141,7 +142,8 @@ The order of the document is the order of the program. [`xaml`](../../src/xaml/R
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | declarative | accidentally-exploited | [`find-posix`](../../src/find-posix/README.md) |
 | [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | declarative | accidentally-exploited | [`cmake`](../../src/cmake/README.md) |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | rewriting | accidentally-exploited |  |
-| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | idiomatic | [Document order is the program](09-comparative-case-studies.md#document-order-is-the-program) | eager | implementation-permitted |  |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | idiomatic | [Document order is the program](09-comparative-case-studies.md#document-order-is-the-program) | eager | implementation-permitted | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | weird | [Dispatch and triggers: the rule fires the next step](09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step) | eager | implementation-permitted | [`tar-gnu`](../../src/tar-gnu/README.md) |
 | [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | port | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`haskell`](../../src/haskell/README.md) | Haskell | idiomatic | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`haskell-weird`](../../src/haskell-weird/README.md) |
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | implementation-permitted | [`haskell`](../../src/haskell/README.md) |

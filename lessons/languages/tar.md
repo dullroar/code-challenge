@@ -1,6 +1,6 @@
 # tar
 
-Entry: [`src/tar-gnu`](../../src/tar-gnu/README.md). `tar` ("tape archive") packs many files into one stream of bytes. It was made for magnetic tape, where you cannot jump around, so an archive is a *sequence*: a header, the file's bytes, the next header, and so on. That one fact is why a tar archive can be a program. Order is already part of the format.
+Entries: [`src/tar-gnu`](../../src/tar-gnu/README.md) (the archive is a program) and [`src/tar-gnu-weird`](../../src/tar-gnu-weird/README.md) (the archive is a clock). `tar` ("tape archive") packs many files into one stream of bytes. It was made for magnetic tape, where you cannot jump around, so an archive is a *sequence*: a header, the file's bytes, the next header, and so on. That one fact is why a tar archive can be a program. Order is already part of the format.
 
 ## What makes tar special
 
@@ -11,6 +11,8 @@ Entry: [`src/tar-gnu`](../../src/tar-gnu/README.md). `tar` ("tape archive") pack
 | GNU `--to-command=CMD` starts `CMD` for each regular member and pipes the member to it | The *operator* attaches an interpreter. The command line carries the power, and the archive does not. |
 | `TAR_FILENAME`, `TAR_SIZE` and more are set for each command | The member's metadata becomes the command's input, next to its bytes. |
 | tar keeps going when the command fails | There is no built-in "stop". A control rule must be the interpreter's own. |
+| `--checkpoint=N --checkpoint-action=exec=CMD` runs `CMD` every N records | A progress report is an event source. It can be a clock. |
+| `-b N` sets the *record* size to N blocks of 512 bytes | The unit of time is a record, and the archive's size, not its content, decides how many there are. |
 
 ## A program that is an archive
 
@@ -54,8 +56,50 @@ Legitimate uses: `--to-command` as a filter, such as checksumming each member wh
 
 See [exercise B16](../exercises.md#b16-tar-read-the-program-then-run-it-verified).
 
+## The archive is the clock
+
+### 1. Behold the monstrosity
+
+```bash
+sandbox/container/run-image.sh src/tar-gnu-weird
+```
+
+A tar archive whose payload is all zeros, and a state machine that moves one step each time tar says "I wrote a record". The program has no loop. tar is the loop.
+
+### 2. How the hell does that work?
+
+- **One checkpoint is one hour.** `tar -b 1 --checkpoint=1 --checkpoint-action=exec=...` runs a command for every 512 bytes it writes. The command is a single SQL transaction.
+- **The state is one row.** It holds the hours worked on the open card, the length of the card, the running total, the generator's seed and a `done` flag.
+- **The layout is the schedule.** The number of ticks is `floor(ceil(blocks / b) / K)`. Make the archive shorter and the clock stops in the middle of a card. Make it longer and the extra ticks only count as idle.
+- **The stop rule is a flag, because tar will not stop.** After the crossing card the archive is still being written, and the command still runs. It does nothing but count.
+- **`check.sh` predicts, not just observes.** A second machine, written in awk, says which cards must exist for any seed and any layout. The entry must agree for 65 combinations.
+
+The [README](../../src/tar-gnu-weird/README.md#how-the-stunt-works) has the register table and the full list of what we measured.
+
+### 3. What did we just learn?
+
+- **A progress indicator is an event source.** Once something calls your code at a steady beat, you have a clock. Event-driven programs work like this.
+- **A logical clock counts events, not seconds.** Ticks here are records written. Nothing in the run depends on how long a second takes.
+- **Control flow can be inverted.** The program does not call tar. tar calls the program.
+- **A layout can set the pace as well as the meaning.** The payload of this archive is all zeros, and its size still decides when everything happens.
+- **Say what a count counts.** A checkpoint counts records. A record is a number of blocks. The same archive gives 21 ticks when created, 10 when listed and 21 when extracted.
+
+Tags: `--checkpoint`, `--checkpoint-action=exec` and `TAR_CHECKPOINT` are **GNU extensions** (**implementation-permitted**), tested on GNU tar 1.34 and 1.35. The exact tick count in list mode is **accidentally exploited** knowledge, and the entry does not use it.
+
+### 4. Do this in production and you're fired
+
+- **It is a progress meter.** If someone changes the blocking factor, your schedule changes with it.
+- **Every tick starts a process.** Do not use a checkpoint as a scheduler. Use a scheduler.
+- **A failing callback is silent to tar.** Look for your own errors. The entry sends them to standard error and exits 3.
+
+Legitimate uses: progress bars for long backups, and `--checkpoint-action=wait` to pause a job for a cooperating process, as the manual shows.
+
+### 5. Now break it yourself
+
+See [exercise B17](../exercises.md#b17-tar-weird-predict-the-clock-verified).
+
 ## Computer science behind this page
 
 <!-- BEGIN GENERATED concepts:languages/tar.md -->
-The computer-science ideas behind this page: [Threat model](../cs/01-reading-an-adversarial-program.md#threat-model), [Arbitrary code execution](../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution), [Principle of least privilege](../cs/01-reading-an-adversarial-program.md#principle-of-least-privilege), [Transition systems and state machines](../cs/02-what-counts-as-a-machine.md#transition-systems-and-state-machines), [Representing state](../cs/02-what-counts-as-a-machine.md#representing-state), [Observability](../cs/02-what-counts-as-a-machine.md#observability), [Parsing](../cs/05-formal-languages-as-computational-substrates.md#parsing), [Domain-specific languages](../cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages), [Language-theoretic security](../cs/05-formal-languages-as-computational-substrates.md#language-theoretic-security), [Serialization, deserialization and object pickling](../cs/06-state-beyond-variables.md#serialization-deserialization-and-object-pickling), [Exit status](../cs/07-effects-errors-and-commitment.md#exit-status), [Integrity constraints](../cs/07-effects-errors-and-commitment.md#integrity-constraints), [Idempotence](../cs/07-effects-errors-and-commitment.md#idempotence).
+The computer-science ideas behind this page: [Threat model](../cs/01-reading-an-adversarial-program.md#threat-model), [Arbitrary code execution](../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution), [Principle of least privilege](../cs/01-reading-an-adversarial-program.md#principle-of-least-privilege), [Transition systems and state machines](../cs/02-what-counts-as-a-machine.md#transition-systems-and-state-machines), [Representing state](../cs/02-what-counts-as-a-machine.md#representing-state), [Observability](../cs/02-what-counts-as-a-machine.md#observability), [Parsing](../cs/05-formal-languages-as-computational-substrates.md#parsing), [Domain-specific languages](../cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages), [Language-theoretic security](../cs/05-formal-languages-as-computational-substrates.md#language-theoretic-security), [State](../cs/06-state-beyond-variables.md#state), [Serialization, deserialization and object pickling](../cs/06-state-beyond-variables.md#serialization-deserialization-and-object-pickling), [Side effects](../cs/07-effects-errors-and-commitment.md#side-effects), [Exit status](../cs/07-effects-errors-and-commitment.md#exit-status), [Integrity constraints](../cs/07-effects-errors-and-commitment.md#integrity-constraints), [Idempotence](../cs/07-effects-errors-and-commitment.md#idempotence), [Leaky abstractions](../cs/08-abstraction-leaks-and-implementation-dependence.md#leaky-abstractions), [Portability](../cs/08-abstraction-leaks-and-implementation-dependence.md#portability), [Hyrum's law](../cs/08-abstraction-leaks-and-implementation-dependence.md#hyrums-law).
 <!-- END GENERATED concepts:languages/tar.md -->
