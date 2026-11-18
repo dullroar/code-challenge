@@ -277,6 +277,12 @@ The fake `mktemp` makes the dice. The walk reads the last character of each six-
 3. 260 blocks at `-b 4` are 65 records, so `floor(65 / 1) = 65` ticks. The same three cards, a total of 46, and 65 - 46 = 19 idle ticks. The tape is 65 x 2,048 = 133,120 bytes.
 4. The payload is zeros, and the only other bytes are the member's header (a name and some numbers; 74 non-zero bytes in the test run). Nothing reads the content for its meaning. Only the size counts, because the size decides how many records tar writes.
 
+## B18. ed: move the stop rule and break the cleanup
+
+1. `DICE="0 0 0 0 0"`: five cards of 10 hours, totals 10, 20, 30, 40, 50. The run continues at 40, because 40 is not over 40, and the fifth card gets the category of line 5, `Meetings` (the category list is Meetings, Coding, Debugging, Learning, Meetings). `DICE="9 9 9 9 9"`: three cards of 19 hours, 19, 38, 57.
+2. `DICE="3 3 3 3 3"` is 13 hours a card. With `x\{41,\}`: 13, 26, 39, 52, four cards. With `x\{31,\}`: 13, 26, 39, three cards, because 39 is over 30 and the bar becomes a bang. `check-demo.sh out.txt 30` passes. The stop rule is the regular expression over the marks.
+3. The output has a fifth line, `Dead 0 52`. At card 4 the total is 52, so the ledger line has a `!`. Card 5 joins with it, the Dead rule rewrites the joined line to `Dead 0!` plus the marks, and the decimal rules print the total. With the cleanup in place `g/^Dead /d` removes it. **Features:** step 1 is the rewrite table and the addressing (a changed number of marks), step 2 is a regular expression interval, step 3 is `g` with `d`.
+
 ## C1. Weird next to boring
 
 Measured with the verification script (non-comment lines):

@@ -128,4 +128,8 @@ A language specification says what programs *mean*. An implementation is one par
 - [RFC 2119: key words for use in RFCs](https://www.rfc-editor.org/rfc/rfc2119), two pages that fix the meaning of MUST, SHOULD and MAY
 - [Undefined, unspecified and implementation-defined behavior](08-abstraction-leaks-and-implementation-dependence.md#undefined-unspecified-and-implementation-defined-behavior) and [Hyrum's law](08-abstraction-leaks-and-implementation-dependence.md#hyrums-law) in "Abstraction leaks and implementation dependence"
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | What it teaches |
+| --- | --- | --- |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |

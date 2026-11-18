@@ -1,0 +1,70 @@
+H
+# The whole program, as ed commands. ed reads it on standard input; the buffer holds five dice, one digit per line.
+# Run:  printf '7\n3\n9\n0\n5\n' > dice.txt; ed -s dice.txt < timecards.ed
+# Nothing below is a loop except the global command in step 4, and that one is ed's own.
+#
+# 1. Categories are ADDRESSES: line 1 is the first card, line 2 the second, and so on.
+1s/^/Meetings /
+2s/^/Coding /
+3s/^/Debugging /
+4s/^/Learning /
+5s/^/Meetings /
+#
+# 2. Hours are a REWRITE TABLE. "7" becomes hours 17 and ten marks plus seven marks. One rule per digit.
+#    "g/re/s/..." applies a rule to every line that matches, and does nothing to the others.
+g/^/s/ \([0-9]\)$/ 1\1 xxxxxxxxxx\1/
+g/x0$/s/0$//
+g/x1$/s/1$/x/
+g/x2$/s/2$/xx/
+g/x3$/s/3$/xxx/
+g/x4$/s/4$/xxxx/
+g/x5$/s/5$/xxxxx/
+g/x6$/s/6$/xxxxxx/
+g/x7$/s/7$/xxxxxxx/
+g/x8$/s/8$/xxxxxxxx/
+g/x9$/s/9$/xxxxxxxxx/
+#
+# 3. A ledger line above the first card: a total of nothing. A ledger line looks like  "Name hours|marks".
+0a
+Start 0|
+.
+#
+# 4. The run. ONE global command over the card lines, in buffer order. For each card:
+#      -t.   copy the line above (the ledger so far) under the card
+#      -,.j  join the card and that copy into one line:  "Coding 15 xxxxxxxxxxxxxxxMeetings 12|xxxxxxxxxxxx"
+#      s...  keep the card's name and hours, and put ITS marks and the ledger's marks together after a bar.
+#            Adding is writing the marks side by side.
+#    A failed "s" inside a global command is not an error: it does nothing. That is the "if".
+#      - the first s needs a "|" ledger: the total so far is 40 or less.
+#      - the second s needs a "!" ledger: the total already passed 40. The card becomes "Dead", and the "!" and marks
+#        are copied on, so every later card dies too.
+#      - the third s fires when the marks after the bar are 41 or more: the "|" becomes "!". That card is kept.
+g/^[A-Za-z]* [0-9][0-9] x*$/-t.\
+-,.j\
+s/^\([A-Za-z]* [0-9]*\) \(x*\)[A-Za-z]* [0-9]*|\(x*\)$/\1|\2\3/\
+s/^.*[A-Za-z]* [0-9]*!\(x*\)$/Dead 0!\1/\
+s/^\([^|]*\)|\(x\{41,\}\)$/\1!\2/
+#
+# 5. Drop the dead cards and the ledger line.
+g/^Dead /d
+g/^Start /d
+#
+# 6. Marks to decimal, again by rewrite rules. Tens first: the bar and fifty marks become " 5", and so on.
+g/[|!]x\{50\}/s/[|!]x\{50\}/ 5/
+g/[|!]x\{40\}/s/[|!]x\{40\}/ 4/
+g/[|!]x\{30\}/s/[|!]x\{30\}/ 3/
+g/[|!]x\{20\}/s/[|!]x\{20\}/ 2/
+g/[|!]x\{10\}/s/[|!]x\{10\}/ 1/
+g/xxxxxxxxx$/s/xxxxxxxxx$/9/
+g/xxxxxxxx$/s/xxxxxxxx$/8/
+g/xxxxxxx$/s/xxxxxxx$/7/
+g/xxxxxx$/s/xxxxxx$/6/
+g/xxxxx$/s/xxxxx$/5/
+g/xxxx$/s/xxxx$/4/
+g/xxx$/s/xxx$/3/
+g/xx$/s/xx$/2/
+g/x$/s/x$/1/
+g/ [0-9]$/s/$/0/
+#
+,p
+Q

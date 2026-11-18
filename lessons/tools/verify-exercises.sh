@@ -248,6 +248,23 @@ if selected B17; then echo "B17 tar weirder: predict the clock"
   if [[ $b == *"== b4.rc|0|"* && $b == *"tape=133120 idle=19 nonzero="* && ${nz:-999} -lt 100 ]]; then ok "B17 -b 4: 65 ticks, 19 idle, a 133120-byte tape that is zeros but for one header"; else bad B17d "$b"; fi
 fi
 
+if selected B18; then echo "B18 ed: move the stop rule and break the cleanup"
+  d=$(copy src/ed-weird b18)
+  "$sbx" -e DICE="0 0 0 0 0" "$d" sh ./timecards.sh > "$W/b18a.txt" 2>&1
+  "$sbx" -e DICE="9 9 9 9 9" "$d" sh ./timecards.sh > "$W/b18b.txt" 2>&1
+  if grep -qE $'^Meetings\t10\t50\t' "$W/b18a.txt" && contains "$W/b18a.txt" "total=50 entries=5"; then ok "B18 ten-hour cards: five cards, 40 continues, 50 stops"; else bad B18a "$(tr '\n' ' ' < "$W/b18a.txt")"; fi
+  if grep -qE $'^Debugging\t19\t57\t' "$W/b18b.txt" && contains "$W/b18b.txt" "total=57 entries=3"; then ok "B18 nineteen-hour cards: three cards, total 57"; else bad B18b "$(tr '\n' ' ' < "$W/b18b.txt")"; fi
+  "$sbx" -e DICE="3 3 3 3 3" "$d" sh ./timecards.sh > "$W/b18c.txt" 2>&1
+  contains "$W/b18c.txt" "total=52 entries=4" && ok "B18 before: 13 13 13 13 gives four cards" || bad B18c "$(tr '\n' ' ' < "$W/b18c.txt")"
+  d=$(copy src/ed-weird b18d); mutate "$d/timecards.ed" 'x\{41,\}' 'x\{31,\}'
+  "$sbx" -e DICE="3 3 3 3 3" "$d" sh ./timecards.sh > "$W/b18d.txt" 2>&1
+  expect "B18 x{31,}: stops above 30" "$chk" "$W/b18d.txt" 30
+  contains "$W/b18d.txt" "total=39 entries=3" && ok "B18 x{31,}: three cards, total 39" || bad B18d "$(tr '\n' ' ' < "$W/b18d.txt")"
+  d=$(copy src/ed-weird b18e); mutate "$d/timecards.ed" $'g/^Dead /d\n' ''
+  "$sbx" "$d" sh -c "printf '3\\n3\\n3\\n3\\n3\\n' > d.txt; ed -s d.txt < timecards.ed" > "$W/b18e.txt" 2>&1
+  if grep -qx 'Dead 0 52' "$W/b18e.txt"; then ok "B18 without the cleanup: Dead 0 52 shows"; else bad B18e "$(tr '\n' ' ' < "$W/b18e.txt")"; fi
+fi
+
 if selected C1; then echo "C1 weird next to boring (measured)"
   for p in cobol haskell forth apl lisp tcl awk; do
     a=$(cat src/$p/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)'); b=$(cat src/$p-weird/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)')

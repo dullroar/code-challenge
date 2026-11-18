@@ -33,6 +33,7 @@ Haskell is lazy: one `span` over an infinite list is the stop rule, because only
 | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# `for` | deferred |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | LINQ | deferred |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | LINQ | deferred |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed | rewriting |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed | rewriting |
 | [`m4`](../../src/m4/README.md) | m4 | rewriting |
 | [`regex-dotnet`](../../src/regex-dotnet/README.md) | .NET regex | search |

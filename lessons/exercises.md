@@ -308,6 +308,23 @@ Acceptance criteria:
 - Step 3: `-b 4` makes a record four blocks. 260 blocks make 65 records and 65 ticks. The run finishes with the same three cards, and 19 ticks are idle.
 - Step 4: Almost all of `tape.tar` is zeros. The only other bytes are the member's 512-byte header (its name, mode and so on), fewer than 100 of them. The payload does not matter. Its *size* is the clock.
 
+### B18. ed: move the stop rule and break the cleanup (verified)
+
+**Lesson:** [ed and Ex](languages/editors.md#the-buffer-is-the-machine). **Entry:** a copy of `src/ed-weird`.
+
+The launcher takes `DICE="a b c d e"`: five digits. Each card has 10 + its digit hours.
+
+1. **Predict**, then run: `DICE="0 0 0 0 0" sh timecards.sh`, and `DICE="9 9 9 9 9" sh timecards.sh`. How many cards will each print, and why is the fifth card of the first one `Meetings` again?
+2. In the copy, change `x\{41,\}` in `timecards.ed` to `x\{31,\}`. **Predict** the rows for `DICE="3 3 3 3 3"` before and after the change. Then run both.
+3. Delete the line `g/^Dead /d` from `timecards.ed`. Run the ed program on its own: `printf '3\n3\n3\n3\n3\n' > d.txt; ed -s d.txt < timecards.ed`. **Predict** the extra line.
+
+Acceptance criteria:
+
+- Step 1: all ten-hour cards give five cards with totals 10, 20, 30, 40, 50 (a total of exactly 40 does not stop the run, and there are only four categories, so the fifth is `Meetings` again). All 19-hour cards give three cards: 19, 38, 57.
+- Step 2: before the change, `13 13 13 13 13` give four cards (13, 26, 39, 52). After it, three cards (13, 26, 39): the run now stops after the first total over 30. `check-demo.sh out.txt 30` passes. One number in a regular expression moved the stop rule.
+- Step 3: the output ends with an extra line `Dead 0 52`. It is the fifth card, which was turned into a dead card because the total had passed 40 at card 4. The `Dead` rule is the one that stops cards from counting; the cleanup only hides them.
+- In one sentence: which ed feature made each of the three changes possible?
+
 ## C. By solution pattern
 
 ### C1. Weird next to boring (verified)

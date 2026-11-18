@@ -57,6 +57,7 @@ The program is text, and repetition is rewriting it. [`regex-sed`](../../src/reg
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | A string-rewriting machine with line addresses | The editor buffer: one line per card, and marks (x) that are added by joining lines | rewriting | accidentally-exploited |
 | [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | A dependency graph that can restart itself | Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | declarative | accidentally-exploited |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | A string-rewriting system (a Markov algorithm) | One line of text, rewritten until no rule applies | rewriting | accidentally-exploited |
 | [`m4`](../../src/m4/README.md) | m4 | A text-rescanning machine | The input stream: whatever macro text has not been read yet | rewriting | implementation-permitted |
@@ -137,6 +138,7 @@ The order of the document is the order of the program. [`xaml`](../../src/xaml/R
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | eager | implementation-permitted | [`cobol`](../../src/cobol/README.md) |
 | [`lisp`](../../src/lisp/README.md) | Common Lisp | idiomatic | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`lisp-weird`](../../src/lisp-weird/README.md) |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | weird | [Dispatch and triggers: the rule fires the next step](09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step) | eager | implementation-permitted | [`lisp`](../../src/lisp/README.md) |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | rewriting | accidentally-exploited |  |
 | [`forth`](../../src/forth/README.md) | Forth | idiomatic | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`forth-weird`](../../src/forth-weird/README.md) |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | eager | implementation-permitted | [`forth`](../../src/forth/README.md) |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | declarative | accidentally-exploited | [`find-posix`](../../src/find-posix/README.md) |
