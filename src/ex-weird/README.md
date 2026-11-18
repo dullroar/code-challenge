@@ -55,6 +55,25 @@ sandbox/container/run-image.sh src/ex-weird
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`. The image holds nvi and sqlite3 on a minimal Ubuntu.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: ex-weird: a register that holds the command that runs it again
+    accDescr: A flowchart. The launcher gives Ex five digits as cards. The script adds a tape of sixty lines under the cards, and the program as one line of text, which it copies into register a. Running register a starts the loop. The first card's digit is rewritten into a command that moves the mark t down the tape, and running it adds the hours. The program prints the row, using the total from the tape line under the mark. It copies that tape line's instruction into register n and deletes the used card. Running register n then does what the tape line says. Up to 40, the line says to run register a again. Above 40, the line is a comment, so nothing runs and the script ends.
+    A["Launcher gives five digits; the script adds a 60-line tape and the program as one line, copied into register a"] --> B["Run @a: rewrite the first card's digit into a command, 't+17 k t"]
+    B --> C["Run that command: mark t moves down the tape, and that is the addition"]
+    C --> D["Print the row: the card and the total on the tape line under mark t"]
+    D --> E["Copy that tape line's instruction into register n, delete the used card"]
+    E --> F{{"Run @n: what does the tape line say?"}}
+    F -->|"@a: total is 40 or less"| B
+    F -->|"a quote mark: a comment, total is over 40"| G["Nothing runs: the script ends and the launcher loads the rows"]
+```
+
+**What this shows:** Ex keeps state outside the text, in marks, and it can run a register as a command. The position of mark `t` on a tape *is* the running total. The tape line under it holds the next instruction: `@a`, which means "go round again", or a quote mark, which Ex reads as a comment.
+
+**Why this mechanism matters:** this is self-modifying code. The program writes the command that does its arithmetic, and the stop rule is the place on the tape where `@a` turns into a comment. Nothing in the program says "40" anywhere except in how the tape is laid out.
+
 ## How the stunt works
 
 Read [`timecards.ex`](timecards.ex) from top to bottom. Its comments say what each part does.

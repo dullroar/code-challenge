@@ -15,7 +15,7 @@
 #   - No binary files, and nothing over 256 KiB.
 #   - No invisible or direction-changing characters (Trojan Source), and no control characters.
 #   - The README starts with the frontmatter block described in CONTRIBUTING.md (the book is built from it),
-#     and has the shared section headings (Run it, How the stunt works, What check.sh enforces, Gotchas worth knowing).
+#     and has the shared section headings (Run it, Program Flow, How the stunt works, What check.sh enforces, Gotchas worth knowing).
 #   - The new folder is easy to try: it ships a Dockerfile, or its README has a "## Run it in Windows Sandbox" section.
 #   - A Dockerfile in the new folder must pass dockerfile-lint.sh (trusted bases only, no RUN in the runtime stage).
 #
@@ -81,7 +81,7 @@ for entry in "${!entries[@]}"; do
     fi
 
     # The section headings every entry shares, so readers and the book can rely on them.
-    for h in '## Run it' '## How the stunt works' '## Gotchas worth knowing'; do
+    for h in '## Run it' '## Program Flow' '## How the stunt works' '## Gotchas worth knowing'; do
         grep -qxF "$h" <<<"$readme" || fail "$dir/README.md needs a section headed exactly '$h' (see CONTRIBUTING.md)"
     done
     if git cat-file -e "$head:$dir/check.sh" 2>/dev/null; then

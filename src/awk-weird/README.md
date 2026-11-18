@@ -53,6 +53,24 @@ Debugging	16	47	2026-W47	DEMO ONLY
 
 Because the input is a file operand, the program is **reproducible**: `printf '5 5 5\n' > d.txt; gawk -f timecards.awk d.txt` always gives Meetings 15/15, Coding 15/30, Debugging 15/45. The digits `3 8 2 9 4 1` give 13, 18, 12 hours and stop at 43. `check.sh` does this with hundreds of digits.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: awk-weird: awk's own record loop over /dev/urandom, with a regex as the record separator
+    accDescr: A flowchart. BEGIN sets the record separator to the regular expression for a digit, adds /dev/urandom as the default input file, and opens a pipe to sqlite3. awk then reads a record, which is the bytes up to the next digit, and RT holds that digit. Rule 1 skips a record with an empty RT. Rule 2 sets the hours to 10 plus the digit and adds them to the total. Rule 3 assigns the card to the record, which re-splits it into fields. Rules 4 and 5 print an INSERT to the pipe and print the row. The last rule exits when the total is over 40, and awk goes on to read the next record when it is not. The exit runs END, which commits and prints the summary.
+    A["BEGIN: RS is [0-9], /dev/urandom added to ARGV, sqlite3 pipe opened"] --> B["awk reads a record: the bytes up to the next digit, and RT is that digit"]
+    B --> C["Rules 1 to 3: skip empty RT; hours = 10 + RT, add to total; build the card in the fields"]
+    C --> D["Rules 4 and 5: print the INSERT to the pipe, print the row"]
+    D --> E{{"Last rule: t > 40?"}}
+    E -->|no| B
+    E -->|yes| F["exit: END commits, closes the pipe, prints the summary"]
+```
+
+**What this shows:** the loop is the loop that every AWK program has: read a record, run every rule in order, read the next. The program has no `while` and no `if`. A record separator that is a regular expression turns the random bytes into dice, and the digit that ended the record (`RT`) is the die.
+
+**Why this mechanism matters:** the stop rule is a bare pattern, `t > 40 { exit }`, and it is the last rule, so the crossing card has already passed through every earlier rule. The input is `/dev/urandom`, which never ends, so only `exit` can stop the loop. Compare [`awk`](../awk/README.md), which loops in `BEGIN`.
+
 ## How the stunt works
 
 Read the rules in order: awk runs **every rule whose pattern matches, for every record, top to bottom**.

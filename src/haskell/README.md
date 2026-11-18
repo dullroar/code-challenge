@@ -41,6 +41,25 @@ Learning	12	49	2026-W46	DEMO ONLY
 # the whole challenge is one pure function, timecards; main is just plumbing
 ```
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: haskell: infinite lists that are read only as far as span demands
+    accDescr: A flowchart of data and demand. The function rolls is an infinite list of hours made with iterate. The categories are an infinite cycle. A running sum of the hours gives the totals. The function zipWith3 glues the categories, hours and totals into allCards, an infinite list of cards, none of them built yet. The function span asks for one card at a time and stops at the first card whose total is over 40. The result keeps the cards before it and the first card over 40. The function main then pipes the INSERTs to sqlite3 and prints the rows.
+    A["rolls: an infinite list of hours, from iterate next seed"] --> C["scanl1 (+): the running totals"]
+    A --> D
+    B["cycle of the four categories: repeats for ever"] --> D
+    C --> D["zipWith3 Card: allCards, an infinite list, none of it built yet"]
+    D --> E["span (total <= 40): asks for one card at a time, stops at the first that fails"]
+    E --> F["under ++ take 1 over: the cards before 40 and the crossing card"]
+    F --> G["main: pipe the INSERTs to sqlite3, print the rows"]
+```
+
+**What this shows:** the lists are descriptions, not data. Nothing is computed until `span` asks for a card, and `span` stops asking at the first card that fails the test. So only a handful of cards are ever built, even though the lists are infinite.
+
+**Why this mechanism matters:** the stop rule is not a loop condition. It is *how much of a list you choose to read*. Demand flows backwards, from `span` to the lists, while the data flows forwards. This is lazy evaluation as a way to write a loop without one.
+
 ## How the stunt works
 
 The file reads top to bottom as four steps, each a small function with a type signature.

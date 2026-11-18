@@ -98,6 +98,55 @@ Legitimate uses: `ex -s` in scripts for exact edits, and registers as a small ma
 
 See [exercise B19](../exercises.md#b19-ex-move-the-limit-on-the-tape-and-cut-the-loop-verified).
 
+<!-- BEGIN GENERATED program-flow:languages/editors.md -->
+## How each program runs
+
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+
+### Program flow of `ed-weird`
+
+From [`ed-weird`](../../src/ed-weird/README.md) ([source section](../../src/ed-weird/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: ed-weird: one global command over a text buffer
+    accDescr: A flowchart. The launcher gives ed five random digits as a buffer of five lines. The script adds a category to each line by line address, rewrites each digit into hours and a run of marks with a table of substitutions, and adds a ledger line above the first card. Then one global command visits every card line in buffer order. For each card it copies the ledger above, joins the lines, and merges the marks, which adds the hours. Guarded substitutions then turn the ledger bar into an exclamation mark when there are 41 or more marks, and turn any card after that into a dead card. When all cards are visited, ed deletes the dead and start lines, rewrites marks into decimal, and prints the rows. The launcher loads them into SQLite.
+    A["Launcher: five random digits become ed's buffer, one line per card"] --> B["Rewrite tables: line addresses add categories, a digit becomes hours as marks"]
+    B --> C["Add a ledger line above the first card"]
+    C --> D{{"g: is there another card line to visit?"}}
+    D -->|yes| E["Copy the ledger above, join, merge the marks: adding is writing marks side by side"]
+    E --> F["Guarded substitutions: 41 or more marks turn the bar into !, a card after ! becomes Dead"]
+    F --> D
+    D -->|no| G["Delete Dead and Start lines, marks to decimal, print the rows"]
+    G --> H["Launcher loads the rows into SQLite"]
+```
+
+**What this shows:** `ed` has one loop, the global command `g`, and it has no `if`. A substitution that finds nothing to replace does nothing, so each guarded substitution means "if the line has this pattern, rewrite it". The state is text: marks that are added by writing them side by side.
+
+**Why this mechanism matters:** the stop rule is a regex over the ledger (41 or more marks), and it runs *after* the card is written, so the crossing card is kept. The `!` that it writes is a state that later cards read. It is the whole memory of "we are over".
+
+### Program flow of `ex-weird`
+
+From [`ex-weird`](../../src/ex-weird/README.md) ([source section](../../src/ex-weird/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: ex-weird: a register that holds the command that runs it again
+    accDescr: A flowchart. The launcher gives Ex five digits as cards. The script adds a tape of sixty lines under the cards, and the program as one line of text, which it copies into register a. Running register a starts the loop. The first card's digit is rewritten into a command that moves the mark t down the tape, and running it adds the hours. The program prints the row, using the total from the tape line under the mark. It copies that tape line's instruction into register n and deletes the used card. Running register n then does what the tape line says. Up to 40, the line says to run register a again. Above 40, the line is a comment, so nothing runs and the script ends.
+    A["Launcher gives five digits; the script adds a 60-line tape and the program as one line, copied into register a"] --> B["Run @a: rewrite the first card's digit into a command, 't+17 k t"]
+    B --> C["Run that command: mark t moves down the tape, and that is the addition"]
+    C --> D["Print the row: the card and the total on the tape line under mark t"]
+    D --> E["Copy that tape line's instruction into register n, delete the used card"]
+    E --> F{{"Run @n: what does the tape line say?"}}
+    F -->|"@a: total is 40 or less"| B
+    F -->|"a quote mark: a comment, total is over 40"| G["Nothing runs: the script ends and the launcher loads the rows"]
+```
+
+**What this shows:** Ex keeps state outside the text, in marks, and it can run a register as a command. The position of mark `t` on a tape *is* the running total. The tape line under it holds the next instruction: `@a`, which means "go round again", or a quote mark, which Ex reads as a comment.
+
+**Why this mechanism matters:** this is self-modifying code. The program writes the command that does its arithmetic, and the stop rule is the place on the tape where `@a` turns into a comment. Nothing in the program says "40" anywhere except in how the tape is laid out.
+<!-- END GENERATED program-flow:languages/editors.md -->
+
 ## Computer science behind this page
 
 <!-- BEGIN GENERATED concepts:languages/editors.md -->

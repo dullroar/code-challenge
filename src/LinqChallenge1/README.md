@@ -8,8 +8,9 @@ loop-by: lazy-demand
 evaluation: deferred
 assurance: guaranteed
 pairs-with: LinqChallenge2
-tags: [control-flow, dataflow-programming, deferred-execution, first-class-and-higher-order-functions, lazy-evaluation, monoid-and-fold, side-effect, thread-safety]
+tags: [control-flow, dataflow-programming, deferred-execution, event-loop, first-class-and-higher-order-functions, lazy-evaluation, monoid-and-fold, side-effect, thread-safety]
 analogies: [category-theory, functor]
+counterexamples: [event-driven-programming]
 ---
 # LINQ challenge, Variant A: one fluent method-chain statement
 
@@ -42,6 +43,28 @@ sandbox\windows\run.ps1 src\LinqChallenge1
 ```
 
 It runs the entry in a throwaway VM with networking off, screenshots the window, asks it to close, and prints what it saved. This entry has a `check.ps1`, so that is what runs.
+
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: LinqChallenge1: an eager fold first, then a lazy tail that the last Aggregate forces
+    accDescr: A flowchart with two groups. The eager group runs first because it is the innermost argument. An Aggregate folds the five fixed days into tracked entities and refuses a day that would pass 40 hours, and then the tuple calls SaveChanges. The deferred group is a chain of LINQ stages that does nothing until asked. The final Aggregate asks. That pulls the EF Core query and the return to objects, then a second Aggregate that folds the saved rows into a report, then the stage that builds and shows the window, then the stage that starts the pulse and calls Application.Run, which pumps the dispatcher until the window closes.
+    subgraph E["Eager: runs first, as the innermost argument"]
+        A["Aggregate: fold the five fixed days into tracked entities, refuse a day that passes 40 h"] --> B["Tuple element: SaveChanges runs after every entity is tracked"]
+    end
+    subgraph D["Deferred: nothing runs until the final Aggregate asks"]
+        C["Repeat 1 then SelectMany: EF Core query, then AsEnumerable"] --> F["Aggregate: fold the saved rows into a report"]
+        F --> G["Select: build and show the WPF window"]
+        G --> H["Select: start the pulse, Application.Run pumps the dispatcher until the window closes"]
+    end
+    B --> C
+    Z["Final Aggregate: the demand that forces the whole tail"] -.->|pulls| C
+```
+
+**What this shows:** the whole program is one expression, so the order of work is the order of *evaluation*. The inner `Aggregate` is eager and runs first. Everything after it is a lazy chain of `LINQ` stages, and the last `Aggregate` is what makes them run. The dotted edge is demand, not data.
+
+**Why this mechanism matters:** this is the difference between a query as a description and a query as an execution. `Enumerable.Repeat(…, 1)` turns one value into a one-element sequence so that each stage can stay a real `LINQ` operator. Every `void` call is wrapped to return a value, as the `void`-to-value trick (a section of this README) explains.
 
 ## How the stunt works
 

@@ -69,7 +69,7 @@ A sandbox is a restricted place where untrusted code can run without being trust
 
 **In this repo:**
 
-**Applies to every entry** (39). Every entry ships a Dockerfile for the locked-down Linux container, or a Windows Sandbox command, and its check script runs inside one of them.
+**Applies to every entry** (40). Every entry ships a Dockerfile for the locked-down Linux container, or a Windows Sandbox command, and its check script runs inside one of them.
 
 ## Principle of least privilege
 
@@ -102,7 +102,7 @@ Code review means that another person reads your code before it is accepted. It 
 
 **In this repo:**
 
-**Applies to every entry** (39). Every entry README has a How the stunt works section, the plain-English account that a reviewer reads the code against, and the gate refuses a new entry without it.
+**Applies to every entry** (40). Every entry README has a How the stunt works section, the plain-English account that a reviewer reads the code against, and the gate refuses a new entry without it.
 
 ## Trojan Source: characters you cannot see
 

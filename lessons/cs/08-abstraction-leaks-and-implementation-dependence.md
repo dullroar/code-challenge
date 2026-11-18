@@ -168,6 +168,7 @@ The book you are reading is built this way: every list is sorted, nothing reads 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | demonstrates | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |

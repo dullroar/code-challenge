@@ -37,6 +37,25 @@ Runtime error near line 4: CHECK constraint failed: stop rule fired: total excee
 # an empty while() went round 3 times, once per card
 ```
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: cmake: one while with an empty body, whose condition is a register machine
+    accDescr: A flowchart. Before the loop, the host draws a tape of nine random digits and stores it in the CMAKE_MATCH variables, which are the registers. Each time around, while re-expands its condition. The first test says no if the total so far plus the last card matches a literal of 41 x characters. The second test builds a subject string and a pattern out of the previous captures, splices in the last digit, and matches, which captures the next hours row and rewrites all the registers. If both tests pass, the empty body runs and the loop goes round again. If a test fails, the loop ends, and the host reads the log, picks the ISO week, writes SQLite and plays the glow.
+    A["Host: draw 9 random digits and store them in the CMAKE_MATCH variables"] --> B{{"while re-expands its condition"}}
+    B --> C{{"Test 1: does total plus last card match 41 x's?"}}
+    C -->|"yes: over 40"| G["Loop ends: the host reads the log, picks the week, writes SQLite, plays the glow"]
+    C -->|no| D{{"Test 2: MATCHES on a subject built from the last captures"}}
+    D -->|"match: the registers now hold the new total and card"| E["Empty body"]
+    E --> B
+    D -->|"no match: the registers are cleared"| G
+```
+
+**What this shows:** `while()` re-expands its condition on every pass, and `MATCHES` stores its captures in ordinary variables. So the condition can build its next subject out of its last captures, and the *match* is the program. Numbers are runs of `x`, and the stop rule is a 41-character literal.
+
+**Why this mechanism matters:** the loop has an empty body and a register machine for a condition. Test 1 must run first, because a failed match clears the registers and a successful one rewrites them, so the main match has to run last for its captures to survive.
+
 ## How the stunt works
 
 An earlier version of this file was a normal script: `while()`, `math(EXPR)`, `list(GET)`. That is `RunEverything()`

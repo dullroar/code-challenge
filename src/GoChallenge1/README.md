@@ -61,6 +61,27 @@ It runs the entry in a throwaway VM with networking off, screenshots the window,
 
 As in the original, the entity and the data-access type sit outside `main`. Go also needs small helper functions there (explained below).
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: GoChallenge1: one for statement, a goroutine and a dialog served over HTTP
+    accDescr: A flowchart. The initializer builds a state struct and opens the repository. The condition is true while the total is 40 or less and categories remain. Then the empty body runs, and the post statement runs Seq, which locks, adds hours, stages a card, unlocks, and starts a goroutine that saves the staged cards. When the condition is false, After runs ShowDialog, which serves a page and waits for the browser to post that it closed, then WaitForSaves waits for the goroutines, and the condition returns false so the for ends.
+    A["Initializer: build the state struct, open SQLite"] --> B{{"Condition: total <= 40 and categories left?"}}
+    B -->|true| C["Empty body"]
+    C --> D["Post: Seq runs its arguments in order: lock, hours, card, unlock, spawn"]
+    D --> B
+    D -.->|go| G["Goroutine: lock, SaveAll by reflection, unlock"]
+    B -->|false| E["After: ShowDialog serves a page on loopback and waits for /closed"]
+    E --> W["WaitForSaves waits for the goroutines"]
+    G -.-> W
+    W --> X["After returns false: the for ends"]
+```
+
+**What this shows:** Go's `for` has the same three clauses as the C# original, but Go allows only simple statements there. So the work moves into helper functions, and `Seq(...)` runs its arguments in order in place of the comma list. The dashed edges are the concurrent part: each pass starts a goroutine, and the program must wait for all of them before it exits.
+
+**Why this mechanism matters:** the loop ends through its condition, not through a `break`. The `||` makes the false branch do the final work (show the page, wait for the saves) and then yield `false`. The window is a browser page, because Go has no standard-library GUI.
+
 ## How the stunt works
 
 The work splits three ways: an **initializer** that builds the loop's state, a **condition** that decides whether to keep going (and, on the last check, shows the window), and an **update** that does one pass of work. Comment banners in the source mark the boundaries.

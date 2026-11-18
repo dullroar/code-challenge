@@ -44,6 +44,32 @@ Learning	10	44	2026-W46	DEMO ONLY
 # the list of cards is a fixed point of itself, and reading it is what wrote the rows
 ```
 
+## Program Flow
+
+```mermaid
+sequenceDiagram
+    accTitle: haskell-weird: reading a cell of a lazy list runs that card's effect
+    accDescr: A sequence diagram. The consumer, span in untilOver40, demands the next cell of the lazy list of cards. The cell needs the hours from the random stream and the running total of the previous card. Because every cell is wrapped in unsafeInterleaveIO, the effect for that card runs now, when the cell is demanded: it prints the row and writes the INSERT to the pipe. The cell then returns the card to the consumer. The consumer tests the running total. While it is 40 or less, it demands the next cell. At the first card over 40, the consumer stops demanding, so no later effect ever runs, and main commits.
+    participant S as span, the consumer
+    participant C as the next cell of the list
+    participant R as the random stream and the previous card
+    participant E as onBirth, the card's effect
+    loop while the running total is 40 or less
+        S->>C: demand the next card
+        C->>R: need the hours, and the total of the previous card
+        R-->>C: hours and total, already known
+        C->>E: unsafeInterleaveIO runs the effect now
+        E-->>E: print the row and write the INSERT to the pipe
+        C-->>S: the card
+    end
+    Note over S: the first card over 40 is returned and kept. No later cell is demanded, so no later effect runs
+    S-->>S: main commits and reports
+```
+
+**What this shows:** the effects are tied to the *reading* of the list. The list is built so that nothing runs when it is made. Each cell holds a promise, and forcing the cell runs that card's `onBirth`. So the number of rows printed equals the number of `INSERT`s, equals the number of cards read.
+
+**Why this mechanism matters:** this is demand-driven control flow with side effects, and it is only safe because of how the cells are linked. `unsafeInterleaveIO` is called *unsafe* for a reason: the order of effects now depends on the order of demand. The same laziness without effects is in the plain [`haskell`](../haskell/README.md) entry.
+
 ## How the stunt works
 
 There are three tricks, stacked on each other.

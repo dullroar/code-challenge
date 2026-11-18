@@ -94,8 +94,63 @@ See [exercises](../exercises.md#b12-tcl-edit-the-program-in-the-database-verifie
 
 When your code genuinely belongs with your data: a rules engine where rules are rows, a game where scripts live in the save file, a tool that must patch behavior in a running system. Using a recursive trigger as a `while` loop is a stunt; storing procs in a table is a design.
 
+<!-- BEGIN GENERATED program-flow:languages/tcl.md -->
+## How each program runs
+
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+
+### Program flow of `tcl`
+
+From [`tcl`](../../src/tcl/README.md) ([source section](../../src/tcl/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: tcl: an ordinary while loop in a namespace, then one transaction
+    accDescr: A flowchart. The main procedure parses the arguments with a while, lassign and switch loop, seeds the random generator from the clock and the process id, and calls draw. The draw procedure is a while loop. While the total is at or under the limit, it draws hours, adds them to the total with incr, picks the next category, and appends a card as a dict. When the total is over the limit, the save procedure opens SQLite and writes all the cards inside one transaction. Then the program prints the cards. Only if asked does it build a Tk window with a treeview.
+    A["main: parse argv, seed rand from the clock and pid"] --> B{{"draw: while total <= limit?"}}
+    B -->|yes| C["randomHours, incr total, pick a category, lappend a card as a dict"]
+    C --> B
+    B -->|no| D["save: db transaction inserts every card with bound parameters"]
+    D --> E["Print the cards; build the Tk treeview only if --gui was given"]
+```
+
+**What this shows:** the conventional Tcl shape. A `while` is the loop, a dict is the card, and `db transaction` makes the save all-or-nothing. A guard around `main` lets the checks `source` the file and test `draw` in the same process.
+
+**Why this mechanism matters:** the program draws first and saves afterwards, so the card list is complete before the database sees it. Tcl's `while` re-evaluates its test each pass, and the test comes before the draw, so the crossing card is kept. The weird sibling [`tcl-weird`](../../src/tcl-weird/README.md) moves the loop into the database.
+
+### Program flow of `tcl-weird`
+
+From [`tcl-weird`](../../src/tcl-weird/README.md) ([source section](../../src/tcl-weird/README.md#program-flow)).
+
+```mermaid
+sequenceDiagram
+    accTitle: tcl-weird: a recursive SQLite trigger calls Tcl procs that are fetched from a table
+    accDescr: A sequence diagram. The Tcl host installs three hooks and inserts the first card. Each insert fires a trigger in SQLite. The trigger calls the SQL function tcl, which calls back into Tcl. The first time the Tcl side asks for a command such as born, the command does not exist, so Tcl calls unknown. The unknown handler reads the proc's text from the tcl_code table, defines the proc and retries the call. The call prints the row. The trigger then inserts the next card, but only while the total of the card just inserted is 40 or less. That insert fires the trigger again. When the total is over 40, nothing is inserted, and control returns to the host, which prints the summary.
+    participant H as Tcl host
+    participant D as SQLite and the next_card trigger
+    participant U as unknown handler
+    participant T as tcl_code table
+    H->>D: INSERT the first card
+    loop each INSERT fires the trigger, while the total is 40 or less
+        D->>H: SQL function tcl calls the Tcl command born
+        H->>U: born does not exist yet, so Tcl calls unknown
+        U->>T: look up the proc's params and body
+        T-->>U: the text of the proc
+        U->>H: define the proc, retry the call
+        H-->>D: the row is printed
+        D->>D: INSERT the next card: the trigger fires again
+    end
+    D-->>H: total is over 40, no insert: the trigger chain ends
+    H->>H: print the summary
+```
+
+**What this shows:** the loop is a trigger that inserts a row and so fires itself, and every number and printed line comes from Tcl code stored as text in a table. The first call of a proc takes the long way, through `unknown` and the table, and later calls find the proc defined.
+
+**Why this mechanism matters:** the database is dispatching, but it is not an event queue. The trigger runs synchronously inside the `INSERT`, and the recursion is the loop. The `WHERE` on the trigger's insert is the stop rule. Control moves between three layers (Tcl, SQL, Tcl) on one call stack.
+<!-- END GENERATED program-flow:languages/tcl.md -->
+
 ## Computer science behind this page
 
 <!-- BEGIN GENERATED concepts:languages/tcl.md -->
-The computer-science ideas behind this page: [Arbitrary code execution](../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution), [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [Recursion](../cs/03-control-flow-and-continuations.md#recursion), [Interpreters and virtual machines](../cs/05-formal-languages-as-computational-substrates.md#interpreters-and-virtual-machines), [State](../cs/06-state-beyond-variables.md#state), [Scope and binding](../cs/06-state-beyond-variables.md#scope-and-binding), [Homoiconicity: code as data](../cs/06-state-beyond-variables.md#homoiconicity-code-as-data), [Reflection and metaprogramming](../cs/06-state-beyond-variables.md#reflection-and-metaprogramming), [Database triggers](../cs/06-state-beyond-variables.md#database-triggers), [Serialization, deserialization and object pickling](../cs/06-state-beyond-variables.md#serialization-deserialization-and-object-pickling), [Transactions](../cs/07-effects-errors-and-commitment.md#transactions).
+The computer-science ideas behind this page: [Arbitrary code execution](../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution), [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [Recursion](../cs/03-control-flow-and-continuations.md#recursion), [Interpreters and virtual machines](../cs/05-formal-languages-as-computational-substrates.md#interpreters-and-virtual-machines), [State](../cs/06-state-beyond-variables.md#state), [Scope and binding](../cs/06-state-beyond-variables.md#scope-and-binding), [Homoiconicity: code as data](../cs/06-state-beyond-variables.md#homoiconicity-code-as-data), [Reflection and metaprogramming](../cs/06-state-beyond-variables.md#reflection-and-metaprogramming), [Database triggers](../cs/06-state-beyond-variables.md#database-triggers), [Serialization, deserialization and object pickling](../cs/06-state-beyond-variables.md#serialization-deserialization-and-object-pickling), [Transactions](../cs/07-effects-errors-and-commitment.md#transactions), [Callbacks](../cs/10-events-callbacks-and-reactive-control-flow.md#callbacks).
 <!-- END GENERATED concepts:languages/tcl.md -->

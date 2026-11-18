@@ -48,6 +48,25 @@ Debugging	15	45	2026-W46	DEMO ONLY
 
 The three `# CardN ⇐` lines are read back from the workspace *after* the run (`⎕NL 3` lists its functions). `Card1` and `Card2` exist only because `Card0` and `Card1` wrote them, and their hours are literals in their own source.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: apl-weird: each card function writes and calls the next one
+    accDescr: A flowchart. The function Card0 runs with its genes: the card number, category, hours and running total. It prints its row and inserts it into SQLite. It draws the next hours and builds the four gene lines for the next card as text. A boolean Alive is 1 while the total is 40 or less. The function then takes its own source with the quad-CR function, replaces the header and genes, and compresses the whole child away with Alive. The quad-FX function defines a new function, Card1, from what is left, or defines nothing. Executing the name, also compressed by Alive, then calls Card1, which does the same steps. When Alive is 0, nothing is written or called, and the chain of calls returns.
+    A["CardN runs with its genes: number, category, hours, total"] --> B["Print the row and INSERT it"]
+    B --> C["Draw the next hours; build four new gene lines as text"]
+    C --> D{{"Alive is 40 >= total?"}}
+    D -->|"1: keep the child"| E["Quad-CR reads this function's own source; quad-FX defines Card N+1 from it with the new genes"]
+    E --> F["Execute the name Card N+1: it is a different function with the same body"]
+    F --> A
+    D -->|"0: Alive compresses the child away"| G["Quad-FX defines nothing and execute runs an empty string; the calls return"]
+```
+
+**What this shows:** the recursion is a chain of different functions, not one function calling itself. Each `Card` function *writes* the next one as text and then calls it. The boolean `Alive` is both the stop rule and the guard on writing, because compressing with `0` removes every line of the child.
+
+**Why this mechanism matters:** the program is self-modifying, and its state is source text: the "genes" are four lines that each child gets with new values. A broken stop rule does not fail. It recurses for ever, which is why the check runs the program under a timeout.
+
 ## How the stunt works
 
 A function in GNU APL is a block of text between two `∇` marks. Its first line is the header. Here is `Card0`, with the lines numbered the way `⎕CR` (which returns a function's source as a character matrix) numbers them:

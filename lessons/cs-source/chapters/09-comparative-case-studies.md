@@ -24,6 +24,7 @@ Ask these two questions of any entry, and the strange ones stop looking alike. T
 | [[entry:tcl-weird]] | SQL rows that hold stored source | The interpreter's lookup of an unknown command, and triggers |
 | [[entry:javascript]] | Properties of one object literal, in a bodiless `for` | The `for` statement: initializer, condition, iterator |
 | [[entry:javascript-weird]] | Variables captured by closures | A consumer's demand on an iterator: each `next()` runs one step |
+| [[entry:javascript-events]] | One object that only the listeners of an `EventEmitter` touch | An event, then the scheduler: each listener emits the next event, and `setImmediate` gives the event loop a turn between cards |
 
 ## Writing a program down, reading it back, running it
 

@@ -72,6 +72,61 @@ See [exercises](../exercises.md#b2-haskell-break-the-laziness-verified): replace
 
 Inside a library that implements lazy streaming and has been carefully tested for ordering. Not in application code, where `evaluate`, strict IO and streaming libraries give the same results without the surprises.
 
+<!-- BEGIN GENERATED program-flow:languages/haskell.md -->
+## How each program runs
+
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+
+### Program flow of `haskell`
+
+From [`haskell`](../../src/haskell/README.md) ([source section](../../src/haskell/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: haskell: infinite lists that are read only as far as span demands
+    accDescr: A flowchart of data and demand. The function rolls is an infinite list of hours made with iterate. The categories are an infinite cycle. A running sum of the hours gives the totals. The function zipWith3 glues the categories, hours and totals into allCards, an infinite list of cards, none of them built yet. The function span asks for one card at a time and stops at the first card whose total is over 40. The result keeps the cards before it and the first card over 40. The function main then pipes the INSERTs to sqlite3 and prints the rows.
+    A["rolls: an infinite list of hours, from iterate next seed"] --> C["scanl1 (+): the running totals"]
+    A --> D
+    B["cycle of the four categories: repeats for ever"] --> D
+    C --> D["zipWith3 Card: allCards, an infinite list, none of it built yet"]
+    D --> E["span (total <= 40): asks for one card at a time, stops at the first that fails"]
+    E --> F["under ++ take 1 over: the cards before 40 and the crossing card"]
+    F --> G["main: pipe the INSERTs to sqlite3, print the rows"]
+```
+
+**What this shows:** the lists are descriptions, not data. Nothing is computed until `span` asks for a card, and `span` stops asking at the first card that fails the test. So only a handful of cards are ever built, even though the lists are infinite.
+
+**Why this mechanism matters:** the stop rule is not a loop condition. It is *how much of a list you choose to read*. Demand flows backwards, from `span` to the lists, while the data flows forwards. This is lazy evaluation as a way to write a loop without one.
+
+### Program flow of `haskell-weird`
+
+From [`haskell-weird`](../../src/haskell-weird/README.md) ([source section](../../src/haskell-weird/README.md#program-flow)).
+
+```mermaid
+sequenceDiagram
+    accTitle: haskell-weird: reading a cell of a lazy list runs that card's effect
+    accDescr: A sequence diagram. The consumer, span in untilOver40, demands the next cell of the lazy list of cards. The cell needs the hours from the random stream and the running total of the previous card. Because every cell is wrapped in unsafeInterleaveIO, the effect for that card runs now, when the cell is demanded: it prints the row and writes the INSERT to the pipe. The cell then returns the card to the consumer. The consumer tests the running total. While it is 40 or less, it demands the next cell. At the first card over 40, the consumer stops demanding, so no later effect ever runs, and main commits.
+    participant S as span, the consumer
+    participant C as the next cell of the list
+    participant R as the random stream and the previous card
+    participant E as onBirth, the card's effect
+    loop while the running total is 40 or less
+        S->>C: demand the next card
+        C->>R: need the hours, and the total of the previous card
+        R-->>C: hours and total, already known
+        C->>E: unsafeInterleaveIO runs the effect now
+        E-->>E: print the row and write the INSERT to the pipe
+        C-->>S: the card
+    end
+    Note over S: the first card over 40 is returned and kept. No later cell is demanded, so no later effect runs
+    S-->>S: main commits and reports
+```
+
+**What this shows:** the effects are tied to the *reading* of the list. The list is built so that nothing runs when it is made. Each cell holds a promise, and forcing the cell runs that card's `onBirth`. So the number of rows printed equals the number of `INSERT`s, equals the number of cards read.
+
+**Why this mechanism matters:** this is demand-driven control flow with side effects, and it is only safe because of how the cells are linked. `unsafeInterleaveIO` is called *unsafe* for a reason: the order of effects now depends on the order of demand. The same laziness without effects is in the plain [`haskell`](../../src/haskell/README.md) entry.
+<!-- END GENERATED program-flow:languages/haskell.md -->
+
 ## Computer science behind this page
 
 <!-- BEGIN GENERATED concepts:languages/haskell.md -->

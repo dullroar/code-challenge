@@ -38,6 +38,24 @@ Debugging	14	48	2026-W46	DEMO ONLY
 # committed total=48 entries=3 DEMO ONLY
 ```
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: forth: one begin until loop over a word called card
+    accDescr: A flowchart. The word main sets up, which opens a pipe to sqlite3, and writes the schema. The word run is a begin until loop. Each pass runs card, which draws hours, adds them to the total variable, bumps the card count, prints the row, and sends the INSERT through the pipe. Then over-40 leaves a flag on the stack, and until consumes it. If the flag is false, the loop repeats. If it is true, run ends, and main commits, closes the pipe and reports.
+    A["main: open the pipe to sqlite3, write the schema"] --> B["run: begin"]
+    B --> C["card: draw hours, add to total, bump cards"]
+    C --> D["Print the row; send the INSERT through the pipe"]
+    D --> E{{"over-40? leaves a flag; until consumes it"}}
+    E -->|false| B
+    E -->|true| F["main: commit, close the pipe, report"]
+```
+
+**What this shows:** Forth has one ordinary loop, `begin ... until`. The loop body runs `card`, and then `over-40?` leaves a flag on the stack for `until` to take. The state lives in two variables, `total` and `cards`, and the data stack carries values between words.
+
+**Why this mechanism matters:** the stop rule is a flag, not a condition in the loop's header. The flag is computed after the card, so the crossing card is kept. The weird sibling [`forth-weird`](../forth-weird/README.md) has no `begin` and no `until`.
+
 ## How the stunt works
 
 Forth has almost no syntax: the interpreter reads a space-delimited word, looks it up, and runs it. A `:` definition is a new word; words pass values on a **stack**. Every definition in the file carries a *stack comment* such as `( hours -- )`, meaning "takes one number, leaves nothing". Read those first and most of the file explains itself.

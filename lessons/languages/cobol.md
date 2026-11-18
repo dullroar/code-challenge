@@ -89,6 +89,60 @@ See [exercises](../exercises.md#b1-cobol-predict-then-break-alter-verified): pre
 
 Rarely in the form shown. The `88`-level stop rule, though, is a good design wherever business rules change more often than code. The `ALTER` form was reasonable when memory and cycles were the constraint and the engineers owning the system understood every jump. It stopped being reasonable when teams, tools and maintenance horizons grew.
 
+<!-- BEGIN GENERATED program-flow:languages/cobol.md -->
+## How each program runs
+
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+
+### Program flow of `cobol`
+
+From [`cobol`](../../src/cobol/README.md) ([source section](../../src/cobol/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: cobol: PERFORM UNTIL with the stop rule declared as data
+    accDescr: A flowchart. Set-up and open-script run once. Then PERFORM DRAW-CARD repeats until the 88-level condition OVER-FORTY, declared on WS-TOTAL, is true. Each pass draws a card, adds its hours to the total, prints the row and writes an INSERT line. When OVER-FORTY is true the loop ends, the script is committed with sqlite3, and the run stops.
+    A["SET-UP, OPEN-SCRIPT: seed, ISO week, folder, SQL file"] --> B{{"OVER-FORTY? WS-TOTAL in 41 to 99"}}
+    B -->|No| C["DRAW-CARD: category from MOD of WS-ENTRIES, hours, ADD to WS-TOTAL"]
+    C --> D["DISPLAY the row, WRITE the INSERT line"]
+    D --> B
+    B -->|Yes| E["COMMIT-SCRIPT: run sqlite3"]
+    E --> F["DISPLAY summary, STOP RUN"]
+```
+
+**What this shows:** a conventional structured loop. `PERFORM DRAW-CARD UNTIL OVER-FORTY` tests the condition before every pass, so the test is a real node and the cycle is a real edge.
+
+**Why this mechanism matters:** the stop rule is data, not code. `OVER-FORTY` is an 88-level name for the values 41 to 99 of `WS-TOTAL`, so the loop asks the data whether to go on. The weird sibling [`cobol-weird`](../../src/cobol-weird/README.md) has no such test.
+
+### Program flow of `cobol-weird`
+
+From [`cobol-weird`](../../src/cobol-weird/README.md) ([source section](../../src/cobol-weird/README.md#program-flow)).
+
+```mermaid
+stateDiagram-v2
+    accTitle: cobol-weird: the target of one GO TO is the loop
+    accDescr: A state diagram. The state is the current target of the single GO TO in the NEXT-CARD paragraph. It starts as Meetings. Each category paragraph rewrites it to the next category with ALTER, so the cycle is Meetings, Coding, Debugging, Learning, and back to Meetings. When the two-digit headroom field overflows, ON SIZE ERROR rewrites the target to FINISH-RUN, which commits the script and stops.
+    state "Meetings" as M
+    state "Coding" as C
+    state "Debugging" as D
+    state "Learning" as L
+    state "FINISH-RUN" as F
+    state "NEXT-CARD's GO TO jumps to" as T {
+        [*] --> M
+        M --> C : ALTER
+        C --> D : ALTER
+        D --> L : ALTER
+        L --> M : ALTER
+    }
+    T --> F : ON SIZE ERROR, ALTER
+    F --> [*] : COMMIT, sqlite3, STOP RUN
+```
+
+**What this shows:** the state of this program is the target of one `GO TO`. Each card, the category paragraph named by the target runs, rewrites the target with `ALTER` to the next category, and falls into `RECORD-CARD`, which jumps back to `NEXT-CARD`. The source text of that `GO TO` never changes. The jump does.
+
+**Why this mechanism matters:** there is no loop condition to draw. The exit is another rewrite: when `WS-HEADROOM` overflows, `ON SIZE ERROR` points the same `GO TO` at `FINISH-RUN`. Compare the plain [`cobol`](../../src/cobol/README.md) entry, where a `PERFORM ... UNTIL` tests a condition.
+<!-- END GENERATED program-flow:languages/cobol.md -->
+
 ## Computer science behind this page
 
 <!-- BEGIN GENERATED concepts:languages/cobol.md -->

@@ -10,8 +10,8 @@ assurance: guaranteed
 pairs-with: javascript
 machine: "A closure-backed state machine, pulled by a lazy iterator"
 state: "Variables captured by closures: the generator's number, and the machine's card count, total and stop flag"
-tags: [closure, computation-versus-orchestration, dataflow-programming, deferred-execution, eager-evaluation, event-driven-programming, first-class-and-higher-order-functions, functor, generators, invariant, lazy-evaluation, monoid-and-fold, referential-transparency, reproducibility, scope-and-binding, short-circuit-evaluation, side-effect, state]
-analogies: [category-theory, coroutine]
+tags: [callback, closure, computation-versus-orchestration, dataflow-programming, deferred-execution, eager-evaluation, event-driven-programming, event-loop, first-class-and-higher-order-functions, functor, generators, invariant, lazy-evaluation, monoid-and-fold, referential-transparency, reproducibility, scope-and-binding, short-circuit-evaluation, side-effect, state]
+analogies: [category-theory, coroutine, backpressure]
 counterexamples: [continuation]
 ---
 # JavaScript, weirder: closures all the way down
@@ -67,6 +67,32 @@ sandbox/container/run-image.sh --tty src/javascript-weird    # with a terminal: 
 ```
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`.
+
+## Program Flow
+
+```mermaid
+sequenceDiagram
+    accTitle: javascript-weird: demand pulls each card through three closures and two maps
+    accDescr: A sequence diagram of pull. The call toArray demands a value from the second map, which demands one from the first map, which demands one from the cards iterator. The cards iterator calls the machine closure, which calls the hours closure for a number and moves the generator state. The machine adds the hours to its captured total and sets its stop flag if the total is over 40, and returns the card. The card travels back up: the first map stamps it with the user and week, the second map saves it to SQLite, and toArray collects it. Then toArray demands again. After the crossing card, the machine answers undefined, the iterator answers done, and toArray stops.
+    participant T as toArray
+    participant S as map save
+    participant P as map stamp
+    participant C as cards, machine and hoursFrom
+    loop until the iterator says done
+        T->>S: next
+        S->>P: next
+        P->>C: next: the machine calls hoursFrom
+        C-->>C: hours drawn, total and over updated
+        C-->>P: value: card
+        P-->>S: record stamped with user and week
+        S-->>T: record, saved to SQLite
+    end
+    Note over C,T: after the crossing card the machine answers undefined, cards answers done, and toArray stops
+```
+
+**What this shows:** demand flows *up* the pipeline and cards flow *down* it. Nothing is drawn until `toArray()` asks, and each ask pulls one card all the way through: drawn, stamped, saved. The loop is the consumer asking again. The three closures (`cards`, `machine`, `hoursFrom`) are one column here, because each is called by the one before it.
+
+**Why this mechanism matters:** the state lives in closures: the generator's number, and the machine's count, total and stop flag. Nothing else can reach it. The stop rule is a captured variable, `over`, set in the same call that makes the crossing card. Compare [`javascript`](../javascript/README.md), where a `for` statement drives the same work, and [`javascript-events`](../javascript-events/README.md), where listeners do.
 
 ## How the stunt works
 

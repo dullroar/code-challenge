@@ -72,6 +72,26 @@ It runs the entry in a throwaway VM with networking off, screenshots the window,
 
 As in the original, the entity and the data-access type are the only code outside `main`.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: JavaChallenge1: a for statement whose false branch opens a modal dialog
+    accDescr: A flowchart. The initializer builds an anonymous object with the Spring context, repository, hours, a category iterator and a lock. The condition is true while the total is 40 or less and a category remains. Then the empty body runs and the update locks, adds hours, stages a card, unlocks and starts a thread that saves through reflection. When the condition is false, the else branch builds a Swing dialog from Spring XML at run time and shows it. The modal dialog blocks while a Timer bean fades the label colors. When it closes, Double.isNaN turns the result into false and the for ends.
+    A["Initializer: anonymous class holds Spring context, repository, hours, categories, lock"] --> B{{"Condition: total <= 40 and categories.hasNext()?"}}
+    B -->|true| C["Empty body"]
+    C --> D["Update: lock, add hours, stage a card, unlock, start a Thread"]
+    D --> B
+    D -.-> T["Thread: saveAll through ReflectionUtils"]
+    B -->|false| E["Else branch: build a Swing dialog from Spring XML at run time"]
+    E --> F["setVisible blocks while a Timer bean fades the colors"]
+    F --> G["Dialog closes: Double.isNaN turns the result into false"]
+```
+
+**What this shows:** the literal three-clause `for (init; condition; update) { }`. The condition decides between "go round again" and "show the window, then say false". The window is built from Spring XML bean definitions when it is needed, and the modal dialog does not return until the user closes it.
+
+**Why this mechanism matters:** this entry keeps control flow in the `for` and puts a framework's blocking call (a modal dialog with its own event handling) inside the condition. The dashed thread is the original's deliberately awkward background save.
+
 ## How the stunt works
 
 Every port splits the work three ways: an **initializer** that builds the loop's state, a **condition** that decides whether to keep going (and, on the last check, shows the window), and an **update** that does one pass of work. Comment banners in the source mark the boundaries.

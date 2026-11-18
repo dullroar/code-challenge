@@ -2,6 +2,17 @@
 
 *Learn Programming the Weird Way!* is numbered from **v3** on, so you can see which edition added what. Earlier editions were not numbered. Each release adds a section here, newest first. The edition number lives in [`metadata.yaml`](metadata.yaml) (`book-version`) and on the title page; `build.py` checks that they agree with this file.
 
+## v4
+
+A picture of how every program runs, one new entry and one new chapter, on events.
+
+- **A `## Program Flow` section in every entry's README.** One Mermaid diagram and a few sentences answer "what is the runtime really doing?". The diagram type is chosen to fit the machine: flowcharts for loops and branches, sequence diagrams for callbacks and dispatch, state diagrams for a changing jump target, and dataflow and demand graphs for lazy evaluation. They are not all flowcharts on purpose. The build copies each section to the lesson page of the entry's language, under **How each program runs**, renders it, and checks that it fits a printed page at a legible size.
+- **What the challenge does.** One shared picture in the intro says *what* every entry does. The Program Flow pictures say *how*.
+- **New entry:** [`javascript-events`](../../src/javascript-events/README.md): ten listeners on one `EventEmitter` are the whole program, and `setImmediate` gives the event loop a turn between cards.
+- **New chapter 10, "Events, callbacks and reactive control flow".** Who chooses what runs next, a synchronous `emit()` against the event loop, a trace you can read, state machines, backpressure, and a table that separates real events from look-alikes such as a window's own loop. It adds the concepts callbacks, publish and subscribe, the event loop and scheduling turns, and backpressure, and moves event-driven programming here from chapter 3.
+- **New exercise:** B22 (predict the event trace, then remove the scheduling boundary), checked by `lessons/tools/verify-exercises.sh`.
+- **Build:** `python lessons/book/build.py` renders the diagrams with a pinned Mermaid CLI (see [`README.md`](README.md)); `--check-diagrams` is the full render gate.
+
 ## v3
 
 Six new entries, a new way to ground the computer-science concepts, and a dozen new concepts.

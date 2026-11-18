@@ -4,7 +4,7 @@
 
 Most computing books teach you *a language*. This part teaches you the *ideas* that the languages share. Each idea gets a short, plain explanation: why it exists, why people use it, when it is a good choice and when it is not. Then you see which entries in this repository use it, and you can go and read the code.
 
-The ideas are grouped into eight groups that build on each other, from "what is a machine?" to "what happens when the machine's rules leak?". A ninth group puts entries side by side, so you can see that very different programs play the same role. Read them in order, or jump to a concept in the index at the end of this page.
+The ideas are grouped into eight groups that build on each other, from "what is a machine?" to "what happens when the machine's rules leak?". A ninth group puts entries side by side, so you can see that very different programs play the same role. A tenth group returns to control flow with one more answer to "what runs next?": an event. Read them in order, or jump to a concept in the index at the end of this page.
 
 Links in each concept go to Wikipedia first. Other links go only to sources that are old, stable and free to reuse, such as IETF RFCs, OWASP and MDN. If you want to add to the book, tag your own entry: see [`CONTRIBUTING.md`](../../CONTRIBUTING.md).
 
@@ -14,13 +14,14 @@ The next two parts read the same material from other directions: [By language](.
 
 - [How to read an adversarial program](01-reading-an-adversarial-program.md): Threat model, Arbitrary code execution, Sandbox, Principle of least privilege, Code review, Trojan Source: characters you cannot see, Specification versus implementation, Capability and authority
 - [What counts as a machine?](02-what-counts-as-a-machine.md): Models of computation, Transition systems and state machines, Representing state, Invariants, Observability, Stack machines, Register machines and counter machines, Turing machines, Markov algorithms, Turing completeness, Operational semantics, Computation versus orchestration
-- [Control flow and continuations](03-control-flow-and-continuations.md): Control flow, Goto and structured programming, The program counter, Recursion, Fixed-point iteration, Coroutines, Continuations, Self-modifying code, Event-driven programming, Logical clocks and event ordering
+- [Control flow and continuations](03-control-flow-and-continuations.md): Control flow, Goto and structured programming, The program counter, Recursion, Fixed-point iteration, Coroutines, Continuations, Self-modifying code, Logical clocks and event ordering
 - [Evaluation and demand](04-evaluation-and-demand.md): Evaluation strategies, Eager evaluation, Lazy evaluation, Short-circuit evaluation, Deferred execution, Iterators and generators, Referential transparency, Array programming, First-class and higher-order functions, Functors and mapping, Monoids and folds, Dataflow programming
 - [Formal languages as computational substrates](05-formal-languages-as-computational-substrates.md): The Chomsky hierarchy, Regular expressions, Parsing, Term and string rewriting, Macros and text expansion, Declarative programming, Domain-specific languages, Markup languages, Build automation, Language-theoretic security, Weird machines, Category theory, Interpreters and virtual machines
 - [State beyond variables](06-state-beyond-variables.md): State, The call stack, The stack as a data structure, Scope and binding, Closures and lexical environments, Homoiconicity: code as data, Reflection and metaprogramming, Dependency graphs, Database triggers, Serialization, deserialization and object pickling
 - [Effects, errors and commitment](07-effects-errors-and-commitment.md): Side effects, Monads and effect systems, Exception handling, Exit status, Integrity constraints, Backtracking, The cut: committing to a choice, Transactions, Idempotence, Thread safety and thread affinity
 - [Abstraction leaks and implementation dependence](08-abstraction-leaks-and-implementation-dependence.md): Leaky abstractions, Undefined, unspecified and implementation-defined behavior, Portability, Optimizers, Hyrum's law, Performance cliffs and time complexity, Regular-expression denial of service, Reproducibility and deterministic builds
 - [Comparative case studies](09-comparative-case-studies.md): An ordinary loop, used in an unusual place, A lazy sequence that someone keeps asking for, Whole-array operations instead of steps, Text that is rewritten and read again, Control flow that rewrites itself, A search that fails on purpose, Dispatch and triggers: the rule fires the next step, The input is the loop, Document order is the program
+- [Events, callbacks and reactive control flow](10-events-callbacks-and-reactive-control-flow.md): Event-driven programming, Callbacks, Publish and subscribe, The event loop and scheduling turns, Backpressure
 
 ## Concept index
 
@@ -28,26 +29,28 @@ The next two parts read the same material from other directions: [By language](.
 | --- | --- | --- |
 | [Arbitrary code execution](01-reading-an-adversarial-program.md#arbitrary-code-execution) | How to read an adversarial program | `regex-perl`, `tar-gnu`, `tcl-weird`, `xaml` |
 | [Array programming](04-evaluation-and-demand.md#array-programming) | Evaluation and demand | `apl`, `apl-weird` |
+| [Backpressure](10-events-callbacks-and-reactive-control-flow.md#backpressure) | Events, callbacks and reactive control flow | `javascript-events` (counterexample), `javascript-weird` (analogy), `tar-gnu-weird` (analogy) |
 | [Backtracking](07-effects-errors-and-commitment.md#backtracking) | Effects, errors and commitment | `regex-dotnet`, `regex-pcre2`, `regex-pcre2grep`, `regex-perl` |
 | [Build automation](05-formal-languages-as-computational-substrates.md#build-automation) | Formal languages as computational substrates | `cmake`, `make-gnu` |
+| [Callbacks](10-events-callbacks-and-reactive-control-flow.md#callbacks) | Events, callbacks and reactive control flow | `javascript`, `javascript-events`, `javascript-weird`, `regex-pcre2`, `regex-pcre2grep` (analogy), `tar-gnu-weird`, `tcl-weird` |
 | [Capability and authority](01-reading-an-adversarial-program.md#capability-and-authority) | How to read an adversarial program | `ed-weird`, `ex-weird`, `tar-gnu` |
 | [Category theory](05-formal-languages-as-computational-substrates.md#category-theory) | Formal languages as computational substrates | `haskell` (analogy), `javascript-weird` (analogy), `LinqChallenge1` (analogy) |
 | [Closures and lexical environments](06-state-beyond-variables.md#closures-and-lexical-environments) | State beyond variables | `JavaChallenge1` (analogy), `javascript`, `javascript-weird`, `ModernChallenge1`, `RustChallenge1` |
 | [Code review](01-reading-an-adversarial-program.md#code-review) | How to read an adversarial program | all entries |
 | [Computation versus orchestration](02-what-counts-as-a-machine.md#computation-versus-orchestration) | What counts as a machine? | `ed-weird`, `ex-weird`, `javascript-weird`, `regex-pcre2`, `tar-gnu`, `tar-gnu-weird`, `xaml` |
 | [Continuations](03-control-flow-and-continuations.md#continuations) | Control flow and continuations | `cobol-weird` (analogy), `forth-weird` (analogy), `javascript-weird` (counterexample), `make-gnu` (analogy), `tar-gnu` (counterexample) |
-| [Control flow](03-control-flow-and-continuations.md#control-flow) | Control flow and continuations | `apl-weird`, `awk`, `awk-weird`, `cmake`, `cobol`, `cobol-weird`, `find-gnu`, `find-posix`, `forth`, `forth-weird`, `GoChallenge1`, `haskell-weird`, `JavaChallenge1`, `javascript`, `LinqChallenge1`, `lisp`, `lisp-weird`, `make-gnu`, `ModernChallenge1`, `tcl-weird` |
-| [Coroutines](03-control-flow-and-continuations.md#coroutines) | Control flow and continuations | `javascript-weird` (analogy), `KotlinChallenge1` (analogy), `PythonChallenge1` (analogy), `RustChallenge1` (analogy) |
+| [Control flow](03-control-flow-and-continuations.md#control-flow) | Control flow and continuations | `apl-weird`, `awk`, `awk-weird`, `cmake`, `cobol`, `cobol-weird`, `find-gnu`, `find-posix`, `forth`, `forth-weird`, `GoChallenge1`, `haskell-weird`, `JavaChallenge1`, `javascript`, `javascript-events`, `LinqChallenge1`, `lisp`, `lisp-weird`, `make-gnu`, `ModernChallenge1`, `tcl-weird` |
+| [Coroutines](03-control-flow-and-continuations.md#coroutines) | Control flow and continuations | `javascript-events` (counterexample), `javascript-weird` (analogy), `KotlinChallenge1` (analogy), `PythonChallenge1` (analogy), `RustChallenge1` (analogy) |
 | [Database triggers](06-state-beyond-variables.md#database-triggers) | State beyond variables | `tcl-weird` |
 | [Dataflow programming](04-evaluation-and-demand.md#dataflow-programming) | Evaluation and demand | `javascript-weird`, `LinqChallenge1`, `LinqChallenge2`, `make-gnu` (analogy) |
 | [Declarative programming](05-formal-languages-as-computational-substrates.md#declarative-programming) | Formal languages as computational substrates | `awk`, `awk-weird`, `cobol`, `LinqChallenge2`, `make-gnu`, `xaml` |
-| [Deferred execution](04-evaluation-and-demand.md#deferred-execution) | Evaluation and demand | `javascript-weird`, `LinqChallenge1`, `LinqChallenge2`, `ModernChallenge1` |
+| [Deferred execution](04-evaluation-and-demand.md#deferred-execution) | Evaluation and demand | `javascript-events`, `javascript-weird`, `LinqChallenge1`, `LinqChallenge2`, `ModernChallenge1` |
 | [Dependency graphs](06-state-beyond-variables.md#dependency-graphs) | State beyond variables | `make-gnu` |
 | [Domain-specific languages](05-formal-languages-as-computational-substrates.md#domain-specific-languages) | Formal languages as computational substrates | `awk`, `cmake`, `find-gnu`, `find-posix`, `LinqChallenge2`, `lisp`, `regex-pcre2`, `tar-gnu` |
 | [Eager evaluation](04-evaluation-and-demand.md#eager-evaluation) | Evaluation and demand | `apl`, `apl-weird`, `javascript`, `javascript-weird` |
 | [Evaluation strategies](04-evaluation-and-demand.md#evaluation-strategies) | Evaluation and demand | `haskell`, `haskell-weird`, `PythonChallenge1` |
-| [Event-driven programming](03-control-flow-and-continuations.md#event-driven-programming) | Control flow and continuations | `javascript`, `javascript-weird`, `tar-gnu-weird` |
-| [Exception handling](07-effects-errors-and-commitment.md#exception-handling) | Effects, errors and commitment | `cobol-weird` |
+| [Event-driven programming](10-events-callbacks-and-reactive-control-flow.md#event-driven-programming) | Events, callbacks and reactive control flow | `javascript`, `javascript-events`, `javascript-weird`, `LinqChallenge1` (counterexample), `ModernChallenge1` (counterexample), `PythonChallenge1` (counterexample), `RustChallenge1` (counterexample), `tar-gnu-weird`, `xaml` (counterexample) |
+| [Exception handling](07-effects-errors-and-commitment.md#exception-handling) | Effects, errors and commitment | `cobol-weird`, `javascript-events` |
 | [Exit status](07-effects-errors-and-commitment.md#exit-status) | Effects, errors and commitment | `regex-pcre2grep`, `regex-sed`, `tar-gnu`, `tar-gnu-weird` |
 | [First-class and higher-order functions](04-evaluation-and-demand.md#first-class-and-higher-order-functions) | Evaluation and demand | `haskell`, `javascript`, `javascript-weird`, `LinqChallenge1`, `RustChallenge1` |
 | [Fixed-point iteration](03-control-flow-and-continuations.md#fixed-point-iteration) | Control flow and continuations | `m4`, `make-gnu`, `regex-sed` |
@@ -56,9 +59,9 @@ The next two parts read the same material from other directions: [By language](.
 | [Homoiconicity: code as data](06-state-beyond-variables.md#homoiconicity-code-as-data) | State beyond variables | `apl-weird`, `ex-weird`, `lisp`, `lisp-weird`, `tcl-weird` |
 | [Hyrum's law](08-abstraction-leaks-and-implementation-dependence.md#hyrums-law) | Abstraction leaks and implementation dependence | `cmake`, `ed-weird`, `find-gnu`, `find-posix`, `make-gnu`, `tar-gnu-weird` |
 | [Idempotence](07-effects-errors-and-commitment.md#idempotence) | Effects, errors and commitment | `tar-gnu` |
-| [Integrity constraints](07-effects-errors-and-commitment.md#integrity-constraints) | Effects, errors and commitment | `cobol`, `find-gnu`, `find-posix`, `javascript`, `regex-pcre2grep`, `tar-gnu`, `tar-gnu-weird` |
+| [Integrity constraints](07-effects-errors-and-commitment.md#integrity-constraints) | Effects, errors and commitment | `cobol`, `find-gnu`, `find-posix`, `javascript`, `javascript-events`, `regex-pcre2grep`, `tar-gnu`, `tar-gnu-weird` |
 | [Interpreters and virtual machines](05-formal-languages-as-computational-substrates.md#interpreters-and-virtual-machines) | Formal languages as computational substrates | `ex-weird`, `regex-pcre2`, `tar-gnu`, `tcl-weird`, `xaml` |
-| [Invariants](02-what-counts-as-a-machine.md#invariants) | What counts as a machine? | `javascript`, `javascript-weird`, `tar-gnu-weird` |
+| [Invariants](02-what-counts-as-a-machine.md#invariants) | What counts as a machine? | `javascript`, `javascript-events`, `javascript-weird`, `tar-gnu-weird` |
 | [Iterators and generators](04-evaluation-and-demand.md#iterators-and-generators) | Evaluation and demand | `haskell`, `javascript-weird`, `KotlinChallenge1`, `PythonChallenge1`, `RustChallenge1` |
 | [Language-theoretic security](05-formal-languages-as-computational-substrates.md#language-theoretic-security) | Formal languages as computational substrates | `tar-gnu`, `xaml` |
 | [Lazy evaluation](04-evaluation-and-demand.md#lazy-evaluation) | Evaluation and demand | `haskell`, `haskell-weird`, `javascript-weird`, `KotlinChallenge1`, `LinqChallenge1`, `LinqChallenge2`, `m4`, `RustChallenge1` |
@@ -70,13 +73,14 @@ The next two parts read the same material from other directions: [By language](.
 | [Models of computation](02-what-counts-as-a-machine.md#models-of-computation) | What counts as a machine? | every entry that names its machine |
 | [Monads and effect systems](07-effects-errors-and-commitment.md#monads-and-effect-systems) | Effects, errors and commitment | `haskell-weird` |
 | [Monoids and folds](04-evaluation-and-demand.md#monoids-and-folds) | Evaluation and demand | `haskell`, `javascript`, `javascript-weird`, `LinqChallenge1`, `lisp` (analogy) |
-| [Observability](02-what-counts-as-a-machine.md#observability) | What counts as a machine? | `find-gnu`, `tar-gnu`, `tar-gnu-weird` |
+| [Observability](02-what-counts-as-a-machine.md#observability) | What counts as a machine? | `find-gnu`, `javascript-events`, `tar-gnu`, `tar-gnu-weird` |
 | [Operational semantics](02-what-counts-as-a-machine.md#operational-semantics) | What counts as a machine? | `ex-weird`, `javascript`, `tar-gnu-weird` |
 | [Optimizers](08-abstraction-leaks-and-implementation-dependence.md#optimizers) | Abstraction leaks and implementation dependence | `find-gnu`, `regex-pcre2` |
 | [Parsing](05-formal-languages-as-computational-substrates.md#parsing) | Formal languages as computational substrates | `forth-weird`, `regex-dotnet`, `tar-gnu`, `xaml` |
 | [Performance cliffs and time complexity](08-abstraction-leaks-and-implementation-dependence.md#performance-cliffs-and-time-complexity) | Abstraction leaks and implementation dependence | `regex-sed` |
 | [Portability](08-abstraction-leaks-and-implementation-dependence.md#portability) | Abstraction leaks and implementation dependence | `awk-weird`, `ed-weird`, `ex-weird`, `find-posix`, `regex-pcre2grep`, `tar-gnu-weird` |
 | [Principle of least privilege](01-reading-an-adversarial-program.md#principle-of-least-privilege) | How to read an adversarial program | `tar-gnu` |
+| [Publish and subscribe](10-events-callbacks-and-reactive-control-flow.md#publish-and-subscribe) | Events, callbacks and reactive control flow | `javascript-events`, `tar-gnu-weird` (analogy), `tcl-weird` (analogy) |
 | [Recursion](03-control-flow-and-continuations.md#recursion) | Control flow and continuations | `find-gnu`, `find-posix`, `m4`, `tcl-weird` |
 | [Referential transparency](04-evaluation-and-demand.md#referential-transparency) | Evaluation and demand | `apl`, `haskell`, `haskell-weird`, `javascript-weird` |
 | [Reflection and metaprogramming](06-state-beyond-variables.md#reflection-and-metaprogramming) | State beyond variables | `apl-weird`, `ex-weird`, `forth-weird`, `lisp-weird`, `tcl`, `tcl-weird`, `xaml` |
@@ -84,26 +88,27 @@ The next two parts read the same material from other directions: [By language](.
 | [Regular expressions](05-formal-languages-as-computational-substrates.md#regular-expressions) | Formal languages as computational substrates | `awk`, `awk-weird`, `cmake`, `ed-weird`, `find-gnu`, `regex-dotnet`, `regex-pcre2`, `regex-pcre2grep`, `regex-perl`, `regex-sed` |
 | [Regular-expression denial of service](08-abstraction-leaks-and-implementation-dependence.md#regular-expression-denial-of-service) | Abstraction leaks and implementation dependence | `regex-sed` |
 | [Representing state](02-what-counts-as-a-machine.md#representing-state) | What counts as a machine? | `cobol`, `ed-weird`, `ex-weird`, `find-gnu`, `find-posix`, `regex-sed`, `tar-gnu`, `tar-gnu-weird` |
-| [Reproducibility and deterministic builds](08-abstraction-leaks-and-implementation-dependence.md#reproducibility-and-deterministic-builds) | Abstraction leaks and implementation dependence | `javascript`, `javascript-weird`, `tar-gnu`, `tar-gnu-weird` |
+| [Reproducibility and deterministic builds](08-abstraction-leaks-and-implementation-dependence.md#reproducibility-and-deterministic-builds) | Abstraction leaks and implementation dependence | `javascript`, `javascript-events`, `javascript-weird`, `tar-gnu`, `tar-gnu-weird` |
 | [Sandbox](01-reading-an-adversarial-program.md#sandbox) | How to read an adversarial program | all entries |
 | [Scope and binding](06-state-beyond-variables.md#scope-and-binding) | State beyond variables | `apl-weird`, `javascript`, `javascript-weird`, `lisp-weird`, `m4`, `tcl`, `tcl-weird` |
 | [Self-modifying code](03-control-flow-and-continuations.md#self-modifying-code) | Control flow and continuations | `apl-weird`, `cobol-weird`, `ex-weird` |
 | [Serialization, deserialization and object pickling](06-state-beyond-variables.md#serialization-deserialization-and-object-pickling) | State beyond variables | `apl-weird`, `m4` (analogy), `regex-sed` (analogy), `tar-gnu`, `tcl-weird`, `xaml` |
 | [Short-circuit evaluation](04-evaluation-and-demand.md#short-circuit-evaluation) | Evaluation and demand | `find-gnu`, `find-posix`, `javascript`, `javascript-weird`, `lisp-weird` |
-| [Side effects](07-effects-errors-and-commitment.md#side-effects) | Effects, errors and commitment | `find-gnu`, `find-posix`, `GoChallenge1`, `haskell-weird`, `JavaChallenge1`, `javascript`, `javascript-weird`, `KotlinChallenge1`, `LinqChallenge1`, `LinqChallenge2`, `ModernChallenge1`, `PythonChallenge1`, `regex-pcre2`, `regex-pcre2grep`, `regex-perl`, `RustChallenge1`, `tar-gnu-weird`, `xaml` |
+| [Side effects](07-effects-errors-and-commitment.md#side-effects) | Effects, errors and commitment | `find-gnu`, `find-posix`, `GoChallenge1`, `haskell-weird`, `JavaChallenge1`, `javascript`, `javascript-events`, `javascript-weird`, `KotlinChallenge1`, `LinqChallenge1`, `LinqChallenge2`, `ModernChallenge1`, `PythonChallenge1`, `regex-pcre2`, `regex-pcre2grep`, `regex-perl`, `RustChallenge1`, `tar-gnu-weird`, `xaml` |
 | [Specification versus implementation](01-reading-an-adversarial-program.md#specification-versus-implementation) | How to read an adversarial program | `ed-weird`, `ex-weird` |
 | [Stack machines](02-what-counts-as-a-machine.md#stack-machines) | What counts as a machine? | `forth`, `forth-weird` |
-| [State](06-state-beyond-variables.md#state) | State beyond variables | `apl-weird`, `awk-weird`, `cmake`, `cobol-weird`, `ed-weird`, `ex-weird`, `forth-weird`, `haskell-weird`, `javascript`, `javascript-weird`, `lisp-weird`, `m4`, `make-gnu`, `regex-dotnet`, `regex-pcre2`, `regex-perl`, `regex-sed`, `tar-gnu-weird`, `tcl-weird`, `xaml` |
+| [State](06-state-beyond-variables.md#state) | State beyond variables | `apl-weird`, `awk-weird`, `cmake`, `cobol-weird`, `ed-weird`, `ex-weird`, `forth-weird`, `haskell-weird`, `javascript`, `javascript-events`, `javascript-weird`, `lisp-weird`, `m4`, `make-gnu`, `regex-dotnet`, `regex-pcre2`, `regex-perl`, `regex-sed`, `tar-gnu-weird`, `tcl-weird`, `xaml` |
 | [Term and string rewriting](05-formal-languages-as-computational-substrates.md#term-and-string-rewriting) | Formal languages as computational substrates | `ed-weird`, `m4`, `regex-sed` |
-| [The call stack](06-state-beyond-variables.md#the-call-stack) | State beyond variables | `find-gnu`, `find-posix` |
+| [The call stack](06-state-beyond-variables.md#the-call-stack) | State beyond variables | `find-gnu`, `find-posix`, `javascript-events` |
 | [The Chomsky hierarchy](05-formal-languages-as-computational-substrates.md#the-chomsky-hierarchy) | Formal languages as computational substrates | `regex-dotnet` |
 | [The cut: committing to a choice](07-effects-errors-and-commitment.md#the-cut-committing-to-a-choice) | Effects, errors and commitment | `regex-pcre2`, `regex-pcre2grep`, `regex-perl` |
+| [The event loop and scheduling turns](10-events-callbacks-and-reactive-control-flow.md#the-event-loop-and-scheduling-turns) | Events, callbacks and reactive control flow | `javascript`, `javascript-events`, `javascript-weird`, `LinqChallenge1`, `ModernChallenge1`, `PythonChallenge1`, `RustChallenge1` |
 | [The program counter](03-control-flow-and-continuations.md#the-program-counter) | Control flow and continuations | `cobol-weird`, `ex-weird`, `forth-weird` |
 | [The stack as a data structure](06-state-beyond-variables.md#the-stack-as-a-data-structure) | State beyond variables | `forth`, `forth-weird`, `regex-dotnet` |
 | [Thread safety and thread affinity](07-effects-errors-and-commitment.md#thread-safety-and-thread-affinity) | Effects, errors and commitment | `GoChallenge1`, `JavaChallenge1`, `KotlinChallenge1`, `LinqChallenge1`, `LinqChallenge2`, `ModernChallenge1`, `PythonChallenge1`, `RustChallenge1` |
 | [Threat model](01-reading-an-adversarial-program.md#threat-model) | How to read an adversarial program | `regex-perl`, `tar-gnu`, `xaml` |
 | [Transactions](07-effects-errors-and-commitment.md#transactions) | Effects, errors and commitment | `forth`, `regex-perl`, `tcl` |
-| [Transition systems and state machines](02-what-counts-as-a-machine.md#transition-systems-and-state-machines) | What counts as a machine? | `ed-weird`, `find-gnu`, `find-posix`, `tar-gnu`, `tar-gnu-weird` |
+| [Transition systems and state machines](02-what-counts-as-a-machine.md#transition-systems-and-state-machines) | What counts as a machine? | `ed-weird`, `find-gnu`, `find-posix`, `javascript-events`, `tar-gnu`, `tar-gnu-weird` |
 | [Trojan Source: characters you cannot see](01-reading-an-adversarial-program.md#trojan-source-characters-you-cannot-see) | How to read an adversarial program | an exercise |
 | [Turing completeness](02-what-counts-as-a-machine.md#turing-completeness) | What counts as a machine? | `m4`, `make-gnu`, `regex-sed` |
 | [Turing machines](02-what-counts-as-a-machine.md#turing-machines) | What counts as a machine? | `m4` (analogy), `regex-sed` (analogy) |

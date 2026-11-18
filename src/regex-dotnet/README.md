@@ -50,6 +50,26 @@ sandbox/container/run-image.sh src/regex-dotnet
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The .NET SDK builds it in a build stage. The image holds only the compiled dll on the .NET runtime, with no SDK.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: regex-dotnet: balancing groups as a budget stack
+    accDescr: A flowchart. The host draws four hour counts and writes them as a tape of letters a, one per hour. It runs one regex match. The pattern first pushes 41 empty captures onto the stack of group b, which is the budget. Each pass of the star loop first checks whether the budget stack is non-empty. If it is, a chain of conditional flag groups picks the next category. Then 10 to 19 letters a are matched, and each one pops a budget token, if any is left, and pushes a token onto the running total stack. When the budget is empty, a failing lookahead fails the pass and the loop ends. The host then reads out the categories, the hours and the size of the total stack.
+    A["Host: draw four hour counts, write them as a tape of a's"] --> B["One Regex match runs against the tape"]
+    B --> C["Push 41 empty captures onto group b: the budget"]
+    C --> D{{"Is the budget stack non-empty?"}}
+    D -->|yes| E["Category picker: the first flag not yet set names the category"]
+    E --> F["Match 10 to 19 a's: each pops a budget token if any is left, and pushes one onto the total stack s"]
+    F --> D
+    D -->|"no: a failing lookahead fails the pass"| G["The star loop ends and the match succeeds"]
+    G --> H["Host reads the captures: categories, hours and the size of s"]
+```
+
+**What this shows:** the regex engine is a machine with stacks. A balancing group pops one stack and pushes another in the same step, so a single `a` can spend one unit of budget and add one hour to the total. The budget stack is the stop rule: when it is empty, the next pass cannot start.
+
+**Why this mechanism matters:** the state is stack *depth*. Nothing counts and nothing adds. The match succeeds, and the program's answer is what the engine captured. An entry may push the total over 40 mid-way, because the budget runs dry partway through its hours and the extra `a`s pop nothing.
+
 ## How the stunt works
 
 The host draws four random hour counts and builds a *unary tape*: `Meetings:aaaaaaaaaaaaaaa;Coding:aaaaaaaaaaaa;...` (one `a` per hour). It fires one match against the tape and reads out what the pattern captured. The pattern does the rest:

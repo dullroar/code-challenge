@@ -25,6 +25,7 @@ Haskell is lazy: one `span` over an infinite list is the stop rule, because only
 | [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | eager |
 | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | eager |
 | [`javascript`](../../src/javascript/README.md) | JavaScript | eager |
+| [`javascript-events`](../../src/javascript-events/README.md) | JavaScript | eager |
 | [`tcl`](../../src/tcl/README.md) | Tcl | eager |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl | eager |
 | [`haskell`](../../src/haskell/README.md) | Haskell | lazy |
@@ -156,6 +157,7 @@ Deferred execution means that you describe a query or a pipeline now, and it run
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
+| [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | demonstrates | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |

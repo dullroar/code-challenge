@@ -42,6 +42,25 @@ sandbox\windows\run.ps1 src\LinqChallenge2
 
 It runs the entry in a throwaway VM with networking off, screenshots the window, asks it to close, and prints what it saved. This entry has a `check.ps1`, so that is what runs.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: LinqChallenge2: query syntax over the five fixed days, forced by one Single
+    accDescr: A flowchart. The first query ranges over the five fixed days. Its where clause recomputes the running total as a prefix sum, with no accumulator, and keeps a day only while the total is 40 or less. A let clause wraps the EF Core Add in a one-row query to get a value from a void call. SaveChanges follows. The second query ranges over the EF Core query for this run, crossing to objects with AsEnumerable. An Aggregate folds the saved rows into a report. Further let clauses, each a one-row query, build the window and the pulse. A final Single forces the lazy pipeline to run and returns its one value.
+    A["from day in WorkWeek: the five fixed days"] --> B["where: prefix sum of hours up to this day is 40 or less"]
+    B --> C["let tracked: a one-row query wraps ctx.Timecards.Add"]
+    C --> D["SaveChanges, after all days are tracked"]
+    D --> E["from persisted in the EF query, AsEnumerable: crossing to objects"]
+    E --> F["Aggregate: fold the saved rows into a report"]
+    F --> G["let window, let pulse: each a one-row query around a void WPF call"]
+    G --> H["Single: forces the lazy pipeline and returns its one value"]
+```
+
+**What this shows:** the same data path as [`LinqChallenge1`](../LinqChallenge1/README.md), written with query syntax. The `where` clause is the stop rule: it recomputes a prefix sum for each day instead of keeping a running total in a variable. Nothing runs until the closing `Single()`.
+
+**Why this mechanism matters:** query syntax is only a way to write method calls. The compiler turns `where`, `let` and `select` into the same `Where`, `Select` and `SelectMany` calls, so the execution engine does not change. The one-row query around each `void` call is a joke that proves how far the syntax reaches.
+
 ## How the stunt works
 
 C# query syntax is syntactic sugar (a friendlier way to write the same thing) over the same `Select`/`SelectMany`/`Where` calls Variant A uses directly - it is not a different execution engine. [`Program.cs`](Program.cs) pushes that sugar as far as it goes, in two headline places and then everywhere else for good measure:

@@ -1,0 +1,57 @@
+{
+  "theme": "neutral",
+  "securityLevel": "strict",
+  "fontFamily": "DejaVu Sans, sans-serif",
+  "htmlLabels": false,
+  "themeVariables": {
+    "fontSize": "16px",
+    "lineColor": "#222222",
+    "primaryBorderColor": "#222222",
+    "primaryTextColor": "#000000",
+    "noteBkgColor": "#fff8c4",
+    "noteTextColor": "#000000",
+    "noteBorderColor": "#222222"
+  },
+  "flowchart": {
+    "htmlLabels": false,
+    "useMaxWidth": false,
+    "nodeSpacing": 24,
+    "rankSpacing": 26,
+    "padding": 6,
+    "wrappingWidth": 280
+  },
+  "sequence": {
+    "useMaxWidth": false,
+    "mirrorActors": false,
+    "wrap": true,
+    "width": 135,
+    "actorMargin": 24,
+    "messageMargin": 24,
+    "noteMargin": 6,
+    "diagramMarginX": 10,
+    "diagramMarginY": 10,
+    "boxMargin": 6,
+    "height": 40
+  },
+  "state": {
+    "useMaxWidth": false,
+    "nodeSpacing": 24,
+    "rankSpacing": 26
+  },
+  "class": {
+    "useMaxWidth": false,
+    "htmlLabels": false
+  },
+  "er": {
+    "useMaxWidth": false
+  },
+  "timeline": {
+    "useMaxWidth": false
+  },
+  "journey": {
+    "useMaxWidth": false
+  },
+  "gantt": {
+    "useMaxWidth": false
+  }
+}

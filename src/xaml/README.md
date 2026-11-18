@@ -11,6 +11,7 @@ pairs-with: ModernChallenge1
 machine: "An object-graph constructor that runs methods as it parses"
 state: "Document order, plus \"carrier\" arrays"
 tags: [arbitrary-code-execution, computation-versus-orchestration, declarative-programming, interpreter-and-virtual-machine, langsec, markup-language, parsing, reflection-and-metaprogramming, serialization-deserialization-pickling, side-effect, state, threat-model, weird-machine]
+counterexamples: [event-driven-programming]
 ---
 # XAML challenge: the program isn't even C# code
 
@@ -38,6 +39,33 @@ dotnet run -- efcore.xaml     # EF Core: TimeCards.Add and SaveChanges, from XAM
 Records land in `src\xaml\data`; delete that folder to start fresh (the stop rule counts rows already saved). The window says **DEMO ONLY**: nothing here touches a real time-reporting system.
 
 ![XAML demo window](../../docs/images/xaml-demo.png)
+
+## Program Flow
+
+```mermaid
+sequenceDiagram
+    accTitle: xaml: parsing the file is running the program
+    accDescr: A sequence diagram of efcore.xaml. Loader.Main creates the data folder and calls XamlReader.Load. The XAML parser builds the nodes in document order, and each ObjectDataProvider fires as soon as it is built. Four unrolled passes each draw a random number into a carrier array, build a card from it, and insert it with EF Core. A SQL trigger deletes a row if the earlier rows already total more than 40. The parser returns the finished window. Application.Run then shows the window, a Loaded event trigger starts the fade storyboard, and the run ends when the window closes.
+    participant L as Loader.Main
+    participant P as XAML parser
+    participant O as ObjectDataProvider nodes
+    participant D as SQLite and its trigger
+    participant W as Window and dispatcher
+    L->>P: XamlReader.Load(file)
+    loop four copies, in document order
+        P->>O: build the next provider node: it fires at once
+        O->>D: random hours, via a carrier array, then Add and SaveChanges
+        D-->>D: trigger deletes the row if earlier rows total over 40
+    end
+    P-->>L: the finished Window object
+    L->>W: Application.Run(window)
+    W-->>W: Loaded event trigger starts the fade storyboard
+    W-->>L: the window closes and Run returns
+```
+
+**What this shows:** there is no loop and no stop rule in the markup's control flow. The parser walks the document once, from top to bottom, and each provider does its work at the moment it is built. The four passes are four copies, and the 40-hour limit is a trigger inside SQLite, which removes a row that comes too late.
+
+**Why this mechanism matters:** the program counter is document order. The only event in the picture is the `Loaded` trigger, and it only starts an animation. The program's logic does not subscribe to anything. This is a parser used as an interpreter, not event-driven code. Shown here is `efcore.xaml`; `strict.xaml` and `sqlite.xaml` share the shape.
 
 ## How the stunt works
 

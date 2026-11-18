@@ -38,6 +38,27 @@ Debugging	14	43	2026-W46	DEMO ONLY
 # sed now exits with status 1 (failure), on purpose
 ```
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: regex-sed: one line of text, rewritten by substitutions with labels and jumps
+    accDescr: A flowchart. sed reads one tape line and rewrites it into the program state. At the label entry, two address tests decide whether to go to done: forty-one or more tally marks in the total, or no categories left. Otherwise the next category is moved to the current slot. At draw, substitutions rewrite a 16-bit shift register in the line until a digit is available. The digit becomes tally marks that are added to the total. The label dec rewrites marks into decimal. The label row prints the row and writes an INSERT to file descriptor 3. Control jumps back to entry. At done, the summary is printed and COMMIT is written to file descriptor 3. On a terminal, a catastrophic backtracking match is the clock for the pulse. sed then exits with status 1 on purpose.
+    A["Read the tape line and rewrite it into the program state"] --> B{{"entry: 41 or more # marks in the total, or no categories left?"}}
+    B -->|no| C["Move the next category into the current slot"]
+    C --> D["draw and step: rewrite the 16-bit shift register until a digit comes out"]
+    D --> E["Turn the digit into tally marks and append them to the total"]
+    E --> F["dec and row: marks to decimal, print the row, write the INSERT to fd 3"]
+    F --> B
+    B -->|yes| G["done: print the summary, write COMMIT to fd 3"]
+    G --> H["On a terminal: pulse, timed by a regex that backtracks for a while"]
+    H --> I["Q1: sed exits 1 on purpose; sqlite3 reads fd 3"]
+```
+
+**What this shows:** the only memory is one line of text, and every step is a substitution on it. The jumps (`b` and `t`) with address tests make a program counter. The loop is the jump from `row` back to `entry`, and the stop rule is a regex that matches 41 tally marks.
+
+**Why this mechanism matters:** this is a rewriting system, the Markov-algorithm model: there are no variables and no numbers. The other regex entries make one match do the work. This one makes many substitutions do it, and uses a slow match only as a clock.
+
 ## How the stunt works
 
 The other regex entries make **one match** do the work. The engine's quantifiers and backtracking are the loop, and a host language (Perl code blocks, a C struct, SQLite) does the arithmetic. This entry takes the opposite approach: **many small substitutions, one after another, on a single string**. Nothing outside that string holds any state. Random numbers, addition, comparison and decimal formatting are all done by rewriting text. That is an old and well-understood model of computation, the Markov algorithm.

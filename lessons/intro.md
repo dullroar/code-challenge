@@ -6,6 +6,24 @@ The [code challenge](../README.md) asks one question in many accents: *how far c
 
 The stunts are the door. These lessons are what is behind it.
 
+## What the challenge does
+
+Every entry does the same four things. The picture below says **what** happens. It is the same for all of them, and it says nothing about **how**.
+
+```mermaid
+flowchart TD
+    accTitle: What the challenge does
+    accDescr: A flowchart of the shared task. Start a DEMO ONLY run. Generate a fictional time card of 10 to 19 hours, with a category that cycles through Meetings, Coding, Debugging and Learning. Save it as a DEMO ONLY record in a local SQLite file. Add its hours to the running total. If the total is 40 or less, generate another card. If the total is over 40, show the result and finish.
+    A["Start a DEMO ONLY run"] --> B["Generate a fictional card: 10 to 19 hours, next category"]
+    B --> C["Save it as a DEMO ONLY record in local SQLite"]
+    C --> D["Add its hours to the running total"]
+    D --> E{{"Total over 40?"}}
+    E -->|No| B
+    E -->|Yes| F["Show the result and finish"]
+```
+
+*How* it happens is what the entries disagree about. Each entry's README has a **Program Flow** section with its own picture, and the book shows it on the lesson page of that entry's language, under **How each program runs**. Those pictures are not all flowcharts, because the machines are not all alike. A COBOL program with a rewritten `GO TO` is a state that changes. A Haskell program is a demand that pulls. An m4 program is text that is read again. A Node program built from listeners is a conversation. If a picture could be pasted unchanged into ten entries, it would not be teaching anything.
+
 ## The teaching philosophy
 
 > Teach the language by deliberately misusing it, then explain why the misuse works.

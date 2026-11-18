@@ -115,6 +115,54 @@ The "boring" CMake version was the first draft: `while()`, `math(EXPR)`, `list(G
 
 Never as a loop. But "a build system that regenerates its own inputs and restarts" is exactly what auto-dependency generation relies on, and CMake's regex captures are a legitimate way to parse versions and paths. The stunt is those features used for everything.
 
+<!-- BEGIN GENERATED program-flow:languages/make-cmake.md -->
+## How each program runs
+
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+
+### Program flow of `cmake`
+
+From [`cmake`](../../src/cmake/README.md) ([source section](../../src/cmake/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: cmake: one while with an empty body, whose condition is a register machine
+    accDescr: A flowchart. Before the loop, the host draws a tape of nine random digits and stores it in the CMAKE_MATCH variables, which are the registers. Each time around, while re-expands its condition. The first test says no if the total so far plus the last card matches a literal of 41 x characters. The second test builds a subject string and a pattern out of the previous captures, splices in the last digit, and matches, which captures the next hours row and rewrites all the registers. If both tests pass, the empty body runs and the loop goes round again. If a test fails, the loop ends, and the host reads the log, picks the ISO week, writes SQLite and plays the glow.
+    A["Host: draw 9 random digits and store them in the CMAKE_MATCH variables"] --> B{{"while re-expands its condition"}}
+    B --> C{{"Test 1: does total plus last card match 41 x's?"}}
+    C -->|"yes: over 40"| G["Loop ends: the host reads the log, picks the week, writes SQLite, plays the glow"]
+    C -->|no| D{{"Test 2: MATCHES on a subject built from the last captures"}}
+    D -->|"match: the registers now hold the new total and card"| E["Empty body"]
+    E --> B
+    D -->|"no match: the registers are cleared"| G
+```
+
+**What this shows:** `while()` re-expands its condition on every pass, and `MATCHES` stores its captures in ordinary variables. So the condition can build its next subject out of its last captures, and the *match* is the program. Numbers are runs of `x`, and the stop rule is a 41-character literal.
+
+**Why this mechanism matters:** the loop has an empty body and a register machine for a condition. Test 1 must run first, because a failed match clears the registers and a successful one rewrites them, so the main match has to run last for its captures to survive.
+
+### Program flow of `make-gnu`
+
+From [`make-gnu`](../../src/make-gnu/README.md) ([source section](../../src/make-gnu/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: make-gnu: Make restarts itself once per card
+    accDescr: A flowchart. Make reads the makefile and includes every .tc-N.mk file written so far. A pattern rule checks whether the running total, held as a list of x words, is 40 or less. If it is, the rule writes the next .tc-N.mk file. A makefile that was remade makes Make re-execute itself, and MAKE_RESTARTS counts the passes. If the total is over 40, the rule writes nothing, so nothing is remade, Make stops restarting, and the default goal all runs. It prints the report through a chain of phony targets, plays a glow on a terminal, and hands the SQL script to sqlite3.
+    A["Make reads the makefile and includes every .tc-N.mk written so far"] --> B{{"Is the total, a list of x words, 40 or less?"}}
+    B -->|yes| C["A pattern rule writes the next .tc-N.mk file with the next card"]
+    C --> D["A file was remade, so Make re-executes itself: MAKE_RESTARTS goes up by one"]
+    D --> A
+    B -->|"no: the 41st word exists"| E["Nothing is remade: Make stops restarting"]
+    E --> F["all runs: phony targets print the report, a glow plays on a terminal"]
+    F --> G["sqlite3 reads the script that Make wrote"]
+```
+
+**What this shows:** the loop is the build tool re-running itself. Each pass includes the `.tc-N.mk` files that exist, and a file that gets written forces a restart. The state is *which files exist*. The stop rule is that the rule declines to write a new file.
+
+**Why this mechanism matters:** Make's dependency engine decides what to do next from the state of the file system. There is no loop statement and no `$(shell)`: arithmetic is list surgery on `x` words. The report is a chain of phony targets so that its output stays in order.
+<!-- END GENERATED program-flow:languages/make-cmake.md -->
+
 ## Computer science behind this page
 
 <!-- BEGIN GENERATED concepts:languages/make-cmake.md -->

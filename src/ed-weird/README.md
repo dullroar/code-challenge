@@ -54,6 +54,26 @@ sandbox/container/run-image.sh src/ed-weird
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`. The image holds GNU ed and sqlite3 on a minimal Ubuntu.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: ed-weird: one global command over a text buffer
+    accDescr: A flowchart. The launcher gives ed five random digits as a buffer of five lines. The script adds a category to each line by line address, rewrites each digit into hours and a run of marks with a table of substitutions, and adds a ledger line above the first card. Then one global command visits every card line in buffer order. For each card it copies the ledger above, joins the lines, and merges the marks, which adds the hours. Guarded substitutions then turn the ledger bar into an exclamation mark when there are 41 or more marks, and turn any card after that into a dead card. When all cards are visited, ed deletes the dead and start lines, rewrites marks into decimal, and prints the rows. The launcher loads them into SQLite.
+    A["Launcher: five random digits become ed's buffer, one line per card"] --> B["Rewrite tables: line addresses add categories, a digit becomes hours as marks"]
+    B --> C["Add a ledger line above the first card"]
+    C --> D{{"g: is there another card line to visit?"}}
+    D -->|yes| E["Copy the ledger above, join, merge the marks: adding is writing marks side by side"]
+    E --> F["Guarded substitutions: 41 or more marks turn the bar into !, a card after ! becomes Dead"]
+    F --> D
+    D -->|no| G["Delete Dead and Start lines, marks to decimal, print the rows"]
+    G --> H["Launcher loads the rows into SQLite"]
+```
+
+**What this shows:** `ed` has one loop, the global command `g`, and it has no `if`. A substitution that finds nothing to replace does nothing, so each guarded substitution means "if the line has this pattern, rewrite it". The state is text: marks that are added by writing them side by side.
+
+**Why this mechanism matters:** the stop rule is a regex over the ledger (41 or more marks), and it runs *after* the card is written, so the crossing card is kept. The `!` that it writes is a state that later cards read. It is the whole memory of "we are over".
+
 ## How the stunt works
 
 Read [`timecards.ed`](timecards.ed) from top to bottom. It has six steps.

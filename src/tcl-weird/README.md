@@ -10,7 +10,8 @@ assurance: accidentally-exploited
 pairs-with: tcl
 machine: "A string-command interpreter whose command lookup can be hooked"
 state: "A TEMP table of proc source, and the depth of trigger recursion"
-tags: [arbitrary-code-execution, control-flow, database-trigger, homoiconicity, interpreter-and-virtual-machine, recursion, reflection-and-metaprogramming, scope-and-binding, serialization-deserialization-pickling, state]
+tags: [arbitrary-code-execution, callback, control-flow, database-trigger, homoiconicity, interpreter-and-virtual-machine, recursion, reflection-and-metaprogramming, scope-and-binding, serialization-deserialization-pickling, state]
+analogies: [publish-subscribe]
 ---
 # Tcl, weirder
 
@@ -47,6 +48,34 @@ Debugging	17	45	2026-W47	DEMO ONLY
 ```
 
 The `unknown:` line is real introspection: the `unknown` handler records each name it defines, and the list is printed at the end. The last line appears only with `--gui`. **Headless:** Tk needs an X display; `xvfb-run -a tclsh timecards.tcl --gui --seconds 1` works, and the container image below runs on Xvfb and screenshots the window.
+
+## Program Flow
+
+```mermaid
+sequenceDiagram
+    accTitle: tcl-weird: a recursive SQLite trigger calls Tcl procs that are fetched from a table
+    accDescr: A sequence diagram. The Tcl host installs three hooks and inserts the first card. Each insert fires a trigger in SQLite. The trigger calls the SQL function tcl, which calls back into Tcl. The first time the Tcl side asks for a command such as born, the command does not exist, so Tcl calls unknown. The unknown handler reads the proc's text from the tcl_code table, defines the proc and retries the call. The call prints the row. The trigger then inserts the next card, but only while the total of the card just inserted is 40 or less. That insert fires the trigger again. When the total is over 40, nothing is inserted, and control returns to the host, which prints the summary.
+    participant H as Tcl host
+    participant D as SQLite and the next_card trigger
+    participant U as unknown handler
+    participant T as tcl_code table
+    H->>D: INSERT the first card
+    loop each INSERT fires the trigger, while the total is 40 or less
+        D->>H: SQL function tcl calls the Tcl command born
+        H->>U: born does not exist yet, so Tcl calls unknown
+        U->>T: look up the proc's params and body
+        T-->>U: the text of the proc
+        U->>H: define the proc, retry the call
+        H-->>D: the row is printed
+        D->>D: INSERT the next card: the trigger fires again
+    end
+    D-->>H: total is over 40, no insert: the trigger chain ends
+    H->>H: print the summary
+```
+
+**What this shows:** the loop is a trigger that inserts a row and so fires itself, and every number and printed line comes from Tcl code stored as text in a table. The first call of a proc takes the long way, through `unknown` and the table, and later calls find the proc defined.
+
+**Why this mechanism matters:** the database is dispatching, but it is not an event queue. The trigger runs synchronously inside the `INSERT`, and the recursion is the loop. The `WHERE` on the trigger's insert is the stop rule. Control moves between three layers (Tcl, SQL, Tcl) on one call stack.
 
 ## How the stunt works
 

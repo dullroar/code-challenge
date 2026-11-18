@@ -46,6 +46,26 @@ Debugging	15	41	2026-W47	DEMO ONLY
 
 It draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept). It prints the rows and saves them to SQLite in one transaction.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: m4: a macro whose expansion contains itself
+    accDescr: A flowchart of m4 rescanning. m4 meets the word tc_card and replaces it with the macro body, then rescans that text. The rescan redefines the state macros, prints the row and appends the INSERT. The body ends in an ifelse. If the total is not over 40, the ifelse expands to the word tc_card, and the flow goes back to the start. If the total is over 40, the ifelse expands to nothing, no text is left to rescan, and syscmd hands the script to sqlite3.
+    A["m4 meets the word tc_card: first in the file, later in its own output"] --> B["Replace the word with the macro body, then rescan that text"]
+    B --> C["Rescan redefines state macros: tc_seed, tc_n, tc_total"]
+    C --> D["Rescan prints the row and appends the INSERT to tc_sql"]
+    D --> E{{"ifelse: is tc_total over 40?"}}
+    E -->|No| F["ifelse expands to the word tc_card"]
+    F --> A
+    E -->|Yes| G["ifelse expands to nothing: no text left to rescan"]
+    G --> H["syscmd gives tc_sql to sqlite3"]
+```
+
+**What this shows:** m4 has no loop statement. Its evaluation model is replace, then rescan. The loop is the edge from the last `ifelse` back to the first word: the expansion of `tc_card` contains the word `tc_card`.
+
+**Why this mechanism matters:** the stop rule is the absence of text. When `ifelse` expands to nothing, there is nothing left to rescan, and the program is over. State lives in other macros, redefined during the rescan.
+
 ## How the stunt works
 
 ### m4 in one paragraph

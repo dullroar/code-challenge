@@ -48,6 +48,23 @@ With `--gui` a small table window appears, with a "DEMO ONLY" line under it. **H
 
 It draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept), prints each card, and saves them to SQLite in one transaction.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: tcl: an ordinary while loop in a namespace, then one transaction
+    accDescr: A flowchart. The main procedure parses the arguments with a while, lassign and switch loop, seeds the random generator from the clock and the process id, and calls draw. The draw procedure is a while loop. While the total is at or under the limit, it draws hours, adds them to the total with incr, picks the next category, and appends a card as a dict. When the total is over the limit, the save procedure opens SQLite and writes all the cards inside one transaction. Then the program prints the cards. Only if asked does it build a Tk window with a treeview.
+    A["main: parse argv, seed rand from the clock and pid"] --> B{{"draw: while total <= limit?"}}
+    B -->|yes| C["randomHours, incr total, pick a category, lappend a card as a dict"]
+    C --> B
+    B -->|no| D["save: db transaction inserts every card with bound parameters"]
+    D --> E["Print the cards; build the Tk treeview only if --gui was given"]
+```
+
+**What this shows:** the conventional Tcl shape. A `while` is the loop, a dict is the card, and `db transaction` makes the save all-or-nothing. A guard around `main` lets the checks `source` the file and test `draw` in the same process.
+
+**Why this mechanism matters:** the program draws first and saves afterwards, so the card list is complete before the database sees it. Tcl's `while` re-evaluates its test each pass, and the test comes before the draw, so the crossing card is kept. The weird sibling [`tcl-weird`](../tcl-weird/README.md) moves the loop into the database.
+
 ## How the stunt works
 
 1. **A namespace for the rules.** `namespace eval timecards { variable ... }` holds the categories and limits; every proc is `timecards::name`. That is how a one-file Tcl program avoids polluting the global namespace.

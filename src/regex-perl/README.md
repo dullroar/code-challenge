@@ -53,6 +53,27 @@ sandbox/container/run-image.sh src/regex-perl
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds Perl (from the Ubuntu base) and sqlite3. It has no compiler and no package manager.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: regex-perl: one match, with Perl code blocks as the loop body
+    accDescr: A flowchart. Perl starts one match of a scaffold string against one pattern. A code block at the start initializes state and starts sqlite3 on a pipe. A greedy quantifier repeats a pass. At each pass a postponed code block returns the next category as a pattern, or a failure when the total is over 40 or no category is left. If it returns a category, the engine matches it, and a code block draws hours, updates local state, inserts a row and prints it. When the pass fails, the quantifier stops, and a commit verb forbids retrying fewer passes. A finalizer commits the SQL transaction and prints the summary. A final failure makes the whole match return false, after all the work.
+    A["Perl starts one match of the scaffold string against one pattern"] --> B["Initializer code block: seed, scratch folder, sqlite3 on a pipe, BEGIN"]
+    B --> C["Greedy quantifier starts a pass"]
+    C --> D{{"Postponed block: total <= 40 and a category left?"}}
+    D -->|"yes: returns the category as a pattern"| E["The engine matches the category name in the scaffold"]
+    E --> F["Code block: draw hours, local total and index, INSERT, print the row"]
+    F --> C
+    D -->|"no: returns FAIL"| G["The pass fails, the quantifier stops, COMMIT forbids retrying fewer passes"]
+    G --> H["Finalizer: COMMIT the transaction, close the pipe, print the summary, pulse on a terminal"]
+    H --> I["FAIL: the match returns false after all the work"]
+```
+
+**What this shows:** one regex match is the whole program. The quantifier is the loop, and a code block that returns a *pattern* is the stop rule: it returns the next category's name, or `(*FAIL)` to make the pass fail. Code blocks are the only places where work happens.
+
+**Why this mechanism matters:** backtracking can undo `local` variables but not side effects. The engine abandons a branch, while the `INSERT` and the `print` stay done. That is why the match can end by failing and the data is still saved. The SQL transaction is real. Only the *match* lies.
+
 ## How the stunt works
 
 Below the `use` lines, `timecards.pl` is one line: a constant scaffold string `=~` one pattern. No host code seeds, loops, or prints. `check.sh` enforces that the file is a single statement, with exactly one match and no loop keywords.

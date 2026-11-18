@@ -44,6 +44,32 @@ Debugging	19	54	2026-W46	DEMO ONLY
 # no IF, no PERFORM: ALTER kept rewiring one GO TO, and a two-digit field overflowing pulled the plug
 ```
 
+## Program Flow
+
+```mermaid
+stateDiagram-v2
+    accTitle: cobol-weird: the target of one GO TO is the loop
+    accDescr: A state diagram. The state is the current target of the single GO TO in the NEXT-CARD paragraph. It starts as Meetings. Each category paragraph rewrites it to the next category with ALTER, so the cycle is Meetings, Coding, Debugging, Learning, and back to Meetings. When the two-digit headroom field overflows, ON SIZE ERROR rewrites the target to FINISH-RUN, which commits the script and stops.
+    state "Meetings" as M
+    state "Coding" as C
+    state "Debugging" as D
+    state "Learning" as L
+    state "FINISH-RUN" as F
+    state "NEXT-CARD's GO TO jumps to" as T {
+        [*] --> M
+        M --> C : ALTER
+        C --> D : ALTER
+        D --> L : ALTER
+        L --> M : ALTER
+    }
+    T --> F : ON SIZE ERROR, ALTER
+    F --> [*] : COMMIT, sqlite3, STOP RUN
+```
+
+**What this shows:** the state of this program is the target of one `GO TO`. Each card, the category paragraph named by the target runs, rewrites the target with `ALTER` to the next category, and falls into `RECORD-CARD`, which jumps back to `NEXT-CARD`. The source text of that `GO TO` never changes. The jump does.
+
+**Why this mechanism matters:** there is no loop condition to draw. The exit is another rewrite: when `WS-HEADROOM` overflows, `ON SIZE ERROR` points the same `GO TO` at `FINISH-RUN`. Compare the plain [`cobol`](../cobol/README.md) entry, where a `PERFORM ... UNTIL` tests a condition.
+
 ## How the stunt works
 
 COBOL paragraphs run in the order they're written, falling from one into the next, unless a `GO TO` sends control somewhere else. So [`timecards.cob`](timecards.cob) reads top to bottom: set-up paragraphs fall through into the loop, and the loop ends by jumping to the last paragraph.

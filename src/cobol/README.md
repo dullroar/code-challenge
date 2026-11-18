@@ -40,6 +40,24 @@ Learning	15	49	2026-W46	DEMO ONLY
 # PERFORM UNTIL an 88-level: the stop rule is declared in the DATA DIVISION
 ```
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: cobol: PERFORM UNTIL with the stop rule declared as data
+    accDescr: A flowchart. Set-up and open-script run once. Then PERFORM DRAW-CARD repeats until the 88-level condition OVER-FORTY, declared on WS-TOTAL, is true. Each pass draws a card, adds its hours to the total, prints the row and writes an INSERT line. When OVER-FORTY is true the loop ends, the script is committed with sqlite3, and the run stops.
+    A["SET-UP, OPEN-SCRIPT: seed, ISO week, folder, SQL file"] --> B{{"OVER-FORTY? WS-TOTAL in 41 to 99"}}
+    B -->|No| C["DRAW-CARD: category from MOD of WS-ENTRIES, hours, ADD to WS-TOTAL"]
+    C --> D["DISPLAY the row, WRITE the INSERT line"]
+    D --> B
+    B -->|Yes| E["COMMIT-SCRIPT: run sqlite3"]
+    E --> F["DISPLAY summary, STOP RUN"]
+```
+
+**What this shows:** a conventional structured loop. `PERFORM DRAW-CARD UNTIL OVER-FORTY` tests the condition before every pass, so the test is a real node and the cycle is a real edge.
+
+**Why this mechanism matters:** the stop rule is data, not code. `OVER-FORTY` is an 88-level name for the values 41 to 99 of `WS-TOTAL`, so the loop asks the data whether to go on. The weird sibling [`cobol-weird`](../cobol-weird/README.md) has no such test.
+
 ## How the stunt works
 
 A COBOL program has four *divisions*, always in the same order: `IDENTIFICATION` (its name), `ENVIRONMENT` (which files it uses), `DATA` (every variable, with its exact shape) and `PROCEDURE` (the code). Read [`timecards.cob`](timecards.cob) top to bottom with this beside it.

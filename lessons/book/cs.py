@@ -23,6 +23,7 @@ The frontmatter dialect is a strict subset of YAML so that no parser library is 
 """
 import json, os, posixpath, re
 from urllib.parse import urlparse
+import diagrams
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LESSONS = os.path.dirname(HERE)
@@ -140,6 +141,9 @@ def load_entries(problems):
                 problems.add(where, f"{k!r} must be text, not a list")
         data["dir"] = d
         data["_body"] = body
+        # The README contract: one `## Program Flow` section with one Mermaid diagram (see diagrams.py and CONTRIBUTING.md).
+        data["_flow"], flow_problems = diagrams.program_flow(body, where)
+        problems.extend(flow_problems)
         entries[d] = data
     return entries
 
@@ -492,6 +496,39 @@ def blk_concepts_of(model, L, lesson_file):
         return ""
     return "The computer-science ideas behind this page: " + ", ".join(L.concept(t) for t in ids) + "."
 
+PLAIN_LINK = re.compile(r"(?<!!)\[([^\]]*)\]\(([^)\s]+)\)")
+
+def rebase_links(text, entry_dir, L, problems):
+    """The Program Flow section is written for src/<entry>/README.md. Copied into a lesson page, its relative links must point at the
+    same files from there (a link to ../cobol/README.md stays a link to src/cobol/README.md)."""
+    def sub(m):
+        label, target = m.group(1), m.group(2)
+        if re.match(r"[a-z]+:", target) or target.startswith("#"):
+            return m.group(0)
+        path, _, frag = target.partition("#")
+        full = posixpath.normpath(posixpath.join("src", entry_dir, path))
+        if not os.path.exists(os.path.join(REPO, full)):
+            problems.add(f"src/{entry_dir}/README.md", f"Program Flow link to a missing file: {target}")
+            return m.group(0)
+        return f"[{label}]({L.repo(full)}{'#' + frag if frag else ''})"
+    return PLAIN_LINK.sub(sub, text)
+
+def blk_program_flow(model, L, lesson_file):
+    """The Program Flow sections of the entries whose lesson page is `lesson_file`, copied from their READMEs. GitHub draws the
+    Mermaid; the book build turns each fence into a rendered figure."""
+    es = sorted_entries(model, lambda e: e["lesson"].partition("#")[0] == lesson_file and e.get("_flow"))
+    if not es:
+        return ""
+    parts = ["## How each program runs",
+             "Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how "
+             "that program makes the work happen: what the language, runtime or tool really does. "
+             f"[The introduction]({L.lessons('intro.md')}#what-the-challenge-does) has the one picture of what the challenge asks for, "
+             "which is the same for every entry."]
+    for e in es:
+        parts.append(f"### Program flow of `{e['dir']}`\n\nFrom {L.entry(e['dir'])}"
+                     f" ([source section]({L.repo('src/' + e['dir'] + '/README.md')}#program-flow)).\n\n{rebase_links(e['_flow'], e['dir'], L, model.problems)}")
+    return "\n\n".join(parts)
+
 TABLES = {"machines": tbl_machines, "control-state": tbl_control_state, "evaluation": tbl_evaluation, "glance": tbl_glance}
 
 def make_expander(model, L):
@@ -639,6 +676,8 @@ def generate_blocks(model, rel):
             body = TABLES[name](model, L)
         elif name.startswith("concepts:"):
             body = blk_concepts_of(model, L, name[9:])
+        elif name.startswith("program-flow:"):
+            body = blk_program_flow(model, L, name[13:])
         else:
             model.problems.add(rel, f"unknown generated block {name!r}")
             return m.group(0)

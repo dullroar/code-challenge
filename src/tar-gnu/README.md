@@ -67,6 +67,33 @@ sandbox/container/run-image.sh src/tar-gnu
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`. The image holds GNU tar (from the Ubuntu base) and sqlite3 on a minimal Ubuntu.
 
+## Program Flow
+
+```mermaid
+sequenceDiagram
+    accTitle: tar-gnu: the archive is the program and a dispatcher gives its members meaning
+    accDescr: A sequence diagram. The interpreter first asks the inspector to vet the whole archive, which reads it and runs nothing. Then it starts tar with the to-command option. For each member, in archive order, tar sends the member name and body to the dispatcher. The dispatcher checks the name and the body against strict patterns, runs exactly one SQL statement for the member, and writes a row to the trace table. A stop-over member marks the run as halted when the total is over the limit, and the later members are traced as ignored. The show member prints the rows.
+    participant I as interpret.sh
+    participant S as inspect.sh
+    participant T as tar
+    participant D as dispatch.sh
+    participant Q as SQLite
+    I->>S: vet every member of the archive
+    S-->>I: valid, and nothing was run
+    I->>T: tar --to-command=dispatch.sh
+    loop each member, in archive order
+        T->>D: member name and body
+        D->>D: check name and body against strict patterns
+        D->>Q: one SQL statement, and a trace row
+    end
+    Note over D,Q: stop-over halts the run when the total is over its limit, and later members are traced as ignored
+    D->>Q: show prints the rows
+```
+
+**What this shows:** tar is the loop and the archive is the program. For every member, tar hands the bytes to the dispatcher, and the dispatcher decides what the name means. The order of the members is the order of execution.
+
+**Why this mechanism matters:** reading and running are two separate steps. The inspector parses and checks everything and runs nothing. The dispatcher runs one SQL statement per member and passes no part of a member to a shell. That is the difference between data that is *serialized* and data that is *executed*.
+
 ## How the stunt works
 
 The archive is the program, tar is the loop, and the dispatcher is the machine that gives five words their meaning.

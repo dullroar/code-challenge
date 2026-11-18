@@ -12,6 +12,7 @@ cs/06-state-beyond-variables.md
 cs/07-effects-errors-and-commitment.md
 cs/08-abstraction-leaks-and-implementation-dependence.md
 cs/09-comparative-case-studies.md
+cs/10-events-callbacks-and-reactive-control-flow.md
 languages/README.md
 languages/apl.md
 languages/awk.md

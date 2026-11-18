@@ -1,9 +1,9 @@
 # Code Challenge - Learn Programming the Weird Way!
 
-> **39 challenges in 29 languages**
+> **40 challenges in 29 languages**
 <!-- Keep this line current whenever an entry is added: challenges = the folders in src/; languages = the distinct ids that entries list under `languages:` (the same languages as the book's Index of languages). `python lessons/book/build.py --check` prints both numbers and warns when this line is stale. -->
 
-A series of responses to a code challenge that has morphed into a set of educational exercises about programming languages and how to think about programming languages. **New: [Learn Programming the Weird Way!](lessons/README.md)**, a set of lessons built on these examples. The book is numbered from v3 on: see [what each version added](lessons/book/VERSIONS.md).
+A series of responses to a code challenge that has morphed into a set of educational exercises about programming languages and how to think about programming languages. **New: [Learn Programming the Weird Way!](lessons/README.md)**, a set of lessons built on these examples. The book is numbered from v3 on (v4 adds a picture of how every program runs, and a chapter on events): see [what each version added](lessons/book/VERSIONS.md).
 
 ## Why this exists
 
@@ -64,6 +64,7 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | The same bodiless-loop trick, Java style | [`src/JavaChallenge1`](src/JavaChallenge1/README.md) |
 | **JavaScript** | Jim | The original's empty-bodied `for`, in Node.js: an object for state, `node:sqlite`, and a timer that pulses the DEMO ONLY line on a terminal | The `for` clauses, the comma operator, and the event loop | [`src/javascript`](src/javascript/README.md) |
 | **JavaScript, weirder** | Jim | No loop statement. Three closures make the cards, and an iterator pipeline pulls them one at a time. `reduce` adds up the finished list, because it cannot stop early | Closures, lazy iteration, and why `reduce` cannot stop | [`src/javascript-weird`](src/javascript-weird/README.md) |
+| **JavaScript, event-driven** | Jim | No loop statement and no pipeline. Ten listeners on one `EventEmitter` are the whole program, and each emits the event that the next one waits for. `setImmediate` gives the event loop a turn between cards, so the call stack never grows | Events, callbacks, the event loop, and why a synchronous `emit()` is not asynchronous | [`src/javascript-events`](src/javascript-events/README.md) |
 | **Kotlin** | Ken | The same challenge, built as a sequence | The same trick, with Kotlin's sequence builders | [`src/KotlinChallenge1`](src/KotlinChallenge1/README.md) |
 | **LINQ, fluent chain** | Jim | One LINQ method chain is the entire program | LINQ method chains, end to end | [`src/LinqChallenge1`](src/LinqChallenge1/README.md) |
 | **LINQ, query expression** | Jim | Nearly every line is `from`/`where`/`let`/`select` | C# query syntax, pushed as far as it goes | [`src/LinqChallenge2`](src/LinqChallenge2/README.md) |
@@ -127,6 +128,7 @@ src/
   tar-gnu-weird/              # GNU tar: checkpoints are the clock of a state machine
   javascript/                 # JavaScript (Node.js): the original's bodiless for
   javascript-weird/           # JavaScript (Node.js): closures and a lazy iterator, no loop statement
+  javascript-events/          # JavaScript (Node.js): ten listeners on an EventEmitter, no loop statement
   forth/                      # Forth: one begin ... until and a pipe to SQLite
   forth-weird/                # Forth: no control-flow words; the loop rewinds >in
   lisp/                       # Common Lisp: one LOOP form

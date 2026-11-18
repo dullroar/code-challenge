@@ -45,6 +45,25 @@ Debugging	12	43	2026-W47	DEMO ONLY
 
 It draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept). It prints each card, then writes all of them to SQLite in one transaction.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: lisp: the clauses of one LOOP form, in the order they are written
+    accDescr: A flowchart. The function main seeds a random state from the operating system and works out the ISO week. Then one LOOP form runs its clauses in order on each pass: number counts up from 1, hours is drawn again, hours is summed into total, a card is collected, and an until clause tests whether the total is over 40. If it is not, the next pass starts. Because until comes after collect, the crossing card is kept. When it ends, the program builds the SQL script as a string, runs the sqlite3 command-line tool with run-program, and prints the rows.
+    A["main: make-random-state from the OS, ISO week with decode-universal-time"] --> B["LOOP clause: for number from 1"]
+    B --> C["for hours = a fresh random 10 to 19"]
+    C --> D["sum hours into total"]
+    D --> E["collect a card: number, category, hours, total"]
+    E --> F{{"until total > 40?"}}
+    F -->|no| B
+    F -->|yes| G["Build the SQL script as a string, run sqlite3 with run-program, print the rows"]
+```
+
+**What this shows:** `LOOP` is a small language. Its clauses run in the order written, on every pass. `for hours =` is re-evaluated each time, `sum ... into total` keeps the total in a variable the loop owns, and `until` ends the loop.
+
+**Why this mechanism matters:** the position of `until` is the stop rule's position. Written after `collect`, it keeps the crossing card. Written before it, the last card is dropped without any error. The weird sibling [`lisp-weird`](../lisp-weird/README.md) has no `LOOP`.
+
 ## How the stunt works
 
 Read the file top to bottom; each section only uses what is above it.

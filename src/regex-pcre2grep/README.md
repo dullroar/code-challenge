@@ -11,6 +11,7 @@ pairs-with: regex-pcre2
 machine: "A backtracking search that runs one program per callout"
 state: "SQLite rows, and the exit code of each callout"
 tags: [backtracking, cut, exit-status, integrity-constraint, portability, regular-expression, side-effect]
+analogies: [callback]
 ---
 # Regex challenge, Track 2b: `pcre2grep` (no custom code at all)
 
@@ -65,6 +66,28 @@ sandbox/container/run-image.sh src/regex-pcre2grep
 ```
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds a callout-enabled `pcre2grep` (built from the pinned PCRE2 release in the toolchain image) and sqlite3 on a minimal Ubuntu.
+
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: regex-pcre2grep: each callout runs sqlite3, and its exit code is the decision
+    accDescr: A flowchart. pcre2grep matches one pattern against a one-line tape. An initializing callout runs sqlite3 to create the tables and start a run. A greedy quantifier repeats a pass. At each pass a gate callout inserts a total-is-at-most-40 value into a table with a constraint that requires it to be true. If it is, sqlite3 exits with 0 and the pass continues. If it is not, the constraint fails, sqlite3 exits nonzero, and the branch is vetoed, so the loop ends. The category alternation matches the next name on the tape, and a book callout runs sqlite3 to insert and print the row. After the loop, a commit verb, a summary callout and the optional pulse run, and a final fail verb makes the match return false.
+    A["pcre2grep matches one pattern against a one-line tape"] --> B["Initializer callout: sqlite3 creates the tables, starts the run, prints the header"]
+    B --> C["Greedy quantifier starts a pass"]
+    C --> D["Gate callout: sqlite3 inserts total <= 40 into a column with CHECK ok = 1"]
+    D --> E{{"sqlite3 exit code"}}
+    E -->|"0: the row is accepted"| F["Alternation matches the next category name on the tape"]
+    F --> G["Book callout: sqlite3 draws hours, inserts the row, prints it"]
+    G --> C
+    E -->|"nonzero: the constraint failed, the branch is vetoed"| H["The quantifier stops, COMMIT forbids retrying"]
+    H --> I["Summary callout, then the pulse if test -t 1 succeeds"]
+    I --> J["FAIL: the match returns false after all the work"]
+```
+
+**What this shows:** a callout string that starts with a path runs a program. Exit status 0 lets the match go on, and any other status fails that branch. So every decision in the program is an exit code from `sqlite3`. A constraint violation (the total is over 40) is the stop rule.
+
+**Why this mechanism matters:** `pcre2grep` is not a language runtime, but it has a process boundary inside the matcher. The engine asks an external program a question and backtracks on the answer. Compare [`regex-pcre2`](../regex-pcre2/README.md), where the question is a function call in the same process.
 
 ## How the stunt works
 

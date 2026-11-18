@@ -57,6 +57,23 @@ sandbox/container/run-image.sh src/find-posix
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds GNU findutils, coreutils and sqlite3 on a minimal Ubuntu.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: find-posix: find walks into the directories that its own -exec just made
+    accDescr: A flowchart. find visits a directory. A chain of -o branches, chosen by the directory name and path, runs exactly one branch. Most branches run an exec that digs one new directory below the current one, and print part of an SQL statement. After visiting a directory, find reads its entries, so it finds the new directory and visits it next. At the end of a card where the total is 40 or less, the branch digs the next card's dice directory. At the end of a card where the total is over 40, the branch digs nothing. The walk then ends, and sqlite3 reads the SQL text that find printed.
+    A["find visits one directory: its name and path pick one -o branch"] --> B{{"Does the branch dig a new directory?"}}
+    B -->|"yes: hour, countdown, or the next card's dice"| C["-exec mkdir or mktemp -d digs it; printf and date add SQL text"]
+    C --> D["find reads this directory's entries after visiting it, and finds the new one"]
+    D --> A
+    B -->|"no: the end of a card with a total over 40"| E["The walk ends; sqlite3 reads the SQL text from the pipe"]
+```
+
+**What this shows:** the loop is a tree walk that keeps growing. find reads a directory's entries *after* it visits the directory, so a directory that `-exec` makes inside the current one is walked next. The path from the start is the history, and the directory name is the state. It is the call stack of a recursion, drawn on the file system.
+
+**Why this mechanism matters:** the stop rule is the absence of a new child: at the end of a card, five `0` hour-digits in the path (or four and a nonzero last digit) mean the total is over 40, and no branch digs. The running total is the number of hour directories in the path, and no arithmetic exists anywhere. This relies on the order in which find reads and visits, which is accidental to find, not promised by POSIX.
+
 ## How the stunt works
 
 The Make entry asked how much work Make's own syntax could do. Its loop was Make re-executing itself, and its state was which files exist. This entry plays the same game with find. The trick is this: **find reads a directory's entries after it visits the directory.** So if `-exec` makes a new directory inside the one find is visiting, find walks into it next. The walk keeps going for as long as `-exec` keeps digging.
