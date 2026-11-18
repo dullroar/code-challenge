@@ -32,6 +32,7 @@ header#title-block-header { display: none; }
 .titlepage { height: 22cm; text-align: center; break-after: page; display: flex; flex-direction: column;
              justify-content: center; }
 .titlepage h1.book-title { font-size: 34pt; break-before: auto; margin: 0 0 .6em; }
+.titlepage .book-version { font-size: .5em; font-weight: normal; color: #666; white-space: nowrap; }
 .book-subtitle { font: italic 14pt/1.4 "DejaVu Serif", serif; color: #444; margin: 0 0 4em; }
 .book-authors { font: 16pt/1.6 "DejaVu Sans", sans-serif; }
 .copyrightpage { font-size: 8.5pt; line-height: 1.4; break-after: page; padding-top: 12cm; }

@@ -172,6 +172,30 @@ def counts(model):
     if not m or (int(m.group(1)), int(m.group(2))) != (n, langs):
         print(f"NOTE    the root README says {m.group(0) if m else 'nothing'}; update it to **{n} challenges in {langs} languages**")
 
+def check_version():
+    """The edition number must agree in metadata.yaml, on the title and copyright pages, and in VERSIONS.md."""
+    with open(os.path.join(HERE, "metadata.yaml"), encoding="utf-8") as f:
+        meta = f.read()
+    v = re.search(r"^book-version:\s*(\d+)\s*$", meta, re.M)
+    t = re.search(r'^title:\s*"(.+)"\s*$', meta, re.M)
+    if not v or not t:
+        raise SystemExit("metadata.yaml needs `book-version: N` and a quoted `title:` line")
+    full = f"Learn Programming the Weird Way! v{v.group(1)}"
+    problems = []
+    if t.group(1) != full:
+        problems.append(f"metadata.yaml: title is {t.group(1)!r}, expected {full!r} to match book-version")
+    with open(FRONT, encoding="utf-8") as f:
+        front = f.read()
+    if f'<span class="book-version">v{v.group(1)}</span>' not in front or f"<p>{full}</p>" not in front:
+        problems.append(f"front-matter.md: the title page and the copyright page must both say {full!r}")
+    versions = os.path.join(HERE, "VERSIONS.md")
+    if not os.path.isfile(versions) or not re.search(rf"^## v{v.group(1)}\b", open(versions, encoding="utf-8").read(), re.M):
+        problems.append(f"lessons/book/VERSIONS.md needs a '## v{v.group(1)}' section saying what this edition added")
+    if problems:
+        print("\n".join("PROBLEM " + p for p in problems))
+        raise SystemExit("the book version is inconsistent")
+    print(f"book edition: {full}")
+
 def generate(check):
     """Validate the metadata and refresh (or, with --check, verify) the generated files."""
     model = cs.Model()
@@ -179,6 +203,7 @@ def generate(check):
     if model.problems:
         print("\n".join("PROBLEM " + p for p in model.problems))
         raise SystemExit(f"{len(model.problems)} metadata problem(s)")
+    check_version()
     counts(model)
     if check:
         bad = cs.drift(files)

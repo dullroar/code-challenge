@@ -8,7 +8,7 @@ python lessons/book/build.py --check    # builds the HTML and verifies every int
 ```
 
 - `chapters.txt` is the reading order. Add a chapter by adding its path there.
-- `metadata.yaml` holds the title, author and table-of-contents settings.
+- `metadata.yaml` holds the title, the edition number (`book-version`), author and table-of-contents settings. The book is numbered from v3 on: bump `book-version`, the title, the title page in `front-matter.md` and add a section to [`VERSIONS.md`](VERSIONS.md) (what that edition added). `build.py` fails if they disagree.
 - `build.py` concatenates the chapters and rewrites links first: a link to another chapter becomes an in-book anchor, a link to the web index becomes plain text, and a link to anything else in the repo (source files, `src/*/README.md`, `CHALLENGE.md`) becomes its GitHub URL. The chapters themselves stay ordinary GitHub-friendly Markdown.
 - **PDF** is written to the repo root as `learn-programming-the-weird-way.pdf` and needs [WeasyPrint](https://weasyprint.org) (`uv tool install weasyprint` or `pipx install weasyprint`; it also needs the Pango library, which most Linux desktops and WSL images already have). Without it the script skips the PDF with a note; the EPUB and HTML are complete either way. The layout is `book.css`; fonts are DejaVu, whose mono face has the APL glyphs (`⍴ ⍳ ⎕`; see [Seeing the glyphs](../../src/apl/README.md#seeing-the-glyphs)).
 - **Title and copyright pages** are in [`front-matter.md`](../front-matter.md) (plain HTML, inserted before the table of contents). Edit authors and the copyright line there.
