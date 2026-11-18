@@ -121,6 +121,19 @@ const counter = () => { let n = 0; return () => ++n; };   // `n` lives on, insid
 const next = counter(); next(); next();                   // 1, then 2
 ```
 
+```mermaid
+flowchart TB
+    accTitle: Two closures may share code without sharing captured state
+    accDescr: The function code is shared. Calling the counter factory the first time makes closure A, which points to its own private environment holding n A. Calling A once sets n A to 1, and calling it again sets n A to 2. Calling the factory a second time makes closure B, which points to its own separate environment holding n B. Calling B once sets n B to 1, and n A is not changed. The factory call can return, and each environment lives while its closure can be reached.
+    CODE["shared function code: add 1 to n, return n"]
+    CODE -.-> CA
+    CODE -.-> CB
+    CB["closure B (from factory call 2)"] --> EB0["environment B: n = 0"] -->|"B()"| EB1["n = 1"]
+    CA["closure A (from factory call 1)"] --> EA0["environment A: n = 0"] -->|"A()"| EA1["n = 1"] -->|"A()"| EA2["n = 2"]
+```
+
+Each box under a closure is that closure's *own* environment. The number is not copied into the code when the closure is made. The factory's call frame can return, and the captured variable lives on while the closure can be reached. These are two different factory calls. Two functions made in *one* factory call over the same variable would share it, as described below.
+
 Be exact about three things:
 
 - **A closure captures variables, not values.** Two closures over the same variable share it, and a change made by one is seen by the other. Each call to a factory such as `counter()` makes a *new* variable, so two counters never share state. C# lambdas behave the same way.
@@ -245,6 +258,22 @@ What does a round trip keep? Be exact, because "the same" has four different mea
 - **Structural equality.** The decoded structure has the same fields and values. The inspector in [`tar-gnu`](../../src/tar-gnu/README.md) and the database rows agree on every card.
 - **Behavioral equivalence.** Running the decoded program gives the same results. Two runs of one archive, in two fresh databases, give the same cards.
 - **Continuation or live-state preservation.** A paused process, with its stack, its open files and its position, resumes where it stopped. This is a much stronger promise. Almost no format makes it, and the tar entries do not claim it.
+
+```mermaid
+flowchart TB
+    accTitle: "Round-trip" does not mean one single kind of sameness
+    accDescr: Four separate promises, drawn as four cards with no order between them, inside one frame labeled specify and test the promise you mean. Byte identity says encoding the decoded bytes gives the same bytes under the stated codec rules. Structural equality says decoding the encoded value gives the same fields and values. Behavioral equivalence says running the decoded program gives the same observable behavior. Live continuation preservation says a restored process resumes from its paused state.
+    subgraph P["Specify and test the promise you mean"]
+        direction TB
+        C1["Byte identity: encode(decode(bytes)) == bytes, under the stated codec and canonical form"]
+        C2["Structural equality: decode(encode(x)) has the same fields and values"]
+        C3["Behavioral equivalence: running the decoded program gives the same observable behavior"]
+        C4["Live continuation preservation: a restored process resumes from its paused state"]
+        C1 ~~~ C2 ~~~ C3 ~~~ C4
+    end
+```
+
+The four cards are separate promises, and none implies another. Equal bytes do not promise that a program behaves the same, and a serializer that keeps every field does not resume a process. [`tar-gnu`](../../src/tar-gnu/README.md), [`tcl-weird`](../../src/tcl-weird/README.md), [`apl-weird`](../../src/apl-weird/README.md), [`xaml`](../../src/xaml/README.md) and Python's `pickle` each make a different one of them. Do not forget that deserializing may itself run code (see Security, next).
 
 `decode(encode(x))` may keep some of these and lose others. A JSON round trip keeps the structure and loses the object's identity, its methods and its undefined values. State what you promise before you promise it.
 

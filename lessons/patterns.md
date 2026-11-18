@@ -44,11 +44,47 @@ Several entries replace "loop with an accumulator" with a transformation of a wh
 | **A chain of listeners** | [JavaScript events](../src/javascript-events/timecards.mjs) `on('card-created', ...)` | Each listener does one step and emits the event that the next one waits for. `emit()` is a call on the current stack, and `setImmediate()` gives the event loop a turn between cards |
 | **Stream of records, one rule per step** | [AWK `{ t += h = 10 + RT }` ... `t > 40 { exit }`](../src/awk-weird/timecards.awk#L56-L69) | The input supplies the iterations; each rule is one step of the pipeline |
 
+```mermaid
+flowchart TB
+    accTitle: Folding everything and demanding only a sufficient prefix are different controls over work
+    accDescr: Two parallel tracks over the same timecards of 19, 19 and 19 hours with running totals 19, 38 and 57. In the unrestricted fold, an ordinary reduce processes every available card and returns the final accumulator, and it has no built-in early stop. In the demand-limited stream, the consumer computes the next total, checks the stop boundary, includes the crossing card whose total is 57, and then never makes a fourth request.
+    subgraph DEMAND["Demand-limited stream"]
+        D1["card 19: total 19"] --> D2["card 19: total 38"] --> D3["card 19: total 57, over 40: the crossing card is included"] --> D4["stop asking"] -.-> D5["request for card 4: never made"]
+    end
+    subgraph FOLD["Unrestricted fold: reduce"]
+        F1["card 19: total 19"] --> F2["card 19: total 38"] --> F3["card 19: total 57"] --> F4["every remaining card"] --> F5["final accumulator: no built-in early stop"]
+    end
+    classDef never stroke-dasharray: 5 3
+    class D5 never
+```
+
+Both tracks see the same first three cards. `reduce` has no built-in early stop: it processes everything it is given (code can write a custom fold, or throw, to abort, but that is not short-circuiting). A demand-driven stream stops *asking*, so the fourth card is never made. Haskell's `span` leaves the crossing card out of its accepted prefix, so the complete algorithm takes that card separately.
+
 The common shape: *describe the full answer, then say how much of it you want.* (The JavaScript entry reverses it: it describes how to make *one* answer, and lets the consumer ask for as many as it wants.) The differences are about **when** the work happens (eager `Aggregate` and APL arrays vs. lazy Haskell lists and LINQ `Select`) and **where** state lives. Compare how LINQ and Haskell answer "when does it run?" in [C#](languages/csharp-linq-xaml.md#deferred-execution-and-the-void-to-value-trick) and [Haskell](languages/haskell.md#lazy-io-as-control-flow).
 
 ## Control state outside variables
 
 Where does "where am I in the program?" live when you have no loop counter?
+
+```mermaid
+flowchart LR
+    accTitle: A program counter can be encoded in a jump target, parser position, or external files
+    accDescr: Three small parallel tracks, each answering where next. In COBOL, the NEXT-CARD jump target names Meetings, ALTER rewrites it, and the target now names Coding. In Forth, the interpreter's parse position, called to-in, points here, the program moves it backward, and the words are read again. In GNU Make, makefiles and state files exist, Make remakes a makefile, and then restarts with MAKE_RESTARTS advanced.
+    subgraph MAKE["Where next? External build state (Make)"]
+        direction LR
+        M1["makefile and state files"] --> M2["remake a makefile"] --> M3["Make restarts: MAKE_RESTARTS advances"]
+    end
+    subgraph FORTH["Where next? Interpreter cursor (Forth)"]
+        direction LR
+        F1["#gt;in points here"] --> F2["move #gt;in backward"] --> F3["the words are read again"]
+    end
+    subgraph COBOL["Where next? Mutable branch target (COBOL)"]
+        direction LR
+        C1["NEXT-CARD target: Meetings"] -->|"ALTER"| C2["NEXT-CARD target: Coding"]
+    end
+```
+
+Each track stores "what happens next" somewhere that is not a loop counter: in the target of a jump, in the position of a parser, or in files that a restarted tool reads. The figure compares *where* the state lives, and the generated table below lists the many other places. The language pages show each program in full.
 
 <!-- BEGIN GENERATED control-state -->
 | Place | Entry |
@@ -93,6 +129,24 @@ A backtracking engine tries a choice, and if later steps fail it goes back and t
 - **What survives a failed branch is the whole lesson.** Perl's `local` variables unwind; its `INSERT`s and `print`s do not. PCRE2's C struct does not rewind at all. `pcre2grep`'s statements have already committed. **.NET** cannot do it: a failed `Match` discards captures, so that entry *must* return true.
 - **`(*COMMIT)`** stops the engine retrying shorter loops, which would run the finalizer more than once.
 
+```mermaid
+sequenceDiagram
+    accTitle: The matching engine can abandon its branch; an already committed external effect does not disappear
+    accDescr: A sequence diagram with two layers, the search engine and the external world. The engine tries a choice and captures or changes search state. A callout then writes a SQLite row or prints, which happens in the external world. The engine then fails, and its search state rewinds or the match fails, but the row and the print persist. At the terminal branch, COMMIT followed by FAIL prunes the retry paths and returns no match, for engines that support it, which does not include .NET.
+    participant E as Search engine
+    participant W as External world
+    E->>E: try a choice
+    E->>E: capture or change search state
+    E->>W: callout writes a SQLite row, or prints
+    Note over W: the row and the print are committed
+    E->>E: failure
+    Note over E: search state rewinds, or the match fails
+    Note over W: the row and the print persist
+    Note over E,W: (*COMMIT)(*FAIL) prunes retries and returns no match, where supported (not .NET)
+```
+
+The engine can abandon a branch and rewind its own state. A row that a callout already committed, or a line that it already printed, stays. How much *engine* state rewinds depends on the engine: Perl's `local` variables unwind, PCRE2's external C struct does not, and .NET discards a failed `Match`'s captures. The `(*COMMIT)(*FAIL)` pair exists only in the engines that support it.
+
 ### Side effects in pipelines
 
 LINQ, Haskell and XAML each put an effect inside something that looks like a pure description. The rule that falls out: **if an effect lives in a lazy structure, whoever reads the structure decides whether and when the effect happens.** Haskell's `evaluate (length cards)` and LINQ's final `Aggregate` are both "force it now".
@@ -117,6 +171,17 @@ Notice that **`CHECK(demo_only=1)` appears in nearly every entry**: a table that
 ## Programs stored as data
 
 Four entries keep their program somewhere that is not a source file. Each is a different answer to "what is written down, and what reads it?" See the [comparative chapter](cs/09-comparative-case-studies.md#writing-a-program-down-reading-it-back-running-it) for the round-trip promise each one makes.
+
+```mermaid
+flowchart TB
+    accTitle: The archive stores a program; the consumer determines whether it runs
+    accDescr: A forked diagram. Tar archive members, whose names are instructions and whose bodies are operands, go to one of two readers. A passive inspector displays the decoded instructions and executes nothing. If the operator explicitly attaches a to-command dispatcher, the dispatcher interprets the members and produces operations and effects.
+    ARC["tar archive members: names are instructions, bodies are operands"]
+    ARC --> I1["Passive inspector"] --> I2["decoded instructions displayed"] --> I3["no execution"]
+    ARC --> O1["Operator explicitly attaches a --to-command dispatcher"] --> O2["dispatcher interprets the members"] --> O3["operations and effects"]
+```
+
+The same bytes can be read without running anything, and ordinary `tar -xf` only writes files. The archive cannot attach its own execution hook. The operator does. The other rows of the table differ: Tcl's `unknown` can fetch source and evaluate it, Ex can run text from a register, and APL's `⎕CR` and `⎕FX` can rewrite a function and define the copy.
 
 | Where the program is written down | What reads it, and gives it meaning | Entry |
 | --- | --- | --- |

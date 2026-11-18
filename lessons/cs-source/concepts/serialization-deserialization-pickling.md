@@ -14,6 +14,22 @@ What does a round trip keep? Be exact, because "the same" has four different mea
 - **Behavioral equivalence.** Running the decoded program gives the same results. Two runs of one archive, in two fresh databases, give the same cards.
 - **Continuation or live-state preservation.** A paused process, with its stack, its open files and its position, resumes where it stopped. This is a much stronger promise. Almost no format makes it, and the tar entries do not claim it.
 
+```mermaid
+flowchart TB
+    accTitle: "Round-trip" does not mean one single kind of sameness
+    accDescr: Four separate promises, drawn as four cards with no order between them, inside one frame labeled specify and test the promise you mean. Byte identity says encoding the decoded bytes gives the same bytes under the stated codec rules. Structural equality says decoding the encoded value gives the same fields and values. Behavioral equivalence says running the decoded program gives the same observable behavior. Live continuation preservation says a restored process resumes from its paused state.
+    subgraph P["Specify and test the promise you mean"]
+        direction TB
+        C1["Byte identity: encode(decode(bytes)) == bytes, under the stated codec and canonical form"]
+        C2["Structural equality: decode(encode(x)) has the same fields and values"]
+        C3["Behavioral equivalence: running the decoded program gives the same observable behavior"]
+        C4["Live continuation preservation: a restored process resumes from its paused state"]
+        C1 ~~~ C2 ~~~ C3 ~~~ C4
+    end
+```
+
+The four cards are separate promises, and none implies another. Equal bytes do not promise that a program behaves the same, and a serializer that keeps every field does not resume a process. [[entry:tar-gnu]], [[entry:tcl-weird]], [[entry:apl-weird]], [[entry:xaml]] and Python's `pickle` each make a different one of them. Do not forget that deserializing may itself run code (see Security, next).
+
 `decode(encode(x))` may keep some of these and lose others. A JSON round trip keeps the structure and loses the object's identity, its methods and its undefined values. State what you promise before you promise it.
 
 **Security.** Bytes are inert until a consumer gives them meaning. A tar archive cannot register a hook for itself: `tar -xf` only writes files, and it is the operator's `--to-command` option that makes tar start a program for each member. JSON is not "safe by nature" either. It is only data, until a consumer passes a field to `eval`, a shell or a SQL string. Unsafe deserialization attacks chain the *reconstruction callbacks* that a format allows (constructors, `__reduce__`, `readObject`) into code that does something the author did not plan. The defenses are old and boring. Do not deserialize untrusted bytes into live objects. Check every record against a strict grammar. Refuse what you do not know. Run the consumer with the least privilege it needs.
