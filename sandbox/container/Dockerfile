@@ -88,3 +88,11 @@ RUN set -eux; \
 FROM runtime AS runtime-node
 COPY --from=fetch-node /opt/node /opt/node
 ENV PATH=/opt/node/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# nvi, for the ex-weird entry. nvi will not start unless it can write its crash-recovery files to /var/tmp/vi.recover,
+# and the sandbox runs with a read-only root and a writable /tmp. So that directory is a link to /tmp. The result is
+# cc-rt-nvi:local (build-bases.sh passes PACKAGES=nvi).
+FROM runtime AS runtime-nvi
+USER root
+RUN rm -rf /var/tmp/vi.recover && ln -s /tmp /var/tmp/vi.recover
+USER 65534:65534

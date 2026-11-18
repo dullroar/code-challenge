@@ -68,7 +68,10 @@ RUN set -eux; cd /tmp; \
 #   node 24 LTS        upstream tarball pinned by SHA-256 (Ubuntu 24.04's Node 18 has no node:sqlite)
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ed nvi xz-utils \
- && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/* \
+ && rm -rf /var/tmp/vi.recover && ln -s /tmp /var/tmp/vi.recover
+# ^ nvi refuses to start unless it can write its crash-recovery files to /var/tmp/vi.recover. The sandbox runs with a
+#   read-only root and a writable /tmp, so the directory is a link to /tmp (the same in cc-rt-nvi, see container/Dockerfile).
 ARG NODE_VERSION=24.22.3
 ARG NODE_SHA256_X64=4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb
 ARG NODE_SHA256_ARM64=6e51a2ada00f0011cc266f65d98922b403d7ad88f809ca2aa615a5fe1ce6e86c

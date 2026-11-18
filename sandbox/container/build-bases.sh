@@ -34,7 +34,6 @@ bases=(
     'tcl|tcl8.6 tk8.6 libsqlite3-tcl xvfb scrot fonts-dejavu-core'
     'awk|gawk'
     'ed|ed'
-    'nvi|nvi'
 )
 
 if (( force )) || ! $docker image inspect code-challenge-sandbox:local >/dev/null 2>&1; then
@@ -49,6 +48,13 @@ for b in "${bases[@]}"; do
         $docker build --target runtime -t "cc-rt-$name:local" --build-arg "PACKAGES=$pkgs" "$(host_path "$here")"
     fi
 done
+# nvi needs a link for its recovery directory (see the Dockerfile), so it has its own target too.
+if [[ $only == "  " || $only == *" nvi "* ]]; then
+    if (( force )) || ! $docker image inspect cc-rt-nvi:local >/dev/null 2>&1; then
+        echo "building cc-rt-nvi:local"
+        $docker build --target runtime-nvi --build-arg PACKAGES=nvi -t cc-rt-nvi:local "$(host_path "$here")"
+    fi
+fi
 # node is not an apt package here (Ubuntu's is Node 18, without node:sqlite): its own target in the Dockerfile.
 if [[ $only == "  " || $only == *" node "* ]]; then
     if (( force )) || ! $docker image inspect cc-rt-node:local >/dev/null 2>&1; then
