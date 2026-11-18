@@ -16,7 +16,7 @@ Most tutorials teach the idioms first: here is the right way to iterate, to hold
 
 The aim is to take your understanding up a level in two directions at once:
 
-- **In a specific language.** You will learn what `ALTER`, `unsafeInterleaveIO`, `>in`, `include`, `CMAKE_MATCH_1` and `⎕FX`, `RT`, `unknown`, rescanning and method combination really do, which means you will learn how COBOL, Haskell, Forth, Make, CMake, APL, Common Lisp, m4, Tcl and AWK really work.
+- **In a specific language.** You will learn what `ALTER`, `unsafeInterleaveIO`, `>in`, `include`, `CMAKE_MATCH_1` and `⎕FX`, `RT`, `unknown`, rescanning, method combination and a `find` that digs its own tree really do, which means you will learn how COBOL, Haskell, Forth, Make, CMake, APL, Common Lisp, m4, Tcl, AWK and find really work.
 - **As concepts.** Control flow, state, evaluation order and side effects turn out to be separable things that different languages bolt together differently. Once you have seen control flow stored in a `GO TO`'s target, a parse position, a restarting build tool and a regex capture, you stop thinking of "the loop" as a given.
 
 ## The shape of every lesson

@@ -18,6 +18,7 @@ languages/awk.md
 languages/csharp-linq-xaml.md
 languages/cobol.md
 languages/lisp.md
+languages/find.md
 languages/forth.md
 languages/haskell.md
 languages/m4.md

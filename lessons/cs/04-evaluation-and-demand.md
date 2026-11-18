@@ -37,7 +37,9 @@ Haskell is lazy: one `span` over an infinite list is the stop rule, because only
 | [`regex-pcre2`](../../src/regex-pcre2/README.md) | PCRE2 | search |
 | [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | pcre2grep | search |
 | [`regex-perl`](../../src/regex-perl/README.md) | Perl | search |
+| [`find-gnu`](../../src/find-gnu/README.md) | GNU find | declarative |
 | [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | declarative |
+| [`find-posix`](../../src/find-posix/README.md) | POSIX find | declarative |
 | [`xaml`](../../src/xaml/README.md) | XAML | declarative |
 
 ## Evaluation strategies
@@ -123,6 +125,8 @@ Short-circuit evaluation means that `and` and `or` stop as soon as the answer is
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Deferred execution
 

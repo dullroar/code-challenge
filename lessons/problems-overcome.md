@@ -33,6 +33,7 @@ Some languages have no variables, or have a place for them that does not fit the
 | **.NET regex** | A regex has no counter | Balancing groups: a stack of captures | A stack is a counter |
 | **sed** | No arithmetic and no variables | Tally marks, a text-encoded shift register, substitution rules | A Markov algorithm computes |
 | **m4** | A string that grows, in a language with no variables | `defn` returns a macro's text, so a macro redefines itself as itself plus more | State can be text that rewrites itself |
+| **find** | No variables, no arithmetic and no counter | Names and paths carry the state: a directory is an hour, and its name is the last digit or the hours left. `-path` patterns count by matching `/0/` as often as needed | The file system is memory |
 
 ## No loop? Build control flow out of something else
 
@@ -50,6 +51,8 @@ A loop is only one way to repeat. These rows turn a computed prefix, a rewritten
 | **GNU Make** | A recipe expanding to nothing does not count as remaking a file | A trailing `@:` (shell no-op) | Expansion time vs. execution time |
 | **Lisp weird** | A class must exist before another can inherit from it, and five near-identical classes and methods are tedious | A `defcard` macro writes each pair, tail first; the name-building code runs at compile time inside `eval-when` | Macros are programs that run before yours |
 | **Tcl weird** | SQL cannot call Tcl, and Tcl cannot be given a library of code that is in a table | `db function tcl call` and an `unknown` override that defines procs from rows | The library path is yours to redefine |
+| **find** | A search tool has no loop | The walk descends into the directory that `-exec mkdir` just made; each directory makes the next | A traversal that changes its own tree is a loop |
+| **find GNU** | The portable line spells out every digit of the total | `%d` (depth) is the total and `%T` is the week, so the tables vanish | Use the tool's own measurements as values |
 | **Tcl weird** | Widget rows with fragments (`pack -fill ...`) failed without a widget path | Each `ui` row is a whole command, run through `uplevel #0` | A table of strings, evaluated at the right scope |
 
 ## When does it actually run? Order of evaluation
@@ -64,6 +67,7 @@ Lazy values, expanded recipes, quoted text and global separators all change *whe
 | **GNU Make** | `$(info)` output came out before SQLite's header | The report is a chain of phony targets | Make expands a recipe before it runs it |
 | **CMake** | A failed `MATCHES` clears every register | Put the stop test first so the main match's captures survive | Order of side-effecting conditions |
 | **m4** | Quoting: a loop that must not evaluate its own call early | `[tc_card()]` in brackets, so the call is only expanded after `ifelse` has chosen it | Eager arguments, lazy quotes |
+| **find** | `*` in `-path` crosses `/`, so `*/1/b*` matched an earlier `1/b...` in the same path and the digit stuck at 2 | End every pattern on a fixed-width name (`b00` to `b18`), so the last segment is exactly where you think | Anchor the end of a pattern |
 | **AWK weird** | `RS` applies to every read, so `getline` from `date` returned an empty week | Fetch the week before setting `RS`, then `close` the command | State that is global affects every reader |
 
 ## The host has limits: portability and implementation details
@@ -85,6 +89,9 @@ Integer width, timestamp precision, optimizer behavior, event loops and differen
 | **AWK** | Function parameters that share a name with a global are flagged by `--lint` | Rename them; extra parameters are the locals | Scope in awk is by convention |
 | **AWK** | `close()` returns different values in each awk (status, status x 256, always 0) | The entry only tests for non-zero; the READMEs say so, after testing all four awks | Test every implementation you claim to support |
 | **AWK weird** | mawk has no `RT`, so the program reads forever | Documented as gawk-only; never run it without a memory limit and a timeout | A portable-looking failure is the worst kind |
+| **find** | `mktemp -d` prints the path it made, and the path lands in the middle of the SQL | The line prints ` -- ` first, so the path becomes an SQL comment | Make the noise part of the language |
+| **find** | Dice made by the first of several candidates to claim a directory print `mkdir` errors for the losers | One die per card; 62 characters do not divide by ten, so `Y` and `Z` are re-rolled on the character before | Prefer a design that cannot fail noisily |
+| **find GNU** | `-quit` stops find before it prints the `-D rates` profile | Drop `-quit`; the stop rule digs nothing more and find runs out of tree | An early exit can skip the end-of-run report |
 
 ## Making failure visible and the rules enforceable
 

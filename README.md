@@ -1,6 +1,6 @@
 # Code Challenge - Learn Programming the Weird Way!
 
-> **31 challenges in 24 languages**
+> **33 challenges in 25 languages**
 <!-- Keep this line current whenever an entry is added: challenges = the folders in src/; languages = the distinct ids that entries list under `languages:` (the same languages as the book's Index of languages). `python lessons/book/build.py --check` prints both numbers and warns when this line is stale. -->
 
 A series of responses to a code challenge that has morphed into a set of educational exercises about programming languages and how to think about programming languages. **New: [Learn Programming the Weird Way!](lessons/README.md)**, a set of lessons built on these examples.
@@ -64,6 +64,8 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **Lisp** | Jim | One `LOOP` form that sums, collects and stops, in Common Lisp | `LOOP` clause order, structs, and hand-written ISO-week arithmetic | [`src/lisp`](src/lisp/README.md) |
 | **Lisp, weirder** | Jim | Each card is a CLOS method chained through a class hierarchy; the built-in `or` method combination stops at the first true result | Method combination as control flow | [`src/lisp-weird`](src/lisp-weird/README.md) |
 | **m4** | Jim | A macro whose last word is itself: m4 rescans its own output, and a Park-Miller generator is built from 32-bit `eval` | Quoting as lazy evaluation, in a language that is only text | [`src/m4`](src/m4/README.md) |
+| **find, POSIX** | Jim | One `find` with four primaries and no variables: the walk digs the directory tree it is walking, and the path and the names are the counters | A tree walk as a loop, path patterns as lookup tables, and what POSIX leaves unspecified | [`src/find-posix`](src/find-posix/README.md) |
+| **find, GNU** | Jim | The same digging walk with every GNU extra: `%d` (depth) is the running total, `%T` is the ISO week, `-regex` is the stop rule, `-fprintf` writes the SQL to fd 3, and `-D rates` is find profiling the program | What GNU find's extras replace, and an optimizer that has nothing to reorder | [`src/find-gnu`](src/find-gnu/README.md) |
 | **Make, CMake** | Jim | One bodiless `while()`; its condition is a regex machine | `while()` + regex as a tiny register machine | [`src/cmake`](src/cmake/README.md) |
 | **Make, GNU** | Jim | No `$(shell)`; Make re-executes itself as the loop | Arithmetic and looping in plain Make syntax | [`src/make-gnu`](src/make-gnu/README.md) |
 | **Python** | Ken | The same challenge, Python style | The same trick, in a language with no `;` loops | [`src/PythonChallenge1`](src/PythonChallenge1/README.md) |
@@ -106,6 +108,8 @@ src/
   LinqChallenge1/             # LINQ: one fluent method-chain expression statement
   LinqChallenge2/             # LINQ: one SQL-like query-expression statement
   make-gnu/                   # GNU Make: no $(shell); Make re-executes itself as the loop
+  find-posix/                 # POSIX find: one find; the walk digs the tree it walks, names are counters
+  find-gnu/                   # GNU find: the same walk, with %d, %T, -regex, -fprintf and -D rates
   cmake/                      # CMake: one bodiless while(), a regex machine in its condition
   apl/                        # APL: five rolls and one take-while
   apl-weird/                  # APL: functions that copy themselves with ⎕CR and ⎕FX

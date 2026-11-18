@@ -33,7 +33,12 @@ A transition system is the simplest machine: a set of *states* and a set of allo
 - [Transition system](https://en.wikipedia.org/wiki/Transition_system) (Wikipedia)
 - [Finite-state machine](https://en.wikipedia.org/wiki/Finite-state_machine) (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | What it teaches |
+| --- | --- | --- |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Representing state
 
@@ -52,7 +57,9 @@ Any state must be written down in something. A number can be tally marks (unary)
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`cobol`](../../src/cobol/README.md) | COBOL | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Invariants
 
@@ -80,7 +87,11 @@ Observability is how much of a system's inside you can learn from the outside: t
 - [Observability (software)](https://en.wikipedia.org/wiki/Observability_(software)) (Wikipedia)
 - [Heisenbug](https://en.wikipedia.org/wiki/Heisenbug) (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | What it teaches |
+| --- | --- | --- |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 
 ## Stack machines
 

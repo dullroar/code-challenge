@@ -242,6 +242,39 @@ Acceptance criteria:
 - Step 3: the header and `# committed total=0 entries=0`, no error, exit 0. Explain why: mawk has no `RT`, so `RT == ""` is true for every record and rule 1 skips them all. Say what this teaches about "portable-looking" code, and which [knowledge level](intro.md#three-kinds-of-knowledge) `RT` is.
 - Step 4: `check-demo.sh out.txt 80` passes.
 
+### B14. find: rig the dice (verified)
+
+**Lesson:** [find](languages/find.md). **Entry:** a copy of `src/find-posix`.
+
+1. In the copy, make a folder `bin` with an executable script `bin/mktemp` that always names the new directory `xxxxxS`:
+
+   ```sh
+   #!/bin/sh
+   if [ "$#" -eq 2 ] && [ "$1" = -d ]; then d=${2%XXXXXX}xxxxxS; mkdir "$d" && printf '%s\n' "$d"; else exec /usr/bin/mktemp "$@"; fi
+   ```
+
+   Run `lessons/tools/run-in-sandbox.sh <copy> sh -c 'PATH=$PWD/bin:$PATH sh ./timecards.sh'`. **Predict** the rows first. (The dice use the *last* character; `S` is in the group `STUVWX`, which is the tenth group.)
+2. Change the name in the script to `xxxxxY` and run it again. **Predict:** `Y` is thrown away.
+3. Change the name to `xxxxYZ` and run it again. **Predict:** both of the last two characters are thrown away.
+
+Acceptance criteria:
+
+- Step 1: three cards, `Meetings 19 19`, `Coding 19 38`, `Debugging 19 57`, and `# committed total=57 entries=3`. Every die shows the same group, so every card has 19 hours.
+- Step 2: the walk reads the character before the `Y`. That is `x`, in the group `stuvwx`, the fourth group, so every card has 13 hours: `13 13`, `26`, `39`, `52`. Four cards, and the 39 *continues*, because 39 is not over 40. Explain why the stop rule needs a fourth card here.
+- Step 3: both characters are thrown away, so the hours are 10. Five cards: totals 10, 20, 30, 40, 50. The 40 continues (exactly 40 is not over 40), and the fifth card is `Meetings` again, because there are only four categories.
+
+### B15. GNU find: move the stop rule, read the profile (verified)
+
+**Lesson:** [find](languages/find.md). **Entry:** copies of `src/find-gnu`.
+
+1. **Predict:** in a copy, change the stop test in `timecards.sh`, `-regex '([^/]*/){41}.*'`, to `{31}`. What is the new stop rule? Run it with `sandbox/container/run-image.sh`, then run the entry's own `check.sh` (`sandbox/run.sh <copy>`).
+2. On a *fresh* copy, run `lessons/tools/run-in-sandbox.sh -e FIND_D=rates <copy> sh ./timecards.sh`. Look at standard error.
+
+Acceptance criteria:
+
+- Step 1: the new rule is "stop once the path has 31 or more slashes", which is "the total is over 30". `check-demo.sh out.txt 30` passes. The entry's own `check.sh` **fails**: its forced-dice scenarios expect cards that no longer get made. Explain why changing one number in a regular expression is enough to change the stop rule.
+- Step 2: find prints, for every test in the program, a line like `[real success rate 1/94=0.01064]`. You can say how many times the `-name b00` test succeeded (once per card), and you can say why find's own guess (`est success rate`) for the `-regex` tests is so far off.
+
 ## C. By solution pattern
 
 ### C1. Weird next to boring (verified)
@@ -361,3 +394,4 @@ These are the gaps from [blocking problems](blocking-problems.md). **Nobody has 
 | `awk-weird` needs gawk | Get a die roll without `RT` so it also runs under mawk | Same shape of output under gawk **and** mawk; no `rand`, `srand`, loop or `if`; `check.sh` passes under both |
 | `m4` needs a shell for its seed and week | Produce the seed and the ISO week without `esyscmd` | The seed differs between runs and the week is right, with only m4 builtins; if you cannot, write down exactly what m4 cannot reach |
 | `lisp-weird` is SBCL-only | Run it on a second Common Lisp (ECL or CCL) changing only the implementation-specific calls | Same output and the same `or`/`progn` proof on both; list the lines you changed |
+| `find-posix` was never run on BSD | Run `src/find-posix/check.sh` on a BSD or macOS `find` | Either `check.sh` passes, or you list exactly which primary, `{}` use or utility failed and what each BSD does instead |
