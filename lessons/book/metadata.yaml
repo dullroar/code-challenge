@@ -1,8 +1,8 @@
 ---
 # The edition number. Bump it (and add a section to VERSIONS.md) for each release; build.py checks that this file,
 # the title page and VERSIONS.md agree.
-book-version: 3
-title: "Learn Programming the Weird Way! v3"
+book-version: 4
+title: "Learn Programming the Weird Way! v4"
 subtitle: "Programs you shouldn't write. Language features you should understand."
 author:
   - Jim Lehmer
@@ -11,7 +11,7 @@ lang: en-US
 rights: "Copyright (c) 2026 Jim Lehmer and Ken Astl. MIT License."
 toc: true
 toc-depth: 2
-date: 2026-11-17
+date: 2026-11-18
 # A fixed book identifier (a UUIDv5 of the repository URL), so the EPUB does not get a random one.
 identifier: "urn:uuid:1cb8694e-e636-50f5-9ff2-0f33ae51404a"
 ---

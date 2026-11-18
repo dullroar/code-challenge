@@ -4,13 +4,13 @@
   (book/book.css) gives each page its own sheet. It is not a chapter and is not in chapters.txt.
 -->
 <section class="titlepage">
-<h1 class="book-title">Learn Programming the Weird Way! <span class="book-version">v3</span></h1>
+<h1 class="book-title">Learn Programming the Weird Way! <span class="book-version">v4</span></h1>
 <p class="book-subtitle">Programs you shouldn't write.<br/>Language features you should understand.</p>
 <p class="book-authors">Jim Lehmer<br/>Ken Astl</p>
 </section>
 
 <section class="copyrightpage">
-<p>Learn Programming the Weird Way! v3</p>
+<p>Learn Programming the Weird Way! v4</p>
 <p>Copyright &#169; 2026 Jim Lehmer and Ken Astl</p>
 <p>Released under the MIT License.</p>
 <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this book and associated documentation files (the &#8220;Software&#8221;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
