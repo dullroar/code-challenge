@@ -19,6 +19,7 @@ import concurrent.futures, glob, hashlib, json, os, re, shutil, struct, subproce
 HERE = os.path.dirname(os.path.abspath(__file__))
 DIAGRAM_TOOLS = os.path.join(HERE, "diagrams")           # package.json, package-lock.json, mermaid-config.json
 CONFIG = os.path.join(DIAGRAM_TOOLS, "mermaid-config.json")
+FLATTEN = os.path.join(DIAGRAM_TOOLS, "flatten-text.mjs")   # makes the SVG light for PDF viewers (see the Renderer.flatten docstring)
 CACHE = os.path.join(HERE, "out", "diagrams")            # git-ignored build output (lessons/book/out/)
 
 SECTION = "Program Flow"
@@ -151,6 +152,8 @@ class Renderer:
         self.chrome_version = subprocess.run([chrome, "--version"], capture_output=True, text=True).stdout.strip() or os.path.basename(chrome)
         with open(CONFIG, "rb") as f:
             self.config_bytes = f.read()
+        with open(FLATTEN, "rb") as f:
+            self.config_bytes += f.read()          # the post-processing script is part of the style: a change redraws every figure
         self.pp = None
 
     def describe(self):
@@ -180,6 +183,18 @@ class Renderer:
                                capture_output=True, text=True, timeout=180)
         if p.returncode != 0 or not os.path.isfile(out):
             raise DiagramError(clean_diagnostics(p.stderr or p.stdout) or f"mmdc exited {p.returncode}")
+
+
+    def flatten(self, svg):
+        """Rewrite the SVG so that WeasyPrint puts no transparency groups in the PDF (in place).
+
+        Mermaid centers every label (`text-anchor="middle"`) and gives edge-label backgrounds `opacity`. WeasyPrint turns each of those
+        into a PDF transparency group, and PDFium (Edge, Chrome) draws every group into an off-screen bitmap. A page of the book with
+        a figure on it then needs hundreds of them and shows white for a long time. flatten-text.mjs moves each label to its
+        left-anchored equivalent, measured by the same Chrome, and checks that nothing moved. The look does not change."""
+        p = subprocess.run(["node", FLATTEN, self.puppeteer_config(), svg], capture_output=True, text=True, timeout=180)
+        if p.returncode != 0:
+            raise DiagramError(clean_diagnostics(p.stderr or p.stdout) or f"flatten-text.mjs exited {p.returncode}")
 
 
 def clean_diagnostics(text):
@@ -272,6 +287,7 @@ def render_all(renderer, wanted):
         try:
             tmp_svg, tmp_png = f.svg + ".part.svg", f.png + ".part.png"
             renderer.run(f.source, tmp_svg)
+            renderer.flatten(tmp_svg)               # the SVG only: the PNG (EPUB) is a bitmap and needs nothing
             renderer.run(f.source, tmp_png, ("-s", str(PNG_SCALE)))
             with open(tmp_svg, "rb") as fh:
                 svg_bytes = fh.read()
