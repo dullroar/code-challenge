@@ -427,7 +427,7 @@ Negative control: change the limit to `<= 50` and `takeWhile` returns all four t
 ## F2. Trojan Source: hide a character, then find it
 
 1. `node greet.js` prints `false`. The first line holds `"admin"` followed by U+200B, a character with no shape, so the string has five visible letters (`a d m i n`) and one invisible character: it is not equal to `"admin"`. The second line compares it with the plain word. A reader who sees `user === "admin"` expects `true`.
-2. The scan prints `1:const user = "admin​";` (the invisible character is in the output too, where you cannot see it). `od -c` shows `a d m i n 342 200 213 "`: UTF-8 for U+200B is the three bytes E2 80 8B, which is `342 200 213` in octal.
+2. The scan prints line 1, `1:const user = "admin";`, and there is one more character between the `n` and the closing quote that your terminal draws as nothing (that is the point). `od -c` shows `a d m i n 342 200 213 "`: UTF-8 for U+200B is the three bytes E2 80 8B, which is `342 200 213` in octal.
 3. `clean.js` has no hit, and prints `true`. The scan fires on the character and on nothing else.
 4. No file in `src/apl-weird` matches. APL glyphs are visible, so a reviewer sees them. Banning every non-ASCII character would also ban APL and every non-English name, and it would not stop an attacker who uses an ASCII look-alike. The defense is to ban what has no visible shape. The label is **implementation-permitted**: the rule is written down (`sandbox/scope-check.sh`, the line that sets `hidden=`), its mechanism is `grep -P` and its Unicode tables, and the character class lists only the characters we know about, so a new invisible character in a future Unicode version would not be caught until the list is updated.
 
