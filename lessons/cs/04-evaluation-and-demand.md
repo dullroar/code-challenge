@@ -19,6 +19,7 @@ Haskell is lazy: one `span` over an infinite list is the stop rule, because only
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | eager |
 | [`forth`](../../src/forth/README.md) | Forth | eager |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | eager |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar | eager |
 | [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | eager |
 | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | eager |
 | [`tcl`](../../src/tcl/README.md) | Tcl | eager |

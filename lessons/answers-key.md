@@ -264,6 +264,12 @@ The fake `mktemp` makes the dice. The walk reads the last character of each six-
 1. `([^/]*/){31}.*` matches a path with at least 31 slashes. The start directory `t` is depth 0, and the end of a card is at depth equal to the running total, so the test is true exactly when the total is 31 or more, which is "over 30". `check-demo.sh out.txt 30` passes. The entry's own `check.sh` fails, because the seven forced-dice scenarios (for example `10 10 10 10 10`, five cards) now stop after fewer cards. The stop rule is that one number, because depth is the total.
 2. With `FIND_D=rates`, find prints its profile on stderr after the walk. Each test shows `[est success rate 0.8]` (the optimizer's flat guess) and `[real success rate a/b=...]`. The `-name b00` test succeeds once per card, so `a` equals the number of rows. The guess is far off because the optimizer has no idea that most directories are named `b..` and only one in about 15 ends a card.
 
+## B16. tar: read the program, then run it
+
+1. Four cards run: 12, 24, 36 and 48. The total passes 40 at the fourth card, so the fifth slot (`050.card`) and the `stop-over` members after the halt are read and ignored. The trace table shows `ignored: halted` for them.
+2. Changing `limit=40` to `limit=20` in `021.stop-over` makes the halt happen after the second card (24 is over 20). Nothing in `dispatch.sh` changed: the limit is data, in the archive. `check-demo.sh out.txt 20` passes. Order matters: tar reads members in the order they are in the archive, so a repack in a different order is a different program.
+3. `inspect.sh` marks `025.exec` as `REFUSE (unknown record type)` and exits 4. `interpret.sh --execute` asks the inspector first, so it exits 4, prints that nothing was run, and starts no tar. No `pwned` appears. A plain `tar -xf` writes `025.exec` as an inert file and runs nothing, because an archive cannot register a hook for itself. **Parsing** was done by `tar -t` and `tar -xO` inside `inspect.sh`, and by tar again inside `interpret.sh`. **Running** happened only in `interpret.sh --execute`, in `tar --to-command`. The trust boundary is the command line the operator typed.
+
 ## C1. Weird next to boring
 
 Measured with the verification script (non-comment lines):

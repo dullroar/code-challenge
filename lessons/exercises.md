@@ -275,6 +275,21 @@ Acceptance criteria:
 - Step 1: the new rule is "stop once the path has 31 or more slashes", which is "the total is over 30". `check-demo.sh out.txt 30` passes. The entry's own `check.sh` **fails**: its forced-dice scenarios expect cards that no longer get made. Explain why changing one number in a regular expression is enough to change the stop rule.
 - Step 2: find prints, for every test in the program, a line like `[real success rate 1/94=0.01064]`. You can say how many times the `-name b00` test succeeded (once per card), and you can say why find's own guess (`est success rate`) for the `-regex` tests is so far off.
 
+### B16. tar: read the program, then run it (verified)
+
+**Lesson:** [tar](languages/tar.md). **Entry:** a copy of `src/tar-gnu`.
+
+1. In the copy, write an archive with fixed hours and read it without running it: `sh build-archive.sh --seed 1 --hours "12 12 12 12 12" a.tar`, then `sh inspect.sh a.tar`. **Predict** how many cards will run, and which of the five card slots will be read and ignored. Then run it: `sh interpret.sh --execute a.tar`.
+2. Take the program apart with plain tar: `mkdir x && tar -C x -xf a.tar`. Open `x/021.stop-over` and change `limit=40` to `limit=20`. Pack it again **in the same order**: `tar --format=ustar -cf b.tar -C x 000.begin 010.card 011.stop-over 020.card 021.stop-over 030.card 031.stop-over 040.card 041.stop-over 050.card 051.stop-over 990.show`. **Predict** the rows, then run `b.tar`. Delete the old database first (`rm "$XDG_DATA_HOME/TarGnu/demo-timecards.db"`), so only this run is in it. Run it with the `trace` table in view: `sqlite3 "$XDG_DATA_HOME/TarGnu/demo-timecards.db" 'select * from trace'`.
+3. Add a member that is not in the instruction set: `printf 'touch pwned\n' > x/025.exec`, pack `x` again with `025.exec` after `021.stop-over`, and run `sh inspect.sh c.tar; echo $?`, then `sh interpret.sh --execute c.tar; echo $?`. **Predict** both exit statuses, and whether a file called `pwned` appears.
+
+Acceptance criteria:
+
+- Step 1: four cards (`Meetings 12 12`, `Coding 12 24`, `Debugging 12 36`, `Learning 12 48`), and the fifth slot is read and ignored. `check-demo.sh` passes.
+- Step 2: two cards (`Meetings 12 12`, `Coding 12 24`). The limit is in the archive, so changing a member changed the stop rule, and `dispatch.sh` did not change. The trace shows `ok` for the first two cards and `ignored: halted` for the rest. `check-demo.sh out.txt 20` passes.
+- Step 3: the inspector prints the line `REFUSE (unknown record type)` and exits 4. `interpret.sh` exits 4 and says that nothing was run. No `pwned` file exists. Explain why plain `tar -xf` of the same archive would also not create it.
+- In one sentence each: which step *parsed* the program, which step *ran* it, and where was the trust boundary?
+
 ## C. By solution pattern
 
 ### C1. Weird next to boring (verified)

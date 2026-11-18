@@ -10,7 +10,7 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 
 **A**
 
-- [Arbitrary code execution](cs/01-reading-an-adversarial-program.md#arbitrary-code-execution): [`regex-perl`](../src/regex-perl/README.md), [`tcl-weird`](../src/tcl-weird/README.md), [`xaml`](../src/xaml/README.md)
+- [Arbitrary code execution](cs/01-reading-an-adversarial-program.md#arbitrary-code-execution): [`regex-perl`](../src/regex-perl/README.md), [`tar-gnu`](../src/tar-gnu/README.md), [`tcl-weird`](../src/tcl-weird/README.md), [`xaml`](../src/xaml/README.md)
 - [Array programming](cs/04-evaluation-and-demand.md#array-programming): [`apl`](../src/apl/README.md), [`apl-weird`](../src/apl-weird/README.md)
 
 **B**
@@ -31,14 +31,14 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 - [Declarative programming](cs/05-formal-languages-as-computational-substrates.md#declarative-programming): [`awk`](../src/awk/README.md), [`awk-weird`](../src/awk-weird/README.md), [`cobol`](../src/cobol/README.md), [`LinqChallenge2`](../src/LinqChallenge2/README.md), [`make-gnu`](../src/make-gnu/README.md), [`xaml`](../src/xaml/README.md)
 - [Deferred execution](cs/04-evaluation-and-demand.md#deferred-execution): [`LinqChallenge1`](../src/LinqChallenge1/README.md), [`LinqChallenge2`](../src/LinqChallenge2/README.md), [`ModernChallenge1`](../src/ModernChallenge1/README.md)
 - [Dependency graphs](cs/06-state-beyond-variables.md#dependency-graphs): [`make-gnu`](../src/make-gnu/README.md)
-- [Domain-specific languages](cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages): [`awk`](../src/awk/README.md), [`cmake`](../src/cmake/README.md), [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md), [`LinqChallenge2`](../src/LinqChallenge2/README.md), [`lisp`](../src/lisp/README.md), [`regex-pcre2`](../src/regex-pcre2/README.md)
+- [Domain-specific languages](cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages): [`awk`](../src/awk/README.md), [`cmake`](../src/cmake/README.md), [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md), [`LinqChallenge2`](../src/LinqChallenge2/README.md), [`lisp`](../src/lisp/README.md), [`regex-pcre2`](../src/regex-pcre2/README.md), [`tar-gnu`](../src/tar-gnu/README.md)
 
 **E**
 
 - [Eager evaluation](cs/04-evaluation-and-demand.md#eager-evaluation): [`apl`](../src/apl/README.md), [`apl-weird`](../src/apl-weird/README.md)
 - [Evaluation strategies](cs/04-evaluation-and-demand.md#evaluation-strategies): [`haskell`](../src/haskell/README.md), [`haskell-weird`](../src/haskell-weird/README.md), [`PythonChallenge1`](../src/PythonChallenge1/README.md)
 - [Exception handling](cs/07-effects-errors-and-commitment.md#exception-handling): [`cobol-weird`](../src/cobol-weird/README.md)
-- [Exit status](cs/07-effects-errors-and-commitment.md#exit-status): [`regex-pcre2grep`](../src/regex-pcre2grep/README.md), [`regex-sed`](../src/regex-sed/README.md)
+- [Exit status](cs/07-effects-errors-and-commitment.md#exit-status): [`regex-pcre2grep`](../src/regex-pcre2grep/README.md), [`regex-sed`](../src/regex-sed/README.md), [`tar-gnu`](../src/tar-gnu/README.md)
 
 **F**
 
@@ -55,14 +55,14 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 
 **I**
 
-- [Idempotence](cs/07-effects-errors-and-commitment.md#idempotence): background for the others
-- [Integrity constraints](cs/07-effects-errors-and-commitment.md#integrity-constraints): [`cobol`](../src/cobol/README.md), [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md), [`regex-pcre2grep`](../src/regex-pcre2grep/README.md)
+- [Idempotence](cs/07-effects-errors-and-commitment.md#idempotence): [`tar-gnu`](../src/tar-gnu/README.md)
+- [Integrity constraints](cs/07-effects-errors-and-commitment.md#integrity-constraints): [`cobol`](../src/cobol/README.md), [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md), [`regex-pcre2grep`](../src/regex-pcre2grep/README.md), [`tar-gnu`](../src/tar-gnu/README.md)
 - [Invariants](cs/02-what-counts-as-a-machine.md#invariants): background for the others
 - [Iterators and generators](cs/04-evaluation-and-demand.md#iterators-and-generators): [`haskell`](../src/haskell/README.md), [`KotlinChallenge1`](../src/KotlinChallenge1/README.md), [`PythonChallenge1`](../src/PythonChallenge1/README.md), [`RustChallenge1`](../src/RustChallenge1/README.md)
 
 **L**
 
-- [Language-theoretic security](cs/05-formal-languages-as-computational-substrates.md#language-theoretic-security): [`xaml`](../src/xaml/README.md)
+- [Language-theoretic security](cs/05-formal-languages-as-computational-substrates.md#language-theoretic-security): [`tar-gnu`](../src/tar-gnu/README.md), [`xaml`](../src/xaml/README.md)
 - [Lazy evaluation](cs/04-evaluation-and-demand.md#lazy-evaluation): [`haskell`](../src/haskell/README.md), [`haskell-weird`](../src/haskell-weird/README.md), [`KotlinChallenge1`](../src/KotlinChallenge1/README.md), [`LinqChallenge1`](../src/LinqChallenge1/README.md), [`LinqChallenge2`](../src/LinqChallenge2/README.md), [`m4`](../src/m4/README.md), [`RustChallenge1`](../src/RustChallenge1/README.md)
 - [Leaky abstractions](cs/08-abstraction-leaks-and-implementation-dependence.md#leaky-abstractions): background for the others
 
@@ -76,15 +76,15 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 
 **O**
 
-- [Observability](cs/02-what-counts-as-a-machine.md#observability): [`find-gnu`](../src/find-gnu/README.md)
+- [Observability](cs/02-what-counts-as-a-machine.md#observability): [`find-gnu`](../src/find-gnu/README.md), [`tar-gnu`](../src/tar-gnu/README.md)
 - [Optimizers](cs/08-abstraction-leaks-and-implementation-dependence.md#optimizers): [`find-gnu`](../src/find-gnu/README.md), [`regex-pcre2`](../src/regex-pcre2/README.md)
 
 **P**
 
-- [Parsing](cs/05-formal-languages-as-computational-substrates.md#parsing): [`forth-weird`](../src/forth-weird/README.md), [`regex-dotnet`](../src/regex-dotnet/README.md), [`xaml`](../src/xaml/README.md)
+- [Parsing](cs/05-formal-languages-as-computational-substrates.md#parsing): [`forth-weird`](../src/forth-weird/README.md), [`regex-dotnet`](../src/regex-dotnet/README.md), [`tar-gnu`](../src/tar-gnu/README.md), [`xaml`](../src/xaml/README.md)
 - [Performance cliffs and time complexity](cs/08-abstraction-leaks-and-implementation-dependence.md#performance-cliffs-and-time-complexity): [`regex-sed`](../src/regex-sed/README.md)
 - [Portability](cs/08-abstraction-leaks-and-implementation-dependence.md#portability): [`awk-weird`](../src/awk-weird/README.md), [`find-posix`](../src/find-posix/README.md), [`regex-pcre2grep`](../src/regex-pcre2grep/README.md)
-- [Principle of least privilege](cs/01-reading-an-adversarial-program.md#principle-of-least-privilege): background for the others
+- [Principle of least privilege](cs/01-reading-an-adversarial-program.md#principle-of-least-privilege): [`tar-gnu`](../src/tar-gnu/README.md)
 
 **R**
 
@@ -94,13 +94,14 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 - [Register machines and counter machines](cs/02-what-counts-as-a-machine.md#register-machines-and-counter-machines): [`cmake`](../src/cmake/README.md), [`forth-weird`](../src/forth-weird/README.md), [`regex-dotnet`](../src/regex-dotnet/README.md)
 - [Regular expressions](cs/05-formal-languages-as-computational-substrates.md#regular-expressions): [`awk`](../src/awk/README.md), [`awk-weird`](../src/awk-weird/README.md), [`cmake`](../src/cmake/README.md), [`find-gnu`](../src/find-gnu/README.md), [`regex-dotnet`](../src/regex-dotnet/README.md), [`regex-pcre2`](../src/regex-pcre2/README.md), [`regex-pcre2grep`](../src/regex-pcre2grep/README.md), [`regex-perl`](../src/regex-perl/README.md), [`regex-sed`](../src/regex-sed/README.md)
 - [Regular-expression denial of service](cs/08-abstraction-leaks-and-implementation-dependence.md#regular-expression-denial-of-service): [`regex-sed`](../src/regex-sed/README.md)
-- [Representing state](cs/02-what-counts-as-a-machine.md#representing-state): [`cobol`](../src/cobol/README.md), [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md), [`regex-sed`](../src/regex-sed/README.md)
+- [Representing state](cs/02-what-counts-as-a-machine.md#representing-state): [`cobol`](../src/cobol/README.md), [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md), [`regex-sed`](../src/regex-sed/README.md), [`tar-gnu`](../src/tar-gnu/README.md)
 
 **S**
 
 - [Sandbox](cs/01-reading-an-adversarial-program.md#sandbox): background for the others
 - [Scope and binding](cs/06-state-beyond-variables.md#scope-and-binding): [`apl-weird`](../src/apl-weird/README.md), [`lisp-weird`](../src/lisp-weird/README.md), [`m4`](../src/m4/README.md), [`tcl`](../src/tcl/README.md), [`tcl-weird`](../src/tcl-weird/README.md)
 - [Self-modifying code](cs/03-control-flow-and-continuations.md#self-modifying-code): [`apl-weird`](../src/apl-weird/README.md), [`cobol-weird`](../src/cobol-weird/README.md)
+- [Serialization, deserialization and object pickling](cs/06-state-beyond-variables.md#serialization-deserialization-and-object-pickling): [`tar-gnu`](../src/tar-gnu/README.md)
 - [Short-circuit evaluation](cs/04-evaluation-and-demand.md#short-circuit-evaluation): [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md), [`lisp-weird`](../src/lisp-weird/README.md)
 - [Side effects](cs/07-effects-errors-and-commitment.md#side-effects): [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md), [`GoChallenge1`](../src/GoChallenge1/README.md), [`haskell-weird`](../src/haskell-weird/README.md), [`JavaChallenge1`](../src/JavaChallenge1/README.md), [`KotlinChallenge1`](../src/KotlinChallenge1/README.md), [`LinqChallenge1`](../src/LinqChallenge1/README.md), [`LinqChallenge2`](../src/LinqChallenge2/README.md), [`ModernChallenge1`](../src/ModernChallenge1/README.md), [`PythonChallenge1`](../src/PythonChallenge1/README.md), [`regex-pcre2`](../src/regex-pcre2/README.md), [`regex-pcre2grep`](../src/regex-pcre2grep/README.md), [`regex-perl`](../src/regex-perl/README.md), [`RustChallenge1`](../src/RustChallenge1/README.md), [`xaml`](../src/xaml/README.md)
 - [Specification versus implementation](cs/01-reading-an-adversarial-program.md#specification-versus-implementation): background for the others
@@ -116,9 +117,9 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 - [The program counter](cs/03-control-flow-and-continuations.md#the-program-counter): [`cobol-weird`](../src/cobol-weird/README.md), [`forth-weird`](../src/forth-weird/README.md)
 - [The stack as a data structure](cs/06-state-beyond-variables.md#the-stack-as-a-data-structure): [`forth`](../src/forth/README.md), [`forth-weird`](../src/forth-weird/README.md), [`regex-dotnet`](../src/regex-dotnet/README.md)
 - [Thread safety and thread affinity](cs/07-effects-errors-and-commitment.md#thread-safety-and-thread-affinity): [`GoChallenge1`](../src/GoChallenge1/README.md), [`JavaChallenge1`](../src/JavaChallenge1/README.md), [`KotlinChallenge1`](../src/KotlinChallenge1/README.md), [`LinqChallenge1`](../src/LinqChallenge1/README.md), [`LinqChallenge2`](../src/LinqChallenge2/README.md), [`ModernChallenge1`](../src/ModernChallenge1/README.md), [`PythonChallenge1`](../src/PythonChallenge1/README.md), [`RustChallenge1`](../src/RustChallenge1/README.md)
-- [Threat model](cs/01-reading-an-adversarial-program.md#threat-model): [`regex-perl`](../src/regex-perl/README.md), [`xaml`](../src/xaml/README.md)
+- [Threat model](cs/01-reading-an-adversarial-program.md#threat-model): [`regex-perl`](../src/regex-perl/README.md), [`tar-gnu`](../src/tar-gnu/README.md), [`xaml`](../src/xaml/README.md)
 - [Transactions](cs/07-effects-errors-and-commitment.md#transactions): [`forth`](../src/forth/README.md), [`regex-perl`](../src/regex-perl/README.md), [`tcl`](../src/tcl/README.md)
-- [Transition systems and state machines](cs/02-what-counts-as-a-machine.md#transition-systems-and-state-machines): [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md)
+- [Transition systems and state machines](cs/02-what-counts-as-a-machine.md#transition-systems-and-state-machines): [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md), [`tar-gnu`](../src/tar-gnu/README.md)
 - [Trojan Source: characters you cannot see](cs/01-reading-an-adversarial-program.md#trojan-source-characters-you-cannot-see): background for the others
 - [Turing completeness](cs/02-what-counts-as-a-machine.md#turing-completeness): [`m4`](../src/m4/README.md), [`make-gnu`](../src/make-gnu/README.md), [`regex-sed`](../src/regex-sed/README.md)
 - [Turing machines](cs/02-what-counts-as-a-machine.md#turing-machines): background for the others
@@ -159,6 +160,7 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 
 - **GNU Make**: lesson [GNU Make and CMake](languages/make-cmake.md); entries [`make-gnu`](../src/make-gnu/README.md)
 - **GNU sed**: lesson [Regular expressions: five engines, five personalities](languages/regex.md); entries [`regex-sed`](../src/regex-sed/README.md)
+- **GNU tar**: lesson [tar](languages/tar.md); entries [`tar-gnu`](../src/tar-gnu/README.md)
 - **Go**: lesson [C#, LINQ and XAML (plus the one-statement ports)](languages/csharp-linq-xaml.md); entries [`GoChallenge1`](../src/GoChallenge1/README.md)
 
 **H**
@@ -194,7 +196,7 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 
 **S**
 
-- **SQLite**: lesson [find](languages/find.md), [Tcl](languages/tcl.md); entries [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md), [`tcl-weird`](../src/tcl-weird/README.md)
+- **SQLite**: lesson [find](languages/find.md), [tar](languages/tar.md), [Tcl](languages/tcl.md); entries [`find-gnu`](../src/find-gnu/README.md), [`find-posix`](../src/find-posix/README.md), [`tar-gnu`](../src/tar-gnu/README.md), [`tcl-weird`](../src/tcl-weird/README.md)
 
 **T**
 
@@ -275,6 +277,7 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 
 **T**
 
+- [`tar-gnu`](../src/tar-gnu/README.md): GNU tar, SQLite; idiomatic; [Document order is the program](cs/09-comparative-case-studies.md#document-order-is-the-program)
 - [`tcl`](../src/tcl/README.md): Tcl; idiomatic; [An ordinary loop, used in an unusual place](cs/09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place)
 - [`tcl-weird`](../src/tcl-weird/README.md): Tcl, SQLite; weird; [Dispatch and triggers: the rule fires the next step](cs/09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step)
 
@@ -301,7 +304,7 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 **D**
 
 - [Dispatch and triggers: the rule fires the next step](cs/09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step): [`lisp-weird`](../src/lisp-weird/README.md), [`tcl-weird`](../src/tcl-weird/README.md)
-- [Document order is the program](cs/09-comparative-case-studies.md#document-order-is-the-program): [`xaml`](../src/xaml/README.md)
+- [Document order is the program](cs/09-comparative-case-studies.md#document-order-is-the-program): [`tar-gnu`](../src/tar-gnu/README.md), [`xaml`](../src/xaml/README.md)
 
 **T**
 

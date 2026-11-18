@@ -112,12 +112,13 @@ The input is the loop. AWK reads one record at a time and runs every pattern-act
 
 ## Document order is the program
 
-The order of the document is the order of the program. [`xaml`](../../src/xaml/README.md) has no code behind it. The XAML parser builds objects in the order it reads them, and several of those objects call methods as they are made. Four unrolled passes replace the loop, "carrier" arrays are the variables, and SQL or `DataTable` expressions make the decisions. The program is the markup file, and it runs while the file is parsed.
+The order of the document is the order of the program. [`xaml`](../../src/xaml/README.md) has no code behind it. The XAML parser builds objects in the order it reads them, and several of those objects call methods as they are made. Four unrolled passes replace the loop, "carrier" arrays are the variables, and SQL or `DataTable` expressions make the decisions. The program is the markup file, and it runs while the file is parsed. [`tar-gnu`](../../src/tar-gnu/README.md) is the same idea with a tape instead of a markup file: the members of a tar archive are the instructions, and the order of the archive is the order of the program.
 
 **Entries:**
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | A tape reader (tar) feeding a five-word interpreter | The archive's members, which are the program, plus one SQLite row that says whether the run has halted or faulted | eager | implementation-permitted |
 | [`xaml`](../../src/xaml/README.md) | XAML, C# | An object-graph constructor that runs methods as it parses | Document order, plus "carrier" arrays | declarative | accidentally-exploited |
 
 ## Every entry at a glance
@@ -140,6 +141,7 @@ The order of the document is the order of the program. [`xaml`](../../src/xaml/R
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | declarative | accidentally-exploited | [`find-posix`](../../src/find-posix/README.md) |
 | [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | declarative | accidentally-exploited | [`cmake`](../../src/cmake/README.md) |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | rewriting | accidentally-exploited |  |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | idiomatic | [Document order is the program](09-comparative-case-studies.md#document-order-is-the-program) | eager | implementation-permitted |  |
 | [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | port | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`haskell`](../../src/haskell/README.md) | Haskell | idiomatic | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`haskell-weird`](../../src/haskell-weird/README.md) |
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | implementation-permitted | [`haskell`](../../src/haskell/README.md) |

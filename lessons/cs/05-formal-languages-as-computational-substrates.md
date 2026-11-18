@@ -68,6 +68,7 @@ Parsing turns text into structure, following a grammar. It exists because progra
 | --- | --- | --- |
 | [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | A regex as a stack-based counter. |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
 
 ## Term and string rewriting
@@ -154,6 +155,7 @@ A domain-specific language (DSL) is a small language for one kind of job. SQL is
 | [`cmake`](../../src/cmake/README.md) | CMake | `while()` plus regex as a tiny register machine. |
 | [`lisp`](../../src/lisp/README.md) | Common Lisp | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | C# query syntax, pushed as far as it goes. |
 | [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | Regex callouts as a tiny instruction set. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
@@ -216,6 +218,7 @@ Language-theoretic security (LangSec) is a way of thinking about security. Every
 
 | Entry | Language | What it teaches |
 | --- | --- | --- |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
 
 ## Weird machines

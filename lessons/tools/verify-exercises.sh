@@ -197,6 +197,32 @@ if selected B15; then echo "B15 GNU find stop rule and profile"
   if contains "$W/b15b.txt" "real success rate" && contains "$W/b15b.txt" "est success rate"; then ok "B15 FIND_D=rates prints est and real success rates"; else bad B15b "no profile on stderr"; fi
 fi
 
+if selected B16; then echo "B16 tar: read the program, then run it"
+  d=$(copy src/tar-gnu b16)
+  "$sbx" "$d" sh -c '
+    set -e
+    sh build-archive.sh --seed 1 --hours "12 12 12 12 12" a.tar
+    sh inspect.sh a.tar > /dev/null; sh interpret.sh --execute a.tar > step1.txt
+    mkdir x; tar -C x -xf a.tar; printf "limit=20\n" > x/021.stop-over
+    O="000.begin 010.card 011.stop-over 020.card 021.stop-over 030.card 031.stop-over 040.card 041.stop-over 050.card 051.stop-over 990.show"
+    tar --format=ustar -cf b.tar -C x $O; rm "$TARPROG_DB" 2>/dev/null || true; rm -f "$XDG_DATA_HOME/TarGnu/demo-timecards.db"
+    sh interpret.sh --execute b.tar > step2.txt
+    sqlite3 "$XDG_DATA_HOME/TarGnu/demo-timecards.db" "select count(*) from trace where outcome like \"ignored%\"" > ignored.txt
+    printf "touch pwned\n" > x/025.exec
+    tar --format=ustar -cf c.tar -C x 000.begin 010.card 011.stop-over 020.card 021.stop-over 025.exec 030.card 031.stop-over 990.show
+    set +e; sh inspect.sh c.tar > insp.txt; r1=$?; sh interpret.sh --execute c.tar > /dev/null 2> interp.err; r2=$?; set -e
+    [ "$r1" = 4 ] && [ "$r2" = 4 ] && [ ! -e pwned ] && grep -q "REFUSE (unknown record type)" insp.txt
+    mkdir plain; tar -C plain -xf c.tar; [ -f plain/025.exec ] && [ ! -e plain/pwned ] && [ ! -e pwned ]
+    cat step1.txt; echo ---STEP2; cat step2.txt; echo ---IGN; cat ignored.txt' > "$W/b16.txt" 2>&1
+  s1=${W}/b16-1.txt; sed -n '1,/^---STEP2/p' "$W/b16.txt" | grep -v '^---' > "$s1"
+  sed -n '/^---STEP2/,/^---IGN/p' "$W/b16.txt" | grep -v '^---' > "$W/b16-2.txt"
+  expect "B16 step 1: four cards pass check-demo" "$chk" "$s1"
+  if grep -qE $'^Learning\t12\t48\t' "$s1" && contains "$s1" "total=48 entries=4"; then ok "B16 step 1: 12, 24, 36, 48"; else bad B16a "$(tr '\n' ' ' < "$s1")"; fi
+  expect "B16 step 2: limit 20 in the archive stops after two cards" "$chk" "$W/b16-2.txt" 20
+  if contains "$W/b16-2.txt" "total=24 entries=2" && tail -1 "$W/b16.txt" | grep -qx 3; then ok "B16 step 2: two cards, three slots ignored"; else bad B16b "$(tr '\n' ' ' < "$W/b16-2.txt") / $(tail -1 "$W/b16.txt")"; fi
+  if grep -q '^---IGN' "$W/b16.txt"; then ok "B16 step 3: inspector and interpreter exit 4, no pwned, plain tar -xf inert"; else bad B16c "$(tail -3 "$W/b16.txt" | tr '\n' ' ')"; fi
+fi
+
 if selected C1; then echo "C1 weird next to boring (measured)"
   for p in cobol haskell forth apl lisp tcl awk; do
     a=$(cat src/$p/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)'); b=$(cat src/$p-weird/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)')

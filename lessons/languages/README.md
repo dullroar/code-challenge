@@ -15,6 +15,7 @@ Each page covers what makes the language special, with pointers into the repo, t
 | [m4](m4.md) | `m4` | A macro whose last word is itself: rescanning is the loop | Quoting as lazy evaluation, text as the only data type, 32-bit arithmetic |
 | [Make and CMake](make-cmake.md) | `make-gnu`, `cmake` | Remaking makefiles becomes a loop; regex captures become registers | Dependency graphs, restart semantics, scope, stateful condition evaluation |
 | [Regex](regex.md) | `regex-perl`, `regex-pcre2`, `regex-pcre2grep`, `regex-dotnet`, `regex-sed` | Substitutions implement arithmetic and state; matches that return false after doing the work | String-rewriting systems, backtracking as search, performance cliffs |
+| [tar](tar.md) | `tar-gnu` | An archive is the program: tar walks the members, and the operator's `--to-command` gives them meaning | Serialization versus execution, trust boundaries, fail-closed interpreters |
 | [Tcl](tcl.md) | `tcl`, `tcl-weird` | The program is text in a SQLite table; a recursive trigger is the loop | Everything is a string command, `unknown` as a library path, code and data are one thing |
 
 Prefer to start from a mechanism instead? See [patterns](../patterns.md). Back to the [lessons index](../README.md).

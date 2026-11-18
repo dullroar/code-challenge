@@ -61,6 +61,7 @@ Where does "where am I in the program?" live when you have no loop counter?
 | The path from the start directory to the directory being visited; its depth is the running total | [find](languages/find.md): [`find-gnu`](../src/find-gnu/README.md) |
 | Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | [make-cmake](languages/make-cmake.md#gnu-make): [`make-gnu`](../src/make-gnu/README.md) |
 | One line of text, rewritten until no rule applies | [regex](languages/regex.md#gnu-sed): [`regex-sed`](../src/regex-sed/README.md) |
+| The archive's members, which are the program, plus one SQLite row that says whether the run has halted or faulted | [tar](languages/tar.md#a-program-that-is-an-archive): [`tar-gnu`](../src/tar-gnu/README.md) |
 | Thunks: which parts of a list have been demanded | [haskell](languages/haskell.md#lazy-io-as-control-flow): [`haskell-weird`](../src/haskell-weird/README.md) |
 | The input stream: whatever macro text has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning): [`m4`](../src/m4/README.md) |
 | A C struct that never rewinds | [regex](languages/regex.md#pcre2-callouts-as-an-instruction-set): [`regex-pcre2`](../src/regex-pcre2/README.md) |

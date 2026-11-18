@@ -22,6 +22,7 @@ Every weird entry forces you to name the machine hiding inside a language. Once 
 | GNU find | A tree walk that grows the tree it is walking, with find itself reading the depth and the clock | The path from the start directory to the directory being visited; its depth is the running total | [find](languages/find.md) |
 | GNU Make | A dependency graph that can restart itself | Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | [make-cmake](languages/make-cmake.md#gnu-make) |
 | GNU sed | A string-rewriting system (a Markov algorithm) | One line of text, rewritten until no rule applies | [regex](languages/regex.md#gnu-sed) |
+| GNU tar | A tape reader (tar) feeding a five-word interpreter | The archive's members, which are the program, plus one SQLite row that says whether the run has halted or faulted | [tar](languages/tar.md#a-program-that-is-an-archive) |
 | Haskell | A lazy graph reducer | Thunks: which parts of a list have been demanded | [haskell](languages/haskell.md#lazy-io-as-control-flow) |
 | m4 | A text-rescanning machine | The input stream: whatever macro text has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning) |
 | PCRE2 | A backtracking search with hooks | A C struct that never rewinds | [regex](languages/regex.md#pcre2-callouts-as-an-instruction-set) |

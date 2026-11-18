@@ -28,6 +28,7 @@ A threat model answers four plain questions. What are we protecting? Who might a
 
 | Entry | Language | What it teaches |
 | --- | --- | --- |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | Executable code inside a live regex match. |
 | [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
 
@@ -49,6 +50,7 @@ Arbitrary code execution means that an attacker makes a program run instructions
 
 | Entry | Language | What it teaches |
 | --- | --- | --- |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | Executable code inside a live regex match. |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
 | [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
@@ -79,7 +81,11 @@ The principle of least privilege says that every part of a system should get onl
 - [Principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege) (Wikipedia)
 - [RFC 4949: Internet Security Glossary](https://www.rfc-editor.org/rfc/rfc4949), which defines the term (search the page for "least privilege")
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | What it teaches |
+| --- | --- | --- |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 
 ## Code review
 
