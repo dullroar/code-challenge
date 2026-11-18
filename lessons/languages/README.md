@@ -14,6 +14,7 @@ Each page covers what makes the language special, with pointers into the repo, t
 | [Forth](forth.md) | `forth`, `forth-weird` | The text interpreter's parse position is the program counter | The interpreter is a program you can reach into |
 | [Haskell](haskell.md) | `haskell`, `haskell-weird` | Evaluating a list element performs I/O | Laziness, evaluation order, referential transparency, unsafe operations |
 | [m4](m4.md) | `m4` | A macro whose last word is itself: rescanning is the loop | Quoting as lazy evaluation, text as the only data type, 32-bit arithmetic |
+| [JavaScript](javascript.md) | `javascript` | The original's empty-bodied `for`, in Node.js: three clauses, an object for state, a timer for the animation | Evaluation order, the comma operator, `let` per iteration, the event loop |
 | [Make and CMake](make-cmake.md) | `make-gnu`, `cmake` | Remaking makefiles becomes a loop; regex captures become registers | Dependency graphs, restart semantics, scope, stateful condition evaluation |
 | [Regex](regex.md) | `regex-perl`, `regex-pcre2`, `regex-pcre2grep`, `regex-dotnet`, `regex-sed` | Substitutions implement arithmetic and state; matches that return false after doing the work | String-rewriting systems, backtracking as search, performance cliffs |
 | [tar](tar.md) | `tar-gnu` | An archive is the program: tar walks the members, and the operator's `--to-command` gives them meaning | Serialization versus execution, trust boundaries, fail-closed interpreters |

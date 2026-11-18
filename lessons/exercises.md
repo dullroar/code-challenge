@@ -343,6 +343,22 @@ Acceptance criteria:
 - Step 3: one card. The program runs once and never starts itself again, because nothing runs register `n` any more. With `DICE="5 5 5 5 5"` the row is `Meetings 15 15`.
 - Step 4: `@n` is the loop, and register `n` holds the instruction from the tape line. The line that stops it is the first one whose instruction is `"`, which is the one for a total of 41.
 
+### B20. JavaScript: read the clauses, move the limit and fail the structure check (verified)
+
+**Lesson:** [JavaScript](languages/javascript.md#the-bodiless-for-in-node). **Entry:** a copy of `src/javascript`.
+
+1. **Predict**, then run: `SEED=42 node timecards.mjs`. Which card crosses 40? (The generator is Park-Miller, and the hours of the first three cards for this seed are 12, 17 and 17.)
+2. In the copy, change `<= 40` in the condition to `<= 20`. **Predict** the rows for `SEED=42`, then run them.
+3. Put a statement in the loop body: replace `{ /* Intentionally empty. */ }` with `{ i.frames++; }`. Run `node timecards.mjs`, then `node check-structure.mjs timecards.mjs`.
+4. Run `NOW=2026-12-31 SEED=42 node timecards.mjs` and `NOW=2024-12-30 SEED=42 node timecards.mjs`. **Predict** the week column.
+
+Acceptance criteria:
+
+- Step 1: three cards, `Meetings 12 12`, `Coding 17 29`, `Debugging 17 46`, and the third card crosses 40. `check-demo.sh` passes.
+- Step 2: two cards, 12 and 29. The condition is evaluated after the iterator has added a card, so the card that takes the total from 12 to 29 is saved, and then the test (29 is over 20) ends the loop. `check-demo.sh out.txt 20` passes.
+- Step 3: the program still runs and prints the same cards (the extra statement changes a counter that nothing reads), and the structure check **fails** with a message about the body. The constraint was a rule you broke, and the check is the proof that it was real.
+- Step 4: `2026-W53` and `2025-W01`. The week is the ISO week, and the year printed is the ISO year, which can differ from the calendar year at New Year.
+
 ## C. By solution pattern
 
 ### C1. Weird next to boring (verified)

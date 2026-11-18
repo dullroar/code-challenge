@@ -24,6 +24,7 @@ Haskell is lazy: one `span` over an infinite list is the stop rule, because only
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar | eager |
 | [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | eager |
 | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | eager |
+| [`javascript`](../../src/javascript/README.md) | JavaScript | eager |
 | [`tcl`](../../src/tcl/README.md) | Tcl | eager |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl | eager |
 | [`haskell`](../../src/haskell/README.md) | Haskell | lazy |
@@ -85,6 +86,7 @@ Eager evaluation computes a value as soon as the code asks for it. It is the def
 | --- | --- | --- |
 | [`apl`](../../src/apl/README.md) | APL | That five rolls and a take-while can replace a loop. |
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 
 ## Lazy evaluation
 
@@ -130,6 +132,7 @@ Short-circuit evaluation means that `and` and `or` stop as soon as the answer is
 | --- | --- | --- |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Deferred execution

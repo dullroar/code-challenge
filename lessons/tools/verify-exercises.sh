@@ -281,6 +281,25 @@ if selected B19; then echo "B19 Ex: move the limit on the tape and cut the loop"
   if grep -qE $'^Meetings\t15\t15\t' "$W/b19c.txt" && contains "$W/b19c.txt" "entries=1"; then ok "B19 no @n: one card"; else bad B19c "$(tr '\n' ' ' < "$W/b19c.txt")"; fi
 fi
 
+if selected B20; then echo "B20 JavaScript: read the clauses, move the limit, fail the structure check"
+  d=$(copy src/javascript b20)
+  "$sbx" -e SEED=42 "$d" node timecards.mjs > "$W/b20a.txt" 2>&1
+  if grep -qE $'^Meetings\t12\t12\t' "$W/b20a.txt" && grep -qE $'^Coding\t17\t29\t' "$W/b20a.txt" && grep -qE $'^Debugging\t17\t46\t' "$W/b20a.txt"; then ok "B20 SEED=42: 12, 29, 46"; else bad B20a "$(tr '\n' ' ' < "$W/b20a.txt")"; fi
+  expect "B20 step 1 passes check-demo" "$chk" "$W/b20a.txt"
+  d=$(copy src/javascript b20b); mutate "$d/timecards.mjs" '<= 40' '<= 20'
+  "$sbx" -e SEED=42 "$d" node timecards.mjs > "$W/b20b.txt" 2>&1
+  contains "$W/b20b.txt" "total=29 entries=2" && ok "B20 <= 20: two cards, 29" || bad B20b "$(tr '\n' ' ' < "$W/b20b.txt")"
+  expect "B20 <= 20 passes check-demo at 20" "$chk" "$W/b20b.txt" 20
+  d=$(copy src/javascript b20c); mutate "$d/timecards.mjs" '{ /* Intentionally empty. */ }' '{ i.frames++; }'
+  "$sbx" -e SEED=42 "$d" node timecards.mjs > "$W/b20c.txt" 2>&1
+  contains "$W/b20c.txt" "total=46 entries=3" && ok "B20 a statement in the body: the program still runs" || bad B20c "$(tr '\n' ' ' < "$W/b20c.txt")"
+  expectnot "B20 ...and check-structure.mjs fails" "$sbx" "$d" node check-structure.mjs timecards.mjs
+  d=$(copy src/javascript b20d)
+  "$sbx" -e SEED=42 -e NOW=2026-12-31 "$d" node timecards.mjs > "$W/b20d1.txt" 2>&1
+  "$sbx" -e SEED=42 -e NOW=2024-12-30 "$d" node timecards.mjs > "$W/b20d2.txt" 2>&1
+  if grep -qE $'\t2026-W53\t' "$W/b20d1.txt" && grep -qE $'\t2025-W01\t' "$W/b20d2.txt"; then ok "B20 weeks: 2026-W53 and 2025-W01"; else bad B20d "$(tr '\n' ' ' < "$W/b20d1.txt") / $(tr '\n' ' ' < "$W/b20d2.txt")"; fi
+fi
+
 if selected C1; then echo "C1 weird next to boring (measured)"
   for p in cobol haskell forth apl lisp tcl awk; do
     a=$(cat src/$p/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)'); b=$(cat src/$p-weird/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)')

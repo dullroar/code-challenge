@@ -290,6 +290,13 @@ The fake `mktemp` makes the dice. The walk reads the last character of each six-
 3. Without the final `|@n` the program ends after one card: `Meetings 15 15` for `DICE="5 5 5 5 5"`. Nothing starts the program again.
 4. The loop is `@n`, the last command on the program line. Register `n` holds the text of the tape line, minus the total. The first row whose text is `"` (the row for 41) is where it stops, and the limit of 40 is nowhere in the program: it is the boundary on the tape.
 
+## B20. JavaScript: read the clauses, move the limit and fail the structure check
+
+1. `SEED=42` gives hours 12, 17 and 17: totals 12, 29 and 46. The third card crosses 40 and is kept. The first test sees 0, the second 12, the third 29 (all 40 or less), and the fourth sees 46 and stops.
+2. With `<= 20`: the test sees 0 and 12 (go on) and then 29 (over 20), so two cards: 12 and 29. The crossing card is the second.
+3. The extra statement is legal JavaScript, and the program runs. `check-structure.mjs` reports `FAIL: the body must be empty`. That is the proof that the stunt's rule is checked, and not just claimed.
+4. 2026-12-31 is a Thursday, and 2026 starts on a Thursday, so it has 53 weeks: `2026-W53`. 2024-12-30 is a Monday, in the week whose Thursday is 2025-01-02, so it is `2025-W01`.
+
 ## C1. Weird next to boring
 
 Measured with the verification script (non-comment lines):
