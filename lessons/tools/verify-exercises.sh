@@ -265,6 +265,22 @@ if selected B18; then echo "B18 ed: move the stop rule and break the cleanup"
   if grep -qx 'Dead 0 52' "$W/b18e.txt"; then ok "B18 without the cleanup: Dead 0 52 shows"; else bad B18e "$(tr '\n' ' ' < "$W/b18e.txt")"; fi
 fi
 
+if selected B19; then echo "B19 Ex: move the limit on the tape and cut the loop"
+  d=$(copy src/ex-weird b19)
+  "$sbx" -e DICE="1 1 1 1 1" "$d" sh ./timecards.sh > "$W/b19a.txt" 2>&1
+  if contains "$W/b19a.txt" "total=44 entries=4"; then ok "B19 eleven-hour cards: four cards, 44"; else bad B19a "$(tr '\n' ' ' < "$W/b19a.txt")"; fi
+  expect "B19 step 1 passes check-demo" "$chk" "$W/b19a.txt"
+  d=$(copy src/ex-weird b19b); "$sbx" "$d" sh -c "true" >/dev/null 2>&1
+  python -I -c 'import re,sys; p=sys.argv[1]; s=open(p).read(); s=re.sub(r"(?m)^(4[1-5]) \"$", r"\1 @a", s); open(p,"w").write(s)' "$d/timecards.ex"
+  "$sbx" -e DICE="1 1 1 1 1" "$d" sh ./timecards.sh > "$W/b19b.txt" 2>&1
+  if contains "$W/b19b.txt" "total=55 entries=5"; then ok "B19 tape 45: five cards, 55"; else bad B19b "$(tr '\n' ' ' < "$W/b19b.txt")"; fi
+  expect "B19 tape 45 passes check-demo at 45" "$chk" "$W/b19b.txt" 45
+  d=$(copy src/ex-weird b19c)
+  python -I -c 'import sys; p=sys.argv[1]; s=open(p).read(); assert "|@n\n" in s; open(p,"w").write(s.replace("|@n\n","\n",1))' "$d/timecards.ex"
+  "$sbx" -e DICE="5 5 5 5 5" "$d" sh ./timecards.sh > "$W/b19c.txt" 2>&1
+  if grep -qE $'^Meetings\t15\t15\t' "$W/b19c.txt" && contains "$W/b19c.txt" "entries=1"; then ok "B19 no @n: one card"; else bad B19c "$(tr '\n' ' ' < "$W/b19c.txt")"; fi
+fi
+
 if selected C1; then echo "C1 weird next to boring (measured)"
   for p in cobol haskell forth apl lisp tcl awk; do
     a=$(cat src/$p/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)'); b=$(cat src/$p-weird/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)')

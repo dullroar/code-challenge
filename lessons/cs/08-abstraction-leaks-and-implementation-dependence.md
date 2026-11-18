@@ -63,6 +63,7 @@ Software is portable if it runs correctly in more than one environment: another 
 | --- | --- | --- |
 | [`awk-weird`](../../src/awk-weird/README.md) | AWK | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
 | [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 | [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |

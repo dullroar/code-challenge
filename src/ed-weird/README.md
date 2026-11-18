@@ -7,6 +7,7 @@ lesson: "languages/editors.md#the-buffer-is-the-machine"
 loop-by: rewrite-and-rescan
 evaluation: rewriting
 assurance: accidentally-exploited
+pairs-with: ex-weird
 machine: "A string-rewriting machine with line addresses"
 state: "The editor buffer: one line per card, and marks (x) that are added by joining lines"
 tags: [hyrums-law, language-specification, markov-algorithm, portability, regular-expression, state, state-encoding, term-rewriting, transition-system, weird-machine]
@@ -27,7 +28,7 @@ Coding 13 30
 Debugging 19 49
 ```
 
-Cards and rows: every number is made by writing marks (`x`) next to each other and by rewriting text. A launcher gives `ed` its five digits and stores the rows afterwards. It does no arithmetic.
+Its partner, [`ex-weird`](../ex-weird/README.md), uses the richer language that `vi` is built on: registers, marks and `@`. Here every number is made by writing marks (`x`) next to each other and by rewriting text. A launcher gives `ed` its five digits and stores the rows afterwards. It does no arithmetic.
 
 ## Run it
 

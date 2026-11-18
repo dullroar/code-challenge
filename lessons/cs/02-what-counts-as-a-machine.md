@@ -61,6 +61,7 @@ Any state must be written down in something. A number can be tally marks (unary)
 | --- | --- | --- |
 | [`cobol`](../../src/cobol/README.md) | COBOL | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
 | [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
@@ -139,6 +140,7 @@ A register machine stores its values in a few numbered boxes called registers. R
 | --- | --- | --- |
 | [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | A regex as a stack-based counter. |
 | [`cmake`](../../src/cmake/README.md) | CMake | `while()` plus regex as a tiny register machine. |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
 
 ## Turing machines

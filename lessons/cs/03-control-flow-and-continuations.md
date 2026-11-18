@@ -78,6 +78,7 @@ The program counter is a register that holds the address of the next instruction
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | Why structured programming won, by running a program whose control flow rewrites itself. |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
 
 ## Recursion
@@ -169,3 +170,4 @@ Self-modifying code changes its own instructions while it runs. Early computers 
 | --- | --- | --- |
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | Why structured programming won, by running a program whose control flow rewrites itself. |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |

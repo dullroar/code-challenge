@@ -19,6 +19,7 @@ Every weird entry forces you to name the machine hiding inside a language. Once 
 | COBOL | A program whose jump targets are mutable | The target of one `GO TO` | [cobol](languages/cobol.md#alter) |
 | Common Lisp | A method dispatcher with a pluggable combination rule | The class precedence list, and each method's return value | [lisp](languages/lisp.md#method-combination-as-control-flow) |
 | ed | A string-rewriting machine with line addresses | The editor buffer: one line per card, and marks (x) that are added by joining lines | [editors](languages/editors.md#the-buffer-is-the-machine) |
+| Ex | A register machine whose registers are editor marks, and whose program is a register that runs itself | The marks (where we are on a tape of numbered lines), the first line of the buffer (the next card), and registers a, d and n | [editors](languages/editors.md#a-program-you-can-edit) |
 | Forth | A stack machine with a movable instruction pointer | The data stack and the parse position `>in` | [forth](languages/forth.md) |
 | GNU find | A tree walk that grows the tree it is walking, with find itself reading the depth and the clock | The path from the start directory to the directory being visited; its depth is the running total | [find](languages/find.md) |
 | GNU Make | A dependency graph that can restart itself | Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | [make-cmake](languages/make-cmake.md#gnu-make) |

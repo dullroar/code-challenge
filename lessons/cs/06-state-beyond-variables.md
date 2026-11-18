@@ -30,6 +30,7 @@ State is whatever a program remembers between steps. Without it, nothing could b
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | Why structured programming won, by running a program whose control flow rewrites itself. |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
 | [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
 | [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | Arithmetic and looping in plain Make syntax, no shell required. |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
@@ -125,6 +126,7 @@ A language is *homoiconic* when its programs are written in its own data structu
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
 | [`lisp`](../../src/lisp/README.md) | Common Lisp | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
 
 ## Reflection and metaprogramming
@@ -146,6 +148,7 @@ A language is *homoiconic* when its programs are written in its own data structu
 | --- | --- | --- |
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
 | [`tcl`](../../src/tcl/README.md) | Tcl | Idiomatic Tcl: procs in a namespace, dicts for records, braced `expr`, and `db eval` binding Tcl variables straight into SQL. |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |

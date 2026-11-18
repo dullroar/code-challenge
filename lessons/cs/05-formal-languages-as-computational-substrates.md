@@ -241,6 +241,7 @@ Language-theoretic security (LangSec) is a way of thinking about security. Every
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 | [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |

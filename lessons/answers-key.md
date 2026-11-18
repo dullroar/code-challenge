@@ -283,6 +283,13 @@ The fake `mktemp` makes the dice. The walk reads the last character of each six-
 2. `DICE="3 3 3 3 3"` is 13 hours a card. With `x\{41,\}`: 13, 26, 39, 52, four cards. With `x\{31,\}`: 13, 26, 39, three cards, because 39 is over 30 and the bar becomes a bang. `check-demo.sh out.txt 30` passes. The stop rule is the regular expression over the marks.
 3. The output has a fifth line, `Dead 0 52`. At card 4 the total is 52, so the ledger line has a `!`. Card 5 joins with it, the Dead rule rewrites the joined line to `Dead 0!` plus the marks, and the decimal rules print the total. With the cleanup in place `g/^Dead /d` removes it. **Features:** step 1 is the rewrite table and the addressing (a changed number of marks), step 2 is a regular expression interval, step 3 is `g` with `d`.
 
+## B19. Ex: move the limit on the tape and cut the loop
+
+1. `DICE="1 1 1 1 1"` is eleven hours a card: totals 11, 22, 33, 44. After card 4 the mark is on tape row 44, whose instruction is the comment, so the run ends. Four cards.
+2. With rows 41 to 45 changed from `"` to `@a`, row 44 now continues. The fifth card brings the total to 55, which is row 55: still a comment. Five cards: 11, 22, 33, 44, 55. `check-demo.sh out.txt 45` passes. One edit of data moved the stop rule.
+3. Without the final `|@n` the program ends after one card: `Meetings 15 15` for `DICE="5 5 5 5 5"`. Nothing starts the program again.
+4. The loop is `@n`, the last command on the program line. Register `n` holds the text of the tape line, minus the total. The first row whose text is `"` (the row for 41) is where it stops, and the limit of 40 is nowhere in the program: it is the boundary on the tape.
+
 ## C1. Weird next to boring
 
 Measured with the verification script (non-comment lines):

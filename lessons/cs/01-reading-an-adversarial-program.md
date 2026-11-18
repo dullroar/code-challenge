@@ -133,3 +133,4 @@ A language specification says what programs *mean*. An implementation is one par
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |

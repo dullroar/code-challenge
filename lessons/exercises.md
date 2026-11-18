@@ -325,6 +325,24 @@ Acceptance criteria:
 - Step 3: the output ends with an extra line `Dead 0 52`. It is the fifth card, which was turned into a dead card because the total had passed 40 at card 4. The `Dead` rule is the one that stops cards from counting; the cleanup only hides them.
 - In one sentence: which ed feature made each of the three changes possible?
 
+### B19. Ex: move the limit on the tape and cut the loop (verified)
+
+**Lesson:** [ed and Ex](languages/editors.md#a-program-you-can-edit). **Entry:** a copy of `src/ex-weird`.
+
+The launcher takes `DICE="a b c d e"`: five digits. Each card has 10 + its digit hours.
+
+1. **Predict**, then run: `DICE="1 1 1 1 1" sh timecards.sh`. How many cards, and what are the totals?
+2. In the copy, make the tape say "go on" up to 45 instead of 40: `sed -i 's/^\(4[1-5]\) "$/\1 @a/' timecards.ex`. **Predict** the rows for the same dice, then run them.
+3. Take the loop out: `sed -i 's/|@n$//' timecards.ex`. **Predict** how many cards run, then run it with `DICE="5 5 5 5 5"`.
+4. Look at the end of the program line in `timecards.ex`. Which command is the loop, and which line of the tape makes it stop?
+
+Acceptance criteria:
+
+- Step 1: four cards, 11, 22, 33 and 44. The total passes 40 at the fourth card, so the tape row `44` is the first "stop" instruction that the program reads, and the run ends there. `check-demo.sh` passes.
+- Step 2: five cards, 11, 22, 33, 44 and 55. Row 44 now says `@a`, so the run goes on, and row 55 still says `"`. `check-demo.sh out.txt 45` passes. The program did not change: only a line of data did.
+- Step 3: one card. The program runs once and never starts itself again, because nothing runs register `n` any more. With `DICE="5 5 5 5 5"` the row is `Meetings 15 15`.
+- Step 4: `@n` is the loop, and register `n` holds the instruction from the tape line. The line that stops it is the first one whose instruction is `"`, which is the one for a total of 41.
+
 ## C. By solution pattern
 
 ### C1. Weird next to boring (verified)
