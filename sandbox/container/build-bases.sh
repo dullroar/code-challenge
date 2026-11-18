@@ -33,6 +33,8 @@ bases=(
     'm4|m4'
     'tcl|tcl8.6 tk8.6 libsqlite3-tcl xvfb scrot fonts-dejavu-core'
     'awk|gawk'
+    'ed|ed'
+    'nvi|nvi'
 )
 
 if (( force )) || ! $docker image inspect code-challenge-sandbox:local >/dev/null 2>&1; then
@@ -47,6 +49,13 @@ for b in "${bases[@]}"; do
         $docker build --target runtime -t "cc-rt-$name:local" --build-arg "PACKAGES=$pkgs" "$(host_path "$here")"
     fi
 done
+# node is not an apt package here (Ubuntu's is Node 18, without node:sqlite): its own target in the Dockerfile.
+if [[ $only == "  " || $only == *" node "* ]]; then
+    if (( force )) || ! $docker image inspect cc-rt-node:local >/dev/null 2>&1; then
+        echo "building cc-rt-node:local"
+        $docker build --target runtime-node -t cc-rt-node:local "$(host_path "$here")"
+    fi
+fi
 for t in go rust java; do   # build-only bases: a toolchain image that entries' build stages start from
     if [[ $only == "  " || $only == *" build-$t "* ]]; then
         if (( force )) || ! $docker image inspect "cc-build-$t:local" >/dev/null 2>&1; then
