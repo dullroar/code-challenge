@@ -34,6 +34,7 @@ There is no loop. There is a sequence that someone keeps asking for, and the pro
 | --- | --- | --- | --- | --- | --- |
 | [`haskell`](../../src/haskell/README.md) | Haskell |  |  | lazy | guaranteed |
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | A lazy graph reducer | Thunks: which parts of a list have been demanded | lazy | implementation-permitted |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | A closure-backed state machine, pulled by a lazy iterator | Variables captured by closures: the generator's number, and the machine's card count, total and stop flag | lazy | guaranteed |
 | [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin |  |  | lazy | guaranteed |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ |  |  | deferred | guaranteed |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ |  |  | deferred | guaranteed |
@@ -153,7 +154,8 @@ The order of the document is the order of the program. [`xaml`](../../src/xaml/R
 | [`haskell`](../../src/haskell/README.md) | Haskell | idiomatic | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`haskell-weird`](../../src/haskell-weird/README.md) |
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | implementation-permitted | [`haskell`](../../src/haskell/README.md) |
 | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | port | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) |
-| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | port | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed |  |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | port | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`javascript-weird`](../../src/javascript-weird/README.md) |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`javascript`](../../src/javascript/README.md) |
 | [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | port | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | deferred | guaranteed | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | deferred | guaranteed | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) |

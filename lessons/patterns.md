@@ -67,6 +67,7 @@ Where does "where am I in the program?" live when you have no loop counter?
 | One SQLite row (the machine's registers) and the number of records tar has written | [tar](languages/tar.md#the-archive-is-the-clock): [`tar-gnu-weird`](../src/tar-gnu-weird/README.md) |
 | Thunks: which parts of a list have been demanded | [haskell](languages/haskell.md#lazy-io-as-control-flow): [`haskell-weird`](../src/haskell-weird/README.md) |
 | Properties of one object literal | [javascript](languages/javascript.md#the-bodiless-for-in-node): [`javascript`](../src/javascript/README.md) |
+| Variables captured by closures: the generator's number, and the machine's card count, total and stop flag | [javascript](languages/javascript.md#closures-all-the-way-down): [`javascript-weird`](../src/javascript-weird/README.md) |
 | The input stream: whatever macro text has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning): [`m4`](../src/m4/README.md) |
 | A C struct that never rewinds | [regex](languages/regex.md#pcre2-callouts-as-an-instruction-set): [`regex-pcre2`](../src/regex-pcre2/README.md) |
 | SQLite rows, and the exit code of each callout | [regex](languages/regex.md#pcre2grep-exit-codes-as-control-flow): [`regex-pcre2grep`](../src/regex-pcre2grep/README.md) |

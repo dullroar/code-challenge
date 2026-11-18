@@ -7,6 +7,7 @@ lesson: "languages/javascript.md#the-bodiless-for-in-node"
 loop-by: loop-statement
 evaluation: eager
 assurance: guaranteed
+pairs-with: javascript-weird
 machine: "Three expression slots"
 state: "Properties of one object literal"
 tags: [control-flow, eager-evaluation, integrity-constraint, scope-and-binding, short-circuit-evaluation, side-effect, state]

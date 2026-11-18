@@ -300,6 +300,22 @@ if selected B20; then echo "B20 JavaScript: read the clauses, move the limit, fa
   if grep -qE $'\t2026-W53\t' "$W/b20d1.txt" && grep -qE $'\t2025-W01\t' "$W/b20d2.txt"; then ok "B20 weeks: 2026-W53 and 2025-W01"; else bad B20d "$(tr '\n' ' ' < "$W/b20d1.txt") / $(tr '\n' ' ' < "$W/b20d2.txt")"; fi
 fi
 
+if selected B21; then echo "B21 JavaScript weirder: move the stop rule in a closure, watch the demand"
+  d=$(copy src/javascript-weird b21)
+  "$sbx" "$d" node --expose-gc --test check.mjs > "$W/b21a.txt" 2>&1
+  if grep -q '^ℹ pass 12' "$W/b21a.txt" && grep -q '^ℹ fail 0' "$W/b21a.txt"; then ok "B21 the lab passes: 12 tests"; else bad B21a "$(grep '^ℹ' "$W/b21a.txt" | tr '\n' ' ')"; fi
+  d=$(copy src/javascript-weird b21b); mutate "$d/core.mjs" 'over = total > 40' 'over = total > 20'
+  "$sbx" -e SEED=42 "$d" node timecards.mjs > "$W/b21b.txt" 2>&1
+  contains "$W/b21b.txt" "total=29 entries=2" && ok "B21 over > 20: two cards, 29" || bad B21b "$(tr '\n' ' ' < "$W/b21b.txt")"
+  "$sbx" "$d" node --expose-gc --test check.mjs > "$W/b21c.txt" 2>&1
+  if grep -q '^ℹ pass 5' "$W/b21c.txt" && grep -q '^ℹ fail 7' "$W/b21c.txt"; then ok "B21 over > 20: the lab shows 5 passes and 7 failures"; else bad B21c "$(grep '^ℹ' "$W/b21c.txt" | tr '\n' ' ')"; fi
+  d=$(copy src/javascript-weird b21d)
+  "$sbx" "$d" node --input-type=module -e "import { cards, machine } from './core.mjs'; const m = machine(() => (console.log('drawn'), 15)); const p = Iterator.from(cards(m)).map(c => c.total); console.log('built'); console.log(p.take(1).toArray());" > "$W/b21d.txt" 2>&1
+  [[ $(tr '\n' '|' < "$W/b21d.txt") == "built|drawn|[ 15 ]|" ]] && ok "B21 built, drawn, [ 15 ]" || bad B21d "$(tr '\n' '|' < "$W/b21d.txt")"
+  "$sbx" "$d" node --input-type=module -e "import { cards, machine } from './core.mjs'; const m = machine(() => (console.log('drawn'), 15)); const p = Iterator.from(cards(m)).map(c => c.total); console.log('built'); console.log(p.take(2).toArray());" > "$W/b21e.txt" 2>&1
+  [[ $(tr '\n' '|' < "$W/b21e.txt") == "built|drawn|drawn|[ 15, 30 ]|" ]] && ok "B21 take(2): two draws" || bad B21e "$(tr '\n' '|' < "$W/b21e.txt")"
+fi
+
 if selected C1; then echo "C1 weird next to boring (measured)"
   for p in cobol haskell forth apl lisp tcl awk; do
     a=$(cat src/$p/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)'); b=$(cat src/$p-weird/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)')

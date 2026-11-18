@@ -29,6 +29,7 @@ Haskell is lazy: one `span` over an infinite list is the stop rule, because only
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl | eager |
 | [`haskell`](../../src/haskell/README.md) | Haskell | lazy |
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | lazy |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript | lazy |
 | [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | lazy |
 | [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | lazy |
 | [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | lazy |
@@ -87,6 +88,7 @@ Eager evaluation computes a value as soon as the code asks for it. It is the def
 | [`apl`](../../src/apl/README.md) | APL | That five rolls and a take-while can replace a loop. |
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 
 ## Lazy evaluation
 
@@ -107,6 +109,7 @@ Lazy evaluation delays a computation until its result is needed, and then rememb
 | --- | --- | --- |
 | [`haskell`](../../src/haskell/README.md) | Haskell | That a lazy list and one `span` are the whole stop rule. |
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 | [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | LINQ method chains, end to end. |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | C# query syntax, pushed as far as it goes. |
@@ -133,6 +136,7 @@ Short-circuit evaluation means that `and` and `or` stop as soon as the answer is
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Deferred execution
@@ -153,6 +157,7 @@ Deferred execution means that you describe a query or a pipeline now, and it run
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | LINQ method chains, end to end. |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | C# query syntax, pushed as far as it goes. |
 
@@ -175,6 +180,7 @@ An *iterator* is an object that answers "give me the next one". A *generator* is
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`haskell`](../../src/haskell/README.md) | Haskell | That a lazy list and one `span` are the whole stop rule. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 | [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
 | [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
 | [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | Iterators and closures as control flow. |
@@ -199,6 +205,7 @@ An expression is referentially transparent if you can replace it with its value 
 | [`apl`](../../src/apl/README.md) | APL | That five rolls and a take-while can replace a loop. |
 | [`haskell`](../../src/haskell/README.md) | Haskell | That a lazy list and one `span` are the whole stop rule. |
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 
 ## Array programming
 

@@ -359,6 +359,31 @@ Acceptance criteria:
 - Step 3: the program still runs and prints the same cards (the extra statement changes a counter that nothing reads), and the structure check **fails** with a message about the body. The constraint was a rule you broke, and the check is the proof that it was real.
 - Step 4: `2026-W53` and `2025-W01`. The week is the ISO week, and the year printed is the ISO year, which can differ from the calendar year at New Year.
 
+### B21. JavaScript, weirder: move the stop rule in a closure and watch the demand (verified)
+
+**Lesson:** [JavaScript](languages/javascript.md#closures-all-the-way-down). **Entry:** a copy of `src/javascript-weird`.
+
+1. Run the closure lab on the untouched copy: `node --expose-gc --test check.mjs`. How many tests pass?
+2. In `core.mjs`, change the stop rule `over = total > 40` to `over = total > 20`. **Predict** the rows for `SEED=42 node timecards.mjs` (the hours of the first cards are 12, 17 and 17). Then run the lab again. **Predict** whether it passes.
+3. Run this, and **predict** what it prints, and in what order:
+
+   ```bash
+   node --input-type=module -e "
+   import { cards, machine } from './core.mjs';
+   const m = machine(() => (console.log('drawn'), 15));
+   const p = Iterator.from(cards(m)).map(c => c.total);
+   console.log('built');
+   console.log(p.take(1).toArray());"
+   ```
+4. In the same command, change `take(1)` to `take(2)`. How many `drawn` lines do you get?
+
+Acceptance criteria:
+
+- Step 1: all 12 tests pass.
+- Step 2: two cards (`Meetings 12 12`, `Coding 17 29`): the machine says `over` as soon as the total passes 20. The lab does **not** pass: 7 of the 12 tests fail, and they are the ones that pin the stop rule (the crossing card, exactly 40, the draw counts, the replay of seed 42). The 5 that pass are about closures and do not care about the limit. In one sentence: why do the closure tests not care?
+- Step 3: `built`, then `drawn`, then `[ 15 ]`. Building the pipeline draws nothing. `take(1)` asks for one card, so one hours value is drawn.
+- Step 4: two `drawn` lines (and `[ 15, 30 ]`). The consumer decides how many cards exist.
+
 ## C. By solution pattern
 
 ### C1. Weird next to boring (verified)

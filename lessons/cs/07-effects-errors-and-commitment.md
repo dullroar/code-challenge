@@ -29,6 +29,7 @@ A side effect is anything an operation does besides returning a value: writing a
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
 | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 | [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | LINQ method chains, end to end. |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | C# query syntax, pushed as far as it goes. |

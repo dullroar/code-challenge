@@ -297,6 +297,13 @@ The fake `mktemp` makes the dice. The walk reads the last character of each six-
 3. The extra statement is legal JavaScript, and the program runs. `check-structure.mjs` reports `FAIL: the body must be empty`. That is the proof that the stunt's rule is checked, and not just claimed.
 4. 2026-12-31 is a Thursday, and 2026 starts on a Thursday, so it has 53 weeks: `2026-W53`. 2024-12-30 is a Monday, in the week whose Thursday is 2025-01-02, so it is `2025-W01`.
 
+## B21. JavaScript, weirder: move the stop rule in a closure and watch the demand
+
+1. 12 tests pass.
+2. With `over = total > 20` and `SEED=42` the totals are 12 and 29, so the machine is over after the second card: two cards. The lab then shows 7 failures and 5 passes. The failures are the tests that use the number 40 or the seed's three cards: the crossing card, exactly 40, the draw count, replay, and the like. The five passing tests (two environments, lazy versus eager `map`, closure lifetime, closure versus `this`, closure versus continuation) are about how closures behave, and not about when this machine stops. A closure's rules do not depend on what the closure is for.
+3. `built`, `drawn`, `[ 15 ]`. The pipeline is only a description until `toArray()` asks. `take(1)` stops after one value, so the machine is asked once, and the hours source is called once.
+4. `take(2)` prints `drawn` twice, then `[ 15, 30 ]`: the machine's total is 15 after the first card and 30 after the second.
+
 ## C1. Weird next to boring
 
 Measured with the verification script (non-comment lines):

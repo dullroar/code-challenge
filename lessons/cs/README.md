@@ -36,10 +36,10 @@ The next two parts read the same material from other directions: [By language](.
 | [Coroutines](03-control-flow-and-continuations.md#coroutines) | Control flow and continuations |  |
 | [Database triggers](06-state-beyond-variables.md#database-triggers) | State beyond variables | `tcl-weird` |
 | [Declarative programming](05-formal-languages-as-computational-substrates.md#declarative-programming) | Formal languages as computational substrates | `awk`, `awk-weird`, `cobol`, `LinqChallenge2`, `make-gnu`, `xaml` |
-| [Deferred execution](04-evaluation-and-demand.md#deferred-execution) | Evaluation and demand | `LinqChallenge1`, `LinqChallenge2`, `ModernChallenge1` |
+| [Deferred execution](04-evaluation-and-demand.md#deferred-execution) | Evaluation and demand | `javascript-weird`, `LinqChallenge1`, `LinqChallenge2`, `ModernChallenge1` |
 | [Dependency graphs](06-state-beyond-variables.md#dependency-graphs) | State beyond variables | `make-gnu` |
 | [Domain-specific languages](05-formal-languages-as-computational-substrates.md#domain-specific-languages) | Formal languages as computational substrates | `awk`, `cmake`, `find-gnu`, `find-posix`, `LinqChallenge2`, `lisp`, `regex-pcre2`, `tar-gnu` |
-| [Eager evaluation](04-evaluation-and-demand.md#eager-evaluation) | Evaluation and demand | `apl`, `apl-weird`, `javascript` |
+| [Eager evaluation](04-evaluation-and-demand.md#eager-evaluation) | Evaluation and demand | `apl`, `apl-weird`, `javascript`, `javascript-weird` |
 | [Evaluation strategies](04-evaluation-and-demand.md#evaluation-strategies) | Evaluation and demand | `haskell`, `haskell-weird`, `PythonChallenge1` |
 | [Exception handling](07-effects-errors-and-commitment.md#exception-handling) | Effects, errors and commitment | `cobol-weird` |
 | [Exit status](07-effects-errors-and-commitment.md#exit-status) | Effects, errors and commitment | `regex-pcre2grep`, `regex-sed`, `tar-gnu`, `tar-gnu-weird` |
@@ -50,9 +50,9 @@ The next two parts read the same material from other directions: [By language](.
 | [Idempotence](07-effects-errors-and-commitment.md#idempotence) | Effects, errors and commitment | `tar-gnu` |
 | [Integrity constraints](07-effects-errors-and-commitment.md#integrity-constraints) | Effects, errors and commitment | `cobol`, `find-gnu`, `find-posix`, `javascript`, `regex-pcre2grep`, `tar-gnu`, `tar-gnu-weird` |
 | [Invariants](02-what-counts-as-a-machine.md#invariants) | What counts as a machine? |  |
-| [Iterators and generators](04-evaluation-and-demand.md#iterators-and-generators) | Evaluation and demand | `haskell`, `KotlinChallenge1`, `PythonChallenge1`, `RustChallenge1` |
+| [Iterators and generators](04-evaluation-and-demand.md#iterators-and-generators) | Evaluation and demand | `haskell`, `javascript-weird`, `KotlinChallenge1`, `PythonChallenge1`, `RustChallenge1` |
 | [Language-theoretic security](05-formal-languages-as-computational-substrates.md#language-theoretic-security) | Formal languages as computational substrates | `tar-gnu`, `xaml` |
-| [Lazy evaluation](04-evaluation-and-demand.md#lazy-evaluation) | Evaluation and demand | `haskell`, `haskell-weird`, `KotlinChallenge1`, `LinqChallenge1`, `LinqChallenge2`, `m4`, `RustChallenge1` |
+| [Lazy evaluation](04-evaluation-and-demand.md#lazy-evaluation) | Evaluation and demand | `haskell`, `haskell-weird`, `javascript-weird`, `KotlinChallenge1`, `LinqChallenge1`, `LinqChallenge2`, `m4`, `RustChallenge1` |
 | [Leaky abstractions](08-abstraction-leaks-and-implementation-dependence.md#leaky-abstractions) | Abstraction leaks and implementation dependence | `tar-gnu-weird` |
 | [Macros and text expansion](05-formal-languages-as-computational-substrates.md#macros-and-text-expansion) | Formal languages as computational substrates | `lisp`, `lisp-weird`, `m4` |
 | [Markov algorithms](02-what-counts-as-a-machine.md#markov-algorithms) | What counts as a machine? | `ed-weird`, `regex-sed` |
@@ -66,21 +66,21 @@ The next two parts read the same material from other directions: [By language](.
 | [Portability](08-abstraction-leaks-and-implementation-dependence.md#portability) | Abstraction leaks and implementation dependence | `awk-weird`, `ed-weird`, `ex-weird`, `find-posix`, `regex-pcre2grep`, `tar-gnu-weird` |
 | [Principle of least privilege](01-reading-an-adversarial-program.md#principle-of-least-privilege) | How to read an adversarial program | `tar-gnu` |
 | [Recursion](03-control-flow-and-continuations.md#recursion) | Control flow and continuations | `find-gnu`, `find-posix`, `m4`, `tcl-weird` |
-| [Referential transparency](04-evaluation-and-demand.md#referential-transparency) | Evaluation and demand | `apl`, `haskell`, `haskell-weird` |
+| [Referential transparency](04-evaluation-and-demand.md#referential-transparency) | Evaluation and demand | `apl`, `haskell`, `haskell-weird`, `javascript-weird` |
 | [Reflection and metaprogramming](06-state-beyond-variables.md#reflection-and-metaprogramming) | State beyond variables | `apl-weird`, `ex-weird`, `forth-weird`, `lisp-weird`, `tcl`, `tcl-weird`, `xaml` |
 | [Register machines and counter machines](02-what-counts-as-a-machine.md#register-machines-and-counter-machines) | What counts as a machine? | `cmake`, `ex-weird`, `forth-weird`, `regex-dotnet` |
 | [Regular expressions](05-formal-languages-as-computational-substrates.md#regular-expressions) | Formal languages as computational substrates | `awk`, `awk-weird`, `cmake`, `ed-weird`, `find-gnu`, `regex-dotnet`, `regex-pcre2`, `regex-pcre2grep`, `regex-perl`, `regex-sed` |
 | [Regular-expression denial of service](08-abstraction-leaks-and-implementation-dependence.md#regular-expression-denial-of-service) | Abstraction leaks and implementation dependence | `regex-sed` |
 | [Representing state](02-what-counts-as-a-machine.md#representing-state) | What counts as a machine? | `cobol`, `ed-weird`, `ex-weird`, `find-gnu`, `find-posix`, `regex-sed`, `tar-gnu`, `tar-gnu-weird` |
 | [Sandbox](01-reading-an-adversarial-program.md#sandbox) | How to read an adversarial program |  |
-| [Scope and binding](06-state-beyond-variables.md#scope-and-binding) | State beyond variables | `apl-weird`, `javascript`, `lisp-weird`, `m4`, `tcl`, `tcl-weird` |
+| [Scope and binding](06-state-beyond-variables.md#scope-and-binding) | State beyond variables | `apl-weird`, `javascript`, `javascript-weird`, `lisp-weird`, `m4`, `tcl`, `tcl-weird` |
 | [Self-modifying code](03-control-flow-and-continuations.md#self-modifying-code) | Control flow and continuations | `apl-weird`, `cobol-weird`, `ex-weird` |
 | [Serialization, deserialization and object pickling](06-state-beyond-variables.md#serialization-deserialization-and-object-pickling) | State beyond variables | `tar-gnu` |
-| [Short-circuit evaluation](04-evaluation-and-demand.md#short-circuit-evaluation) | Evaluation and demand | `find-gnu`, `find-posix`, `javascript`, `lisp-weird` |
-| [Side effects](07-effects-errors-and-commitment.md#side-effects) | Effects, errors and commitment | `find-gnu`, `find-posix`, `GoChallenge1`, `haskell-weird`, `JavaChallenge1`, `javascript`, `KotlinChallenge1`, `LinqChallenge1`, `LinqChallenge2`, `ModernChallenge1`, `PythonChallenge1`, `regex-pcre2`, `regex-pcre2grep`, `regex-perl`, `RustChallenge1`, `tar-gnu-weird`, `xaml` |
+| [Short-circuit evaluation](04-evaluation-and-demand.md#short-circuit-evaluation) | Evaluation and demand | `find-gnu`, `find-posix`, `javascript`, `javascript-weird`, `lisp-weird` |
+| [Side effects](07-effects-errors-and-commitment.md#side-effects) | Effects, errors and commitment | `find-gnu`, `find-posix`, `GoChallenge1`, `haskell-weird`, `JavaChallenge1`, `javascript`, `javascript-weird`, `KotlinChallenge1`, `LinqChallenge1`, `LinqChallenge2`, `ModernChallenge1`, `PythonChallenge1`, `regex-pcre2`, `regex-pcre2grep`, `regex-perl`, `RustChallenge1`, `tar-gnu-weird`, `xaml` |
 | [Specification versus implementation](01-reading-an-adversarial-program.md#specification-versus-implementation) | How to read an adversarial program | `ed-weird`, `ex-weird` |
 | [Stack machines](02-what-counts-as-a-machine.md#stack-machines) | What counts as a machine? | `forth`, `forth-weird` |
-| [State](06-state-beyond-variables.md#state) | State beyond variables | `apl-weird`, `awk-weird`, `cmake`, `cobol-weird`, `ed-weird`, `ex-weird`, `forth-weird`, `haskell-weird`, `javascript`, `lisp-weird`, `m4`, `make-gnu`, `regex-dotnet`, `regex-pcre2`, `regex-perl`, `regex-sed`, `tar-gnu-weird`, `tcl-weird`, `xaml` |
+| [State](06-state-beyond-variables.md#state) | State beyond variables | `apl-weird`, `awk-weird`, `cmake`, `cobol-weird`, `ed-weird`, `ex-weird`, `forth-weird`, `haskell-weird`, `javascript`, `javascript-weird`, `lisp-weird`, `m4`, `make-gnu`, `regex-dotnet`, `regex-pcre2`, `regex-perl`, `regex-sed`, `tar-gnu-weird`, `tcl-weird`, `xaml` |
 | [Term and string rewriting](05-formal-languages-as-computational-substrates.md#term-and-string-rewriting) | Formal languages as computational substrates | `ed-weird`, `m4`, `regex-sed` |
 | [The call stack](06-state-beyond-variables.md#the-call-stack) | State beyond variables | `find-gnu`, `find-posix` |
 | [The Chomsky hierarchy](05-formal-languages-as-computational-substrates.md#the-chomsky-hierarchy) | Formal languages as computational substrates |  |
