@@ -17,13 +17,16 @@ languages/apl.md
 languages/awk.md
 languages/csharp-linq-xaml.md
 languages/cobol.md
+languages/editors.md
 languages/lisp.md
 languages/find.md
 languages/forth.md
 languages/haskell.md
+languages/javascript.md
 languages/m4.md
 languages/make-cmake.md
 languages/regex.md
+languages/tar.md
 languages/tcl.md
 patterns.md
 problems-overcome.md

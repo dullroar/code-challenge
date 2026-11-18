@@ -96,7 +96,7 @@ Legitimate uses: progress bars for long backups, and `--checkpoint-action=wait` 
 
 ### 5. Now break it yourself
 
-See [exercise B17](../exercises.md#b17-tar-weird-predict-the-clock-verified).
+See [exercise B17](../exercises.md#b17-tar-weirder-predict-the-clock-verified).
 
 ## Computer science behind this page
 
