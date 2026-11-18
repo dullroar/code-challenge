@@ -9,6 +9,7 @@ c-sharp: "C#"
 cmake: CMake
 cobol: COBOL
 common-lisp: Common Lisp
+find: find
 forth: Forth
 go: Go
 haskell: Haskell

@@ -116,6 +116,8 @@ wslRun('runTcl', 'src/tcl', 'tclsh', 'tclsh timecards.tcl', 'Runs the Tcl versio
 wslRun('runTclWeird', 'src/tcl-weird', 'tclsh', 'tclsh timecards.tcl', 'Runs the weird Tcl (SQLite holds the program) version (src/tcl-weird).')
 wslRun('runAwk', 'src/awk', 'awk', 'awk -f timecards.awk', 'Runs the portable AWK version (src/awk).')
 wslRun('runAwkWeird', 'src/awk-weird', 'gawk', 'gawk -f timecards.awk', 'Runs the weird AWK version (src/awk-weird); needs GNU awk.')
+wslRun('runFindPosix', 'src/find-posix', 'sqlite3', 'sh ./timecards.sh', 'Runs the portable find version (src/find-posix); needs sqlite3.')
+wslRun('runFindGnu', 'src/find-gnu', 'sqlite3', 'sh ./timecards.sh', 'Runs the GNU find version (src/find-gnu); needs GNU find and sqlite3.')
 
 // ── The Docker sandbox (sandbox/README.md) ──────────────────────────────────
 // On Windows the sandbox scripts run in Git Bash, which they support with Docker Desktop; WSL may

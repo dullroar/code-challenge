@@ -242,6 +242,28 @@ The digit file is `1 2` followed by a newline. With `RS="[0-9]"` the records are
    No error, exit 0. On `/dev/urandom` the same program never stops and mawk reads until it runs out of memory (verified under a 400 MB limit). A program that *looks* portable and silently computes nothing is worse than one that crashes. `RT` is a **gawk extension**: implementation-permitted, not part of POSIX.
 4. `t > 80 { exit }`: the run stops on the first card that takes the total above 80, and `check-demo.sh out.txt 80` passes. The pattern *is* the stop rule: `check.sh` makes the same edit on a stream of 5s to prove it (three cards become six).
 
+## B14. find: rig the dice
+
+The fake `mktemp` makes the dice. The walk reads the last character of each six-character name, in the pattern `-path '*/[!/][!/][!/][!/][!/][STUVWX]/?'`.
+
+1. `xxxxxS` is in group 9, so each card is 19 hours:
+
+   ```text
+   Meetings	19	19	2026-W47	DEMO ONLY
+   Coding	19	38	2026-W47	DEMO ONLY
+   Debugging	19	57	2026-W47	DEMO ONLY
+   # committed total=57 entries=3 DEMO ONLY
+   ```
+
+   The first total, 19, is the digit sequence 1 ... 9, 0 ... 9: the path has one directory named `0`, and the last digit is 9. After the third card the path has five of them, so the tens digit is 5 and the stop rule fires.
+2. `xxxxxY` ends in `Y`, which is not one of the 60 good characters, so the walk tries the character before it. That is `x`, in the group `stuvwx`: 13 hours. The totals are 13, 26, 39 and 52. The stop rule says "over 40", and 39 is not, so a fourth card is made. The categories are `Meetings`, `Coding`, `Debugging`, `Learning`.
+3. `xxxxYZ`: `Z` is thrown away, and so is `Y` before it. The last branch of the table is the default: 10 hours. The totals are 10, 20, 30, 40 and 50. The stop rule is "five directories named `0`, or four of them and a last digit that is not `0`". At 40 the path has four of them and the last digit is `0`, so it continues. The fifth card is `Meetings` again.
+
+## B15. GNU find: move the stop rule, read the profile
+
+1. `([^/]*/){31}.*` matches a path with at least 31 slashes. The start directory `t` is depth 0, and the end of a card is at depth equal to the running total, so the test is true exactly when the total is 31 or more, which is "over 30". `check-demo.sh out.txt 30` passes. The entry's own `check.sh` fails, because the seven forced-dice scenarios (for example `10 10 10 10 10`, five cards) now stop after fewer cards. The stop rule is that one number, because depth is the total.
+2. With `FIND_D=rates`, find prints its profile on stderr after the walk. Each test shows `[est success rate 0.8]` (the optimizer's flat guess) and `[real success rate a/b=...]`. The `-name b00` test succeeds once per card, so `a` equals the number of rows. The guess is far off because the optimizer has no idea that most directories are named `b..` and only one in about 15 ends a card.
+
 ## C1. Weird next to boring
 
 Measured with the verification script (non-comment lines):

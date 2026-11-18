@@ -23,6 +23,7 @@ A side effect is anything an operation does besides returning a value: writing a
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | A one-statement port in Go: a three-part `for` with an empty body does all the work. |
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
 | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
@@ -32,6 +33,7 @@ A side effect is anything an operation does besides returning a value: writing a
 | [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | Regex callouts as a tiny instruction set. |
 | [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
 | [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | Executable code inside a live regex match. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 | [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
 | [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | Iterators and closures as control flow. |
 | [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
@@ -108,7 +110,9 @@ An integrity constraint is a rule that the database itself enforces: `NOT NULL`,
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`cobol`](../../src/cobol/README.md) | COBOL | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Backtracking
 

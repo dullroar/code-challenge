@@ -177,6 +177,26 @@ if selected B13; then echo "B13 AWK RT"
   img "$d" "$W/b13d.txt"; expect "B13 't > 80' stops above 80" "$chk" "$W/b13d.txt" 80
 fi
 
+if selected B14; then echo "B14 find dice"
+  d=$(copy src/find-posix b14); mkdir "$d/bin"
+  for n in xxxxxS xxxxxY xxxxYZ; do
+    printf '#!/bin/sh\nif [ "$#" -eq 2 ] && [ "$1" = -d ]; then d=${2%%XXXXXX}%s; mkdir "$d" && printf "%%s\\n" "$d"; else exec /usr/bin/mktemp "$@"; fi\n' "$n" > "$d/bin/mktemp"; chmod +x "$d/bin/mktemp"
+    "$sbx" "$d" sh -c 'PATH=$PWD/bin:$PATH sh ./timecards.sh' > "$W/b14-$n.txt" 2>&1
+  done
+  if grep -qE $'^Meetings\t19\t19\t' "$W/b14-xxxxxS.txt" && grep -qE $'^Coding\t19\t38\t' "$W/b14-xxxxxS.txt" && grep -qE $'^Debugging\t19\t57\t' "$W/b14-xxxxxS.txt" && contains "$W/b14-xxxxxS.txt" "total=57 entries=3"; then ok "B14 xxxxxS: three cards of 19 hours"; else bad B14a "$(tr '\n' ' ' < "$W/b14-xxxxxS.txt")"; fi
+  if grep -qE $'^Debugging\t13\t39\t' "$W/b14-xxxxxY.txt" && grep -qE $'^Learning\t13\t52\t' "$W/b14-xxxxxY.txt" && contains "$W/b14-xxxxxY.txt" "total=52 entries=4"; then ok "B14 xxxxxY: re-roll reads x, 13 hours, 39 continues to 52"; else bad B14b "$(tr '\n' ' ' < "$W/b14-xxxxxY.txt")"; fi
+  if grep -qE $'^Learning\t10\t40\t' "$W/b14-xxxxYZ.txt" && grep -qE $'^Meetings\t10\t50\t' "$W/b14-xxxxYZ.txt" && contains "$W/b14-xxxxYZ.txt" "total=50 entries=5"; then ok "B14 xxxxYZ: ten hours, 40 continues, fifth card is Meetings"; else bad B14c "$(tr '\n' ' ' < "$W/b14-xxxxYZ.txt")"; fi
+fi
+
+if selected B15; then echo "B15 GNU find stop rule and profile"
+  d=$(copy src/find-gnu b15); mutate "$d/timecards.sh" '{41}' '{31}'
+  img "$d" "$W/b15.txt"; expect "B15 '{31}' stops above 30" "$chk" "$W/b15.txt" 30
+  expectnot "B15 ...and the entry's own check.sh fails" sandbox/run.sh "$d"
+  d=$(copy src/find-gnu b15b)
+  "$sbx" -e FIND_D=rates "$d" sh ./timecards.sh > "$W/b15b.txt" 2>&1
+  if contains "$W/b15b.txt" "real success rate" && contains "$W/b15b.txt" "est success rate"; then ok "B15 FIND_D=rates prints est and real success rates"; else bad B15b "no profile on stderr"; fi
+fi
+
 if selected C1; then echo "C1 weird next to boring (measured)"
   for p in cobol haskell forth apl lisp tcl awk; do
     a=$(cat src/$p/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)'); b=$(cat src/$p-weird/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)')

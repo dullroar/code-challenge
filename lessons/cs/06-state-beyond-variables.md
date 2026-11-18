@@ -52,7 +52,12 @@ The call stack is a stack of *frames*. Each active function call has one, holdin
 - [Stack buffer overflow](https://en.wikipedia.org/wiki/Stack_buffer_overflow) (Wikipedia)
 - [Tail call](https://en.wikipedia.org/wiki/Tail_call) (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | What it teaches |
+| --- | --- | --- |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## The stack as a data structure
 

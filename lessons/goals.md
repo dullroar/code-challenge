@@ -19,6 +19,7 @@ Every weird entry forces you to name the machine hiding inside a language. Once 
 | COBOL | A program whose jump targets are mutable | The target of one `GO TO` | [cobol](languages/cobol.md#alter) |
 | Common Lisp | A method dispatcher with a pluggable combination rule | The class precedence list, and each method's return value | [lisp](languages/lisp.md#method-combination-as-control-flow) |
 | Forth | A stack machine with a movable instruction pointer | The data stack and the parse position `>in` | [forth](languages/forth.md) |
+| GNU find | A tree walk that grows the tree it is walking, with find itself reading the depth and the clock | The path from the start directory to the directory being visited; its depth is the running total | [find](languages/find.md) |
 | GNU Make | A dependency graph that can restart itself | Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | [make-cmake](languages/make-cmake.md#gnu-make) |
 | GNU sed | A string-rewriting system (a Markov algorithm) | One line of text, rewritten until no rule applies | [regex](languages/regex.md#gnu-sed) |
 | Haskell | A lazy graph reducer | Thunks: which parts of a list have been demanded | [haskell](languages/haskell.md#lazy-io-as-control-flow) |
@@ -26,6 +27,7 @@ Every weird entry forces you to name the machine hiding inside a language. Once 
 | PCRE2 | A backtracking search with hooks | A C struct that never rewinds | [regex](languages/regex.md#pcre2-callouts-as-an-instruction-set) |
 | pcre2grep | A backtracking search that runs one program per callout | SQLite rows, and the exit code of each callout | [regex](languages/regex.md#pcre2grep-exit-codes-as-control-flow) |
 | Perl | A backtracking search with hooks | `local` variables that unwind (effects do not) | [regex](languages/regex.md#perl-code-inside-the-match) |
+| POSIX find | A tree walk that grows the tree it is walking | The path from the start directory to the directory being visited | [find](languages/find.md) |
 | Tcl | A string-command interpreter whose command lookup can be hooked | A TEMP table of proc source, and the depth of trigger recursion | [tcl](languages/tcl.md#sqlite-as-the-program) |
 | XAML | An object-graph constructor that runs methods as it parses | Document order, plus "carrier" arrays | [csharp-linq-xaml](languages/csharp-linq-xaml.md#xaml) |
 <!-- END GENERATED machines -->

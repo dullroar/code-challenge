@@ -40,6 +40,8 @@ The comparison is not "who is better". It is "which pieces of that list can this
 | `tcl`, `tcl-weird` | yes | yes (in-process `sqlite3` package) | optional Tk window (`--gui`) | no | recursive trigger stops on an empty `INSERT ... SELECT` |
 | `awk` | yes (`rand`, seeded from the host) | via `sqlite3` pipe | terminal only | no | one `while`; not a one-statement entry |
 | `awk-weird` | yes (the dice are `RT` from `/dev/urandom`) | via `sqlite3` pipe | terminal only | no | `t > 40 { exit }`; **gawk only** |
+| `find-posix` | yes (`mktemp -d` names; the last character picks the hours) | via `sqlite3` pipe | terminal only | no | one `find`; the walk runs out of tree. Not run on BSD or macOS |
+| `find-gnu` | yes (same dice) | via `sqlite3` on fd 3 | terminal only | no | one GNU `find`; `-O0` to `-O3` must agree. **GNU find only** |
 | `apl`, `apl-weird`, `cobol`, `cobol-weird`, `forth`, `forth-weird`, `haskell`, `haskell-weird` | yes | via `sqlite3` pipe or script | terminal only | no | one-statement not the rule |
 
 The Linux script entries share a reporting shape (rows, a committed total, a stunt note) and do not open windows. Treat "Window / pulse" in this table as "terminal output" for them.
@@ -126,6 +128,12 @@ The Linux script entries share a reporting shape (rows, a committed total, a stu
 - **AWK**: `close()` of a pipe returns different values in different awks, and the one-true-awk build tested returns 0, so a failing `sqlite3` would pass unnoticed there. **`awk-weird`**: gawk only (`RT`); mawk quietly runs forever or reports zero cards. A directory name containing a single quote breaks the shell command that makes the data folder.
 - **None of the four** opens a thread; only the Tcl entries open a window (optional `--gui`).
 
+### find
+
+- **`find-posix`**: relies on find reading a directory after it visits it (unspecified by POSIX; works on GNU find 4.9, bfs 3.1.2 and busybox 1.36.1) and on `{}` inside a longer argument (`{}/b09`; also unspecified). `mktemp` is not POSIX. **Not run on BSD or macOS.** busybox runs `mktemp` in-process, so the forced-dice tests are skipped for it. The line is about 5.7 KB because find has no variables.
+- **`find-gnu`**: GNU find only (`-fprintf`, `%d`, `%T`, `-regex`, `-D`). `-quit` is avoided because it skips the `-D rates` profile. `/dev/fd/3` must be a pipe, or find truncates it.
+- **Neither** opens a window or a thread, and neither has a glow or pulse.
+
 ### The ports
 
 - Java, Kotlin and Go **Windows Sandbox** profiles are not yet tested on real hardware; Rust has no Windows Sandbox profile; the GUI ports have no check script and the gate does not cover them yet ([`sandbox/README.md`](../sandbox/README.md)).
@@ -145,5 +153,6 @@ Each of these is an [exercise](exercises.md#g-open-challenges-not-verified-may-b
 8. Make `awk-weird` work under mawk (or any non-GNU awk): get a die roll without `RT`.
 9. Give m4 its seed and week without `esyscmd`.
 10. Port `lisp-weird` to a second Common Lisp (ECL or CCL) by replacing only the SBCL-specific calls.
+11. Run `find-posix`'s `check.sh` on a BSD or macOS `find`, and write down exactly what breaks (`{}` in `{}/b09`, `-path`, `mktemp`, `date +%G-W%V`).
 
 > **THERE ARE NO BLOCKERS, JUST NOT ENOUGH IMAGINATION.** The list above is the imagination budget.

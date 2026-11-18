@@ -38,6 +38,8 @@ Standards use three different words for "the standard does not fully say". **Und
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | Why structured programming won, by running a program whose control flow rewrites itself. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Portability
 
@@ -57,6 +59,7 @@ Software is portable if it runs correctly in more than one environment: another 
 | --- | --- | --- |
 | [`awk-weird`](../../src/awk-weird/README.md) | AWK | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
 | [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Optimizers
 
@@ -75,6 +78,7 @@ An optimizing compiler rewrites your program so that it runs faster or uses less
 
 | Entry | Language | What it teaches |
 | --- | --- | --- |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | Regex callouts as a tiny instruction set. |
 
 ## Hyrum's law
@@ -94,7 +98,9 @@ Hyrum's law says: with enough users of an interface, *every* observable behavior
 | Entry | Language | What it teaches |
 | --- | --- | --- |
 | [`cmake`](../../src/cmake/README.md) | CMake | `while()` plus regex as a tiny register machine. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Performance cliffs and time complexity
 
