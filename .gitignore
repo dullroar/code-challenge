@@ -20,3 +20,6 @@ src/xaml/data/
 
 # GNU APL command history
 .apl.history
+
+# Book diagram renderer (Mermaid CLI, installed by `npm ci` in lessons/book/diagrams); rendered figures live in lessons/book/out/
+lessons/book/diagrams/node_modules/

@@ -78,6 +78,7 @@ All entries use the **same section titles**, so a reader (and the book, and link
 | `# Title` | yes | One title line. Optionally follow it with a `**Teaches you:**` sentence, then a `DEMO ONLY` notice (your data is fictional and never touches a real system) and a short introduction: what the entry does, and the constraint it plays under. |
 | `## Run it` | yes | How to run it on your own machine. |
 | `## Run it in a container` or `## Run it in Windows Sandbox` | yes, one of them | See the Dockerfile rule above. The Windows heading is checked word for word. |
+| `## Program Flow` | yes | One Mermaid diagram of **how this program runs**, and two short paragraphs. See [Program Flow: a picture of the machine](#program-flow-a-picture-of-the-machine) below. Put it just before `## How the stunt works` |
 | `## How the stunt works` | yes | The plain-English mechanism, and the most important section. Say where the program's state lives, what plays the loop and what plays the stop rule. If you are a "weird" entry, also say what the ordinary version would look like. Put sub-steps under `###` headings. |
 | ``## What `check.sh` enforces`` | yes (``## What `check.ps1` enforces`` for a Windows check script) | The rules your check script tries to break. |
 | `## Gotchas worth knowing` | yes | The walls you hit, the parts that depend on one implementation, and anything that surprised you. Mark each trick as guaranteed, implementation-permitted or accidentally exploited, the same words as the `assurance` key. |
@@ -85,6 +86,36 @@ All entries use the **same section titles**, so a reader (and the book, and link
 These optional headings also have fixed titles. Use them when they fit: `## What it does`, `## Why this is weird` (or `## Why this is idiomatic`, for the ordinary version of a weird entry), `## What you can learn`, `## Layout`, `## Format and lint`. Add any other `##` section your entry needs under its own, specific title.
 
 The order above is the recommended order, but it is not enforced. `sandbox/scope-check.sh` fails a new entry that lacks one of the required headings. The earliest one-statement ports (Go, Java, Kotlin, Python and Rust) have no check script, so they have no check section; a new entry must have both.
+
+### Program Flow: a picture of the machine
+
+Every README has exactly one `## Program Flow` section. It answers **"what is the runtime, interpreter, compiler, scheduler or language feature actually doing that makes this program work?"** It is not a picture of the task (the book's intro has that, once, for every entry). If your diagram could be pasted unchanged into ten other READMEs, it is not teaching your entry's point.
+
+The section is exactly this, and nothing else (no sub-headings):
+
+````markdown
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: Short caption of the figure
+    accDescr: One or two sentences that say in words what the picture shows, for readers who cannot see it.
+    A["First step"] --> B{{"A decision?"}}
+    B -->|yes| C["Do this"]
+    B -->|no| D["Finish"]
+```
+
+**What this shows:** two to four sentences.
+
+**Why this mechanism matters:** two to four sentences.
+````
+
+- **Pick the diagram type that fits the machine.** `flowchart` for branches and loops, `sequenceDiagram` for callbacks, dispatch and who-calls-whom, `stateDiagram-v2` for a state that changes (a `GO TO` target, a parse pointer), a flowchart of data and demand for lazy evaluation. Do not draw a `while` loop for a program that has none. The build accepts any diagram family that Mermaid can render.
+- **Draw what runs.** Read the source and run it first. Do not depict something the program does not do, and do not copy the task description.
+- **Keep it small.** About 5 to 10 nodes or messages, labels under about 60 characters. Draw decisions as hexagons (`{{"text"}}`): a diamond grows too tall around its text. No HTML tags in labels, no colors that carry meaning, no `;` in a sequence-diagram message (it ends the statement).
+- **`accTitle` and `accDescr` are required.** The first is the figure's caption and the second is its alt text.
+- **Links** to other files are fine (they are re-aimed when the section is copied into a lesson page). Links to a heading in your own README are not.
+- **The build checks it.** `python lessons/book/build.py --check` checks the section's structure. `python lessons/book/build.py --check-diagrams` renders every diagram and fails if one cannot be drawn, or would print smaller than about 8.4 pt on a Letter page. If your diagram is too tall or wide, shorten the labels or use fewer nodes. See [`lessons/book/README.md`](lessons/book/README.md#diagrams) for the one-time setup.
 
 ### 4. Voice and tone
 

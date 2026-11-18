@@ -4,9 +4,11 @@
     python lessons/book/build.py            # writes lessons/book/out/
     python lessons/book/build.py --check    # build HTML and verify every internal link resolves
     python lessons/book/build.py --check-links   # (network) verify every external link in the computer-science prose loads
+    python lessons/book/build.py --check-diagrams  # FULL RENDER GATE: render every diagram, check each fits a printed page legibly, list orphans
     python lessons/book/build.py --orphans       # how every concept is grounded (entries, analogies, cross-cutting, exercise); fails on none
 
-Needs pandoc (https://pandoc.org). PDF additionally needs WeasyPrint (`uv tool install weasyprint`
+Needs pandoc (https://pandoc.org) and, for the diagrams, the pinned Mermaid CLI (`npm ci` in lessons/book/diagrams; see README.md here).
+PDF additionally needs WeasyPrint (`uv tool install weasyprint`
 or `pipx install weasyprint`). Without it, use the EPUB or HTML.
 
 The chapters are ordinary Markdown files that link to each other and to the repo with relative
@@ -30,7 +32,7 @@ table of contents). The PDF and EPUB are written to the repo root as learn-progr
 """
 import calendar, os, re, shutil, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import cs
+import cs, diagrams
 from pathlib import PurePosixPath
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -122,15 +124,67 @@ def rewrite(text, chapter, ids, maps):
         return f"[{label}]({GITHUB}{full}{'#' + frag if frag else ''})"
     return LINK.sub(sub, text)
 
-def build_markdown():
+def chapter_texts():
+    return {c: read(c) for c in chapters()}
+
+def where_of(chapter, text, first_line):
+    """Where a diagram came from, for error messages: the README for a copied Program Flow section, else the chapter and line."""
+    heading = None
+    for it in diagrams.scan(text):
+        if it[0] == "heading" and it[3] < first_line:
+            heading = it[2]
+    m = re.match(r"Program flow of `([^`]+)`", heading or "")
+    if m:
+        return f"src/{m.group(1)}/README.md, section '## {diagrams.SECTION}' (copied into lessons/{chapter})"
+    return f"lessons/{chapter}:{first_line}" + (f" (under '{heading}')" if heading else "")
+
+def collect_diagrams(texts):
+    """Every distinct Mermaid source in the book's chapters -> where it came from."""
+    wanted = {}
+    for c, text in texts.items():
+        for first, _, src in diagrams.mermaid_blocks(text):
+            wanted.setdefault(src, where_of(c, text, first))
+    return wanted
+
+def render_figures(texts, required):
+    """Render the book's diagrams (cached). Returns {source: Figure}, or None when there is no renderer and none is required.
+    Never returns a partial result: any diagram that fails to render or cannot print legibly stops the build."""
+    wanted = collect_diagrams(texts)
+    if not wanted:
+        return {}
+    renderer, why = diagrams.find_renderer()
+    if renderer is None:
+        if required:
+            raise SystemExit(f"cannot render the {len(wanted)} diagram(s): {why}")
+        print(f"NOTE    {len(wanted)} diagram(s) were NOT rendered ({why}). Their Mermaid syntax was not checked; "
+              "run with the renderer installed for the full render gate (--check-diagrams).")
+        return None
+    figs, errors = diagrams.render_all(renderer, wanted)
+    bad = errors + [f"{f.where}: the diagram prints at {f.points:.1f} pt after fitting one page ({f.scale:.0%} of its size; the minimum is "
+                    f"{diagrams.MIN_SCALE:.0%}). Make it smaller or lay it out differently (LR instead of TD, fewer nodes, shorter labels)."
+                    for f in figs.values() if hasattr(f, "scale") and f.scale < diagrams.MIN_SCALE]
+    if bad:
+        print("\n".join("DIAGRAM " + b for b in bad))
+        raise SystemExit(f"{len(bad)} diagram problem(s)")
+    hits = sum(1 for f in figs.values() if f.hit)
+    print(f"diagrams: {len(figs)} rendered with {renderer.describe()} ({hits} from cache, {len(figs) - hits} drawn now)")
+    gone = diagrams.prune(figs)
+    if gone:
+        print(f"diagrams: removed {len(gone)} stale cached file(s)")
+    return figs
+
+def build_markdown(texts=None, figs=None, fmt="svg", name="book.md"):
+    """The whole book as one Markdown file. `figs` (from render_figures) turns each mermaid fence into a figure: `fmt` 'svg' for the
+    HTML and PDF, 'png' for the EPUB. Without `figs` the fences stay code blocks (a --check run with no renderer)."""
     global ID_MAPS
     names = chapters()
-    texts = {c: read(c) for c in names}
+    texts = texts or chapter_texts()
     ID_MAPS = id_maps(texts)
     ids = {c: next(iter(ID_MAPS[c].values())) for c in texts}     # a chapter's id is its first heading's, the H1
-    parts = [rewrite(t, c, ids, ID_MAPS) for c, t in texts.items()]
+    counter = [1]
+    parts = [rewrite(diagrams.embed(t, figs, fmt, counter) if figs else t, c, ids, ID_MAPS) for c, t in texts.items()]
     os.makedirs(OUT, exist_ok=True)
-    md = os.path.join(OUT, "book.md")
+    md = os.path.join(OUT, name)
     with open(md, "w", encoding="utf-8", newline="\n") as f:
         f.write("\n\n".join(parts))
     return md
@@ -145,7 +199,9 @@ CSS = os.path.join(HERE, "book.css")
 
 def artifacts_dir():
     if "--artifacts-dir" in sys.argv:
-        return os.path.abspath(sys.argv[sys.argv.index("--artifacts-dir") + 1])
+        d = os.path.abspath(sys.argv[sys.argv.index("--artifacts-dir") + 1])
+        os.makedirs(d, exist_ok=True)
+        return d
     return ARTIFACTS
 
 def pdf_engine():
@@ -235,12 +291,54 @@ def orphans():
     if bad:
         raise SystemExit(f"{bad} concept(s) have no entry, no cross-cutting reason and no exercise")
 
+def diagram_gate():
+    """`--check-diagrams`: the FULL RENDER GATE. Renders every diagram in the book with the pinned renderer and reports, for each,
+    its family, natural size, the scale that fits it to one printed page and the printed size of its labels. Fails on a render
+    error, an illegible figure, an orphaned cached file, or a second pass that does not come entirely from the cache."""
+    model = cs.Model()
+    if model.problems:
+        print("\n".join("PROBLEM " + p for p in model.problems))
+        raise SystemExit(f"{len(model.problems)} metadata problem(s)")
+    texts = chapter_texts()
+    wanted = collect_diagrams(texts)
+    renderer, why = diagrams.find_renderer()
+    if renderer is None:
+        raise SystemExit(f"FULL RENDER GATE NOT RUN: {why}")
+    figs, errors = diagrams.render_all(renderer, wanted)
+    print(f"renderer: {renderer.describe()}")
+    print(f"{'family':<16}{'natural px':>12}{'fit px':>12}{'scale':>7}{'label pt':>9}  where")
+    bad = list(errors)
+    for f in sorted(figs.values(), key=lambda f: f.where):
+        if not hasattr(f, "scale"):
+            continue
+        flag = "" if f.scale >= diagrams.MIN_SCALE else "  <-- TOO SMALL"
+        print(f"{f.family:<16}{f'{f.w:.0f}x{f.h:.0f}':>12}{f'{f.pw}x{f.ph}':>12}{f.scale:>7.2f}{f.points:>9.1f}  {f.where}{flag}")
+        if flag:
+            bad.append(f"{f.where}: labels would print at {f.points:.1f} pt")
+    stale = diagrams.orphans(figs)
+    if stale:
+        print(f"note: {len(stale)} cached file(s) belong to no current diagram (an older text or style); a normal build deletes them")
+    again, _ = diagrams.render_all(renderer, wanted)
+    misses = [f.where for f in again.values() if not f.hit]
+    if misses:
+        bad += [f"second pass was not served from the cache: {m}" for m in misses]
+    families = sorted({f.family for f in figs.values()})
+    if bad:
+        print("\n".join("DIAGRAM " + b for b in bad))
+        raise SystemExit(f"FULL RENDER GATE FAILED: {len(bad)} problem(s)")
+    print(f"FULL RENDER GATE PASSED: {len(figs)} diagram(s) rendered in {len(families)} families ({', '.join(families)}); "
+          f"every one fits a printed page at >= {diagrams.MIN_SCALE:.0%} scale; a second pass came entirely from the cache")
+
 def main():
     if "--orphans" in sys.argv:
         orphans()
         return
     if "--check-links" in sys.argv:
         links()
+    if "--check-diagrams" in sys.argv:
+        generate(True)
+        diagram_gate()
+        return
     pandoc = shutil.which("pandoc")
     if not pandoc:
         raise SystemExit("pandoc not found (https://pandoc.org/installing.html)")
@@ -248,25 +346,29 @@ def main():
     if "--generate" in sys.argv:        # refresh the generated Markdown only; skip pandoc
         return
     os.environ["SOURCE_DATE_EPOCH"] = source_date_epoch()
-    md = build_markdown()
-    base = ["pandoc", "-f", "gfm+gfm_auto_identifiers+yaml_metadata_block", "--metadata-file", os.path.join(HERE, "metadata.yaml"),
-            "--wrap=none", "--toc", "--toc-depth=2", "--number-sections", "--include-before-body", FRONT, md]
+    checking = "--check" in sys.argv
+    texts = chapter_texts()
+    figs = render_figures(texts, required=not checking)     # a full build needs the renderer; --check only notes its absence
+    md = build_markdown(texts, figs, "svg", "book.md")
+    base = lambda src: ["pandoc", "-f", "gfm+gfm_auto_identifiers+yaml_metadata_block", "--metadata-file", os.path.join(HERE, "metadata.yaml"),
+            "--wrap=none", "--toc", "--toc-depth=2", "--number-sections", "--include-before-body", FRONT, src]
     # Pandoc's gfm reader does not read a YAML block from --metadata-file as document metadata
     # for every writer, so pass it explicitly too.
-    outs = [("html", ["-s", "--embed-resources", "--css", CSS, "-o", os.path.join(OUT, "weird-way.html")]),
-            ("epub", ["--epub-title-page=false", "--css", CSS, "-o", os.path.join(artifacts_dir(), BOOK + ".epub")])]
-    engine = pdf_engine()
-    if engine and "--check" not in sys.argv:
-        outs.append(("pdf", ["--pdf-engine=" + engine, "--css", CSS, "--lua-filter", os.path.join(HERE, "wrap-code.lua"),
-                             "--metadata", "toc-title=Contents", "-o", os.path.join(artifacts_dir(), PDF_NAME)]))
-    elif "--check" not in sys.argv:
-        print("note: weasyprint not found (uv tool install weasyprint); skipping PDF")
-    if "--check" in sys.argv:
-        outs = outs[:1]
-    for name, extra in outs:
-        subprocess.run(base + extra, check=True)
+    outs = [("html", md, ["-s", "--embed-resources", "--css", CSS, "-o", os.path.join(OUT, "weird-way.html")])]
+    if not checking:
+        # The EPUB gets PNGs (every e-reader draws them); the PDF and HTML get SVG, which is sharper and scales to the page.
+        epub_md = build_markdown(texts, figs, "png", "book-epub.md") if figs else md
+        outs.append(("epub", epub_md, ["--epub-title-page=false", "--css", CSS, "-o", os.path.join(artifacts_dir(), BOOK + ".epub")]))
+        engine = pdf_engine()
+        if engine:
+            outs.append(("pdf", md, ["--pdf-engine=" + engine, "--css", CSS, "--lua-filter", os.path.join(HERE, "wrap-code.lua"),
+                                     "--metadata", "toc-title=Contents", "-o", os.path.join(artifacts_dir(), PDF_NAME)]))
+        else:
+            print("note: weasyprint not found (uv tool install weasyprint); skipping PDF")
+    for name, src, extra in outs:
+        subprocess.run(base(src) + extra, check=True)
         print("wrote", extra[-1])
-    if "--check" in sys.argv:
+    if checking:
         check(os.path.join(OUT, "weird-way.html"))
 
 def check(html_path):

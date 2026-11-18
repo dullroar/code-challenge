@@ -5,6 +5,7 @@ The whole of *Learn Programming the Weird Way!* builds into **one** document wit
 ```bash
 python lessons/book/build.py            # writes learn-programming-the-weird-way.pdf and .epub in the repo root, and lessons/book/out/weird-way.html
 python lessons/book/build.py --check    # builds the HTML and verifies every internal link resolves
+python lessons/book/build.py --check-diagrams   # the full render gate for the Program Flow diagrams (see Diagrams below)
 ```
 
 - `chapters.txt` is the reading order. Add a chapter by adding its path there.
@@ -14,6 +15,43 @@ python lessons/book/build.py --check    # builds the HTML and verifies every int
 - **Title and copyright pages** are in [`front-matter.md`](../front-matter.md) (plain HTML, inserted before the table of contents). Edit authors and the copyright line there.
 - **Long code lines** (regexes, XAML, CMake) are hard-wrapped in the PDF by `wrap-code.lua` so nothing runs off the page. A line that continues ends in `↩` and the next line starts with `↪`. The Markdown source is untouched; HTML and EPUB reflow on their own.
 - The PDF and EPUB in the repo root are committed; the HTML (and the intermediate `book.md`) go to `lessons/book/out/`, which is git-ignored.
+
+## Diagrams
+
+Every entry's README has a `## Program Flow` section with one Mermaid diagram (the contract is in [`CONTRIBUTING.md`](../../CONTRIBUTING.md#program-flow-a-picture-of-the-machine)). The diagram is text in Git, and the build turns it into a figure. The shared "what the challenge does" picture is a fenced `mermaid` block in [`intro.md`](../intro.md), and the chapter on events has one too. **Any** `mermaid` fence in a chapter is rendered.
+
+**How it flows.** `src/<entry>/README.md` (the source of truth) is read by [`diagrams.py`](diagrams.py) with a fence-aware Markdown scanner, not a regex. The `## Program Flow` section is copied by `build.py --generate` into the generated block `How each program runs` of the lesson page named by the entry's `lesson:` key (the page keeps the Mermaid fence, so GitHub draws it too). At book-build time every `mermaid` fence is rendered once to SVG and once to PNG by Mermaid CLI and replaced by an HTML `<figure>` with a caption (`accTitle`) and alt text (`accDescr`) before pandoc runs. The PDF and HTML use the SVG (vector, scaled to fit one page); the EPUB uses the PNG (every reader draws it). There is one renderer and no second mechanism.
+
+**Setup (once, no root needed).** You need Node and a Chromium. Mermaid CLI is pinned in [`diagrams/package.json`](diagrams/package.json) and [`package-lock.json`](diagrams/package-lock.json) (`@mermaid-js/mermaid-cli` 12.2.0; tested with Node 24 and Chrome for Testing 147):
+
+```bash
+cd lessons/book/diagrams
+PUPPETEER_SKIP_DOWNLOAD=1 npm ci          # installs Mermaid CLI into diagrams/node_modules (git-ignored)
+# a Chromium: any of these is found automatically, or set MERMAID_CHROME=/path/to/chrome
+npx playwright install chromium-headless-shell    # -> ~/.cache/ms-playwright   (or: apt install chromium)
+```
+
+After that the build works offline. If Chromium's sandbox does not work in your container, set `MERMAID_NO_SANDBOX=1`; the diagrams are text from this repository, rendered with Mermaid's `securityLevel: strict`.
+
+**What is checked, and when.**
+
+| Command | Needs the renderer? | What it checks |
+| --- | --- | --- |
+| `build.py --check` | No (it says so if it was missing) | Every entry has exactly one `## Program Flow` heading, spelled exactly so, with one `mermaid` block, `accTitle` and `accDescr`, no HTML tags, no sub-headings, and the two bold lead-ins. Generated lesson pages are up to date. If the renderer is present it also renders and checks every diagram. **Without the renderer this is a syntax-and-structure check only, and the build says so** |
+| `build.py --check-diagrams` | Yes | **The full render gate.** Renders every diagram, prints its family, natural size, the scale that fits it to a Letter page and the printed size of its labels, and fails on a render error (with the entry, the heading and Mermaid's message), on a diagram that would print under 70% scale (labels under 8.4 pt), or on a second pass that is not entirely served from the cache |
+| `build.py` | Yes | Renders (or reuses) the figures, deletes cached files that no diagram uses, builds the PDF, EPUB and HTML. It never writes a blank figure or an unrendered code block: any failure stops it |
+
+**Cache.** Figures live in `lessons/book/out/diagrams/<key>.svg` and `.png` (`out/` is git-ignored). The key is a hash of the diagram text, the Mermaid CLI version, the Chrome version, the PNG scale and [`diagrams/mermaid-config.json`](diagrams/mermaid-config.json). Edit one diagram and only its figure is drawn again. Change the renderer, the browser or the style and all of them are. A clean checkout renders everything once (about 15 seconds). The committed PDF and EPUB contain the figures.
+
+**Page fit.** `diagrams.py` computes each figure's printed size (`FIT_W`, `FIT_H` in CSS pixels, 1 px = 1/96 inch) from the page geometry in `book.css`, so a figure always fits one page with its heading and caption, and never splits. If a diagram is so large that scaling would shrink its labels below the minimum, the build fails and tells you which README to fix. The fixes are in the contribution rules: fewer nodes, shorter labels, hexagons for decisions.
+
+**Style.** [`diagrams/mermaid-config.json`](diagrams/mermaid-config.json): the `neutral` theme, DejaVu Sans (the book's font), dark lines on white, SVG text labels (`htmlLabels: false`, because WeasyPrint does not draw HTML inside SVG), no color that carries meaning.
+
+**Failure modes.** `cannot render ... Mermaid CLI is not installed`: run the setup above. `no Chromium found`: set `MERMAID_CHROME`. A Mermaid parse error is printed with the README path and the line Mermaid complains about (a `;` inside a sequence-diagram message is a common cause). PDF viewers differ: we checked the PDF with MuPDF; Ghostscript at some resolutions drops parts of a WeasyPrint SVG, which is a Ghostscript problem.
+
+**Pseudocode.** There is no pseudocode section on purpose. No standard defines one that fits imperative, lazy, rewriting, self-modifying and event-driven programs without erasing the difference. Pseudocode may appear in an entry's prose when it helps, labeled as such, and it never replaces the diagram.
+
+**Adding or changing a diagram.** Edit the `## Program Flow` section of the entry's README, run `python lessons/book/build.py --generate` (it refreshes the lesson page copy), then `--check-diagrams`. Look at the figure. There is nothing else to edit by hand. `python lessons/book/test_diagrams.py` tests the extractor, the cache keys and the contract.
 
 ## Metadata-driven chapters
 

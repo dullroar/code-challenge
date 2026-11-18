@@ -47,3 +47,12 @@ nav#TOC > ul { padding-left: 0; }
 .book-index li { margin: 0 0 .25em 1.2em; text-indent: -1.2em; font-size: 9.5pt; }
 .book-index p strong { display: block; margin-top: .9em; font: bold 11pt "DejaVu Sans", sans-serif; }
 .book-index a[href^="#"]::after { content: " " target-counter(attr(href), page); color: #555; }
+
+/* Program Flow diagrams (diagrams.py). The build sets each figure's printed width and height so that it fits one page; the
+   figure never splits across pages and its heading stays with it. */
+figure.diagram { margin: 1em 0; text-align: center; break-inside: avoid-page; }
+figure.diagram img { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+figure.diagram figcaption { font: 9pt/1.3 "DejaVu Sans", sans-serif; color: #333; margin-top: .5em; }
+/* A heading, and the line that says where a diagram came from, stay on the page with the diagram. */
+h3 + p:has(+ figure.diagram), p:has(+ figure.diagram) { break-after: avoid; }
+figure.diagram { break-before: auto; }

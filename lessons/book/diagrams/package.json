@@ -1,0 +1,8 @@
+{
+  "name": "weird-way-diagrams",
+  "private": true,
+  "description": "Pinned Mermaid renderer for the book's Program Flow diagrams. See ../README.md.",
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "12.2.0"
+  }
+}
