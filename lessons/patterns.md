@@ -41,6 +41,7 @@ Several entries replace "loop with an accumulator" with a transformation of a wh
 | **A circular list** | [Lisp reader `#1=`](../src/lisp-weird/timecards.lisp#L44-L46) | The categories repeat forever with no `mod` |
 | **A pipeline that pulls one value at a time** | [JavaScript weird](../src/javascript-weird/timecards.mjs) `Iterator.from(cards(...)).map(...).map(...).toArray()` | Each value goes through every stage before the next is asked for. A `reduce` adds up the finished list, because `reduce` cannot stop early |
 | **A closure that is the state machine** | [JavaScript weird](../src/javascript-weird/core.mjs) `machine` | A function with captured variables: each call makes the next card, and a flag says when it is over |
+| **A chain of listeners** | [JavaScript events](../src/javascript-events/timecards.mjs) `on('card-created', ...)` | Each listener does one step and emits the event that the next one waits for. `emit()` is a call on the current stack, and `setImmediate()` gives the event loop a turn between cards |
 | **Stream of records, one rule per step** | [AWK `{ t += h = 10 + RT }` ... `t > 40 { exit }`](../src/awk-weird/timecards.awk#L56-L69) | The input supplies the iterations; each rule is one step of the pipeline |
 
 The common shape: *describe the full answer, then say how much of it you want.* (The JavaScript entry reverses it: it describes how to make *one* answer, and lets the consumer ask for as many as it wants.) The differences are about **when** the work happens (eager `Aggregate` and APL arrays vs. lazy Haskell lists and LINQ `Select`) and **where** state lives. Compare how LINQ and Haskell answer "when does it run?" in [C#](languages/csharp-linq-xaml.md#deferred-execution-and-the-void-to-value-trick) and [Haskell](languages/haskell.md#lazy-io-as-control-flow).
@@ -69,6 +70,7 @@ Where does "where am I in the program?" live when you have no loop counter?
 | One SQLite row (the machine's registers) and the number of records tar has written | [tar](languages/tar.md#the-archive-is-the-clock): [`tar-gnu-weird`](../src/tar-gnu-weird/README.md) |
 | Thunks: which parts of a list have been demanded | [haskell](languages/haskell.md#lazy-io-as-control-flow): [`haskell-weird`](../src/haskell-weird/README.md) |
 | Properties of one object literal | [javascript](languages/javascript.md#the-bodiless-for-in-node): [`javascript`](../src/javascript/README.md) |
+| The running total and the card count, held in one object that only the listeners touch | [javascript](languages/javascript.md#listeners-all-the-way-down): [`javascript-events`](../src/javascript-events/README.md) |
 | Variables captured by closures: the generator's number, and the machine's card count, total and stop flag | [javascript](languages/javascript.md#closures-all-the-way-down): [`javascript-weird`](../src/javascript-weird/README.md) |
 | The input stream: whatever macro text has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning): [`m4`](../src/m4/README.md) |
 | A C struct that never rewinds | [regex](languages/regex.md#pcre2-callouts-as-an-instruction-set): [`regex-pcre2`](../src/regex-pcre2/README.md) |

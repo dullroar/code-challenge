@@ -304,6 +304,13 @@ The fake `mktemp` makes the dice. The walk reads the last character of each six-
 3. `built`, `drawn`, `[ 15 ]`. The pipeline is only a description until `toArray()` asks. `take(1)` stops after one value, so the machine is asked once, and the hours source is called once.
 4. `take(2)` prints `drawn` twice, then `[ 15, 30 ]`: the machine's total is 15 after the first card and 30 after the second.
 
+## B22. JavaScript, event-driven: predict the trace, then remove the boundary
+
+1. 14 tests pass.
+2. `listener`, `after emit`, `immediate`. `emit` is a plain call: it runs both of its listeners on the call stack and then returns. `setImmediate` puts the function on the event loop's queue, and Node runs it after the current code, here after the last `console.log`.
+3. `>start`, `<start`, `main is done`, then one turn per card. A turn starts with `>generate` and nests `card-created`, `card-saved` and `total-updated` inside it, so each `>` is closed by its `<` in the reverse order. In the third turn, `total-updated` finds the total (57) over 40 and emits `finished`, which emits `done`: `>finished >done <done <finished` sit inside `total-updated`. `<start` comes before the first `>generate`: `start` asked for the first card with `setImmediate`, so the card is made on a later turn.
+4. Without `later`, `total-updated` calls `generate` inside itself, and the stack never unwinds between cards. 40 hours is three or four cards, so a normal run is fine, and the cards are the same. The lab shows 12 passes and 2 failures: the trace test fails, because each `generate` now sits inside the previous `total-updated` and not in a turn of its own, and the stack-depth test fails, because the stack is deeper at every card. The scan finds `emit('generate'` and fails. With `limit: 10_000_000` the stack runs out after a few thousand cards, a `RangeError` goes to the `failed` listener, and it prints one line, `timecards: Maximum call stack size exceeded`, with status 1. With the boundary back and `limit: 30_000`, the same call is flat and finishes with status 0.
+
 ## C1. Weird next to boring
 
 Measured with the verification script (non-comment lines):

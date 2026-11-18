@@ -28,6 +28,7 @@ Every weird entry forces you to name the machine hiding inside a language. Once 
 | GNU tar | A finite-state machine, driven by a logical clock that tar supplies | One SQLite row (the machine's registers) and the number of records tar has written | [tar](languages/tar.md#the-archive-is-the-clock) |
 | Haskell | A lazy graph reducer | Thunks: which parts of a list have been demanded | [haskell](languages/haskell.md#lazy-io-as-control-flow) |
 | JavaScript | Three expression slots | Properties of one object literal | [javascript](languages/javascript.md#the-bodiless-for-in-node) |
+| JavaScript | A set of listeners on one EventEmitter, which together are a state machine | The running total and the card count, held in one object that only the listeners touch | [javascript](languages/javascript.md#listeners-all-the-way-down) |
 | JavaScript | A closure-backed state machine, pulled by a lazy iterator | Variables captured by closures: the generator's number, and the machine's card count, total and stop flag | [javascript](languages/javascript.md#closures-all-the-way-down) |
 | m4 | A text-rescanning machine | The input stream: whatever macro text has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning) |
 | PCRE2 | A backtracking search with hooks | A C struct that never rewinds | [regex](languages/regex.md#pcre2-callouts-as-an-instruction-set) |

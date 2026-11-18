@@ -4,7 +4,7 @@
 
 "What runs next?" is one of the two basic questions about any program. (The other is "what does it remember?", in the chapter "State beyond variables".) Most languages answer it with a program counter and a call stack, and most programmers never think about it again. The entries in this book keep control somewhere else, so you can see it clearly.
 
-In COBOL it is the target of a `GO TO` that `ALTER` can change. In Forth it is the parse position `>in`, which the program can move backward. In GNU Make it is the set of files that exist, and the build restarts when a makefile is remade. In XAML it is the order of the elements in the document. Each of these is a *continuation* in disguise: the rest of the computation, stored as something other than a stack frame. This chapter gives you the vocabulary: structured programming, recursion, fixed points, coroutines, continuations and self-modifying code. It ends with two ideas about *when* code runs: event-driven programming, where something else calls your code, and logical clocks, where time is a count of events. The tar entries use both.
+In COBOL it is the target of a `GO TO` that `ALTER` can change. In Forth it is the parse position `>in`, which the program can move backward. In GNU Make it is the set of files that exist, and the build restarts when a makefile is remade. In XAML it is the order of the elements in the document. Each of these is a *continuation* in disguise: the rest of the computation, stored as something other than a stack frame. This chapter gives you the vocabulary: structured programming, recursion, fixed points, coroutines, continuations and self-modifying code. It ends with an idea about *when* code runs: logical clocks, where time is a count of events. The tar entries use it. Events, callbacks and the event loop, where something else calls your code, have their own chapter later in this part.
 
 ## Control flow
 
@@ -36,6 +36,7 @@ Control flow is the order in which a program's steps run: one after another, a c
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
 | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | demonstrates | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | demonstrates | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
 | [`lisp`](../../src/lisp/README.md) | Common Lisp | demonstrates | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | demonstrates | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
@@ -140,6 +141,7 @@ A coroutine is a function that can pause in the middle and resume later, with it
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
+| [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | counterexample | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | analogy | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 | [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | analogy | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
 | [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | analogy | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
@@ -187,28 +189,6 @@ Self-modifying code changes its own instructions while it runs. Early computers 
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | demonstrates | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | Why structured programming won, by running a program whose control flow rewrites itself. |
 | [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
-
-## Event-driven programming
-
-In **event-driven programming** the program does not decide when its code runs. Something else produces *events*, and the program registers *callbacks* that run when one arrives. The flow of control is inverted: you do not call the framework, it calls you. Graphical interfaces, servers and timers work this way.
-
-[`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) is the plainest case in this repo. tar writes an archive, and every 512 bytes it calls a command. The command has no loop and no idea how many times it will be called. It moves a state machine one step. Change the archive's layout, and the same program gets a different number of events. [`javascript`](../../src/javascript/README.md) and [`javascript-weird`](../../src/javascript-weird/README.md) show a small, real one: after all the cards are saved, a `setInterval` timer calls a function every 600 milliseconds to pulse the DEMO ONLY line. The calls only happen after the synchronous code has finished, because JavaScript runs on one thread and its **event loop** runs a callback only when nothing else is running. A redirected run starts no timer, so Node has no event to wait for and exits at once.
-
-- **Use it when:** the work is a reaction to things that arrive: clicks, requests, ticks, files.
-- **Avoid it when:** the order matters and the callbacks hide it. A chain of callbacks is hard to read and harder to test.
-
-**Read more:**
-
-- [Event-driven programming](https://en.wikipedia.org/wiki/Event-driven_programming) (Wikipedia)
-- [The event loop](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Event_loop) (MDN)
-
-**In this repo:**
-
-| Entry | Language | How it relates | What it teaches |
-| --- | --- | --- | --- |
-| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
-| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Logical clocks and event ordering
 

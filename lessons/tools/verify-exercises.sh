@@ -316,6 +316,28 @@ if selected B21; then echo "B21 JavaScript weirder: move the stop rule in a clos
   [[ $(tr '\n' '|' < "$W/b21e.txt") == "built|drawn|drawn|[ 15, 30 ]|" ]] && ok "B21 take(2): two draws" || bad B21e "$(tr '\n' '|' < "$W/b21e.txt")"
 fi
 
+if selected B22; then echo "B22 JavaScript event-driven: predict the trace, then remove the boundary"
+  d=$(copy src/javascript-events b22)
+  "$sbx" "$d" node --test check.mjs > "$W/b22a.txt" 2>&1
+  if grep -q '^ℹ pass 14' "$W/b22a.txt" && grep -q '^ℹ fail 0' "$W/b22a.txt"; then ok "B22 the lab passes: 14 tests"; else bad B22a "$(grep '^ℹ' "$W/b22a.txt" | tr '\n' ' ')"; fi
+  "$sbx" "$d" node --input-type=module -e "import { EventEmitter } from 'node:events'; const e = new EventEmitter(); e.on('x', () => console.log('listener')); setImmediate(() => console.log('immediate')); e.emit('x'); console.log('after emit');" > "$W/b22b.txt" 2>&1
+  [[ $(tr '\n' '|' < "$W/b22b.txt") == "listener|after emit|immediate|" ]] && ok "B22 listener, after emit, immediate" || bad B22b "$(tr '\n' '|' < "$W/b22b.txt")"
+  "$sbx" "$d" node --input-type=module -e "import { program, realWorld } from './timecards.mjs'; let hours = [19, 19, 19]; const w = { ...realWorld(), rng: () => hours.shift() - 10, out: () => {} }; const e = program(w); const raw = e.emit.bind(e); e.emit = (name, ...a) => { console.log('>' + name); try { return raw(name, ...a); } finally { console.log('<' + name); } }; e.emit('start'); console.log('main is done');" > "$W/b22c.txt" 2>&1
+  turn='>generate|>card-created|>card-saved|>total-updated|<total-updated|<card-saved|<card-created|<generate|'
+  last='>generate|>card-created|>card-saved|>total-updated|>finished|>done|<done|<finished|<total-updated|<card-saved|<card-created|<generate|'
+  [[ $(tr '\n' '|' < "$W/b22c.txt") == ">start|<start|main is done|$turn$turn$last" ]] && ok "B22 the trace: start returns first, then one nested turn per card" || bad B22c "$(tr '\n' '|' < "$W/b22c.txt")"
+  d=$(copy src/javascript-events b22d); mutate "$d/timecards.mjs" ": later('generate'))" ": events.emit('generate'))"
+  "$sbx" "$d" node --test check.mjs > "$W/b22d.txt" 2>&1
+  if grep -q '^ℹ pass 12' "$W/b22d.txt" && grep -q '^ℹ fail 2' "$W/b22d.txt"; then ok "B22 no boundary: the lab shows 12 passes and 2 failures"; else bad B22d "$(grep '^ℹ' "$W/b22d.txt" | tr '\n' ' ')"; fi
+  "$sbx" "$d" node check-static.mjs timecards.mjs > "$W/b22e.txt" 2>&1; rc=$?
+  if (( rc != 0 )) && contains "$W/b22e.txt" "'generate' must be reached through later"; then ok "B22 no boundary: the scan fails"; else bad B22e "rc=$rc $(tr '\n' ' ' < "$W/b22e.txt")"; fi
+  "$sbx" "$d" node --input-type=module -e "import { program, realWorld } from './timecards.mjs'; program({ ...realWorld(), limit: 10_000_000, out: () => {} }).emit('start');" > "$W/b22f.txt" 2>&1; rc=$?
+  [[ $(cat "$W/b22f.txt") == "timecards: Maximum call stack size exceeded" && $rc -eq 1 ]] && ok "B22 no boundary: the long run overflows the stack, once, status 1" || bad B22f "rc=$rc $(tr '\n' ' ' < "$W/b22f.txt")"
+  d=$(copy src/javascript-events b22g)
+  "$sbx" "$d" node --input-type=module -e "import { program, realWorld } from './timecards.mjs'; program({ ...realWorld(), limit: 30_000, out: () => {} }).emit('start');" > "$W/b22g.txt" 2>&1; rc=$?
+  [[ ! -s $W/b22g.txt && $rc -eq 0 ]] && ok "B22 with the boundary the same long run is flat: no output, status 0" || bad B22g "rc=$rc $(tr '\n' ' ' < "$W/b22g.txt")"
+fi
+
 if selected F2; then echo "F2 Trojan Source: hide a character, then find it"
   d="$W/f2"; mkdir -p "$d"
   printf 'const user = "admin\xe2\x80\x8b";\nconsole.log(user === "admin");\n' > "$d/greet.js"

@@ -94,7 +94,7 @@ The program is a search that fails on purpose. [`regex-perl`](../../src/regex-pe
 
 ## Dispatch and triggers: the rule fires the next step
 
-The rule fires the next step. In [`lisp-weird`](../../src/lisp-weird/README.md) a class hierarchy is the loop: each method calls the next one up the class precedence list, and the `or` method combination stops at the first true value. In [`tcl-weird`](../../src/tcl-weird/README.md) a SQLite trigger inserts the next card, which fires the trigger again, and the loop ends when a `WHERE` clause finds nothing to insert. In both, the repeat is invisible in the code that starts it. [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) gets its callbacks from GNU tar: every record that tar writes runs one transition of a small state machine, so the archive's layout sets the pace.
+The rule fires the next step. In [`lisp-weird`](../../src/lisp-weird/README.md) a class hierarchy is the loop: each method calls the next one up the class precedence list, and the `or` method combination stops at the first true value. In [`tcl-weird`](../../src/tcl-weird/README.md) a SQLite trigger inserts the next card, which fires the trigger again, and the loop ends when a `WHERE` clause finds nothing to insert. In both, the repeat is invisible in the code that starts it. [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) gets its callbacks from GNU tar: every record that tar writes runs one transition of a small state machine, so the archive's layout sets the pace. [`javascript-events`](../../src/javascript-events/README.md) is the plainest case: ten listeners on one `EventEmitter` are the whole program, and each one emits the event that the next one waits for. The next card is asked for through `setImmediate`, so every card is a new turn of the event loop and the call stack never grows.
 
 **Entries:**
 
@@ -102,6 +102,7 @@ The rule fires the next step. In [`lisp-weird`](../../src/lisp-weird/README.md) 
 | --- | --- | --- | --- | --- | --- |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | A method dispatcher with a pluggable combination rule | The class precedence list, and each method's return value | eager | implementation-permitted |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | A finite-state machine, driven by a logical clock that tar supplies | One SQLite row (the machine's registers) and the number of records tar has written | eager | implementation-permitted |
+| [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | A set of listeners on one EventEmitter, which together are a state machine | The running total and the card count, held in one object that only the listeners touch | eager | guaranteed |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | A string-command interpreter whose command lookup can be hooked | A TEMP table of proc source, and the depth of trigger recursion | eager | accidentally-exploited |
 
 ## The input is the loop
@@ -143,6 +144,7 @@ Ask these two questions of any entry, and the strange ones stop looking alike. T
 | [`tcl-weird`](../../src/tcl-weird/README.md) | SQL rows that hold stored source | The interpreter's lookup of an unknown command, and triggers |
 | [`javascript`](../../src/javascript/README.md) | Properties of one object literal, in a bodiless `for` | The `for` statement: initializer, condition, iterator |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | Variables captured by closures | A consumer's demand on an iterator: each `next()` runs one step |
+| [`javascript-events`](../../src/javascript-events/README.md) | One object that only the listeners of an `EventEmitter` touch | An event, then the scheduler: each listener emits the next event, and `setImmediate` gives the event loop a turn between cards |
 
 ## Writing a program down, reading it back, running it
 
@@ -188,6 +190,7 @@ Read down the last column. Only one of the five makes a promise about *behavior*
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | implementation-permitted | [`haskell`](../../src/haskell/README.md) |
 | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | port | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | port | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`javascript-weird`](../../src/javascript-weird/README.md) |
+| [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | weird | [Dispatch and triggers: the rule fires the next step](09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step) | eager | guaranteed | [`javascript`](../../src/javascript/README.md) |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`javascript`](../../src/javascript/README.md) |
 | [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | port | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | deferred | guaranteed | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) |

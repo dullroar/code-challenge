@@ -18,6 +18,7 @@ The challenge allows one statement. These rows are about fitting a whole program
 | **Python** | No `;` loops and no statement expressions | `iter(<lambda>, False)` plus tuple-and-`[-1]` | Expressions standing in for statements |
 | **Kotlin** | No `for(;;)` | `generateSequence`, ending on null | A sequence is a loop |
 | **JavaScript** (`javascript`) | After `let i = ...` in a `for` header, a comma starts the next *declarator*; it is not the comma operator, so the initializer cannot also run statements | The state object goes through an arrow function that finishes it with the comma operator | Know which comma you have |
+| **JavaScript** (`javascript-events`) | `emit()` runs its listeners before it returns, so a chain of events is a recursion with one more level for every card, and a throw in a listener goes to the caller | `setImmediate` between cards, so the stack unwinds, and a `try` in every listener that turns a throw into one `failed` event | Know which calls return before the next one starts |
 
 ## No variables? Find somewhere else to keep state
 

@@ -384,6 +384,51 @@ Acceptance criteria:
 - Step 3: `built`, then `drawn`, then `[ 15 ]`. Building the pipeline draws nothing. `take(1)` asks for one card, so one hours value is drawn.
 - Step 4: two `drawn` lines (and `[ 15, 30 ]`). The consumer decides how many cards exist.
 
+### B22. JavaScript, event-driven: predict the trace, then remove the boundary (verified)
+
+**Lesson:** [JavaScript](languages/javascript.md#listeners-all-the-way-down). **Chapter:** [Events, callbacks and reactive control flow](cs/10-events-callbacks-and-reactive-control-flow.md). **Entry:** a copy of `src/javascript-events`.
+
+1. Run the event lab on the untouched copy: `node --test check.mjs`. How many tests pass?
+2. **Predict** the order of the three lines that this prints, then run it:
+
+   ```bash
+   node --input-type=module -e "
+   import { EventEmitter } from 'node:events';
+   const e = new EventEmitter();
+   e.on('x', () => console.log('listener'));
+   setImmediate(() => console.log('immediate'));
+   e.emit('x');
+   console.log('after emit');"
+   ```
+3. **Predict** the trace of a run in which the three cards have 19 hours each. Write down the lines in order, with `>name` where an `emit` starts and `<name` where it returns. Then run this and compare. Which line shows that `emit('start')` returned before the first card was made?
+
+   ```bash
+   XDG_DATA_HOME=$(mktemp -d) node --input-type=module -e "
+   import { program, realWorld } from './timecards.mjs';
+   let hours = [19, 19, 19];
+   const w = { ...realWorld(), rng: () => hours.shift() - 10, out: () => {} };
+   const e = program(w); const raw = e.emit.bind(e);
+   e.emit = (name, ...a) => { console.log('>' + name); try { return raw(name, ...a); } finally { console.log('<' + name); } };
+   e.emit('start');
+   console.log('main is done');"
+   ```
+4. In the copy, remove the scheduling boundary: in the `total-updated` listener, replace `later('generate')` with `events.emit('generate')`. Run the lab again, and `node check-static.mjs timecards.mjs`. Then run a very long run:
+
+   ```bash
+   XDG_DATA_HOME=$(mktemp -d) node --input-type=module -e "
+   import { program, realWorld } from './timecards.mjs';
+   program({ ...realWorld(), limit: 10_000_000, out: () => {} }).emit('start');"
+   ```
+
+   **Predict** what it prints, and what the exit status is. Then put `later('generate')` back and run the same command with `limit: 30_000`.
+
+Acceptance criteria:
+
+- Step 1: all 14 tests pass.
+- Step 2: `listener`, `after emit`, `immediate`. `emit()` calls the listener before it returns. `setImmediate()` only asks, and the function runs after the current code has finished.
+- Step 3: `>start <start main is done`, then three turns. Each of the first two is `>generate >card-created >card-saved >total-updated <total-updated <card-saved <card-created <generate`. The third has `>finished >done <done <finished` inside the innermost `total-updated`, because 57 hours is over 40. `<start` and `main is done` come before the first `>generate`: `emit('start')` returned before any card existed.
+- Step 4: with the boundary removed, a normal run still works (the cards are the same), because 40 hours is only a few cards deep. The lab does **not** pass: 12 tests pass and 2 fail, the one about events nesting inside one turn and the one about a flat stack over 2000 cards. `check-static.mjs` fails with a message about `generate`. The very long run prints `timecards: Maximum call stack size exceeded` once, and the exit status is 1: every card added a few levels to the stack. With the boundary back and `limit: 30_000` it runs about 2000 cards and prints nothing, with status 0.
+
 ## C. By solution pattern
 
 ### C1. Weird next to boring (verified)

@@ -142,6 +142,7 @@ The Linux script entries share a reporting shape (rows, a committed total, a stu
 - **`ex-weird`**: the tape is sixty lines of data, one per possible total, and nothing computes a different limit. We ran it on nvi 1.81.6 and Vim 9.1; we did not run a conformance suite. nvi needs its recovery folder to be writable.
 - **`javascript`**: needs Node 24 or newer for `node:sqlite`. No thread, mutex or reflection (the C# had them as a 2008 time capsule). The categories repeat, where the C# stopped after four. The year is the ISO year, where the C# stored the calendar year.
 - **`javascript-weird`**: the lifetime test relies on a forced garbage collection (`WeakRef`), and is the one test that depends on the engine. `map` with effects is a trick. An iterator is spent after one pass.
+- **`javascript-events`**: needs Node 24 or newer, to keep the three Node entries in step. `emit()` is synchronous, so the program must schedule each card with `setImmediate` or the stack grows with every card. A throw in a listener goes to the caller of `emit()`, so every listener catches its own. An emitter has no backpressure: this program is safe only because each card waits for the one before it.
 
 ### The ports
 
