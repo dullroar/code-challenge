@@ -9,6 +9,7 @@ evaluation: lazy
 assurance: guaranteed
 pairs-with: JavaChallenge1
 tags: [generators, evaluation-strategy, side-effect, thread-safety]
+analogies: [coroutine]
 ---
 # One Statement, Python Edition
 

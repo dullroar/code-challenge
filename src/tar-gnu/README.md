@@ -10,7 +10,8 @@ assurance: implementation-permitted
 pairs-with: tar-gnu-weird
 machine: "A tape reader (tar) feeding a five-word interpreter"
 state: "The archive's members, which are the program, plus one SQLite row that says whether the run has halted or faulted"
-tags: [arbitrary-code-execution, domain-specific-language, exit-status, idempotence, integrity-constraint, langsec, least-privilege, observability, parsing, serialization-deserialization-pickling, state-encoding, threat-model, transition-system]
+tags: [arbitrary-code-execution, capability-security, computation-versus-orchestration, domain-specific-language, exit-status, idempotence, integrity-constraint, interpreter-and-virtual-machine, langsec, least-privilege, observability, parsing, reproducibility, serialization-deserialization-pickling, state-encoding, threat-model, transition-system]
+counterexamples: [continuation]
 ---
 # GNU tar: it's just a tar file
 

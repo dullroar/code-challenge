@@ -10,6 +10,7 @@ assurance: accidentally-exploited
 machine: "A string-rewriting system (a Markov algorithm)"
 state: "One line of text, rewritten until no rule applies"
 tags: [exit-status, fixed-point-iteration, markov-algorithm, redos, regular-expression, state, state-encoding, term-rewriting, time-complexity, turing-completeness]
+analogies: [serialization-deserialization-pickling, turing-machine]
 ---
 # Regex challenge, Track 4: GNU sed (the program is one line of text, rewritten until it's done)
 

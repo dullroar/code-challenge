@@ -10,7 +10,7 @@ assurance: guaranteed
 pairs-with: regex-perl
 machine: "A counter built from a stack"
 state: "Balancing-group capture stacks"
-tags: [backtracking, parsing, register-machine, regular-expression, stack-data-structure, state]
+tags: [backtracking, chomsky-hierarchy, parsing, register-machine, regular-expression, stack-data-structure, state]
 ---
 # Regex challenge, Track 3: .NET balancing groups (the purist's attempt)
 

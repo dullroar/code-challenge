@@ -10,7 +10,7 @@ assurance: implementation-permitted
 pairs-with: tar-gnu
 machine: "A finite-state machine, driven by a logical clock that tar supplies"
 state: "One SQLite row (the machine's registers) and the number of records tar has written"
-tags: [exit-status, hyrums-law, integrity-constraint, leaky-abstraction, observability, portability, side-effect, state, state-encoding, transition-system]
+tags: [computation-versus-orchestration, event-driven-programming, exit-status, hyrums-law, integrity-constraint, invariant, leaky-abstraction, logical-clock, observability, operational-semantics, portability, reproducibility, side-effect, state, state-encoding, transition-system]
 ---
 # GNU tar, weirder: the archive is the clock
 

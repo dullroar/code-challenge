@@ -4,7 +4,7 @@
 
 "What runs next?" is one of the two basic questions about any program. (The other is "what does it remember?", in the chapter "State beyond variables".) Most languages answer it with a program counter and a call stack, and most programmers never think about it again. The entries in this book keep control somewhere else, so you can see it clearly.
 
-In COBOL it is the target of a `GO TO` that `ALTER` can change. In Forth it is the parse position `>in`, which the program can move backward. In GNU Make it is the set of files that exist, and the build restarts when a makefile is remade. In XAML it is the order of the elements in the document. Each of these is a *continuation* in disguise: the rest of the computation, stored as something other than a stack frame. This chapter gives you the vocabulary: structured programming, recursion, fixed points, coroutines, continuations and self-modifying code.
+In COBOL it is the target of a `GO TO` that `ALTER` can change. In Forth it is the parse position `>in`, which the program can move backward. In GNU Make it is the set of files that exist, and the build restarts when a makefile is remade. In XAML it is the order of the elements in the document. Each of these is a *continuation* in disguise: the rest of the computation, stored as something other than a stack frame. This chapter gives you the vocabulary: structured programming, recursion, fixed points, coroutines, continuations and self-modifying code. It ends with two ideas about *when* code runs: event-driven programming, where something else calls your code, and logical clocks, where time is a count of events. The tar entries use both.
 
 ## Control flow
 
@@ -20,28 +20,28 @@ Control flow is the order in which a program's steps run: one after another, a c
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`apl-weird`](../../src/apl-weird/README.md) | APL | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
-| [`awk`](../../src/awk/README.md) | AWK | Portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream. |
-| [`awk-weird`](../../src/awk-weird/README.md) | AWK | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
-| [`cmake`](../../src/cmake/README.md) | CMake | `while()` plus regex as a tiny register machine. |
-| [`cobol`](../../src/cobol/README.md) | COBOL | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
-| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | Why structured programming won, by running a program whose control flow rewrites itself. |
-| [`lisp`](../../src/lisp/README.md) | Common Lisp | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
-| [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
-| [`forth`](../../src/forth/README.md) | Forth | That a stack language needs one `begin ... until` and a pipe to be a whole program. |
-| [`forth-weird`](../../src/forth-weird/README.md) | Forth | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | Arithmetic and looping in plain Make syntax, no shell required. |
-| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | A one-statement port in Go: a three-part `for` with an empty body does all the work. |
-| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
-| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
-| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | LINQ method chains, end to end. |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
-| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`apl-weird`](../../src/apl-weird/README.md) | APL | demonstrates | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
+| [`awk`](../../src/awk/README.md) | AWK | demonstrates | Portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream. |
+| [`awk-weird`](../../src/awk-weird/README.md) | AWK | demonstrates | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
+| [`cobol`](../../src/cobol/README.md) | COBOL | demonstrates | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
+| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | Why structured programming won, by running a program whose control flow rewrites itself. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| [`forth`](../../src/forth/README.md) | Forth | demonstrates | That a stack language needs one `begin ... until` and a pipe to be a whole program. |
+| [`forth-weird`](../../src/forth-weird/README.md) | Forth | demonstrates | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
+| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | demonstrates | A one-statement port in Go: a three-part `for` with an empty body does all the work. |
+| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
+| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | demonstrates | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
+| [`lisp`](../../src/lisp/README.md) | Common Lisp | demonstrates | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
+| [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | demonstrates | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
+| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
 
 ## Goto and structured programming
 
@@ -58,9 +58,9 @@ Control flow is the order in which a program's steps run: one after another, a c
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | Why structured programming won, by running a program whose control flow rewrites itself. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | Why structured programming won, by running a program whose control flow rewrites itself. |
 
 ## The program counter
 
@@ -76,11 +76,11 @@ The program counter is a register that holds the address of the next instruction
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | Why structured programming won, by running a program whose control flow rewrites itself. |
-| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
-| [`forth-weird`](../../src/forth-weird/README.md) | Forth | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | Why structured programming won, by running a program whose control flow rewrites itself. |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+| [`forth-weird`](../../src/forth-weird/README.md) | Forth | demonstrates | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
 
 ## Recursion
 
@@ -97,12 +97,12 @@ A recursive definition uses itself. A function calls itself on a smaller problem
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`m4`](../../src/m4/README.md) | m4 | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
-| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| [`m4`](../../src/m4/README.md) | m4 | demonstrates | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
+| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
 
 ## Fixed-point iteration
 
@@ -118,11 +118,11 @@ A *fixed point* of a function is a value that the function leaves unchanged: f(x
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | Arithmetic and looping in plain Make syntax, no shell required. |
-| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
-| [`m4`](../../src/m4/README.md) | m4 | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`m4`](../../src/m4/README.md) | m4 | demonstrates | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 
 ## Coroutines
 
@@ -136,7 +136,14 @@ A coroutine is a function that can pause in the middle and resume later, with it
 - [Coroutine](https://en.wikipedia.org/wiki/Coroutine) (Wikipedia)
 - [Iterators and generators](04-evaluation-and-demand.md#iterators-and-generators) in "Evaluation and demand"
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | analogy | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
+| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | analogy | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
+| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | analogy | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | analogy | Iterators and closures as control flow. |
 
 ## Continuations
 
@@ -151,7 +158,15 @@ A continuation is "the rest of the computation" from some point, treated as a va
 - [Continuation-passing style](https://en.wikipedia.org/wiki/Continuation-passing_style) (Wikipedia)
 - [Call-with-current-continuation](https://en.wikipedia.org/wiki/Call-with-current-continuation) (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | analogy | Why structured programming won, by running a program whose control flow rewrites itself. |
+| [`forth-weird`](../../src/forth-weird/README.md) | Forth | analogy | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | counterexample | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | analogy | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | counterexample | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 
 ## Self-modifying code
 
@@ -167,8 +182,51 @@ Self-modifying code changes its own instructions while it runs. Early computers 
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`apl-weird`](../../src/apl-weird/README.md) | APL | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
-| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | Why structured programming won, by running a program whose control flow rewrites itself. |
-| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`apl-weird`](../../src/apl-weird/README.md) | APL | demonstrates | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
+| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | Why structured programming won, by running a program whose control flow rewrites itself. |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+
+## Event-driven programming
+
+In **event-driven programming** the program does not decide when its code runs. Something else produces *events*, and the program registers *callbacks* that run when one arrives. The flow of control is inverted: you do not call the framework, it calls you. Graphical interfaces, servers and timers work this way.
+
+[`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) is the plainest case in this repo. tar writes an archive, and every 512 bytes it calls a command. The command has no loop and no idea how many times it will be called. It moves a state machine one step. Change the archive's layout, and the same program gets a different number of events. [`javascript`](../../src/javascript/README.md) and [`javascript-weird`](../../src/javascript-weird/README.md) show a small, real one: after all the cards are saved, a `setInterval` timer calls a function every 600 milliseconds to pulse the DEMO ONLY line. The calls only happen after the synchronous code has finished, because JavaScript runs on one thread and its **event loop** runs a callback only when nothing else is running. A redirected run starts no timer, so Node has no event to wait for and exits at once.
+
+- **Use it when:** the work is a reaction to things that arrive: clicks, requests, ticks, files.
+- **Avoid it when:** the order matters and the callbacks hide it. A chain of callbacks is hard to read and harder to test.
+
+**Read more:**
+
+- [Event-driven programming](https://en.wikipedia.org/wiki/Event-driven_programming) (Wikipedia)
+- [The event loop](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Event_loop) (MDN)
+
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
+
+## Logical clocks and event ordering
+
+A **logical clock** counts *events*, not seconds. It answers "what happened before what?" and "how many steps have passed?" without asking how long anything took. Distributed systems use logical clocks because real clocks on different machines disagree. A program can also use one on a single machine, to make its behavior independent of speed.
+
+In [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) one tar checkpoint is one hour of work. The clock is the number of records tar has written, and `check.sh` predicts the result of a run from the archive's layout alone. A faster or a slower machine makes no difference. A longer archive gives more ticks, a shorter one stalls the program, and a different checkpoint interval changes the count in a way the check calculates in advance. One detail is easy to miss: `TAR_CHECKPOINT` counts *records* (with `--checkpoint=2` it reads 2, 4, 6), while the machine counts *calls*. They are two clocks, and the entry says which one it uses. [`make-gnu`](../../src/make-gnu/README.md) has a counter of a similar kind: `MAKE_RESTARTS` counts rounds of the build, not time.
+
+- **Use it when:** you need to order events, to make a run repeatable, or to test timing without waiting.
+- **Avoid it when:** the real duration is the thing you need. A logical clock cannot tell you how long anything took.
+
+**Read more:**
+
+- [Logical clock](https://en.wikipedia.org/wiki/Logical_clock) (Wikipedia)
+- [Lamport timestamp](https://en.wikipedia.org/wiki/Lamport_timestamp) (Wikipedia)
+
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | analogy | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |

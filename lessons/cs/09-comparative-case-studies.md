@@ -8,7 +8,7 @@ The tables are *generated* from the metadata at the top of each entry's README, 
 
 ## An ordinary loop, used in an unusual place
 
-The loop is still a loop. What changes is *where* the work happens. In the C#, Java and Go entries the loop has an empty body, and the three clauses of the `for` header do everything. In [`cmake`](../../src/cmake/README.md) a `while()` condition runs a regex, and its captures are the registers. In [`cobol`](../../src/cobol/README.md) the condition is a named fact about the data (`OVER-FORTY`), and `PERFORM ... UNTIL` repeats until it is true. Forth, Lisp and Tcl use their ordinary loop words. Read these beside the others: they show what stays the same when the loop is honest.
+The loop is still a loop. What changes is *where* the work happens. In the C#, Java and Go entries the loop has an empty body, and the three clauses of the `for` header do everything. In [`cmake`](../../src/cmake/README.md) a `while()` condition runs a regex, and its captures are the registers. In [`cobol`](../../src/cobol/README.md) the condition is a named fact about the data (`OVER-FORTY`), and `PERFORM ... UNTIL` repeats until it is true. Forth, Lisp and Tcl use their ordinary loop words. Read these beside the others: they show what stays the same when the loop is honest. [`javascript`](../../src/javascript/README.md) is the original's bodiless `for` in Node.js: three clauses, an object literal for state, and a timer for the animation.
 
 **Entries:**
 
@@ -26,7 +26,7 @@ The loop is still a loop. What changes is *where* the work happens. In the C#, J
 
 ## A lazy sequence that someone keeps asking for
 
-There is no loop. There is a sequence that someone keeps asking for, and the program stops when the asking stops. [`haskell`](../../src/haskell/README.md) describes the cards as an infinite lazy list and takes a prefix with `span`. [`haskell-weird`](../../src/haskell-weird/README.md) puts the effects inside the list, so reading it does the work. LINQ builds a deferred pipeline that a final eager operator forces. Kotlin's `generateSequence`, Rust's `successors` and Python's `iter(step, False)` give a similar shape in other languages. The difference between the entries is *who forces the sequence*, and *when*.
+There is no loop. There is a sequence that someone keeps asking for, and the program stops when the asking stops. [`haskell`](../../src/haskell/README.md) describes the cards as an infinite lazy list and takes a prefix with `span`. [`haskell-weird`](../../src/haskell-weird/README.md) puts the effects inside the list, so reading it does the work. LINQ builds a deferred pipeline that a final eager operator forces. Kotlin's `generateSequence`, Rust's `successors` and Python's `iter(step, False)` give a similar shape in other languages. The difference between the entries is *who forces the sequence*, and *when*. [`javascript-weird`](../../src/javascript-weird/README.md) has no loop statement: three closures make cards, and an iterator pipeline pulls one card at a time until the machine says it is done.
 
 **Entries:**
 
@@ -53,7 +53,7 @@ Do it to all of them at once, then cut. [`apl`](../../src/apl/README.md) draws f
 
 ## Text that is rewritten and read again
 
-The program is text, and repetition is rewriting it. [`regex-sed`](../../src/regex-sed/README.md) keeps one line of text and applies substitutions until none match. [`m4`](../../src/m4/README.md) defines a macro whose replacement text contains the macro itself, so the output is scanned again, and again. [`make-gnu`](../../src/make-gnu/README.md) remakes a makefile that it includes, and then *starts over* with the new one. In all three the repeated thing is a read of rewritten input, and the state is whatever the text (or the set of files) says now.
+The program is text, and repetition is rewriting it. [`regex-sed`](../../src/regex-sed/README.md) keeps one line of text and applies substitutions until none match. [`m4`](../../src/m4/README.md) defines a macro whose replacement text contains the macro itself, so the output is scanned again, and again. [`make-gnu`](../../src/make-gnu/README.md) remakes a makefile that it includes, and then *starts over* with the new one. In all three the repeated thing is a read of rewritten input, and the state is whatever the text (or the set of files) says now. [`ed-weird`](../../src/ed-weird/README.md) rewrites lines with guarded substitutions, and joins lines so that marks are added side by side. It has no `sed`-style branch: its only repeat is one global command.
 
 **Entries:**
 
@@ -66,7 +66,7 @@ The program is text, and repetition is rewriting it. [`regex-sed`](../../src/reg
 
 ## Control flow that rewrites itself
 
-The program changes where it goes next. [`cobol-weird`](../../src/cobol-weird/README.md) uses `ALTER` to rewire a `GO TO`. [`forth-weird`](../../src/forth-weird/README.md) moves `>in`, the text interpreter's parse position, backward to run the same words again. [`apl-weird`](../../src/apl-weird/README.md) reads its own source with `⎕CR`, rewrites it, and defines the new function with `⎕FX`: each step makes its own successor. This is the most dangerous role in the book. It is also the clearest picture of what a program counter really is.
+The program changes where it goes next. [`cobol-weird`](../../src/cobol-weird/README.md) uses `ALTER` to rewire a `GO TO`. [`forth-weird`](../../src/forth-weird/README.md) moves `>in`, the text interpreter's parse position, backward to run the same words again. [`apl-weird`](../../src/apl-weird/README.md) reads its own source with `⎕CR`, rewrites it, and defines the new function with `⎕FX`: each step makes its own successor. This is the most dangerous role in the book. It is also the clearest picture of what a program counter really is. [`ex-weird`](../../src/ex-weird/README.md) copies a line of data from a tape into a register and runs it. On the tape the instruction is `@a` (run the program again) or a comment (stop), so the program reads its next step out of the data.
 
 **Entries:**
 
@@ -94,7 +94,7 @@ The program is a search that fails on purpose. [`regex-perl`](../../src/regex-pe
 
 ## Dispatch and triggers: the rule fires the next step
 
-The rule fires the next step. In [`lisp-weird`](../../src/lisp-weird/README.md) a class hierarchy is the loop: each method calls the next one up the class precedence list, and the `or` method combination stops at the first true value. In [`tcl-weird`](../../src/tcl-weird/README.md) a SQLite trigger inserts the next card, which fires the trigger again, and the loop ends when a `WHERE` clause finds nothing to insert. In both, the repeat is invisible in the code that starts it.
+The rule fires the next step. In [`lisp-weird`](../../src/lisp-weird/README.md) a class hierarchy is the loop: each method calls the next one up the class precedence list, and the `or` method combination stops at the first true value. In [`tcl-weird`](../../src/tcl-weird/README.md) a SQLite trigger inserts the next card, which fires the trigger again, and the loop ends when a `WHERE` clause finds nothing to insert. In both, the repeat is invisible in the code that starts it. [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) gets its callbacks from GNU tar: every record that tar writes runs one transition of a small state machine, so the archive's layout sets the pace.
 
 **Entries:**
 
@@ -125,6 +125,39 @@ The order of the document is the order of the program. [`xaml`](../../src/xaml/R
 | --- | --- | --- | --- | --- | --- |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | A tape reader (tar) feeding a five-word interpreter | The archive's members, which are the program, plus one SQLite row that says whether the run has halted or faulted | eager | implementation-permitted |
 | [`xaml`](../../src/xaml/README.md) | XAML, C# | An object-graph constructor that runs methods as it parses | Document order, plus "carrier" arrays | declarative | accidentally-exploited |
+
+## Where does the program live, and what makes the next step run?
+
+Ask these two questions of any entry, and the strange ones stop looking alike. The first says where the program and its state are kept. The second says what causes the next step to execute.
+
+| Entry | Where the program and its state live | What advances it |
+| --- | --- | --- |
+| [`xaml`](../../src/xaml/README.md) | A declarative document, built into objects | The parser: objects are made in document order |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | Serialized archive members, plus a contract (`tarprog/1`) that tar knows nothing about | Tar's walk over the members, and the operator's `--to-command` |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | The archive's layout, and one row of registers in SQLite | GNU tar's checkpoint events: one tick per record written |
+| [`ed-weird`](../../src/ed-weird/README.md) | The editor buffer: lines, and rows of marks | Addressed editing: one global command, and substitutions that apply only when they match |
+| [`ex-weird`](../../src/ex-weird/README.md) | The buffer, the editor's marks and registers, and a tape of numbered lines | Ex itself: a register that runs itself, steered by a line of data |
+| [`make-gnu`](../../src/make-gnu/README.md) | Targets, dependencies and restart state | Resolving the build graph, and restarting |
+| [`find-posix`](../../src/find-posix/README.md) and [`find-gnu`](../../src/find-gnu/README.md) | The directory tree, its depth and the names | The tree walk |
+| [`haskell-weird`](../../src/haskell-weird/README.md) | Lazy values with effects in them | Demand: whatever is forced runs |
+| [`tcl-weird`](../../src/tcl-weird/README.md) | SQL rows that hold stored source | The interpreter's lookup of an unknown command, and triggers |
+| [`javascript`](../../src/javascript/README.md) | Properties of one object literal, in a bodiless `for` | The `for` statement: initializer, condition, iterator |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | Variables captured by closures | A consumer's demand on an iterator: each `next()` runs one step |
+
+## Writing a program down, reading it back, running it
+
+Four different acts hide behind the words "the program is data". **Serialization** writes something down as bytes. **Deserialization** reads the bytes back into pieces. **Interpretation** gives the pieces a meaning. **Execution** gives that meaning an effect. A format can stop after any of them, and a consumer can combine them. What matters for safety is *which consumer you gave which authority to*. See [Serialization, deserialization and object pickling](06-state-beyond-variables.md#serialization-deserialization-and-object-pickling).
+
+| Entry | Serialization | Deserialization | Interpretation and execution | The round-trip promise it makes |
+| --- | --- | --- | --- | --- |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | A builder writes the members of an archive, in a fixed order, from a seed | Tar parses the members. A passive inspector does the same without running anything | A dispatcher gives four record types a meaning, and runs them only when the operator passes `--to-command` | Same seed, same bytes (checked with `cmp`). The inspector and the database agree on every card. One archive in two fresh databases gives the same cards. It does **not** promise to resume a stopped run |
+| [`xaml`](../../src/xaml/README.md) | A `.xaml` file is an object graph written as markup | `XamlReader.Load` parses it | The same call runs it: methods are called as objects are made | None. Parsing *is* running, and the entry never writes the document back |
+| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl source is stored as rows in SQLite | An overridden `unknown` command fetches a row | The fetched text is defined and evaluated as Tcl | The source comes back as the text that was stored. It does not keep any object identity |
+| [`apl-weird`](../../src/apl-weird/README.md) | `⎕CR` writes a function out as a matrix of characters | `⎕FX` defines a function from such a matrix | Each function rewrites its source, defines the copy, and calls it | The matrix is what `⎕FX` accepts back: a property of GNU APL that the entry uses |
+| [`regex-sed`](../../src/regex-sed/README.md) and [`m4`](../../src/m4/README.md) | None apart from the text itself: the state *is* text | None: there is nothing to read back | The rules rewrite the text until none applies | The text is its own representation, so a round trip is the identity. This is an analogy, and not serialization in the object-graph sense |
+
+Read down the last column. Only one of the five makes a promise about *behavior* after a round trip, and it names what it does not promise. That is the honest shape of the topic: "I can write it down and read it back" is a weaker claim than "it will do the same thing", and both are weaker than "I can pause it and carry on".
+
 
 ## Every entry at a glance
 

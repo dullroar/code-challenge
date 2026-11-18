@@ -20,26 +20,26 @@ A side effect is anything an operation does besides returning a value: writing a
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
-| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | A one-statement port in Go: a three-part `for` with an empty body does all the work. |
-| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
-| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
-| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
-| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | LINQ method chains, end to end. |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | C# query syntax, pushed as far as it goes. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | Regex callouts as a tiny instruction set. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | Executable code inside a live regex match. |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
-| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
-| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | Iterators and closures as control flow. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | demonstrates | A one-statement port in Go: a three-part `for` with an empty body does all the work. |
+| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
+| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | demonstrates | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
+| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | demonstrates | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
+| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | Iterators and closures as control flow. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
 
 ## Monads and effect systems
 
@@ -56,9 +56,9 @@ Pure functional languages have a neat answer to side effects: describe the effec
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
 
 ## Exception handling
 
@@ -74,9 +74,9 @@ Exception handling is a language feature for errors: raise a signal, unwind the 
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | Why structured programming won, by running a program whose control flow rewrites itself. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | Why structured programming won, by running a program whose control flow rewrites itself. |
 
 ## Exit status
 
@@ -91,12 +91,12 @@ An exit status is the number that a finished process hands back to whoever start
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
-| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
-| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Integrity constraints
 
@@ -112,15 +112,15 @@ An integrity constraint is a rule that the database itself enforces: `NOT NULL`,
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`cobol`](../../src/cobol/README.md) | COBOL | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
-| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
-| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`cobol`](../../src/cobol/README.md) | COBOL | demonstrates | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Backtracking
 
@@ -136,12 +136,12 @@ Backtracking is a systematic search. Try a choice, go on, and if you get stuck, 
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | A regex as a stack-based counter. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | Regex callouts as a tiny instruction set. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | Executable code inside a live regex match. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
 
 ## The cut: committing to a choice
 
@@ -157,11 +157,11 @@ The *cut* is a Prolog idea: once the program has passed this point, commit to th
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | Regex callouts as a tiny instruction set. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | Executable code inside a live regex match. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
 
 ## Transactions
 
@@ -178,11 +178,11 @@ A transaction is a group of operations that either *all* happen or *none* happen
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`forth`](../../src/forth/README.md) | Forth | That a stack language needs one `begin ... until` and a pipe to be a whole program. |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | Executable code inside a live regex match. |
-| [`tcl`](../../src/tcl/README.md) | Tcl | Idiomatic Tcl: procs in a namespace, dicts for records, braced `expr`, and `db eval` binding Tcl variables straight into SQL. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`forth`](../../src/forth/README.md) | Forth | demonstrates | That a stack language needs one `begin ... until` and a pipe to be a whole program. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
+| [`tcl`](../../src/tcl/README.md) | Tcl | demonstrates | Idiomatic Tcl: procs in a namespace, dicts for records, braced `expr`, and `db eval` binding Tcl variables straight into SQL. |
 
 ## Idempotence
 
@@ -199,9 +199,9 @@ An operation is idempotent if doing it twice has the same effect as doing it onc
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 
 ## Thread safety and thread affinity
 
@@ -217,13 +217,13 @@ Code is thread-safe if it behaves correctly when several threads use it at the s
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
-| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | A one-statement port in Go: a three-part `for` with an empty body does all the work. |
-| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
-| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | LINQ method chains, end to end. |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | C# query syntax, pushed as far as it goes. |
-| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
-| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | Iterators and closures as control flow. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | demonstrates | A one-statement port in Go: a three-part `for` with an empty body does all the work. |
+| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | demonstrates | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
+| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | demonstrates | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
+| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | Iterators and closures as control flow. |

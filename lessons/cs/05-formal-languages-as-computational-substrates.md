@@ -4,7 +4,7 @@
 
 A formal language is a notation with strict rules that a machine can process. The recurring surprise of this repository is that a notation built for *one* job turns out to be a computer. Regular expressions were made to match text, and Perl, PCRE2 and .NET engines turn them into search machines, a stack and a counter. `sed` is a rewriting system. Make and CMake were made to order builds, and they became a restarting loop and a register machine. XAML was made to describe a user interface, and its parser runs methods.
 
-This chapter gives you the theory underneath: the Chomsky hierarchy (how much machine does a notation need?), parsing, rewriting, macros and declarative languages. It ends with two security ideas that explain why this matters outside the book. If an input language is more powerful than its authors realized, then reading the input is the same as running a program. See [language-theoretic security](#language-theoretic-security) and [weird machines](#weird-machines).
+This chapter gives you the theory underneath: the Chomsky hierarchy (how much machine does a notation need?), parsing, rewriting, macros and declarative languages, interpreters and virtual machines (a representation plus something that gives it behavior), and category theory, a small part of which is useful for saying exactly what a pipeline preserves. It ends with two security ideas that explain why this matters outside the book. If an input language is more powerful than its authors realized, then reading the input is the same as running a program. See [language-theoretic security](#language-theoretic-security) and [weird machines](#weird-machines).
 
 ## The Chomsky hierarchy
 
@@ -19,7 +19,11 @@ In 1956 Noam Chomsky sorted formal languages into four classes by power: regular
 - [Formal language](https://en.wikipedia.org/wiki/Formal_language) (Wikipedia)
 - [Pushdown automaton](https://en.wikipedia.org/wiki/Pushdown_automaton) (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
 
 ## Regular expressions
 
@@ -37,18 +41,18 @@ A regular expression is a compact pattern for a set of strings. Stephen Kleene d
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | A regex as a stack-based counter. |
-| [`awk`](../../src/awk/README.md) | AWK | Portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream. |
-| [`awk-weird`](../../src/awk-weird/README.md) | AWK | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
-| [`cmake`](../../src/cmake/README.md) | CMake | `while()` plus regex as a tiny register machine. |
-| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | Regex callouts as a tiny instruction set. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | Executable code inside a live regex match. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`awk`](../../src/awk/README.md) | AWK | demonstrates | Portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream. |
+| [`awk-weird`](../../src/awk-weird/README.md) | AWK | demonstrates | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 
 ## Parsing
 
@@ -65,12 +69,12 @@ Parsing turns text into structure, following a grammar. It exists because progra
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | A regex as a stack-based counter. |
-| [`forth-weird`](../../src/forth-weird/README.md) | Forth | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
-| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`forth-weird`](../../src/forth-weird/README.md) | Forth | demonstrates | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
 
 ## Term and string rewriting
 
@@ -87,11 +91,11 @@ Rewriting means replacing parts of a structure according to rules, again and aga
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
-| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
-| [`m4`](../../src/m4/README.md) | m4 | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`m4`](../../src/m4/README.md) | m4 | demonstrates | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 
 ## Macros and text expansion
 
@@ -108,11 +112,11 @@ A macro is a name that is replaced by text, or by code, *before* the real langua
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`lisp`](../../src/lisp/README.md) | Common Lisp | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
-| [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
-| [`m4`](../../src/m4/README.md) | m4 | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`lisp`](../../src/lisp/README.md) | Common Lisp | demonstrates | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
+| [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | demonstrates | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
+| [`m4`](../../src/m4/README.md) | m4 | demonstrates | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
 
 ## Declarative programming
 
@@ -128,14 +132,14 @@ Declarative programming says *what* you want, not *how* to get it. SQL, HTML, CS
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`awk`](../../src/awk/README.md) | AWK | Portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream. |
-| [`awk-weird`](../../src/awk-weird/README.md) | AWK | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
-| [`cobol`](../../src/cobol/README.md) | COBOL | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | Arithmetic and looping in plain Make syntax, no shell required. |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | C# query syntax, pushed as far as it goes. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`awk`](../../src/awk/README.md) | AWK | demonstrates | Portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream. |
+| [`awk-weird`](../../src/awk-weird/README.md) | AWK | demonstrates | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
+| [`cobol`](../../src/cobol/README.md) | COBOL | demonstrates | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
 
 ## Domain-specific languages
 
@@ -151,16 +155,16 @@ A domain-specific language (DSL) is a small language for one kind of job. SQL is
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`awk`](../../src/awk/README.md) | AWK | Portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream. |
-| [`cmake`](../../src/cmake/README.md) | CMake | `while()` plus regex as a tiny register machine. |
-| [`lisp`](../../src/lisp/README.md) | Common Lisp | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | C# query syntax, pushed as far as it goes. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | Regex callouts as a tiny instruction set. |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`awk`](../../src/awk/README.md) | AWK | demonstrates | Portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream. |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |
+| [`lisp`](../../src/lisp/README.md) | Common Lisp | demonstrates | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 
 ## Markup languages
 
@@ -178,10 +182,10 @@ A markup language is text with annotations that describe its structure: HTML, XM
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
 
 ## Build automation
 
@@ -198,10 +202,10 @@ Build automation tools rebuild only what changed, and they do it in dependency o
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`cmake`](../../src/cmake/README.md) | CMake | `while()` plus regex as a tiny register machine. |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | Arithmetic and looping in plain Make syntax, no shell required. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
 
 ## Language-theoretic security
 
@@ -218,10 +222,10 @@ Language-theoretic security (LangSec) is a way of thinking about security. Every
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
 
 ## Weird machines
 
@@ -238,10 +242,81 @@ Language-theoretic security (LangSec) is a way of thinking about security. Every
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
-| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+
+## Category theory
+
+Category theory is the mathematics of **things and the arrows between them**, and of how arrows compose. A **category** has *objects* and *morphisms* (arrows). Each morphism goes from one object to another. Two rules hold:
+
+1. **Identity.** Every object has an arrow to itself that changes nothing: `id`.
+2. **Composition.** If `f : A → B` and `g : B → C`, then `g ∘ f : A → C` exists. Composition is associative: `h ∘ (g ∘ f) = (h ∘ g) ∘ f`. And `f ∘ id = f = id ∘ f`.
+
+In programming, the usual category has *types* as objects and *functions* as arrows. The rules then say something you already use: you can chain functions, you can wrap a chain in parentheses wherever you like, and a function that returns its input changes nothing.
+
+```haskell
+-- Haskell: composition is a function, and the laws are things you can test.
+(show . (+ 1)) 41          -- "42"
+(id . show) 42 == show 42   -- True: identity
+```
+
+```python
+# Python: the same idea. compose(g, f)(x) is g(f(x)).
+compose = lambda g, f: lambda x: g(f(x))
+assert compose(str, lambda n: n + 1)(41) == "42"
+```
+
+Three honest warnings come with the vocabulary:
+
+- **It is a lens, not a label.** You can *describe* many pipelines as arrows between types. That does not make every LINQ operator, every `map` or every `INSERT ... SELECT` a formal part of a category. A claim such as "this is a functor" is a claim with laws, and the laws must hold.
+- **Syntax is not structure.** Two operations both called `map` can differ in laziness, in order of effects and in what they do to an empty input. Same name, same shape, different behavior. The laws decide, and the names do not.
+- **A round trip is not an isomorphism by default.** An *isomorphism* is a pair of arrows `f` and `g` with `g ∘ f = id` and `f ∘ g = id`. An encoder and a decoder (see [Serialization, deserialization and object pickling](06-state-beyond-variables.md#serialization-deserialization-and-object-pickling)) form one only if both laws hold. Many codecs keep the second law only on some values.
+
+This book uses the ideas where an entry gives them something real to hold. [`haskell`](../../src/haskell/README.md) composes small pure functions. [`LinqChallenge1`](../../src/LinqChallenge1/README.md) chains query operators. The next pages, [Functors and mapping](04-evaluation-and-demand.md#functors-and-mapping) and [Monoids and folds](04-evaluation-and-demand.md#monoids-and-folds), name two of the laws that make such chains safe to rearrange.
+
+- **Use it when:** you want to say precisely what a pipeline preserves, or when two designs look alike and you need to know if they behave alike.
+- **Avoid it when:** the vocabulary replaces the explanation. If a plain sentence says the same thing, write the sentence.
+
+**Read more:**
+
+- [Category theory](https://en.wikipedia.org/wiki/Category_theory) (Wikipedia)
+- [Category (mathematics)](https://en.wikipedia.org/wiki/Category_(mathematics)) (Wikipedia)
+- [Function composition](https://en.wikipedia.org/wiki/Function_composition) (Wikipedia)
+- [Isomorphism](https://en.wikipedia.org/wiki/Isomorphism) (Wikipedia)
+
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`haskell`](../../src/haskell/README.md) | Haskell | analogy | That a lazy list and one `span` are the whole stop rule. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | analogy | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | analogy | LINQ method chains, end to end. |
+
+## Interpreters and virtual machines
+
+An **interpreter** reads a program as data and does what it says, step by step. A **virtual machine** is an interpreter for a small, fixed instruction set. Both are the same trick: a *representation* (text, records, bytes) plus a *program that gives it behavior*. Take the interpreter away and the representation is only data.
+
+Several entries are interpreters in small. In [`tar-gnu`](../../src/tar-gnu/README.md) the program is the members of a tar archive, and a dispatcher of about 80 lines gives four record types their meaning. It checks every record against a strict grammar and refuses an unknown one. In [`tcl-weird`](../../src/tcl-weird/README.md) Tcl source is stored in SQLite rows, and an overridden `unknown` command fetches and runs it. In [`xaml`](../../src/xaml/README.md) the parser that loads a document is the interpreter that runs it. In [`regex-pcre2`](../../src/regex-pcre2/README.md) callout strings are opcodes, and a bodiless C function is the dispatcher. In [`ex-weird`](../../src/ex-weird/README.md) Ex is the interpreter and a register of text is the program, which the program rewrites and runs again. The question to ask of each is the same: what is the representation, what is the interpreter, and who chose to run the one with the other?
+
+- **Use it when:** a program is easier to change as data than as code, or you want a small, safe language for others to write in.
+- **Avoid it when:** the data comes from someone you do not trust and the interpreter is general. A strict grammar and a fixed set of instructions are what keep a data format from becoming a way in.
+
+**Read more:**
+
+- [Interpreter (computing)](https://en.wikipedia.org/wiki/Interpreter_(computing)) (Wikipedia)
+- [Virtual machine](https://en.wikipedia.org/wiki/Virtual_machine) (Wikipedia)
+
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |

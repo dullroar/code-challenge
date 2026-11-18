@@ -4,6 +4,7 @@
     python lessons/book/build.py            # writes lessons/book/out/
     python lessons/book/build.py --check    # build HTML and verify every internal link resolves
     python lessons/book/build.py --check-links   # (network) verify every external link in the computer-science prose loads
+    python lessons/book/build.py --orphans       # how every concept is grounded (entries, analogies, cross-cutting, exercise); fails on none
 
 Needs pandoc (https://pandoc.org). PDF additionally needs WeasyPrint (`uv tool install weasyprint`
 or `pipx install weasyprint`). Without it, use the EPUB or HTML.
@@ -224,7 +225,20 @@ def links():
     print("\n".join("BROKEN  " + b for b in bad) or "all external links load")
     sys.exit(1 if bad else 0)
 
+def orphans():
+    model = cs.Model()
+    if model.problems:
+        print("\n".join("PROBLEM " + p for p in model.problems))
+        raise SystemExit(f"{len(model.problems)} metadata problem(s)")
+    lines, bad = cs.orphan_report(model)
+    print("\n".join(lines))
+    if bad:
+        raise SystemExit(f"{bad} concept(s) have no entry, no cross-cutting reason and no exercise")
+
 def main():
+    if "--orphans" in sys.argv:
+        orphans()
+        return
     if "--check-links" in sys.argv:
         links()
     pandoc = shutil.which("pandoc")

@@ -11,6 +11,7 @@ pairs-with: forth
 machine: "A stack machine with a movable instruction pointer"
 state: "The data stack and the parse position `>in`"
 tags: [control-flow, parsing, program-counter, reflection-and-metaprogramming, register-machine, stack-data-structure, stack-machine, state]
+analogies: [continuation]
 ---
 # Forth, weirder
 

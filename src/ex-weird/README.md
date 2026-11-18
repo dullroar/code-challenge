@@ -10,7 +10,7 @@ assurance: implementation-permitted
 pairs-with: ed-weird
 machine: "A register machine whose registers are editor marks, and whose program is a register that runs itself"
 state: "The marks (where we are on a tape of numbered lines), the first line of the buffer (the next card), and registers a, d and n"
-tags: [homoiconicity, language-specification, portability, program-counter, reflection-and-metaprogramming, register-machine, self-modifying-code, state, state-encoding, weird-machine]
+tags: [capability-security, computation-versus-orchestration, homoiconicity, interpreter-and-virtual-machine, language-specification, operational-semantics, portability, program-counter, reflection-and-metaprogramming, register-machine, self-modifying-code, state, state-encoding, weird-machine]
 ---
 # Ex: a program you can edit
 

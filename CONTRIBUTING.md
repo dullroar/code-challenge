@@ -53,6 +53,7 @@ tags: [control-flow, stack-data-structure, stack-machine, transaction]
 | `assurance` | yes | The *weakest* promise your trick leans on: `guaranteed` (the specification promises it), `implementation-permitted` (one compiler or platform allows it) or `accidentally-exploited` (it works, but nobody promised it). The [intro](lessons/intro.md#three-kinds-of-knowledge) explains the three. |
 | `tags` | yes | A list of computer-science concepts. See below. |
 | `pairs-with` | no | Your closest sibling entry: the ordinary version of a weird one, or the other way round. |
+| `analogies`, `counterexamples` | no | Concept ids (the same vocabulary as `tags`). Use `tags` only for ideas your entry **demonstrates**. Use `analogies` for an idea your entry *resembles* without being an instance of it (a Kotlin `generateSequence` is not a coroutine, but it is a cousin). Use `counterexamples` for an idea your entry shows by *not* being it (a closure is not a continuation). An entry can relate to a concept in only one of the three ways. The concept's "In this repo" table says which. |
 | `machine`, `state` | no, but give both or neither | The two sentences from the book's "name the machine" table: *what machine is your entry really?* and *where does its state live?* Give them if your entry is a stunt. |
 
 The block is a small, strict subset of YAML, so no parser library is needed: `key: value`, `key: "quoted text"` and `key: [a, b]`. Put text that contains a colon or a `#` in quotes. Comment lines start with `#`. Nothing else is allowed, and the build tells you the line it did not understand.
@@ -65,6 +66,7 @@ Tags connect your entry to the book's concepts: control flow, lazy evaluation, b
 - Spell a tag exactly like its file name, without `.md`: `reflection-and-metaprogramming`.
 - **Do not edit `lessons/`.** If you need a concept that does not exist, use the nearest tag and say in your pull request which concept is missing. A maintainer decides whether to add it. `scope-check.sh` only prints a note for an unknown tag, but the book build fails until a maintainer adds the concept or fixes the tag.
 - Languages work the same way, with one list: [`lessons/cs-source/languages.txt`](lessons/cs-source/languages.txt). A *language* says what the entry is written in or runs on. A *tag* says which computer-science idea it shows. The book's **Index** (the last chapter) is built from both, so an entry with the right languages and tags shows up everywhere a reader would look for it.
+- **Do not tag to make a concept look used.** A concept that no entry honestly demonstrates is grounded some other way: an analogy, a counterexample, a statement that it applies to every entry (`applies-to`), or an exercise. `python lessons/book/build.py --orphans` lists how every concept is grounded and fails if one has nothing behind it.
 - Each concept page explains *why it exists, why it is used, when to use it and when not to*, with links to Wikipedia and other long-lived, freely reusable sources. Read the ones you tag, and check that your entry really is an example.
 
 ### 3. The section headings every README shares

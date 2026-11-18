@@ -13,11 +13,11 @@ Each page covers what makes the language special, with pointers into the repo, t
 | [find](find.md) | `find-posix`, `find-gnu` | The walk digs the directory it is walking; the path is the call stack and the names are the counters | Tree traversal as a loop, path patterns as lookup tables, what GNU's extras replace, what POSIX leaves unspecified |
 | [Forth](forth.md) | `forth`, `forth-weird` | The text interpreter's parse position is the program counter | The interpreter is a program you can reach into |
 | [Haskell](haskell.md) | `haskell`, `haskell-weird` | Evaluating a list element performs I/O | Laziness, evaluation order, referential transparency, unsafe operations |
-| [m4](m4.md) | `m4` | A macro whose last word is itself: rescanning is the loop | Quoting as lazy evaluation, text as the only data type, 32-bit arithmetic |
 | [JavaScript](javascript.md) | `javascript`, `javascript-weird` | The original's empty-bodied `for` in Node.js; and no loop at all: closures remember the state and a lazy iterator pulls the cards | Evaluation order, closures, iterators and demand, why `reduce` cannot stop |
+| [m4](m4.md) | `m4` | A macro whose last word is itself: rescanning is the loop | Quoting as lazy evaluation, text as the only data type, 32-bit arithmetic |
 | [Make and CMake](make-cmake.md) | `make-gnu`, `cmake` | Remaking makefiles becomes a loop; regex captures become registers | Dependency graphs, restart semantics, scope, stateful condition evaluation |
 | [Regex](regex.md) | `regex-perl`, `regex-pcre2`, `regex-pcre2grep`, `regex-dotnet`, `regex-sed` | Substitutions implement arithmetic and state; matches that return false after doing the work | String-rewriting systems, backtracking as search, performance cliffs |
-| [tar](tar.md) | `tar-gnu` | An archive is the program: tar walks the members, and the operator's `--to-command` gives them meaning | Serialization versus execution, trust boundaries, fail-closed interpreters |
+| [tar](tar.md) | `tar-gnu`, `tar-gnu-weird` | An archive is the program (tar walks the members, and the operator's `--to-command` gives them meaning); and an archive's layout is a clock (every record written is one tick) | Serialization versus execution, trust boundaries, logical clocks, fail-closed interpreters |
 | [Tcl](tcl.md) | `tcl`, `tcl-weird` | The program is text in a SQLite table; a recursive trigger is the loop | Everything is a string command, `unknown` as a library path, code and data are one thing |
 
 Prefer to start from a mechanism instead? See [patterns](../patterns.md). Back to the [lessons index](../README.md).

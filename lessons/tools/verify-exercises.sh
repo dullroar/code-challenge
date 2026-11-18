@@ -316,6 +316,20 @@ if selected B21; then echo "B21 JavaScript weirder: move the stop rule in a clos
   [[ $(tr '\n' '|' < "$W/b21e.txt") == "built|drawn|drawn|[ 15, 30 ]|" ]] && ok "B21 take(2): two draws" || bad B21e "$(tr '\n' '|' < "$W/b21e.txt")"
 fi
 
+if selected F2; then echo "F2 Trojan Source: hide a character, then find it"
+  d="$W/f2"; mkdir -p "$d"
+  printf 'const user = "admin\xe2\x80\x8b";\nconsole.log(user === "admin");\n' > "$d/greet.js"
+  printf 'const user = "admin";\nconsole.log(user === "admin");\n' > "$d/clean.js"
+  cls='[\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{2064}\x{2066}-\x{2069}\x{FEFF}\x{00AD}\x{2028}\x{2029}]'
+  "$sbx" "$d" node greet.js > "$W/f2a.txt" 2>&1; [[ $(cat "$W/f2a.txt") == false ]] && ok "F2 the program that looks true prints false" || bad F2a "$(cat "$W/f2a.txt")"
+  LC_ALL=C.UTF-8 grep -nP "$cls" "$d/greet.js" > "$W/f2b.txt"; [[ $(cut -d: -f1 "$W/f2b.txt") == 1 ]] && ok "F2 the scan finds line 1" || bad F2b "$(cat "$W/f2b.txt")"
+  od -c "$d/greet.js" | head -2 | grep -q '342 200 213' && ok "F2 od shows the bytes 342 200 213" || bad F2c "no 342 200 213"
+  if LC_ALL=C.UTF-8 grep -qP "$cls" "$d/clean.js"; then bad F2d "the scan fired on the clean file"; else ok "F2 negative control: the scan finds nothing in the clean file"; fi
+  "$sbx" "$d" node clean.js > "$W/f2e.txt" 2>&1; [[ $(cat "$W/f2e.txt") == true ]] && ok "F2 the clean program prints true" || bad F2e "$(cat "$W/f2e.txt")"
+  if LC_ALL=C.UTF-8 grep -rlP "$cls" src/apl-weird | grep -q .; then bad F2f "the scan fired on APL source"; else ok "F2 visible APL glyphs pass the scan"; fi
+  grep -qP '[^\x00-\x7F]' src/apl-weird/*.apl 2>/dev/null || grep -rqP '[^\x00-\x7F]' src/apl-weird && ok "F2 (and src/apl-weird really is non-ASCII)" || bad F2g "apl-weird has no non-ASCII text, so the test proves nothing"
+fi
+
 if selected C1; then echo "C1 weird next to boring (measured)"
   for p in cobol haskell forth apl lisp tcl awk; do
     a=$(cat src/$p/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)'); b=$(cat src/$p-weird/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)')

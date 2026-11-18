@@ -10,7 +10,7 @@ assurance: implementation-permitted
 pairs-with: apl
 machine: "An array machine, with code that is also an array"
 state: "Arrays, and the source text of functions"
-tags: [array-programming, control-flow, eager-evaluation, homoiconicity, reflection-and-metaprogramming, scope-and-binding, self-modifying-code, state]
+tags: [array-programming, control-flow, eager-evaluation, homoiconicity, reflection-and-metaprogramming, scope-and-binding, self-modifying-code, serialization-deserialization-pickling, state]
 ---
 # APL, weirder
 

@@ -10,7 +10,9 @@ assurance: guaranteed
 pairs-with: javascript
 machine: "A closure-backed state machine, pulled by a lazy iterator"
 state: "Variables captured by closures: the generator's number, and the machine's card count, total and stop flag"
-tags: [deferred-execution, eager-evaluation, generators, lazy-evaluation, referential-transparency, scope-and-binding, short-circuit-evaluation, side-effect, state]
+tags: [closure, computation-versus-orchestration, dataflow-programming, deferred-execution, eager-evaluation, event-driven-programming, first-class-and-higher-order-functions, functor, generators, invariant, lazy-evaluation, monoid-and-fold, referential-transparency, reproducibility, scope-and-binding, short-circuit-evaluation, side-effect, state]
+analogies: [category-theory, coroutine]
+counterexamples: [continuation]
 ---
 # JavaScript, weirder: closures all the way down
 

@@ -10,7 +10,7 @@ assurance: guaranteed
 pairs-with: javascript-weird
 machine: "Three expression slots"
 state: "Properties of one object literal"
-tags: [control-flow, eager-evaluation, integrity-constraint, scope-and-binding, short-circuit-evaluation, side-effect, state]
+tags: [closure, control-flow, eager-evaluation, event-driven-programming, first-class-and-higher-order-functions, integrity-constraint, invariant, monoid-and-fold, operational-semantics, reproducibility, scope-and-binding, short-circuit-evaluation, side-effect, state]
 ---
 # JavaScript: back to the original, in Node.js
 

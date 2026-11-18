@@ -18,7 +18,7 @@ What does a round trip keep? Be exact, because "the same" has four different mea
 
 **Security.** Bytes are inert until a consumer gives them meaning. A tar archive cannot register a hook for itself: `tar -xf` only writes files, and it is the operator's `--to-command` option that makes tar start a program for each member. JSON is not "safe by nature" either. It is only data, until a consumer passes a field to `eval`, a shell or a SQL string. Unsafe deserialization attacks chain the *reconstruction callbacks* that a format allows (constructors, `__reduce__`, `readObject`) into code that does something the author did not plan. The defenses are old and boring. Do not deserialize untrusted bytes into live objects. Check every record against a strict grammar. Refuse what you do not know. Run the consumer with the least privilege it needs.
 
-**Category theory.** An encoder and a decoder are functions that should compose to something with a stated law: `decode ∘ encode = id` on the values you care about. That is true for some types and some formats, false for others (a format may map two values to one string). Do not call a codec an isomorphism unless you can prove the law in both directions.
+**Category theory.** An encoder and a decoder are functions that should compose to something with a stated law: `decode ∘ encode = id` on the values you care about. That is true for some types and some formats, false for others (a format may map two values to one string). Do not call a codec an isomorphism unless you can prove the law in both directions; [[category-theory]] says what the word asks of you.
 
 | | What the bytes hold | What the consumer rebuilds | Can code run while reading? | Where the trust boundary is |
 | --- | --- | --- | --- | --- |
@@ -34,6 +34,6 @@ What does a round trip keep? Be exact, because "the same" has four different mea
 - [Serialization](https://en.wikipedia.org/wiki/Serialization) (Wikipedia)
 - [Pickle (Python)](https://en.wikipedia.org/wiki/Pickle_(Python)) (Wikipedia)
 - [Tar (computing)](https://en.wikipedia.org/wiki/Tar_(computing)) (Wikipedia)
-- [Deserialization of untrusted data](https://en.wikipedia.org/wiki/Deserialization_of_untrusted_data) (Wikipedia)
+- [Deserialization of untrusted data](https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data) (OWASP)
 - [Deserialization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html) (OWASP)
 - [`JSON`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON) (MDN)

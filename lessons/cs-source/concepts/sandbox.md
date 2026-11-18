@@ -2,6 +2,8 @@
 title: "Sandbox"
 chapter: 1
 order: 30
+applies-to: all
+applies-because: "Every entry ships a Dockerfile for the locked-down Linux container, or a Windows Sandbox command, and its check script runs inside one of them."
 ---
 A sandbox is a restricted place where untrusted code can run without being trusted. The code gets a small, fenced area: little memory, no network, no access to your files. It exists because "read every line first" does not scale, and because a clever program can hide what it does. Every entry here runs in one. The Linux sandbox has no network, a read-only system and an unprivileged user. Windows entries use Windows Sandbox. See [`SANDBOX-SETUP.md`](../../SANDBOX-SETUP.md).
 

@@ -2,6 +2,7 @@
 title: "Trojan Source: characters you cannot see"
 chapter: 1
 order: 60
+exercise: "exercises.md#f2-trojan-source-hide-a-character-then-find-it-verified"
 ---
 Trojan Source is an attack on the human reviewer. Unicode includes characters that you cannot see: zero-width spaces, and "bidirectional" controls that change the visual order of text. Code can *look* harmless to a person and *mean* something else to the compiler. Researchers at Cambridge described the attack in 2021 (CVE-2021-42574). This repository defends against it in a simple way: `sandbox/scope-check.sh` rejects hidden and direction-changing characters in a pull request. Visible Unicode is fine. APL needs `⍴` and `⍳`.
 

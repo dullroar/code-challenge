@@ -4,7 +4,7 @@
 
 Before you can say that a regex engine, a build tool or a markup file "computes", you need to say what a machine is. The answer is smaller than you might think. A machine has a **state**, a set of allowed **steps**, a way to **represent** its values, and some facts that stay true while it runs (**invariants**). If you can say what those four are, you have named the machine.
 
-The first goal of this book is exactly that habit: *name the machine hiding inside the language*. A stack machine, a register machine and a rewriting system can all compute the same things, but they keep their memory in different places. The concepts here are the vocabulary for that: transition systems, Turing machines, Markov algorithms and Turing completeness. The chapter "State beyond variables" then returns to the question that matters most for this repository: where does the state live?
+The first goal of this book is exactly that habit: *name the machine hiding inside the language*. A stack machine, a register machine and a rewriting system can all compute the same things, but they keep their memory in different places. The concepts here are the vocabulary for that: transition systems, operational semantics (state, and one step at a time), Turing machines, Markov algorithms and Turing completeness. One more question goes with them: which part of a design *computes*, and which part only decides what runs next ([Computation versus orchestration](02-what-counts-as-a-machine.md#computation-versus-orchestration))? The chapter "State beyond variables" then returns to the question that matters most for this repository: where does the state live?
 
 ## Models of computation
 
@@ -19,7 +19,9 @@ A model of computation is a precise description of what "computing" means: what 
 - [Abstract machine](https://en.wikipedia.org/wiki/Abstract_machine) (Wikipedia)
 - [Church–Turing thesis](https://en.wikipedia.org/wiki/Church%E2%80%93Turing_thesis) (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+**Applies to every entry that names its machine** (25 of 39; see the [table of machines](../goals.md)). Each of these entries states, in its machine and state fields, what kind of machine it really is and where its state lives, which is the habit this concept teaches.
 
 ## Transition systems and state machines
 
@@ -35,13 +37,13 @@ A transition system is the simplest machine: a set of *states* and a set of allo
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
-| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Representing state
 
@@ -57,16 +59,16 @@ Any state must be written down in something. A number can be tally marks (unary)
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`cobol`](../../src/cobol/README.md) | COBOL | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
-| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
-| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
-| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
-| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`cobol`](../../src/cobol/README.md) | COBOL | demonstrates | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Invariants
 
@@ -80,7 +82,13 @@ An invariant is a fact that stays true at every step. It exists because you cann
 - [Invariant (computer science)](https://en.wikipedia.org/wiki/Invariant_(computer_science)) (Wikipedia)
 - [Loop invariant](https://en.wikipedia.org/wiki/Loop_invariant) (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Observability
 
@@ -96,11 +104,11 @@ Observability is how much of a system's inside you can learn from the outside: t
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
-| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Stack machines
 
@@ -117,10 +125,10 @@ A stack machine keeps its working values on a stack. An instruction takes its in
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`forth`](../../src/forth/README.md) | Forth | That a stack language needs one `begin ... until` and a pipe to be a whole program. |
-| [`forth-weird`](../../src/forth-weird/README.md) | Forth | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`forth`](../../src/forth/README.md) | Forth | demonstrates | That a stack language needs one `begin ... until` and a pipe to be a whole program. |
+| [`forth-weird`](../../src/forth-weird/README.md) | Forth | demonstrates | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
 
 ## Register machines and counter machines
 
@@ -136,12 +144,12 @@ A register machine stores its values in a few numbered boxes called registers. R
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | A regex as a stack-based counter. |
-| [`cmake`](../../src/cmake/README.md) | CMake | `while()` plus regex as a tiny register machine. |
-| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
-| [`forth-weird`](../../src/forth-weird/README.md) | Forth | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+| [`forth-weird`](../../src/forth-weird/README.md) | Forth | demonstrates | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
 
 ## Turing machines
 
@@ -156,7 +164,12 @@ A Turing machine has an endless tape of cells, a head that reads and writes one 
 - [Halting problem](https://en.wikipedia.org/wiki/Halting_problem) (Wikipedia)
 - [Church–Turing thesis](https://en.wikipedia.org/wiki/Church%E2%80%93Turing_thesis) (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`m4`](../../src/m4/README.md) | m4 | analogy | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | analogy | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 
 ## Markov algorithms
 
@@ -172,10 +185,10 @@ A Markov algorithm is a list of find-and-replace rules, in order. Look for the f
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
-| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 
 ## Turing completeness
 
@@ -192,8 +205,64 @@ A system is Turing complete if it can simulate any Turing machine (given unlimit
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | Arithmetic and looping in plain Make syntax, no shell required. |
-| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
-| [`m4`](../../src/m4/README.md) | m4 | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`m4`](../../src/m4/README.md) | m4 | demonstrates | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
+
+## Operational semantics
+
+**Operational semantics** says what a program means by saying how it runs: what a machine's *state* is, and what *one step* does to it. A language is then a set of rules of the form "in this state, this construct moves the machine to that state". It is the most direct way to answer "what does this actually do?", and it is what you do when you read a program one transition at a time.
+
+Every entry that names its machine could be described this way. Three do it on the page. [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) has one row of registers (the hours worked, the target, the total, the seed, a done flag) and one transition, run once per tar checkpoint. [`javascript`](../../src/javascript/README.md) is the three clauses of a `for`: initialize once, then test, body, update, test, body, update. Its README traces one card through them. [`ex-weird`](../../src/ex-weird/README.md) has marks and registers as its state, and each command line moves them.
+
+- **Use it when:** you must explain, or check, exactly what a strange construct does. Write down the state and the step, and run it by hand.
+- **Avoid it when:** you need to compare programs by what they compute and not by how. Then you want a semantics that ignores the steps.
+
+**Read more:**
+
+- [Operational semantics](https://en.wikipedia.org/wiki/Operational_semantics) (Wikipedia)
+- [Transition system](https://en.wikipedia.org/wiki/Transition_system) (Wikipedia)
+
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
+
+## Computation versus orchestration
+
+Two jobs hide in every program. **Computation** makes new values: the sum, the stop decision, the next card. **Orchestration** decides what runs next, and in what order: the loop, the callbacks, the dispatch. When an entry says "the regex engine does the work" or "tar is the loop", the useful question is which of the two jobs it means.
+
+The entries answer it differently:
+
+- In [`tar-gnu`](../../src/tar-gnu/README.md) tar *orchestrates*: it walks the members in order. A small dispatcher *computes*: it gives the five record types a meaning. The program's data (the dice, the order, the limit) is in the archive.
+- In [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) tar supplies only *time*: one tick per record. A single SQL transaction computes everything else.
+- In [`ed-weird`](../../src/ed-weird/README.md) and [`ex-weird`](../../src/ex-weird/README.md) a launcher does the *edges* (five random digits, a database write) and the editor does the computing and the sequencing.
+- In [`regex-pcre2`](../../src/regex-pcre2/README.md) the regex engine orchestrates by matching and backtracking, and a bodiless C dispatcher computes what each callout means. [`xaml`](../../src/xaml/README.md) lets the parser orchestrate: document order is the order of execution.
+- In [`javascript-weird`](../../src/javascript-weird/README.md) the consumer orchestrates (it asks for the next card) and three closures compute. The impure parts, such as the database, the clock and the screen, sit at the edge.
+
+Naming the split tells you where a bug can be, what to test, and what an attacker would take over. It also keeps a stunt honest: if the "weird" part only orchestrates while an ordinary program computes, it is a costume change.
+
+- **Use it when:** you review an unusual design, or write a test that must prove that a named tool does the interesting work.
+- **Avoid it when:** the two are the same thing, as in a pure expression. Do not invent a split.
+
+**Read more:**
+
+- [Separation of concerns](https://en.wikipedia.org/wiki/Separation_of_concerns) (Wikipedia)
+- [Orchestration (computing)](https://en.wikipedia.org/wiki/Orchestration_(computing)) (Wikipedia)
+
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |

@@ -8,7 +8,8 @@ loop-by: lazy-demand
 evaluation: deferred
 assurance: guaranteed
 pairs-with: LinqChallenge2
-tags: [control-flow, deferred-execution, lazy-evaluation, side-effect, thread-safety]
+tags: [control-flow, dataflow-programming, deferred-execution, first-class-and-higher-order-functions, lazy-evaluation, monoid-and-fold, side-effect, thread-safety]
+analogies: [category-theory, functor]
 ---
 # LINQ challenge, Variant A: one fluent method-chain statement
 

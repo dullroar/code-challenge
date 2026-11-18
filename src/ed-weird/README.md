@@ -10,7 +10,7 @@ assurance: accidentally-exploited
 pairs-with: ex-weird
 machine: "A string-rewriting machine with line addresses"
 state: "The editor buffer: one line per card, and marks (x) that are added by joining lines"
-tags: [hyrums-law, language-specification, markov-algorithm, portability, regular-expression, state, state-encoding, term-rewriting, transition-system, weird-machine]
+tags: [capability-security, computation-versus-orchestration, hyrums-law, language-specification, markov-algorithm, portability, regular-expression, state, state-encoding, term-rewriting, transition-system, weird-machine]
 ---
 # ed: the buffer is the machine
 

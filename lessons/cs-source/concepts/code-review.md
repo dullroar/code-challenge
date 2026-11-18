@@ -2,6 +2,8 @@
 title: "Code review"
 chapter: 1
 order: 50
+applies-to: all
+applies-because: "Every entry README has a How the stunt works section, the plain-English account that a reviewer reads the code against, and the gate refuses a new entry without it."
 ---
 Code review means that another person reads your code before it is accepted. It exists because tests only check what you thought to test, while a reader may notice what you did not think of. Here the review has a specific shape: the README must contain a plain-English **How the stunt works** section, and reviewers (people and AI helpers) are asked to translate the code into plain words and list everything it can touch. If the reviewer cannot follow the entry, it is not merged, however clever it is.
 

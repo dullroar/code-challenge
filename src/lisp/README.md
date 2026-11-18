@@ -9,6 +9,7 @@ evaluation: eager
 assurance: guaranteed
 pairs-with: lisp-weird
 tags: [control-flow, domain-specific-language, homoiconicity, macro-processing]
+analogies: [monoid-and-fold]
 ---
 # Common Lisp
 

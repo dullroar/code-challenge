@@ -424,6 +424,13 @@ lessons/tools/run-in-sandbox.sh lessons/solutions runghc f-takewhile.hs
 
 Negative control: change the limit to `<= 50` and `takeWhile` returns all four totals. **Tag: guaranteed**, since both functions are specified by the Haskell `Prelude`, and your test does not depend on the implementation.
 
+## F2. Trojan Source: hide a character, then find it
+
+1. `node greet.js` prints `false`. The first line holds `"admin"` followed by U+200B, a character with no shape, so the string has five visible letters (`a d m i n`) and one invisible character: it is not equal to `"admin"`. The second line compares it with the plain word. A reader who sees `user === "admin"` expects `true`.
+2. The scan prints `1:const user = "admin​";` (the invisible character is in the output too, where you cannot see it). `od -c` shows `a d m i n 342 200 213 "`: UTF-8 for U+200B is the three bytes E2 80 8B, which is `342 200 213` in octal.
+3. `clean.js` has no hit, and prints `true`. The scan fires on the character and on nothing else.
+4. No file in `src/apl-weird` matches. APL glyphs are visible, so a reviewer sees them. Banning every non-ASCII character would also ban APL and every non-English name, and it would not stop an attacker who uses an ASCII look-alike. The defense is to ban what has no visible shape. The label is **implementation-permitted**: the rule is written down (`sandbox/scope-check.sh`, the line that sets `hidden=`), its mechanism is `grep -P` and its Unicode tables, and the character class lists only the characters we know about, so a new invisible character in a future Unicode version would not be caught until the list is updated.
+
 ## G. Open challenges
 
 No answers: these are unsolved. If you close one, send it in.

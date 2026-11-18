@@ -8,7 +8,8 @@ loop-by: lazy-demand
 evaluation: lazy
 assurance: guaranteed
 pairs-with: JavaChallenge1
-tags: [generators, lazy-evaluation, side-effect, thread-safety]
+tags: [closure, first-class-and-higher-order-functions, generators, lazy-evaluation, side-effect, thread-safety]
+analogies: [coroutine]
 ---
 # One Statement, Rust Edition
 

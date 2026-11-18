@@ -388,7 +388,7 @@ Acceptance criteria:
 
 ### C1. Weird next to boring (verified)
 
-**Lesson:** [Weird next to boring](intro.md#weird-next-to-boring). The repo has seven ready-made pairs: `cobol`/`cobol-weird`, `haskell`/`haskell-weird`, `forth`/`forth-weird`, `apl`/`apl-weird`, `lisp`/`lisp-weird`, `tcl`/`tcl-weird` and `awk`/`awk-weird`.
+**Lesson:** [Weird next to boring](intro.md#weird-next-to-boring). The repo has many ready-made pairs, among them `cobol`/`cobol-weird`, `haskell`/`haskell-weird`, `forth`/`forth-weird`, `apl`/`apl-weird`, `lisp`/`lisp-weird`, `tcl`/`tcl-weird`, `awk`/`awk-weird`, `tar-gnu`/`tar-gnu-weird`, `ed-weird`/`ex-weird` and `javascript`/`javascript-weird`.
 
 Compare one pair. Run both, and count code lines (not comments) in each program.
 
@@ -486,6 +486,29 @@ Acceptance criteria:
 - The test runs in the sandbox and **passes** against current behavior.
 - You also show it **fails** under a deliberate change (a negative control).
 - You say whether the claim is **guaranteed**, **implementation-permitted** or **accidentally exploited**, and cite the evidence.
+
+### F2. Trojan Source: hide a character, then find it (verified)
+
+**Lesson:** [Trojan Source](cs/01-reading-an-adversarial-program.md#trojan-source-characters-you-cannot-see). **Entry:** none. No entry in this repository may contain an invisible character, so you make the file yourself, in a scratch folder, and you never commit it. The claim to prove is the one in [`CONTRIBUTING.md`](../CONTRIBUTING.md): "no invisible or direction-changing Unicode characters. APL glyphs and other visible Unicode are fine."
+
+1. In a scratch folder, make a program with a zero-width space (U+200B) after `admin` in the first line:
+
+   ```bash
+   printf 'const user = "admin\xe2\x80\x8b";\nconsole.log(user === "admin");\n' > greet.js
+   ```
+
+   Look at it with `cat greet.js`. **Predict** what `node greet.js` prints, then run it (for example with `lessons/tools/run-in-sandbox.sh <folder> node greet.js`).
+2. Find the character the way the gate does: `LC_ALL=C.UTF-8 grep -nP '[\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{2064}\x{2066}-\x{2069}\x{FEFF}\x{00AD}\x{2028}\x{2029}]' greet.js`. Then look at the bytes: `od -c greet.js | head`.
+3. **Negative control.** Make the same file without the character (`printf 'const user = "admin";\nconsole.log(user === "admin");\n' > clean.js`). Run the scan on it, and run it with `node`.
+4. **The other half of the claim.** Run the same scan over `src/apl-weird` (its source is full of visible APL glyphs): `LC_ALL=C.UTF-8 grep -rlP '<the class above>' src/apl-weird`. **Predict** what it finds.
+
+Acceptance criteria:
+
+- Step 1: the file looks like a program that prints `true`, and it prints `false`. The string has five characters that you can see (`a d m i n`) and one that you cannot, so it is not equal to `admin`.
+- Step 2: the scan prints line 1 of `greet.js`, and `od` shows the three bytes `342 200 213` after `admin`.
+- Step 3: the scan finds nothing in `clean.js`, and the program prints `true`. This is the negative control: the scan fires on the hidden character, and on nothing else.
+- Step 4: the scan finds **no file** in `src/apl-weird`. Visible Unicode (`⍴`, `⍳`, `⎕`) is not in the class, so a reviewer can read it and the gate lets it through. Say in one sentence why banning all non-ASCII text would be the wrong defense.
+- Say whether the claim is **guaranteed**, **implementation-permitted** or **accidentally exploited**, and cite the evidence. (Hint: the gate's rule is written down in `sandbox/scope-check.sh`, and `grep -P` with a character class is its mechanism. The class lists only the characters we know of.)
 
 ## G. Open challenges (not verified; may be impossible)
 
