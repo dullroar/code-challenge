@@ -88,6 +88,20 @@ A listener cannot pause in the middle and be resumed, so a chain of listeners is
 
 An event source announces things at its own speed. Events have no way to say "slower". If the producer is faster than the consumer, the queue grows without a limit, or events are dropped. **Backpressure** is the way a consumer pushes back. A pull is the simplest form of it, because the consumer asks for one value when it is ready: [`javascript-weird`](../../src/javascript-weird/README.md) cannot be flooded, since nothing is drawn until `next()` is called. [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) shows the opposite. tar keeps writing records and calling the clock after the machine is done, and those ticks only count as idle.
 
+```mermaid
+flowchart TB
+    accTitle: Notification is not flow control: backpressure must be designed
+    accDescr: Two panels. In unregulated push, a fast producer sends events into a queue holding 1, 2, 3, 4 and so on, which keeps growing, and a slow consumer reads from it, so the queue grows or events are dropped. In consumer-controlled pull, the consumer is ready, requests one item, the producer emits one, the consumer processes it and requests the next, so the consumer determines the pace.
+    subgraph PULL["Consumer-controlled pull"]
+        RDY["consumer: ready?"] --> REQ["request one item"] --> EMIT["producer emits one"] --> PROC["consumer processes"] --> NXT["request next item"]
+    end
+    subgraph PUSH["Unregulated push"]
+        FP["fast producer"] -->|"events"| Q["queue: 1, 2, 3, 4, ... grows, or events are dropped"] --> SC["slow consumer"]
+    end
+```
+
+Telling the consumer "something happened" does not tell the producer to slow down. On the left nothing limits the rate. On the right the consumer's request is the limit. A bounded queue or a stream with pause and resume can also push back. Plain Node `EventEmitter` has no backpressure, and a synchronous `emit()` is a call and not a queue. The trace above is about the order of calls, and this picture is about their *rates*.
+
 [`javascript-events`](../../src/javascript-events/README.md) is safe from the flood for a plain reason: each card waits for the one before it, so the producer and the consumer are the same program. A real event source, such as a network socket, needs a bounded queue or a stream.
 
 Events are also the wrong tool when:

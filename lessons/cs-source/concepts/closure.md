@@ -10,6 +10,19 @@ const counter = () => { let n = 0; return () => ++n; };   // `n` lives on, insid
 const next = counter(); next(); next();                   // 1, then 2
 ```
 
+```mermaid
+flowchart TB
+    accTitle: Two closures may share code without sharing captured state
+    accDescr: The function code is shared. Calling the counter factory the first time makes closure A, which points to its own private environment holding n A. Calling A once sets n A to 1, and calling it again sets n A to 2. Calling the factory a second time makes closure B, which points to its own separate environment holding n B. Calling B once sets n B to 1, and n A is not changed. The factory call can return, and each environment lives while its closure can be reached.
+    CODE["shared function code: add 1 to n, return n"]
+    CODE -.-> CA
+    CODE -.-> CB
+    CB["closure B (from factory call 2)"] --> EB0["environment B: n = 0"] -->|"B()"| EB1["n = 1"]
+    CA["closure A (from factory call 1)"] --> EA0["environment A: n = 0"] -->|"A()"| EA1["n = 1"] -->|"A()"| EA2["n = 2"]
+```
+
+Each box under a closure is that closure's *own* environment. The number is not copied into the code when the closure is made. The factory's call frame can return, and the captured variable lives on while the closure can be reached. These are two different factory calls. Two functions made in *one* factory call over the same variable would share it, as described below.
+
 Be exact about three things:
 
 - **A closure captures variables, not values.** Two closures over the same variable share it, and a change made by one is seen by the other. Each call to a factory such as `counter()` makes a *new* variable, so two counters never share state. C# lambdas behave the same way.

@@ -6,6 +6,25 @@ Is a value computed when you write it, when you first need it, or each time you 
 
 Haskell is lazy: one `span` over an infinite list is the stop rule, because only the needed part is ever computed. LINQ is deferred: a pipeline does nothing until someone enumerates it. APL is eager and works on whole arrays at once, so it draws more numbers than it needs and trims the result. When effects are involved, the choice stops being a detail. If a lazy list performs input and output, then *reading the list* is what does the work. This chapter explains the vocabulary: strategies and short circuits, iterators and generators, first-class and higher-order functions, functors and `map`, monoids and folds (and why `reduce` cannot stop early), and dataflow. The table at the end shows every entry's strategy in one place.
 
+```mermaid
+flowchart TB
+    accTitle: The same requested prefix can entail different work
+    accDescr: Three lanes show a consumer that asks for only the first two elements of a sequence of five. In the eager lane, all five values 1 to 5 are computed first, the consumer takes 1 and 2, and 3 to 5 were computed but unused. In the lazy by-need lane, thunks are built, 1 is demanded, evaluated and cached, 2 is demanded, evaluated and cached, and 3 to 5 are never evaluated. In the deferred pipeline lane, the pipeline is defined and no work happens, then enumerating computes and yields 1 and 2, and enumerating again may repeat the work because deferred is not automatically memoized.
+    subgraph DEFER["Deferred, like LINQ"]
+        D1["define: no work yet"] --> D2["enumerate: 1, 2"] --> D3["enumerate again: may redo"]
+    end
+    subgraph LAZY["Lazy, by need"]
+        L1["build thunks"] --> L2["demand 1: cache"] --> L3["demand 2: cache"] --> L4["3 to 5: never run"]
+    end
+    subgraph EAGER["Eager, like an array"]
+        E1["construct"] --> E2["compute 1 to 5"] --> E3["consumer takes 1, 2"] --> E4["3 to 5: unused"]
+    end
+    classDef unused stroke-dasharray: 5 3
+    class E4,L4,D3 unused
+```
+
+The values 1 to 5 are only a sample. Haskell's call-by-need *remembers* an evaluated value, while a deferred enumerable pipeline usually recomputes it each time you enumerate. APL often evaluates a whole array, so it is closest to the eager lane. The picture compares strategies, and it is not an exact trace of any one entry.
+
 | Entry | Name | Evaluation |
 | --- | --- | --- |
 | [`apl`](../../src/apl/README.md) | APL | eager |
@@ -190,6 +209,28 @@ An *iterator* is an object that answers "give me the next one". A *generator* is
 ## Referential transparency
 
 An expression is referentially transparent if you can replace it with its value and the program does not change. `2 + 3` is. `readLine()` is not, because it gives a different answer each time. It exists as the rule behind *pure* functions: they are easy to test, to cache, to run in parallel and to rearrange. Effects break it. That is the whole point of [`haskell-weird`](../../src/haskell-weird/README.md): it hides input and output inside a list, so a list that looks like plain data is not plain data. Where it is allowed to be violated, the code must say so loudly.
+
+```mermaid
+flowchart LR
+    accTitle: Pure expressions can be replaced by their values; a clock read cannot
+    accDescr: Two parallel groups of calls. On the left, evaluating 2 plus 3 gives 5, and evaluating it again gives 5, so the value is the same and substitution is safe. On the right, calling now at time t0 gives 10:00:00, and calling it at time t1 gives 10:00:01, so the result depends on when it is evaluated, and replacing the call with one constant changes the behavior. The clock times are illustrative.
+    subgraph CLOCK["Time-dependent call"]
+        direction LR
+        B2["now() at t₁"] --> W2["10:00:01"]
+        B1["now() at t₀"] --> W1["10:00:00"]
+        W1 --> NO["the result depends on when it is evaluated: one constant in its place changes the behavior"]
+        W2 --> NO
+    end
+    subgraph STABLE["Replaceable expression"]
+        direction LR
+        A2["evaluate 2 + 3 again"] --> V2["5"]
+        A1["evaluate 2 + 3"] --> V1["5"]
+        V1 --> OK["same value: substitution is safe"]
+        V2 --> OK
+    end
+```
+
+The left side can be replaced by `5` anywhere. The right side cannot: the call's value depends on *when* it runs, and the times shown are only illustrative. This is about referential transparency, which is the same as repeatability here, and not about [Idempotence](07-effects-errors-and-commitment.md#idempotence). A function that reads the clock changes nothing, so it is not "non-idempotent". It is just not repeatable. [Idempotence](07-effects-errors-and-commitment.md#idempotence) is about what an operation does to state.
 
 - **Use it when:** as much as you can. Keep the pure core large and push effects to the edges.
 - **Avoid pretending:** random numbers, clocks, files and networks are not transparent.

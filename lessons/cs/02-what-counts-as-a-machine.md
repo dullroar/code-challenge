@@ -4,6 +4,19 @@
 
 Before you can say that a regex engine, a build tool or a markup file "computes", you need to say what a machine is. The answer is smaller than you might think. A machine has a **state**, a set of allowed **steps**, a way to **represent** its values, and some facts that stay true while it runs (**invariants**). If you can say what those four are, you have named the machine.
 
+```mermaid
+flowchart TB
+    accTitle: A machine is state plus a rule for the next state, not necessarily a processor
+    accDescr: A transition-system diagram. State s, represented as bits, a stack, text, paths or other values, goes through an allowed step, the transition rule, to state s prime. An input or event, if any, feeds the step. The step may produce an observable effect or result, if any. A frame around both states says that the invariant holds for s and for s prime.
+    subgraph INV["Invariant I holds for s and for s′"]
+        S["State s: bits, stack, text, paths, ..."] --> T(["allowed step: transition rule"]) --> S2["State s′"]
+    end
+    IN["input or event (if any)"] -.-> T
+    T -.-> OUT["observable effect or result (if any)"]
+```
+
+The picture shows the four parts without naming any hardware: the state and how it is represented, one allowed step, and the invariant that holds before and after it. A regex engine's capture stack, a Make dependency graph and an editor buffer all fit this template. The template does not require finite states, explicit input and output, or machine instructions.
+
 The first goal of this book is exactly that habit: *name the machine hiding inside the language*. A stack machine, a register machine and a rewriting system can all compute the same things, but they keep their memory in different places. The concepts here are the vocabulary for that: transition systems, operational semantics (state, and one step at a time), Turing machines, Markov algorithms and Turing completeness. One more question goes with them: which part of a design *computes*, and which part only decides what runs next ([Computation versus orchestration](02-what-counts-as-a-machine.md#computation-versus-orchestration))? The chapter "State beyond variables" then returns to the question that matters most for this repository: where does the state live?
 
 ## Models of computation
@@ -249,6 +262,25 @@ The entries answer it differently:
 - In [`javascript-weird`](../../src/javascript-weird/README.md) the consumer orchestrates (it asks for the next card) and three closures compute. The impure parts, such as the database, the clock and the screen, sit at the edge.
 
 Naming the split tells you where a bug can be, what to test, and what an attacker would take over. It also keeps a stunt honest: if the "weird" part only orchestrates while an ordinary program computes, it is a costume change.
+
+```mermaid
+sequenceDiagram
+    accTitle: Choosing the next run is not the same as doing the computation
+    accDescr: A sequence diagram with three participants, the orchestrator or host, the computing worker, and the stored state or output. The host chooses when to invoke or resume the worker. The worker reads the state, applies one computational rule, writes a result or the next state, and replies done or needs another step. If another step is needed, the host schedules another invocation.
+    participant H as Orchestrator / host
+    participant W as Computing machine / worker
+    participant D as Stored state or output
+    H->>W: choose when to invoke or resume
+    W->>D: read state
+    D-->>W: current state
+    Note over W: apply one computational rule
+    W->>D: write result / next state
+    W-->>H: done, or needs another step
+    H->>W: if another step is needed, schedule another invocation
+    Note over H,W: two separate jobs
+```
+
+The host decides *when*, and the worker decides *what the next value is*. In [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) tar's checkpoints play the host and one SQL transaction is the worker. In [`tar-gnu`](../../src/tar-gnu/README.md) tar walks the archive and a dispatcher gives each record a meaning. The picture shows two *roles*. One piece of software may play both, and an orchestrator may compute too.
 
 - **Use it when:** you review an unusual design, or write a test that must prove that a named tool does the interesting work.
 - **Avoid it when:** the two are the same thing, as in a pure expression. Do not invent a split.
