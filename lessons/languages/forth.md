@@ -73,6 +73,52 @@ See [exercises](../exercises.md#b3-forth-move-the-anchor-verified).
 
 When you are writing the interpreter, a parsing word or a debugger. Rewinding the parser is a stunt in a loop; it is a tool in a language implementer's kit.
 
+<!-- BEGIN GENERATED program-flow:languages/forth.md -->
+## How each program runs
+
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+
+### Program flow of `forth`
+
+From [`forth`](../../src/forth/README.md) ([source section](../../src/forth/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: forth: one begin until loop over a word called card
+    accDescr: A flowchart. The word main sets up, which opens a pipe to sqlite3, and writes the schema. The word run is a begin until loop. Each pass runs card, which draws hours, adds them to the total variable, bumps the card count, prints the row, and sends the INSERT through the pipe. Then over-40 leaves a flag on the stack, and until consumes it. If the flag is false, the loop repeats. If it is true, run ends, and main commits, closes the pipe and reports.
+    A["main: open the pipe to sqlite3, write the schema"] --> B["run: begin"]
+    B --> C["card: draw hours, add to total, bump cards"]
+    C --> D["Print the row; send the INSERT through the pipe"]
+    D --> E{{"over-40? leaves a flag; until consumes it"}}
+    E -->|false| B
+    E -->|true| F["main: commit, close the pipe, report"]
+```
+
+**What this shows:** Forth has one ordinary loop, `begin ... until`. The loop body runs `card`, and then `over-40?` leaves a flag on the stack for `until` to take. The state lives in two variables, `total` and `cards`, and the data stack carries values between words.
+
+**Why this mechanism matters:** the stop rule is a flag, not a condition in the loop's header. The flag is computed after the card, so the crossing card is kept. The weird sibling [`forth-weird`](../../src/forth-weird/README.md) has no `begin` and no `until`.
+
+### Program flow of `forth-weird`
+
+From [`forth-weird`](../../src/forth-weird/README.md) ([source section](../../src/forth-weird/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: forth-weird: the text interpreter reads the same words again
+    accDescr: A flowchart. The Forth text interpreter reads one line: zero zero, then at-in fetch, then step, then rewind-question. Zero zero pushes the card number and the total. At-in fetch pushes the parse position, which is the anchor. The word step runs one card with the anchor kept on the return stack. The word rewind-question makes a flag, minus one while the total is 40 or less, and zero otherwise. It combines the flag with the distance back to the anchor, and adds that to the parse position. If the flag was true, the parse position is back at the anchor, so the interpreter reads step again. If it was false, the parse position is unchanged, and the interpreter goes on to drop, commit and report.
+    A["Interpreter reads: 0 0 >in @ — stack holds n, total and anchor"] --> B["Interpreter reads the word step: runs one card, anchor kept on the return stack"]
+    B --> C["Interpreter reads rewind?: flag is -1 while total <= 40, else 0"]
+    C --> D["Distance back to the anchor AND flag, added to the parse position >in"]
+    D --> E{{"Is the parse position back at the anchor?"}}
+    E -->|"yes: flag was -1"| B
+    E -->|"no: flag was 0"| F["Interpreter reads on: drop the anchor, commit, report"]
+```
+
+**What this shows:** the loop is the text interpreter, the loop you never see, and the jump is a change to `>in`, the number that says how far it has read. Setting `>in` to an earlier value makes the interpreter read the same words again. There is no `if`: a Forth flag is `-1` or `0`, so `AND` turns the distance back into either itself or nothing.
+
+**Why this mechanism matters:** the program counter is a variable, and a program can rewrite it. The state is two numbers on the data stack, and they survive the rewind because nothing else touches them. This works because the words are read from an input line, and it does not work the same way in a definition. See [`forth`](../../src/forth/README.md) for the ordinary loop.
+<!-- END GENERATED program-flow:languages/forth.md -->
+
 ## Computer science behind this page
 
 <!-- BEGIN GENERATED concepts:languages/forth.md -->

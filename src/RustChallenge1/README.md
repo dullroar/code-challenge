@@ -8,8 +8,9 @@ loop-by: lazy-demand
 evaluation: lazy
 assurance: guaranteed
 pairs-with: JavaChallenge1
-tags: [closure, first-class-and-higher-order-functions, generators, lazy-evaluation, side-effect, thread-safety]
+tags: [closure, event-loop, first-class-and-higher-order-functions, generators, lazy-evaluation, side-effect, thread-safety]
 analogies: [coroutine]
+counterexamples: [event-driven-programming]
 ---
 # One Statement, Rust Edition
 
@@ -42,6 +43,26 @@ sandbox/container/run-image.sh --online-build --out ./results src/RustChallenge1
 ```
 
 This is the Linux home of this entry, and it needs no WSLg: the [`Dockerfile`](Dockerfile) compiles it with Ubuntu's Rust in a build stage, then runs the one binary on a base with the GTK 4 runtime, a virtual display (Xvfb) and a screenshot tool, and no Rust, headers or compiler. The window opens on that virtual display *inside* the container, the entrypoint screenshots it after a few seconds and closes it, and the run prints the SQLite rows it wrote. With `--out`, `results/screenshot.png` is the window. `--online-build` is needed because the build downloads the locked crates (the run itself has no network). The image is about 350 MB, because GTK 4 is big.
+
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: RustChallenge1: std::iter::successors ends when next returns None
+    accDescr: A flowchart. successors starts from an immutable DemoBatch. The empty for body runs, then successors calls next with the batch. If the total is 40 or less and a category remains, next returns Some of a new batch with one more card, and the body runs again. If not, a scoped worker thread saves the batch in one SQLite transaction and is joined. Then a GTK window is built from Builder XML, and a glib MainLoop runs until the window closes while a timeout redraws the background. Then next returns None and the for ends.
+    A["first: Some(DemoBatch) is the first value"] --> B["Empty for body"]
+    B --> C["successors calls next(batch)"]
+    C --> D{{"total <= 40 and categories left?"}}
+    D -->|yes| E["Some(batch.extended(hours)): a new immutable batch with one more card"]
+    E --> B
+    D -->|no| F["thread::scope: a worker saves the batch in one transaction; join waits"]
+    F --> G["GTK Builder XML makes the window; glib MainLoop.run blocks, a timeout redraws"]
+    G --> H["Window closed: next returns None, the for ends"]
+```
+
+**What this shows:** `std::iter::successors(first, next)` carries the three jobs of a `for`: `first` is the initializer, `next` is both the condition and the update, and returning `None` is the stop. The state is never mutated. Each step builds a new `DemoBatch`.
+
+**Why this mechanism matters:** saving is a joined, scoped thread, so the program never says "saved" before the transaction finished. The GTK window runs its own event loop (`MainLoop.run`) inside the `next` call, which is the last step before the loop ends.
 
 ## How the stunt works
 

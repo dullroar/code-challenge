@@ -100,6 +100,52 @@ See [exercises](../exercises.md#b13-awk-the-missing-rt-verified). There is also 
 
 When the input *is* the loop. A regex record separator is the idiomatic way to read paragraphs, blocks of a config file or entries of a log. Slicing `/dev/urandom` for dice is a stunt, but the same mechanism (a pattern decides where a record ends; a pattern decides whether it matters) is what gives awk its reputation for doing in one line what takes a page elsewhere.
 
+<!-- BEGIN GENERATED program-flow:languages/awk.md -->
+## How each program runs
+
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+
+### Program flow of `awk`
+
+From [`awk`](../../src/awk/README.md) ([source section](../../src/awk/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: awk: a generator in BEGIN, with a while loop and a pipe to sqlite3
+    accDescr: A flowchart. awk has no input, so everything runs in the BEGIN rule. BEGIN asks the shell for the ISO week, seeds the random generator, splits the category names into an array and opens a pipe to sqlite3. A while loop tests whether the total is at or under the limit. If so, it draws hours, adds them to the total, picks the next category, prints the row, and prints an INSERT to the pipe. When the total is over the limit, awk closes the pipe, which commits the transaction, and prints the summary.
+    A["BEGIN: week from date, srand from /dev/urandom, split categories, open the pipe to sqlite3"] --> B{{"while: total <= LIMIT?"}}
+    B -->|yes| C["random_hours, total += hours, pick the next category"]
+    C --> D["print the row by assigning fields; print the INSERT to the pipe"]
+    D --> B
+    B -->|no| E["close the pipe: sqlite3 commits"]
+    E --> F["Print the summary"]
+```
+
+**What this shows:** the idiomatic shape of an AWK generator. There is no input, so `BEGIN` does everything, and an ordinary `while` is the loop. The test comes before each draw, so the card that crosses 40 is the last one added.
+
+**Why this mechanism matters:** the pipe is an output stream with a name. `print ... | sqlite` starts `sqlite3` once and streams SQL to it, and `close` is what flushes it and returns its exit status. AWK's real loop, the one over input records, is not used here. The weird sibling [`awk-weird`](../../src/awk-weird/README.md) uses it.
+
+### Program flow of `awk-weird`
+
+From [`awk-weird`](../../src/awk-weird/README.md) ([source section](../../src/awk-weird/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: awk-weird: awk's own record loop over /dev/urandom, with a regex as the record separator
+    accDescr: A flowchart. BEGIN sets the record separator to the regular expression for a digit, adds /dev/urandom as the default input file, and opens a pipe to sqlite3. awk then reads a record, which is the bytes up to the next digit, and RT holds that digit. Rule 1 skips a record with an empty RT. Rule 2 sets the hours to 10 plus the digit and adds them to the total. Rule 3 assigns the card to the record, which re-splits it into fields. Rules 4 and 5 print an INSERT to the pipe and print the row. The last rule exits when the total is over 40, and awk goes on to read the next record when it is not. The exit runs END, which commits and prints the summary.
+    A["BEGIN: RS is [0-9], /dev/urandom added to ARGV, sqlite3 pipe opened"] --> B["awk reads a record: the bytes up to the next digit, and RT is that digit"]
+    B --> C["Rules 1 to 3: skip empty RT; hours = 10 + RT, add to total; build the card in the fields"]
+    C --> D["Rules 4 and 5: print the INSERT to the pipe, print the row"]
+    D --> E{{"Last rule: t > 40?"}}
+    E -->|no| B
+    E -->|yes| F["exit: END commits, closes the pipe, prints the summary"]
+```
+
+**What this shows:** the loop is the loop that every AWK program has: read a record, run every rule in order, read the next. The program has no `while` and no `if`. A record separator that is a regular expression turns the random bytes into dice, and the digit that ended the record (`RT`) is the die.
+
+**Why this mechanism matters:** the stop rule is a bare pattern, `t > 40 { exit }`, and it is the last rule, so the crossing card has already passed through every earlier rule. The input is `/dev/urandom`, which never ends, so only `exit` can stop the loop. Compare [`awk`](../../src/awk/README.md), which loops in `BEGIN`.
+<!-- END GENERATED program-flow:languages/awk.md -->
+
 ## Computer science behind this page
 
 <!-- BEGIN GENERATED concepts:languages/awk.md -->

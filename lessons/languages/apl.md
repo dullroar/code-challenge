@@ -120,6 +120,53 @@ Both entries are APL, and neither is idiomatic in the sense a C programmer means
 
 The first isn't a terrible idea; it is how APL programmers actually think. The second becomes reasonable when you are generating code from data in an environment designed for it. And as a *design* notation, APL's real home, it was reasonable from the start: it was meant for describing computation on a blackboard, long before anyone ran it.
 
+<!-- BEGIN GENERATED program-flow:languages/apl.md -->
+## How each program runs
+
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+
+### Program flow of `apl`
+
+From [`apl`](../../src/apl/README.md) ([source section](../../src/apl/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: apl: draw everything first, then let arrays decide where to stop
+    accDescr: A flowchart of data moving through whole-array operations. Five random hours between 10 and 19 are drawn at once. A running sum gives the total after each card. Comparing the totals with 40 gives ones and zeros. Summing the ones and adding one counts the cards to keep. Taking that many cards from the drawn hours gives the kept hours. The running totals and the category names, reshaped to the same length, are derived from them. Then a function applied to each row number saves each row and shows each row.
+    A["Drawn: five random hours, 10 to 19, rolled at once"] --> B["Running sum of Drawn: the total after each card"]
+    B --> C["Compare with 40: 1 where the total is 40 or less, else 0"]
+    C --> D["Sum the 1s, add 1: the number of cards to keep"]
+    D --> E["Take that many from Drawn: Hours"]
+    E --> F["Totals is a running sum of Hours; Kinds is the categories reshaped to the length of Hours"]
+    F --> G["SaveRow and ShowRow, each applied to every row number"]
+```
+
+**What this shows:** no card is drawn *after* the stop rule is known. All five are drawn first, and the stop rule is arithmetic on whole arrays: a running sum, a comparison, a count. The only repetition is `¨` ("each"), and it visits rows that were already decided.
+
+**Why this mechanism matters:** five is not a loop count. It is a bound that can never be too small, because five cards of at least 10 hours always pass 40. The program does its work as array operations, and an array operation takes the place of a loop. Compare [`apl-weird`](../../src/apl-weird/README.md), where the program writes itself.
+
+### Program flow of `apl-weird`
+
+From [`apl-weird`](../../src/apl-weird/README.md) ([source section](../../src/apl-weird/README.md#program-flow)).
+
+```mermaid
+flowchart TD
+    accTitle: apl-weird: each card function writes and calls the next one
+    accDescr: A flowchart. The function Card0 runs with its genes: the card number, category, hours and running total. It prints its row and inserts it into SQLite. It draws the next hours and builds the four gene lines for the next card as text. A boolean Alive is 1 while the total is 40 or less. The function then takes its own source with the quad-CR function, replaces the header and genes, and compresses the whole child away with Alive. The quad-FX function defines a new function, Card1, from what is left, or defines nothing. Executing the name, also compressed by Alive, then calls Card1, which does the same steps. When Alive is 0, nothing is written or called, and the chain of calls returns.
+    A["CardN runs with its genes: number, category, hours, total"] --> B["Print the row and INSERT it"]
+    B --> C["Draw the next hours; build four new gene lines as text"]
+    C --> D{{"Alive is 40 >= total?"}}
+    D -->|"1: keep the child"| E["Quad-CR reads this function's own source; quad-FX defines Card N+1 from it with the new genes"]
+    E --> F["Execute the name Card N+1: it is a different function with the same body"]
+    F --> A
+    D -->|"0: Alive compresses the child away"| G["Quad-FX defines nothing and execute runs an empty string; the calls return"]
+```
+
+**What this shows:** the recursion is a chain of different functions, not one function calling itself. Each `Card` function *writes* the next one as text and then calls it. The boolean `Alive` is both the stop rule and the guard on writing, because compressing with `0` removes every line of the child.
+
+**Why this mechanism matters:** the program is self-modifying, and its state is source text: the "genes" are four lines that each child gets with new values. A broken stop rule does not fail. It recurses for ever, which is why the check runs the program under a timeout.
+<!-- END GENERATED program-flow:languages/apl.md -->
+
 ## Computer science behind this page
 
 <!-- BEGIN GENERATED concepts:languages/apl.md -->

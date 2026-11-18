@@ -98,8 +98,70 @@ Legitimate uses: progress bars for long backups, and `--checkpoint-action=wait` 
 
 See [exercise B17](../exercises.md#b17-tar-weirder-predict-the-clock-verified).
 
+<!-- BEGIN GENERATED program-flow:languages/tar.md -->
+## How each program runs
+
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+
+### Program flow of `tar-gnu`
+
+From [`tar-gnu`](../../src/tar-gnu/README.md) ([source section](../../src/tar-gnu/README.md#program-flow)).
+
+```mermaid
+sequenceDiagram
+    accTitle: tar-gnu: the archive is the program and a dispatcher gives its members meaning
+    accDescr: A sequence diagram. The interpreter first asks the inspector to vet the whole archive, which reads it and runs nothing. Then it starts tar with the to-command option. For each member, in archive order, tar sends the member name and body to the dispatcher. The dispatcher checks the name and the body against strict patterns, runs exactly one SQL statement for the member, and writes a row to the trace table. A stop-over member marks the run as halted when the total is over the limit, and the later members are traced as ignored. The show member prints the rows.
+    participant I as interpret.sh
+    participant S as inspect.sh
+    participant T as tar
+    participant D as dispatch.sh
+    participant Q as SQLite
+    I->>S: vet every member of the archive
+    S-->>I: valid, and nothing was run
+    I->>T: tar --to-command=dispatch.sh
+    loop each member, in archive order
+        T->>D: member name and body
+        D->>D: check name and body against strict patterns
+        D->>Q: one SQL statement, and a trace row
+    end
+    Note over D,Q: stop-over halts the run when the total is over its limit, and later members are traced as ignored
+    D->>Q: show prints the rows
+```
+
+**What this shows:** tar is the loop and the archive is the program. For every member, tar hands the bytes to the dispatcher, and the dispatcher decides what the name means. The order of the members is the order of execution.
+
+**Why this mechanism matters:** reading and running are two separate steps. The inspector parses and checks everything and runs nothing. The dispatcher runs one SQL statement per member and passes no part of a member to a shell. That is the difference between data that is *serialized* and data that is *executed*.
+
+### Program flow of `tar-gnu-weird`
+
+From [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) ([source section](../../src/tar-gnu-weird/README.md#program-flow)).
+
+```mermaid
+sequenceDiagram
+    accTitle: tar-gnu-weird: tar's checkpoints are the clock of a state machine
+    accDescr: A sequence diagram. The launcher runs one tar command that writes an archive with a checkpoint every 512-byte record. For each record that tar writes, tar runs tick.sh with the record count. The script runs one SQL transaction on a single row of state. If the run is done, the tick only counts as idle. Otherwise it works one hour, writes the card when the hours reach the target, and closes the card, which sets done when the total is over 40. The exit status is ignored, and tar goes on writing. When the archive is finished, the launcher reads the cards and prints them.
+    participant R as run-clock.sh
+    participant T as tar
+    participant K as tick.sh
+    participant Q as SQLite fsm row
+    R->>T: one tar command with --checkpoint=1 and an exec action
+    loop each 512-byte record that tar writes
+        T->>K: run tick.sh with TAR_CHECKPOINT
+        K->>Q: tick.sql: one transaction
+        Note over Q: if done, count an idle tick. Else work one hour, write the card at the target, close it and set done when the total is over 40
+        K-->>T: exit status, which tar ignores
+    end
+    T-->>R: the archive is finished: the clock ran out
+    R->>Q: read the cards and print them
+```
+
+**What this shows:** the program is a state machine in one SQLite row, and tar's checkpoint is its clock. One tick is one transaction. tar does not stop when the machine is done. It keeps ticking, and the extra ticks only count as idle.
+
+**Why this mechanism matters:** this is an event source made from a file's layout. The number of ticks is set by the archive size, so a layout that is too short stalls the machine in the middle of a card. The ticks are callbacks that tar runs for the program. They are not events that the program waits for.
+<!-- END GENERATED program-flow:languages/tar.md -->
+
 ## Computer science behind this page
 
 <!-- BEGIN GENERATED concepts:languages/tar.md -->
-The computer-science ideas behind this page: [Threat model](../cs/01-reading-an-adversarial-program.md#threat-model), [Arbitrary code execution](../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution), [Principle of least privilege](../cs/01-reading-an-adversarial-program.md#principle-of-least-privilege), [Capability and authority](../cs/01-reading-an-adversarial-program.md#capability-and-authority), [Transition systems and state machines](../cs/02-what-counts-as-a-machine.md#transition-systems-and-state-machines), [Representing state](../cs/02-what-counts-as-a-machine.md#representing-state), [Invariants](../cs/02-what-counts-as-a-machine.md#invariants), [Observability](../cs/02-what-counts-as-a-machine.md#observability), [Operational semantics](../cs/02-what-counts-as-a-machine.md#operational-semantics), [Computation versus orchestration](../cs/02-what-counts-as-a-machine.md#computation-versus-orchestration), [Event-driven programming](../cs/03-control-flow-and-continuations.md#event-driven-programming), [Logical clocks and event ordering](../cs/03-control-flow-and-continuations.md#logical-clocks-and-event-ordering), [Parsing](../cs/05-formal-languages-as-computational-substrates.md#parsing), [Domain-specific languages](../cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages), [Language-theoretic security](../cs/05-formal-languages-as-computational-substrates.md#language-theoretic-security), [Interpreters and virtual machines](../cs/05-formal-languages-as-computational-substrates.md#interpreters-and-virtual-machines), [State](../cs/06-state-beyond-variables.md#state), [Serialization, deserialization and object pickling](../cs/06-state-beyond-variables.md#serialization-deserialization-and-object-pickling), [Side effects](../cs/07-effects-errors-and-commitment.md#side-effects), [Exit status](../cs/07-effects-errors-and-commitment.md#exit-status), [Integrity constraints](../cs/07-effects-errors-and-commitment.md#integrity-constraints), [Idempotence](../cs/07-effects-errors-and-commitment.md#idempotence), [Leaky abstractions](../cs/08-abstraction-leaks-and-implementation-dependence.md#leaky-abstractions), [Portability](../cs/08-abstraction-leaks-and-implementation-dependence.md#portability), [Hyrum's law](../cs/08-abstraction-leaks-and-implementation-dependence.md#hyrums-law), [Reproducibility and deterministic builds](../cs/08-abstraction-leaks-and-implementation-dependence.md#reproducibility-and-deterministic-builds).
+The computer-science ideas behind this page: [Threat model](../cs/01-reading-an-adversarial-program.md#threat-model), [Arbitrary code execution](../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution), [Principle of least privilege](../cs/01-reading-an-adversarial-program.md#principle-of-least-privilege), [Capability and authority](../cs/01-reading-an-adversarial-program.md#capability-and-authority), [Transition systems and state machines](../cs/02-what-counts-as-a-machine.md#transition-systems-and-state-machines), [Representing state](../cs/02-what-counts-as-a-machine.md#representing-state), [Invariants](../cs/02-what-counts-as-a-machine.md#invariants), [Observability](../cs/02-what-counts-as-a-machine.md#observability), [Operational semantics](../cs/02-what-counts-as-a-machine.md#operational-semantics), [Computation versus orchestration](../cs/02-what-counts-as-a-machine.md#computation-versus-orchestration), [Logical clocks and event ordering](../cs/03-control-flow-and-continuations.md#logical-clocks-and-event-ordering), [Parsing](../cs/05-formal-languages-as-computational-substrates.md#parsing), [Domain-specific languages](../cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages), [Language-theoretic security](../cs/05-formal-languages-as-computational-substrates.md#language-theoretic-security), [Interpreters and virtual machines](../cs/05-formal-languages-as-computational-substrates.md#interpreters-and-virtual-machines), [State](../cs/06-state-beyond-variables.md#state), [Serialization, deserialization and object pickling](../cs/06-state-beyond-variables.md#serialization-deserialization-and-object-pickling), [Side effects](../cs/07-effects-errors-and-commitment.md#side-effects), [Exit status](../cs/07-effects-errors-and-commitment.md#exit-status), [Integrity constraints](../cs/07-effects-errors-and-commitment.md#integrity-constraints), [Idempotence](../cs/07-effects-errors-and-commitment.md#idempotence), [Leaky abstractions](../cs/08-abstraction-leaks-and-implementation-dependence.md#leaky-abstractions), [Portability](../cs/08-abstraction-leaks-and-implementation-dependence.md#portability), [Hyrum's law](../cs/08-abstraction-leaks-and-implementation-dependence.md#hyrums-law), [Reproducibility and deterministic builds](../cs/08-abstraction-leaks-and-implementation-dependence.md#reproducibility-and-deterministic-builds), [Event-driven programming](../cs/10-events-callbacks-and-reactive-control-flow.md#event-driven-programming), [Callbacks](../cs/10-events-callbacks-and-reactive-control-flow.md#callbacks).
 <!-- END GENERATED concepts:languages/tar.md -->

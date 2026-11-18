@@ -38,6 +38,24 @@ Debugging	16	52	2026-W46	DEMO ONLY
 # committed total=52 entries=3 DEMO ONLY
 ```
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: apl: draw everything first, then let arrays decide where to stop
+    accDescr: A flowchart of data moving through whole-array operations. Five random hours between 10 and 19 are drawn at once. A running sum gives the total after each card. Comparing the totals with 40 gives ones and zeros. Summing the ones and adding one counts the cards to keep. Taking that many cards from the drawn hours gives the kept hours. The running totals and the category names, reshaped to the same length, are derived from them. Then a function applied to each row number saves each row and shows each row.
+    A["Drawn: five random hours, 10 to 19, rolled at once"] --> B["Running sum of Drawn: the total after each card"]
+    B --> C["Compare with 40: 1 where the total is 40 or less, else 0"]
+    C --> D["Sum the 1s, add 1: the number of cards to keep"]
+    D --> E["Take that many from Drawn: Hours"]
+    E --> F["Totals is a running sum of Hours; Kinds is the categories reshaped to the length of Hours"]
+    F --> G["SaveRow and ShowRow, each applied to every row number"]
+```
+
+**What this shows:** no card is drawn *after* the stop rule is known. All five are drawn first, and the stop rule is arithmetic on whole arrays: a running sum, a comparison, a count. The only repetition is `¨` ("each"), and it visits rows that were already decided.
+
+**Why this mechanism matters:** five is not a loop count. It is a bound that can never be too small, because five cards of at least 10 hours always pass 40. The program does its work as array operations, and an array operation takes the place of a loop. Compare [`apl-weird`](../apl-weird/README.md), where the program writes itself.
+
 ## How the stunt works
 
 Read the three lines under "The challenge" in the source with this walk-through beside them.

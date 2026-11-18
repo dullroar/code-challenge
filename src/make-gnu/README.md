@@ -45,6 +45,25 @@ sandbox/container/run-image.sh src/make-gnu
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The image holds GNU Make and sqlite3 on a minimal Ubuntu. The Makefile runs from a private folder that starts out holding nothing else.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: make-gnu: Make restarts itself once per card
+    accDescr: A flowchart. Make reads the makefile and includes every .tc-N.mk file written so far. A pattern rule checks whether the running total, held as a list of x words, is 40 or less. If it is, the rule writes the next .tc-N.mk file. A makefile that was remade makes Make re-execute itself, and MAKE_RESTARTS counts the passes. If the total is over 40, the rule writes nothing, so nothing is remade, Make stops restarting, and the default goal all runs. It prints the report through a chain of phony targets, plays a glow on a terminal, and hands the SQL script to sqlite3.
+    A["Make reads the makefile and includes every .tc-N.mk written so far"] --> B{{"Is the total, a list of x words, 40 or less?"}}
+    B -->|yes| C["A pattern rule writes the next .tc-N.mk file with the next card"]
+    C --> D["A file was remade, so Make re-executes itself: MAKE_RESTARTS goes up by one"]
+    D --> A
+    B -->|"no: the 41st word exists"| E["Nothing is remade: Make stops restarting"]
+    E --> F["all runs: phony targets print the report, a glow plays on a terminal"]
+    F --> G["sqlite3 reads the script that Make wrote"]
+```
+
+**What this shows:** the loop is the build tool re-running itself. Each pass includes the `.tc-N.mk` files that exist, and a file that gets written forces a restart. The state is *which files exist*. The stop rule is that the rule declines to write a new file.
+
+**Why this mechanism matters:** Make's dependency engine decides what to do next from the state of the file system. There is no loop statement and no `$(shell)`: arithmetic is list surgery on `x` words. The report is a chain of phony targets so that its output stays in order.
+
 ## How the stunt works
 
 | Job | Done by | Shell? |

@@ -43,6 +43,24 @@ Debugging	10	46	2026-W47	DEMO ONLY
 
 It draws cards of 10 to 19 hours, cycling through Meetings, Coding, Debugging and Learning, until the running total is greater than 40 (the card that crosses the line is kept), prints each row, and saves all of them to SQLite in one transaction.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: awk: a generator in BEGIN, with a while loop and a pipe to sqlite3
+    accDescr: A flowchart. awk has no input, so everything runs in the BEGIN rule. BEGIN asks the shell for the ISO week, seeds the random generator, splits the category names into an array and opens a pipe to sqlite3. A while loop tests whether the total is at or under the limit. If so, it draws hours, adds them to the total, picks the next category, prints the row, and prints an INSERT to the pipe. When the total is over the limit, awk closes the pipe, which commits the transaction, and prints the summary.
+    A["BEGIN: week from date, srand from /dev/urandom, split categories, open the pipe to sqlite3"] --> B{{"while: total <= LIMIT?"}}
+    B -->|yes| C["random_hours, total += hours, pick the next category"]
+    C --> D["print the row by assigning fields; print the INSERT to the pipe"]
+    D --> B
+    B -->|no| E["close the pipe: sqlite3 commits"]
+    E --> F["Print the summary"]
+```
+
+**What this shows:** the idiomatic shape of an AWK generator. There is no input, so `BEGIN` does everything, and an ordinary `while` is the loop. The test comes before each draw, so the card that crosses 40 is the last one added.
+
+**Why this mechanism matters:** the pipe is an output stream with a name. `print ... | sqlite` starts `sqlite3` once and streams SQL to it, and `close` is what flushes it and returns its exit status. AWK's real loop, the one over input records, is not used here. The weird sibling [`awk-weird`](../awk-weird/README.md) uses it.
+
 ## How the stunt works
 
 An AWK program is a list of `pattern { action }` rules that run once per input record, plus `BEGIN` and `END` rules. This program has **no input**, so everything happens in `BEGIN`, which is the idiomatic shape for a generator.

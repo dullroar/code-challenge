@@ -10,7 +10,7 @@ assurance: implementation-permitted
 pairs-with: regex-perl
 machine: "A backtracking search with hooks"
 state: "A C struct that never rewinds"
-tags: [backtracking, compiler-optimization, computation-versus-orchestration, cut, domain-specific-language, interpreter-and-virtual-machine, regular-expression, side-effect, state]
+tags: [backtracking, callback, compiler-optimization, computation-versus-orchestration, cut, domain-specific-language, interpreter-and-virtual-machine, regular-expression, side-effect, state]
 ---
 # Regex challenge, Track 2: PCRE2 callouts as a tiny DSL
 
@@ -48,6 +48,33 @@ sandbox/container/run-image.sh src/regex-pcre2
 ```
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`, then prints the output and a read-only look at the rows it wrote. The C host is compiled in a build stage. The image holds only the binary and the shared libpcre2, with no compiler or headers.
+
+## Program Flow
+
+```mermaid
+sequenceDiagram
+    accTitle: regex-pcre2: the engine calls back into C at each callout
+    accDescr: A sequence diagram. The C host compiles the pattern and calls pcre2_match once. The engine reaches an init callout, and the host opens the scratch file and writes the header. For each category, the engine reaches a gate callout, which returns 0 while the total is 40 or less. The engine matches the next category name from the subject, and then reaches a book callout, where the host draws hours and writes the record. When the gate returns 1, because the total is over 40, that pass fails and the star loop ends. The commit verb forbids retrying fewer passes, and a commit callout writes the summary and closes the file. A final fail verb makes the match return no match, and the host prints the file.
+    participant H as C host
+    participant E as PCRE2 engine
+    participant K as Callout function
+    H->>E: pcre2_match, once
+    E->>K: init: opens the file, writes the header
+    loop for each category in the subject
+        E->>K: gate: returns 0 while the total is 40 or less
+        E->>E: match the next category name
+        E->>K: book: draws hours, writes the record
+    end
+    E->>K: gate: returns 1, the total is over 40
+    Note over E: the pass fails, the star loop ends
+    E->>K: commit, after COMMIT: writes the summary
+    E-->>H: FAIL: no match, after all the work
+    H->>H: print the file
+```
+
+**What this shows:** the C host has no loop. It calls `pcre2_match` once and the engine calls back into the host at every callout. The callout name is an opcode. The return value is the decision: `0` means continue and `1` means fail this branch.
+
+**Why this mechanism matters:** the stop rule is a callout that returns `1`, so the `*` quantifier ends by backtracking. `(*COMMIT)` makes `commit` run exactly once, and `(*FAIL)` makes the whole match lose. The callouts are synchronous calls from the engine, not queued events.
 
 ## How the stunt works
 

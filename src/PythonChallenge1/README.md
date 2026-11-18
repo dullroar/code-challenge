@@ -8,8 +8,9 @@ loop-by: lazy-demand
 evaluation: lazy
 assurance: guaranteed
 pairs-with: JavaChallenge1
-tags: [generators, evaluation-strategy, side-effect, thread-safety]
+tags: [evaluation-strategy, event-loop, generators, side-effect, thread-safety]
 analogies: [coroutine]
+counterexamples: [event-driven-programming]
 ---
 # One Statement, Python Edition
 
@@ -52,6 +53,25 @@ It runs the entry in a throwaway VM with networking off, screenshots the window,
 ## Layout
 
 [program.py](program.py) is the whole port. The entity and repository classes sit in the same file, above `main`.
+
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: PythonChallenge1: iter with a sentinel calls one function until it returns False
+    accDescr: A flowchart. A lambda builds the function step from the state object. The for statement iterates iter(step, False), so it calls step again and again. Each call tests whether the total is 40 or less and a category remains. If so, a tuple of calls runs left to right: lock, add hours, stage a card, unlock, start a thread that saves. The last item of the tuple is True, which is not the sentinel, so the empty body runs and the loop calls step again. If not, the else branch builds a Tk window from an XML string and calls mainloop, which blocks until the window closes, and step returns False. That equals the sentinel, so iter stops and the for ends.
+    A["Initializer: a lambda takes the state and returns step"] --> B["for _ in iter(step, False) calls step()"]
+    B --> C{{"step: total <= 40 and categories left?"}}
+    C -->|yes| D["Tuple, left to right: lock, hours, card, unlock, Thread; value True"]
+    D -->|"True: the body is ..., call step again"| B
+    D -.-> T["Thread: save_all"]
+    C -->|no| F["Else: build a Tk window from XML, mainloop blocks"]
+    F --> G["step returns False, the sentinel: iter stops"]
+```
+
+**What this shows:** Python has no three-clause `for`, so the loop is `iter(step, False)`: call `step` until it returns the sentinel. One conditional expression is the test, and a tuple stands in for the comma list. Python evaluates the tuple's items in order, and the last item (`True`) is the value of the update.
+
+**Why this mechanism matters:** the stop is a return value compared by `iter` with the sentinel, not a condition that the `for` itself checks. The window shows the same idea as the other ports: the final branch does the last work, then returns the value that ends the loop.
 
 ## How the stunt works
 

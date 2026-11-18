@@ -10,7 +10,7 @@ assurance: guaranteed
 pairs-with: javascript-weird
 machine: "Three expression slots"
 state: "Properties of one object literal"
-tags: [closure, control-flow, eager-evaluation, event-driven-programming, first-class-and-higher-order-functions, integrity-constraint, invariant, monoid-and-fold, operational-semantics, reproducibility, scope-and-binding, short-circuit-evaluation, side-effect, state]
+tags: [callback, closure, control-flow, eager-evaluation, event-driven-programming, event-loop, first-class-and-higher-order-functions, integrity-constraint, invariant, monoid-and-fold, operational-semantics, reproducibility, scope-and-binding, short-circuit-evaluation, side-effect, state]
 ---
 # JavaScript: back to the original, in Node.js
 
@@ -60,6 +60,26 @@ sandbox/container/run-image.sh --tty src/javascript    # with a terminal: watch 
 ```
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`. The image holds Node 24 (a pinned upstream build) and sqlite3 on a minimal Ubuntu.
+
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: javascript: a for statement in Node whose condition prints the result and the event loop keeps the pulse alive
+    accDescr: A flowchart. The initializer builds one object literal with the seed generator, the SQLite database and the categories. The condition sums the hours with reduce and is true while the total is 40 or less. Then the empty body runs and the iterator pushes random hours and inserts a card with the comma operator. When the condition is false, a comma expression prints the result, starts a setInterval timer if the output is a terminal, and yields false, so the for ends. Node does not exit yet, because the timer is still registered. The event loop runs the timer callback, which pulses the DEMO ONLY line and then clears the timer, so Node exits.
+    A["Initializer: one object literal holds seed, SQLite, categories, state"] --> B{{"Condition: reduce sum <= 40?"}}
+    B -->|true| C["Empty body"]
+    C --> D["Iterator, comma operator: push hours, insert the card"]
+    D --> B
+    B -->|false| E["Comma expression: console.log the result, setInterval if a terminal, value false"]
+    E --> F["The for ends; the call stack empties"]
+    F --> G["Event loop runs the timer callback: pulse the DEMO ONLY line"]
+    G --> H["clearInterval: nothing is left, Node exits"]
+```
+
+**What this shows:** the three clauses of a `for`, where the condition is a conditional expression that does the final work when it is false. The only asynchronous part is the pulse. Until the `for` is over, everything runs synchronously on one call stack.
+
+**Why this mechanism matters:** the program has a loop, a stop and a second phase, and the second phase exists only because a timer keeps the event loop alive. Without a terminal there is no timer, and Node exits as soon as the `for` ends. The other two Node entries make this scheduling the point: [`javascript-weird`](../javascript-weird/README.md) (closures) and [`javascript-events`](../javascript-events/README.md) (listeners).
 
 ## How the stunt works
 

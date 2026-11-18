@@ -55,6 +55,23 @@ sandbox/container/run-image.sh src/find-gnu
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`. The image holds GNU findutils, coreutils and sqlite3 on a minimal Ubuntu.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: find-gnu: the depth of a directory is the running total
+    accDescr: A flowchart. find visits a directory. A chain of -o branches is chosen by name and by regular expression on the path. Most branches dig the next directory with mkdir or mktemp. The first hour of a card is the dice directory itself, and the other hours are directories named b17 down to b00, so the depth of the directory is the running total. At the end of a card, fprintf writes SQL to file descriptor 3, using the depth as the total and the directory's modification time as the ISO week. If the path has at least 41 slashes, the total is over 40, and nothing is dug. After visiting, find reads the directory's entries and visits the new directory. The walk ends when nothing new is dug, and sqlite3 reads file descriptor 3.
+    A["find visits one directory: -name, -path and -regex tests pick a branch"] --> B{{"Does the branch dig a new directory?"}}
+    B -->|"yes: b17 to b01, or after a card of 40 or fewer slashes, the next dice"| C["-exec digs it; at b00, -fprintf writes SQL to fd 3: depth is the total, mtime the week"]
+    C --> D["find reads this directory's entries after visiting it, and finds the new one"]
+    D --> A
+    B -->|"no: b00 with 41 or more slashes in the path"| E["The last row is written, nothing is dug, the walk ends; sqlite3 reads fd 3"]
+```
+
+**What this shows:** the same trick as [`find-posix`](../find-posix/README.md), with GNU extras that remove bookkeeping. `-fprintf` can write to its own file descriptor, `%d` is the directory depth, and `%TG-W%TV` formats the modification time as the ISO week. So the depth *is* the total, and no digit-by-digit arithmetic is needed.
+
+**Why this mechanism matters:** the stop rule is a regular expression on the path, "at least 41 slashes". GNU find also has an optimizer that may reorder tests. An effect pins the order, so the program gives the same answer at every optimization level. That is tested, not promised.
+
 ## How the stunt works
 
 Read [how the portable entry works](../find-posix/README.md#how-the-stunt-works) first. It explains why the walk goes into the directory that `-exec` just made, and why `*` in a pattern can count. This page covers only what the GNU extras change.

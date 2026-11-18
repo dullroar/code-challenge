@@ -60,6 +60,25 @@ It runs the entry in a throwaway VM with networking off, screenshots the window,
 
 As in the original, the entity and the data-access type are the only code outside `main`.
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: KotlinChallenge1: a generated sequence ends when takeIf returns null
+    accDescr: A flowchart. The seed object is the first value of generateSequence. The empty for body runs. The sequence then asks its next function for the next value. takeIf tests whether the total is 40 or less and a category remains. If so, a chain of also calls locks, adds hours, stages a card, unlocks and starts a thread, and the same object is the next value, so the body runs again. If not, the else branch shows a Swing dialog built from Spring XML and ends with let false, so takeIf returns null and the sequence, and the for, end.
+    A["Seed: an object expression holds the state"] --> B["Empty for body"]
+    B --> C["generateSequence asks for the next value"]
+    C --> D{{"takeIf: total <= 40 and categories left?"}}
+    D -->|yes| E["also chain: lock, add hours, stage a card, unlock, start a Thread"]
+    E --> B
+    D -->|no| F["Else branch: show the Swing dialog, then let false"]
+    F --> G["takeIf returns null: the sequence is over"]
+```
+
+**What this shows:** Kotlin has no three-clause `for`, so the loop iterates a sequence. The condition is `takeIf`, and "stop" is a `null`. The update is the chain of `?.also { ... }` calls that runs only when the condition passed. The body runs once before the first test, which makes no difference here because the body is empty.
+
+**Why this mechanism matters:** it is the same three jobs as the Java port (initialize, test, update), carried by a lazy sequence that is pulled one value at a time. Ending the sequence is a value (`null`), not a statement.
+
 ## How the stunt works
 
 The work splits three ways: an **initializer** that builds the loop's state, a **condition** that decides whether to keep going (and, on the last check, shows the window), and an **update** that does one pass of work. Comment banners in the source mark the boundaries.

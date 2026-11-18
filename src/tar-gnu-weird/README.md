@@ -10,7 +10,8 @@ assurance: implementation-permitted
 pairs-with: tar-gnu
 machine: "A finite-state machine, driven by a logical clock that tar supplies"
 state: "One SQLite row (the machine's registers) and the number of records tar has written"
-tags: [computation-versus-orchestration, event-driven-programming, exit-status, hyrums-law, integrity-constraint, invariant, leaky-abstraction, logical-clock, observability, operational-semantics, portability, reproducibility, side-effect, state, state-encoding, transition-system]
+tags: [callback, computation-versus-orchestration, event-driven-programming, exit-status, hyrums-law, integrity-constraint, invariant, leaky-abstraction, logical-clock, observability, operational-semantics, portability, reproducibility, side-effect, state, state-encoding, transition-system]
+analogies: [backpressure, publish-subscribe]
 ---
 # GNU tar, weirder: the archive is the clock
 
@@ -57,6 +58,31 @@ sandbox/container/run-image.sh src/tar-gnu-weird
 ```
 
 It builds this folder's [`Dockerfile`](Dockerfile) and runs the result with no network, a read-only file system and user `nobody`. The image holds GNU tar (from the Ubuntu base) and sqlite3 on a minimal Ubuntu.
+
+## Program Flow
+
+```mermaid
+sequenceDiagram
+    accTitle: tar-gnu-weird: tar's checkpoints are the clock of a state machine
+    accDescr: A sequence diagram. The launcher runs one tar command that writes an archive with a checkpoint every 512-byte record. For each record that tar writes, tar runs tick.sh with the record count. The script runs one SQL transaction on a single row of state. If the run is done, the tick only counts as idle. Otherwise it works one hour, writes the card when the hours reach the target, and closes the card, which sets done when the total is over 40. The exit status is ignored, and tar goes on writing. When the archive is finished, the launcher reads the cards and prints them.
+    participant R as run-clock.sh
+    participant T as tar
+    participant K as tick.sh
+    participant Q as SQLite fsm row
+    R->>T: one tar command with --checkpoint=1 and an exec action
+    loop each 512-byte record that tar writes
+        T->>K: run tick.sh with TAR_CHECKPOINT
+        K->>Q: tick.sql: one transaction
+        Note over Q: if done, count an idle tick. Else work one hour, write the card at the target, close it and set done when the total is over 40
+        K-->>T: exit status, which tar ignores
+    end
+    T-->>R: the archive is finished: the clock ran out
+    R->>Q: read the cards and print them
+```
+
+**What this shows:** the program is a state machine in one SQLite row, and tar's checkpoint is its clock. One tick is one transaction. tar does not stop when the machine is done. It keeps ticking, and the extra ticks only count as idle.
+
+**Why this mechanism matters:** this is an event source made from a file's layout. The number of ticks is set by the archive size, so a layout that is too short stalls the machine in the middle of a card. The ticks are callbacks that tar runs for the program. They are not events that the program waits for.
 
 ## How the stunt works
 

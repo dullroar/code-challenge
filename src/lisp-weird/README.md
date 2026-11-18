@@ -45,6 +45,33 @@ Debugging	15	51	2026-W47	DEMO ONLY
 
 The last line is introspection: it asks the **metaobject protocol** (`sb-mop:compute-applicable-methods`) which methods apply to the ledger, and counts how many of the five actually ran.
 
+## Program Flow
+
+```mermaid
+sequenceDiagram
+    accTitle: lisp-weird: method combination with or is the loop and the stop rule
+    accDescr: A sequence diagram. Main calls the generic function punch on a card-1 instance. CLOS finds every applicable method and sorts them by class precedence: card-1, card-2, and so on up to the ledger. An around method on the ledger runs first. It binds the special variable for the SQL stream and calls the next method, which is the or combination. The or combination calls the card methods in order. Each one deals a card: it draws hours, adds to the total, prints the row and writes the INSERT to the SQL stream. The method returns whether the total is over 40. The first true result ends the or, so later methods never run. The around method then appends COMMIT and pipes the script into sqlite3.
+    participant M as main
+    participant A as around method on ledger
+    participant P as punch with or combination
+    participant K as card-N methods
+    M->>P: punch on a card-1 instance
+    P->>A: the around method runs first
+    A->>A: bind *sql* to a new string stream
+    A->>P: call-next-method: the or chain
+    loop each applicable method, most specific first
+        P->>K: card-N deals a card: hours, total, print, INSERT into *sql*
+        K-->>P: is the total over 40?
+    end
+    Note over P,K: the first true result ends the or: later methods never run
+    P-->>A: the chain returns
+    A->>A: append COMMIT, pipe the script into sqlite3
+```
+
+**What this shows:** the loop is a class hierarchy. `card-1` inherits from `card-2`, and so on, and the generic function `punch` calls the method of each class in turn. The class is the whole message "this is card number N". The method combination `or` is what stops it: it calls methods until one returns true.
+
+**Why this mechanism matters:** CLOS decides what runs and in what order. The program has no statement that says "stop", and the unused methods are simply never called. The `:around` method wraps the whole chain and uses dynamic binding to send every `format` to one stream.
+
 ## How the stunt works
 
 ### 1. Method combination: what happens when more than one method applies

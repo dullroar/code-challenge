@@ -10,7 +10,8 @@ assurance: guaranteed
 pairs-with: JavaChallenge1
 machine: "Three expression slots"
 state: "Fields of one anonymous object"
-tags: [closure, control-flow, deferred-execution, markup-language, side-effect, thread-safety]
+tags: [closure, control-flow, deferred-execution, event-loop, markup-language, side-effect, thread-safety]
+counterexamples: [event-driven-programming]
 ---
 # C# challenge: the original (modernized)
 
@@ -41,6 +42,26 @@ sandbox\windows\run.ps1 src\ModernChallenge1
 ```
 
 It runs the entry in a throwaway VM with networking off, screenshots the window, asks it to close, and prints what it saved. Use `-Seconds 30` to leave the animation up longer.
+
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: ModernChallenge1: a for statement whose false branch runs the WPF message loop
+    accDescr: A flowchart. The initializer builds one anonymous object with the EF Core context, a category enumerator, a WPF Application, a Mutex and an XElement. The condition is true while the LINQ sum is 40 or less and MoveNext succeeds. Then the empty body runs and the iterator draws hours, adds a row to the context and starts a thread that waits on the Mutex and saves through MethodInfo.Invoke. When the condition is false, XamlReader.Load builds the window from a string and the XElement becomes its DoubleAnimation. Application.Run then runs the WPF message loop until the window closes, and IsNaN of its result is false, so the for ends.
+    A["Initializer: anonymous object holds EF context, enumerator, WPF Application, Mutex, XElement"] --> B{{"Condition: LINQ Sum <= 40 and MoveNext()?"}}
+    B -->|true| C["Empty body"]
+    C --> D["Iterator: draw hours, add a row, start a Thread"]
+    D --> B
+    D -.-> T["Thread: Mutex.WaitOne, SaveChanges via MethodInfo.Invoke, ReleaseMutex"]
+    B -->|false| E["XamlReader.Load builds the window from a string; the XElement is its DoubleAnimation"]
+    E --> F["Application.Run: the WPF message loop runs until the window closes"]
+    F --> G["Double.IsNaN of the result is false: the for ends"]
+```
+
+**What this shows:** the original stunt. One `for` statement with an empty body, in which the condition and the iterator do all the work. While the total is 40 or less the condition is true. When it is not, the condition builds and shows the window, and the window's blocking call yields the `false` that ends the loop.
+
+**Why this mechanism matters:** `Application.Run` is a UI framework's own loop, started from inside a loop condition. The animation fades the window by itself: nothing in `Program.cs` subscribes to an event to do it. See [`xaml`](../xaml/README.md) for a stricter view of what that runtime parsing does.
 
 ## How the stunt works
 

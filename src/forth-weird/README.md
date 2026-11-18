@@ -49,6 +49,24 @@ Debugging	19	49	2026-W46	DEMO ONLY
 # no loop word anywhere: the text interpreter was rewound until the total passed 40
 ```
 
+## Program Flow
+
+```mermaid
+flowchart TD
+    accTitle: forth-weird: the text interpreter reads the same words again
+    accDescr: A flowchart. The Forth text interpreter reads one line: zero zero, then at-in fetch, then step, then rewind-question. Zero zero pushes the card number and the total. At-in fetch pushes the parse position, which is the anchor. The word step runs one card with the anchor kept on the return stack. The word rewind-question makes a flag, minus one while the total is 40 or less, and zero otherwise. It combines the flag with the distance back to the anchor, and adds that to the parse position. If the flag was true, the parse position is back at the anchor, so the interpreter reads step again. If it was false, the parse position is unchanged, and the interpreter goes on to drop, commit and report.
+    A["Interpreter reads: 0 0 >in @ — stack holds n, total and anchor"] --> B["Interpreter reads the word step: runs one card, anchor kept on the return stack"]
+    B --> C["Interpreter reads rewind?: flag is -1 while total <= 40, else 0"]
+    C --> D["Distance back to the anchor AND flag, added to the parse position >in"]
+    D --> E{{"Is the parse position back at the anchor?"}}
+    E -->|"yes: flag was -1"| B
+    E -->|"no: flag was 0"| F["Interpreter reads on: drop the anchor, commit, report"]
+```
+
+**What this shows:** the loop is the text interpreter, the loop you never see, and the jump is a change to `>in`, the number that says how far it has read. Setting `>in` to an earlier value makes the interpreter read the same words again. There is no `if`: a Forth flag is `-1` or `0`, so `AND` turns the distance back into either itself or nothing.
+
+**Why this mechanism matters:** the program counter is a variable, and a program can rewrite it. The state is two numbers on the data stack, and they survive the rewind because nothing else touches them. This works because the words are read from an input line, and it does not work the same way in a definition. See [`forth`](../forth/README.md) for the ordinary loop.
+
 ## How the stunt works
 
 The Forth text interpreter is a loop you never see: it reads the next word from the input line, runs it, and repeats. `>in` is a variable holding *how far it has read*. Read it with `>in @`, set it with `>in !`. Set it to an earlier value and the interpreter will cheerfully read the same words again.
