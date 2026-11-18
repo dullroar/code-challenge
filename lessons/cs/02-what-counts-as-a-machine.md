@@ -130,6 +130,28 @@ Observability is how much of a system's inside you can learn from the outside: t
 
 A stack machine keeps its working values on a stack. An instruction takes its inputs from the top and puts its result back. There are no named registers. It exists because the instructions can be tiny (`+` needs no operands) and a compiler can generate them easily. That is why the JVM, .NET's IL, WebAssembly, PostScript and Forth all use the idea. In [`forth-weird`](../../src/forth-weird/README.md) the data stack is the *only* memory: the program has no `variable` at all.
 
+```mermaid
+flowchart TB
+    accTitle: Stack machines compute by pushing and popping values at the top of a LIFO stack
+    accDescr: Three snapshots of a stack, top to bottom, each drawn from the stack's bottom on the left to its top on the right. At the start the stack holds 19 with 23 on top. The instruction ADD pops the top two values and pushes their sum, so the stack holds only 42. Then PUSH 10 puts 10 on top, and the stack holds 42 with 10 on top. Every step touches only the top of the stack, and no instruction names a location.
+    subgraph S1["Start (bottom on the left, top on the right)"]
+        direction LR
+        a1["19"] ~~~ a2["23 (top)"]
+    end
+    subgraph S2["After ADD"]
+        direction LR
+        b1["42 (top)"]
+    end
+    subgraph S3["After PUSH 10"]
+        direction LR
+        c1["42"] ~~~ c2["10 (top)"]
+    end
+    S1 -->|"ADD: pop two values, push their sum"| S2
+    S2 -->|"PUSH 10: push one value"| S3
+```
+
+Read the picture from top to bottom. `ADD` does not say where its inputs are: it pops the top two values and pushes one result. A real stack machine still has other memory (the JVM has local variables and a heap, for example). The stack only holds the values that the next instruction needs.
+
 - **Use it when:** you build a small virtual machine or interpreter, or you want compact code.
 - **Avoid it when:** you need random access to many values. Shuffling the stack with `dup`, `swap` and `rot` becomes unreadable fast.
 
@@ -149,6 +171,25 @@ A stack machine keeps its working values on a stack. An instruction takes its in
 ## Register machines and counter machines
 
 A register machine stores its values in a few numbered boxes called registers. Real processors are register machines. The smallest version, a *counter machine*, has only two operations: add one to a register, or subtract one and jump if the result is zero. It exists as a thinking tool: it is simple enough to prove things about, yet powerful enough to compute anything (two counters are enough). Several entries are register machines in disguise. CMake's `CMAKE_MATCH_1` to `CMAKE_MATCH_5` are the registers of [`cmake`](../../src/cmake/README.md). .NET's balancing groups, in [`regex-dotnet`](../../src/regex-dotnet/README.md), are a counter.
+
+```mermaid
+flowchart TB
+    accTitle: A register machine names its storage cells; a counter machine needs only increment, decrement and a zero test
+    accDescr: Two panels. In the register machine, registers R1 and R2 hold 19 and 23. The instruction ADD R1, R2 into R1 leaves R1 holding 42 and R2 still holding 23. In the counter machine, counters C1 and C2 start at 2 and 0. A loop decrements C1, increments C2 and tests C1 for zero. If C1 is not zero, the loop runs again. When C1 reaches zero, C1 is 0 and C2 is 2.
+    subgraph CNT["Counter machine"]
+        direction TB
+        c1["C1 = 2, C2 = 0"] --> c2["DEC C1, INC C2"]
+        c2 --> c3{{"C1 is zero?"}}
+        c3 -->|"no: loop"| c2
+        c3 -->|"yes"| c4["C1 = 0, C2 = 2"]
+    end
+    subgraph REG["Register machine"]
+        direction TB
+        r1["R1 = 19, R2 = 23"] -->|"ADD R1, R2 into R1"| r2["R1 = 42, R2 = 23"]
+    end
+```
+
+On the left, the instruction names its cells (`R1` and `R2`). On the right, the machine has two counters and three moves: count down, count up and test for zero. Moving a count from `C1` to `C2` takes one pass of the loop for each unit, so a counter machine is slow on purpose. What it shows is how little machinery is enough.
 
 - **Use it when:** you want to explain what a strange system *is*, by finding its registers.
 - **Avoid it as a coding style:** it is a model for reasoning, not a way to write programs.
@@ -190,6 +231,22 @@ A Turing machine has an endless tape of cells, a head that reads and writes one 
 ## Markov algorithms
 
 A Markov algorithm is a list of find-and-replace rules, in order. Look for the first rule whose pattern appears in the text, replace it, and start again from the top. Stop when no rule applies (or when a rule says "stop"). The Russian mathematician Andrey Markov Jr. described it in the 1950s, and it can compute anything a Turing machine can. It exists to show that *rewriting text is computing*. [`regex-sed`](../../src/regex-sed/README.md) is exactly this: one line of text, and a script of substitutions that rewrite it until nothing matches. The line is the whole memory.
+
+```mermaid
+flowchart TB
+    accTitle: A Markov algorithm applies the first rule that matches, again and again, until a terminal rule or no match
+    accDescr: An ordered rule list is shown above a trace. Rule 1 turns AA into A. Rule 2 turns BA into AB. Rule 3 turns B into B and stops. The text BAA matches both rule 1 and rule 2, but rule 1 comes first, so it wins and the text becomes BA. Now only rule 2 matches, and the text becomes AB. Rules 1 and 2 no longer match, rule 3 matches and is terminal, so the algorithm halts with AB.
+    subgraph RULES["Rules, always tried from the top"]
+        direction TB
+        R1["1: AA becomes A"] ~~~ R2["2: BA becomes AB"] ~~~ R3["3: B becomes B, then stop"]
+    end
+    S0["Text: BAA (rules 1 and 2 both match)"] -->|"rule 1 comes first"| S1["Text: BA"]
+    S1 -->|"rule 2"| S2["Text: AB"]
+    S2 -->|"rule 3: terminal"| H(["Halt with AB"])
+    RULES ~~~ S0
+```
+
+The order of the rules decides, not the place in the text. `BAA` matches rules 1 and 2, and rule 1 wins because it is first. After each rewrite the search for a rule starts again at rule 1. The run ends when a terminal rule applies (rule 3 here) or when no rule matches. Other rewriting systems, such as those in [Term and string rewriting](05-formal-languages-as-computational-substrates.md#term-and-string-rewriting), do not all pick rules this way.
 
 - **Use it when:** you transform or normalize text, or when you want to teach that a program can be "just rules".
 - **Avoid it for large programs:** rule order *is* the control flow, which is hard to reason about, and speed is hard to predict.

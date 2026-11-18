@@ -49,6 +49,23 @@ State is whatever a program remembers between steps. Without it, nothing could b
 
 The call stack is a stack of *frames*. Each active function call has one, holding its return address and its local variables. It exists so that functions can call functions, and recursion works. For most programmers the call stack *is* "where am I in the program". Several entries live without it, or work around it. A sed script has no calls at all. m4 and Make repeat by reading text again. The trigger recursion in [`tcl-weird`](../../src/tcl-weird/README.md) is limited by the database, not by a stack you can see.
 
+```mermaid
+flowchart TB
+    accTitle: The call stack records where execution is and what each active call still needs
+    accDescr: Two parts. On the left is a call stack with three frames, with the newest frame on top. The top frame is saveRow, with its argument, its local variable and a return address into drawCard. Below it is drawCard, with its locals and a return address into main. At the bottom is main, with its locals and a return address into the runtime. On the right are the returns in order. First saveRow returns and its frame is removed. Then drawCard returns. Then main returns.
+    subgraph STACK["Call stack"]
+        direction TB
+        f3["top: saveRow(card). Locals: sql. Return into drawCard"] ~~~ f2["drawCard(). Locals: hours, category. Return into main"] ~~~ f1["bottom: main(). Locals: total, rows. Return into the runtime"]
+    end
+    subgraph RET["Returns, in order"]
+        direction TB
+        r1["1. saveRow returns, frame removed"] --> r2["2. drawCard returns, frame removed"] --> r3["3. main returns, stack empty"]
+    end
+    STACK ~~~ RET
+```
+
+Each active call owns one frame, and the newest frame is on top. When `saveRow` returns, its frame is removed and execution continues at the return address it stored, which is inside `drawCard`. The names here are examples, and the exact layout of a frame differs between languages and processors. The general idea of a stack is in [The stack as a data structure](06-state-beyond-variables.md#the-stack-as-a-data-structure).
+
 - **Use it when:** you read a stack trace, or you reason about recursion depth.
 - **Avoid:** unbounded recursion. A stack overflow ends the program, and in unsafe languages it can become a security hole.
 
@@ -70,6 +87,28 @@ The call stack is a stack of *frames*. Each active function call has one, holdin
 
 A stack is a pile where you add and remove at the top only: last in, first out. It is the right shape for anything nested: undo, expression evaluation, bracket matching and backtracking. In this repository the stack appears in two unusual places. In [`forth-weird`](../../src/forth-weird/README.md) the data stack is the only memory. In [`regex-dotnet`](../../src/regex-dotnet/README.md) *balancing groups* push a capture when they see an opening mark and pop one when they see a closing mark. A stack of marks is a counter, so a regex can compare two counts.
 
+```mermaid
+flowchart TB
+    accTitle: A stack is last-in, first-out, and only the top element can be pushed or popped
+    accDescr: Three snapshots of a stack, top to bottom, each drawn from the stack's bottom on the left to its top on the right. At the start the stack holds only A. After push B and push C it holds A, B and C, with C on top. Two pops then return C first and B second, leaving only A. The most recent push is always the first to come back out.
+    subgraph T1["Start (bottom on the left, top on the right)"]
+        direction LR
+        a1["A (top)"]
+    end
+    subgraph T2["After two pushes"]
+        direction LR
+        b1["A"] ~~~ b2["B"] ~~~ b3["C (top)"]
+    end
+    subgraph T3["After two pops"]
+        direction LR
+        c1["A (top)"]
+    end
+    T1 -->|"push B, then push C"| T2
+    T2 -->|"pop gives C, pop gives B"| T3
+```
+
+Only the top can be reached. A push adds on top and a pop removes from the top, so the last item in is the first one out. [The call stack](06-state-beyond-variables.md#the-call-stack) is one use of this structure, with frames as the items. Undo lists, bracket matching and the data stack of [`forth-weird`](../../src/forth-weird/README.md) are others.
+
 - **Use it when:** the problem is nested, or you must undo in reverse order.
 - **Avoid it when:** you need random access or first-in, first-out order. Use an array or a queue.
 
@@ -89,6 +128,24 @@ A stack is a pile where you add and remove at the top only: last in, first out. 
 ## Scope and binding
 
 *Scope* is the part of a program where a name can be seen. *Binding* is the link between a name and a value. Most languages use *lexical* scope: a name means what it means where it is written. Some use *dynamic* scope: a name means whatever the most recent caller set. Dynamic scope can be useful, and it can be dangerous. In [`apl-weird`](../../src/apl-weird/README.md) dynamic scope would let a rewritten function overwrite its parent's variables, so each generated header re-declares its locals. In Tcl, `uplevel` runs code in the scope of another stack frame. [`tcl-weird`](../../src/tcl-weird/README.md) uses `uplevel #0`, which means the global scope. In m4 and Make, every name is global.
+
+```mermaid
+flowchart TB
+    accTitle: Scope sets the search region for a name, and binding is the value the name resolves to
+    accDescr: Two nested boxes. The outer scope binds x to 10 and y to 20. The inner scope, drawn inside it, binds x to 99. An expression x plus y runs inside the inner scope. The lookup for x finds x equals 99 in the inner scope first, so the outer x is shadowed. The lookup for y finds nothing in the inner scope, so it goes outward and finds y equals 20. The result is 99 plus 20, which is 119.
+    subgraph OUT["Outer scope"]
+        direction TB
+        ox["x = 10 (shadowed)"] ~~~ oy["y = 20"]
+        subgraph INN["Inner scope"]
+            direction TB
+            ix["x = 99"] ~~~ use["x + y = 99 + 20 = 119"]
+        end
+    end
+    use -->|"x: found here, first"| ix
+    use -->|"y: not here, look outward"| oy
+```
+
+A name is looked up in the innermost scope first, then outward. Here `x` is found at once in the inner scope, which *shadows* the outer `x = 10`. The name `y` is not bound in the inner scope, so the search goes outward. The scope decides where to look, and the binding is what the search finds. This picture is lexical scope: the boxes are the nesting of the source text.
 
 - **Use it when:** lexical scope, almost always. It lets you read a function without knowing its callers.
 - **Avoid:** dynamic and global scope, except for deliberate, documented settings.
@@ -213,6 +270,20 @@ A language is *homoiconic* when its programs are written in its own data structu
 
 A dependency graph has a node for each thing and an arrow for "this needs that". If there are no cycles, it is a directed acyclic graph, and a *topological sort* gives an order that always works: build the needed things first. It exists so that tools do only the work that is needed, in the right order, and in parallel where they can. Make, package managers, spreadsheets and schedulers are all dependency engines. What is unusual in [`make-gnu`](../../src/make-gnu/README.md) is that the graph can *change while it is being walked*: Make remakes an included makefile, then starts over with the new graph. That restart is the loop.
 
+```mermaid
+flowchart LR
+    accTitle: A dependency graph captures what must be recomputed when an input changes
+    accDescr: A graph in which each arrow runs from an input to the thing built from it. Raw cards and categories both feed rows. Rows feeds report and chart. The categories node has changed, and it is drawn with a thick border. Everything downstream of categories must be recomputed, which is rows, report and chart. Raw cards is not downstream of the change, so its old value is reused.
+    raw["raw cards: unchanged, reused"] --> rows["rows: recompute"]
+    cat["categories: changed"] --> rows
+    rows --> rep["report: recompute"]
+    rows --> chart["chart: recompute"]
+    classDef changed stroke-width: 4px
+    class cat changed
+```
+
+Each arrow here runs from an input to the thing built from it, so a change travels along the arrows. (Some books draw the arrow the other way, from a thing to what it needs. The facts are the same.) Only `categories` changed, so only what is downstream of it must be redone. `raw cards` keeps its old result. The graph says what *must* be recomputed, not when values arrive. For that, see [Dataflow programming](04-evaluation-and-demand.md#dataflow-programming).
+
 - **Use it when:** any problem of the form "A must come before B".
 - **Avoid:** cycles, and dependencies that are not declared. A hidden dependency gives wrong incremental builds.
 
@@ -231,6 +302,18 @@ A dependency graph has a node for each thing and an arrow for "this needs that".
 ## Database triggers
 
 A trigger is code that the database runs by itself when a row is inserted, updated or deleted. It exists to keep rules close to the data: audit logs, derived columns, checks that a `CHECK` constraint cannot express. In [`tcl-weird`](../../src/tcl-weird/README.md) a trigger is the loop. Each insert fires the trigger, which inserts the next row, until a `WHERE` clause finds nothing to insert. The cost is invisible control flow. Nothing in the application code says "this also happens", and the order and depth of triggers can surprise you.
+
+```mermaid
+flowchart TB
+    accTitle: A trigger is code the database runs in response to a table event, and the changed data becomes the next step
+    accDescr: A flowchart of a recursive trigger. Host code runs a single INSERT, and the host code contains no loop. The insert is a table event, which fires the trigger. The trigger checks its condition. If the condition selects a row, the trigger action inserts the next row, which is a new table event that fires the trigger again. If the condition selects nothing, the chain ends.
+    H["Host code: one INSERT, no loop"] --> E["Table event: a row is inserted"]
+    E --> T{{"Trigger fires: does its condition select a row?"}}
+    T -->|"yes: the trigger inserts the next row"| E
+    T -->|"no: nothing to insert"| X(["Chain ends"])
+```
+
+The host code runs one `INSERT` and has no loop. The trigger belongs to the table, so each insert is an event that fires it. The trigger's own `INSERT` is another event, and that is how one change causes the next. A chain like this ends only because the condition finally selects no row. Databases are careful about it. SQLite does not let a trigger fire itself unless `PRAGMA recursive_triggers` is on, and [`tcl-weird`](../../src/tcl-weird/README.md) turns it on on purpose.
 
 - **Use it when:** for audit trails and rules that must hold whoever writes the data.
 - **Avoid it when:** you are tempted to put business workflows in triggers, or to use them as a program loop (as this entry does, on purpose).
