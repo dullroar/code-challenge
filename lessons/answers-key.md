@@ -264,6 +264,46 @@ The fake `mktemp` makes the dice. The walk reads the last character of each six-
 1. `([^/]*/){31}.*` matches a path with at least 31 slashes. The start directory `t` is depth 0, and the end of a card is at depth equal to the running total, so the test is true exactly when the total is 31 or more, which is "over 30". `check-demo.sh out.txt 30` passes. The entry's own `check.sh` fails, because the seven forced-dice scenarios (for example `10 10 10 10 10`, five cards) now stop after fewer cards. The stop rule is that one number, because depth is the total.
 2. With `FIND_D=rates`, find prints its profile on stderr after the walk. Each test shows `[est success rate 0.8]` (the optimizer's flat guess) and `[real success rate a/b=...]`. The `-name b00` test succeeds once per card, so `a` equals the number of rows. The guess is far off because the optimizer has no idea that most directories are named `b..` and only one in about 15 ends a card.
 
+## B16. tar: read the program, then run it
+
+1. Four cards run: 12, 24, 36 and 48. The total passes 40 at the fourth card, so the fifth slot (`050.card`) and the `stop-over` members after the halt are read and ignored. The trace table shows `ignored: halted` for them.
+2. Changing `limit=40` to `limit=20` in `021.stop-over` makes the halt happen after the second card (24 is over 20). Nothing in `dispatch.sh` changed: the limit is data, in the archive. `check-demo.sh out.txt 20` passes. Order matters: tar reads members in the order they are in the archive, so a repack in a different order is a different program.
+3. `inspect.sh` marks `025.exec` as `REFUSE (unknown record type)` and exits 4. `interpret.sh --execute` asks the inspector first, so it exits 4, prints that nothing was run, and starts no tar. No `pwned` appears. A plain `tar -xf` writes `025.exec` as an inert file and runs nothing, because an archive cannot register a hook for itself. **Parsing** was done by `tar -t` and `tar -xO` inside `inspect.sh`, and by tar again inside `interpret.sh`. **Running** happened only in `interpret.sh --execute`, in `tar --to-command`. The trust boundary is the command line the operator typed.
+
+## B17. tar, weirder: predict the clock
+
+1. With 45 ticks the machine reaches 45 hours of work, but the third card needs the 46th. It prints the two closed cards (`Meetings 12 12`, `Coding 17 29`), reports `the clock ran out` and exits 3. With 46 ticks it finishes: three cards, total 46, exit 0.
+2. `--ticks 92 --interval 2`: 92 records, one callback every second record, so 46 callbacks and the run finishes. `--ticks 91`: 45 callbacks, and it stalls. `TAR_CHECKPOINT` is the record number, so the last value in the finished run is 92 and `fsm.tick` shows it, while the machine has counted 46 hours. The check script says this as: last `TAR_CHECKPOINT` = ticks x K.
+3. 260 blocks at `-b 4` are 65 records, so `floor(65 / 1) = 65` ticks. The same three cards, a total of 46, and 65 - 46 = 19 idle ticks. The tape is 65 x 2,048 = 133,120 bytes.
+4. The payload is zeros, and the only other bytes are the member's header (a name and some numbers; 74 non-zero bytes in the test run). Nothing reads the content for its meaning. Only the size counts, because the size decides how many records tar writes.
+
+## B18. ed: move the stop rule and break the cleanup
+
+1. `DICE="0 0 0 0 0"`: five cards of 10 hours, totals 10, 20, 30, 40, 50. The run continues at 40, because 40 is not over 40, and the fifth card gets the category of line 5, `Meetings` (the category list is Meetings, Coding, Debugging, Learning, Meetings). `DICE="9 9 9 9 9"`: three cards of 19 hours, 19, 38, 57.
+2. `DICE="3 3 3 3 3"` is 13 hours a card. With `x\{41,\}`: 13, 26, 39, 52, four cards. With `x\{31,\}`: 13, 26, 39, three cards, because 39 is over 30 and the bar becomes a bang. `check-demo.sh out.txt 30` passes. The stop rule is the regular expression over the marks.
+3. The output has a fifth line, `Dead 0 52`. At card 4 the total is 52, so the ledger line has a `!`. Card 5 joins with it, the Dead rule rewrites the joined line to `Dead 0!` plus the marks, and the decimal rules print the total. With the cleanup in place `g/^Dead /d` removes it. **Features:** step 1 is the rewrite table and the addressing (a changed number of marks), step 2 is a regular expression interval, step 3 is `g` with `d`.
+
+## B19. Ex: move the limit on the tape and cut the loop
+
+1. `DICE="1 1 1 1 1"` is eleven hours a card: totals 11, 22, 33, 44. After card 4 the mark is on tape row 44, whose instruction is the comment, so the run ends. Four cards.
+2. With rows 41 to 45 changed from `"` to `@a`, row 44 now continues. The fifth card brings the total to 55, which is row 55: still a comment. Five cards: 11, 22, 33, 44, 55. `check-demo.sh out.txt 45` passes. One edit of data moved the stop rule.
+3. Without the final `|@n` the program ends after one card: `Meetings 15 15` for `DICE="5 5 5 5 5"`. Nothing starts the program again.
+4. The loop is `@n`, the last command on the program line. Register `n` holds the text of the tape line, minus the total. The first row whose text is `"` (the row for 41) is where it stops, and the limit of 40 is nowhere in the program: it is the boundary on the tape.
+
+## B20. JavaScript: read the clauses, move the limit and fail the structure check
+
+1. `SEED=42` gives hours 12, 17 and 17: totals 12, 29 and 46. The third card crosses 40 and is kept. The first test sees 0, the second 12, the third 29 (all 40 or less), and the fourth sees 46 and stops.
+2. With `<= 20`: the test sees 0 and 12 (go on) and then 29 (over 20), so two cards: 12 and 29. The crossing card is the second.
+3. The extra statement is legal JavaScript, and the program runs. `check-structure.mjs` reports `FAIL: the body must be empty`. That is the proof that the stunt's rule is checked, and not just claimed.
+4. 2026-12-31 is a Thursday, and 2026 starts on a Thursday, so it has 53 weeks: `2026-W53`. 2024-12-30 is a Monday, in the week whose Thursday is 2025-01-02, so it is `2025-W01`.
+
+## B21. JavaScript, weirder: move the stop rule in a closure and watch the demand
+
+1. 12 tests pass.
+2. With `over = total > 20` and `SEED=42` the totals are 12 and 29, so the machine is over after the second card: two cards. The lab then shows 7 failures and 5 passes. The failures are the tests that use the number 40 or the seed's three cards: the crossing card, exactly 40, the draw count, replay, and the like. The five passing tests (two environments, lazy versus eager `map`, closure lifetime, closure versus `this`, closure versus continuation) are about how closures behave, and not about when this machine stops. A closure's rules do not depend on what the closure is for.
+3. `built`, `drawn`, `[ 15 ]`. The pipeline is only a description until `toArray()` asks. `take(1)` stops after one value, so the machine is asked once, and the hours source is called once.
+4. `take(2)` prints `drawn` twice, then `[ 15, 30 ]`: the machine's total is 15 after the first card and 30 after the second.
+
 ## C1. Weird next to boring
 
 Measured with the verification script (non-comment lines):
@@ -383,6 +423,13 @@ lessons/tools/run-in-sandbox.sh lessons/solutions runghc f-takewhile.hs
 ```
 
 Negative control: change the limit to `<= 50` and `takeWhile` returns all four totals. **Tag: guaranteed**, since both functions are specified by the Haskell `Prelude`, and your test does not depend on the implementation.
+
+## F2. Trojan Source: hide a character, then find it
+
+1. `node greet.js` prints `false`. The first line holds `"admin"` followed by U+200B, a character with no shape, so the string has five visible letters (`a d m i n`) and one invisible character: it is not equal to `"admin"`. The second line compares it with the plain word. A reader who sees `user === "admin"` expects `true`.
+2. The scan prints line 1, `1:const user = "admin";`, and there is one more character between the `n` and the closing quote that your terminal draws as nothing (that is the point). `od -c` shows `a d m i n 342 200 213 "`: UTF-8 for U+200B is the three bytes E2 80 8B, which is `342 200 213` in octal.
+3. `clean.js` has no hit, and prints `true`. The scan fires on the character and on nothing else.
+4. No file in `src/apl-weird` matches. APL glyphs are visible, so a reviewer sees them. Banning every non-ASCII character would also ban APL and every non-English name, and it would not stop an attacker who uses an ASCII look-alike. The defense is to ban what has no visible shape. The label is **implementation-permitted**: the rule is written down (`sandbox/scope-check.sh`, the line that sets `hidden=`), its mechanism is `grep -P` and its Unicode tables, and the character class lists only the characters we know about, so a new invisible character in a future Unicode version would not be caught until the list is updated.
 
 ## G. Open challenges
 

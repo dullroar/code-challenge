@@ -1,5 +1,8 @@
 ---
-title: "Learn Programming the Weird Way!"
+# The edition number. Bump it (and add a section to VERSIONS.md) for each release; build.py checks that this file,
+# the title page and VERSIONS.md agree.
+book-version: 3
+title: "Learn Programming the Weird Way! v3"
 subtitle: "Programs you shouldn't write. Language features you should understand."
 author:
   - Jim Lehmer

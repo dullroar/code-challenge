@@ -5,9 +5,10 @@ access and no dependence on directory listing order (every list is sorted), so t
 always produce the same bytes.
 
 Sources (hand-written):
-  src/<entry>/README.md          YAML frontmatter: name, kind, tags, ... (see ENTRY_FIELDS)
+  src/<entry>/README.md          YAML frontmatter: name, kind, tags, analogies, counterexamples, ... (see ENTRY_FIELDS)
   lessons/cs-source/chapters/    one intro file per chapter:        NN-slug.md  (title)
-  lessons/cs-source/concepts/    one file per computer-science concept: <id>.md (title, chapter, order)
+  lessons/cs-source/concepts/    one file per computer-science concept: <id>.md (title, chapter, order; optionally
+                                 applies-to, applies-because, exercise: see CONCEPT_OPTIONAL)
   lessons/cs-source/roles/       one file per "what plays the loop" role: <id>.md (title, order)
   lessons/cs-source/index.md     intro of the "By computer science concept" opener
   lessons/book/link-hosts.txt    the only external hosts prose may link to
@@ -38,8 +39,17 @@ ENTRY_FIELDS = {
     "name": ("str", True), "teaches": ("str", True), "kind": ("str", True), "languages": ("list", True),
     "lesson": ("str", True), "loop-by": ("str", True), "evaluation": ("str", True), "assurance": ("str", True),
     "tags": ("list", True), "pairs-with": ("str", False), "machine": ("str", False), "state": ("str", False),
+    # How an entry relates to a concept it does not DEMONSTRATE. `tags` = a direct demonstration. `analogies` = the entry
+    # looks like the concept without being an instance of it. `counterexamples` = the entry shows what the concept is not.
+    "analogies": ("list", False), "counterexamples": ("list", False),
 }
+RELATIONS = (("tags", "demonstrates"), ("analogies", "analogy"), ("counterexamples", "counterexample"))
 CONCEPT_FIELDS = {"title": "str", "chapter": "str", "order": "str"}
+# A concept that no entry demonstrates must still be grounded. Either it applies to every entry (or every entry that has a
+# field) for a stated reason, or it points at an exercise. Nothing else makes a concept acceptable.
+CONCEPT_OPTIONAL = {"applies-to": "str", "applies-because": "str", "exercise": "str"}
+APPLIES_TO = ("all", "has:machine")
+STALE_PHRASES = ("no entry uses this yet", "it is background for the others")
 ROLE_FIELDS = {"title": "str", "order": "str"}
 CHAPTER_FIELDS = {"title": "str"}
 
@@ -133,7 +143,7 @@ def load_entries(problems):
         entries[d] = data
     return entries
 
-def load_dir(sub, spec, problems):
+def load_dir(sub, spec, problems, optional=()):
     out = {}
     base = os.path.join(CSSRC, sub)
     if not os.path.isdir(base):
@@ -143,7 +153,7 @@ def load_dir(sub, spec, problems):
             continue
         where = f"lessons/cs-source/{sub}/{fn}"
         data, body = parse_frontmatter(read(os.path.join(base, fn)), where, problems)
-        check_fields(data, spec, where, problems)
+        check_fields(data, {**spec, **{k: "str" for k in optional}}, where, problems)
         for k in spec:
             if k not in data:
                 problems.add(where, f"missing required key {k!r}")
@@ -157,7 +167,7 @@ class Model:
         self.problems = Problems()
         p = self.problems
         self.entries = load_entries(p)
-        self.concepts = load_dir("concepts", CONCEPT_FIELDS, p)
+        self.concepts = load_dir("concepts", CONCEPT_FIELDS, p, CONCEPT_OPTIONAL)
         self.roles = load_dir("roles", ROLE_FIELDS, p)
         self.chapters = load_dir("chapters", CHAPTER_FIELDS, p)
         self.index = parse_frontmatter(read(os.path.join(CSSRC, "index.md")), "cs-source/index.md", p)[1].strip("\n") \
@@ -184,6 +194,19 @@ class Model:
             ch["number"] = int(m.group(1))
             self.chapter_files[ch["number"]] = cid + ".md"
         self._lint()
+        self._lint_stale()
+
+    def _lint_stale(self):
+        """Prose that says a concept is unused must not come back: the generator now decides, from the metadata."""
+        texts = [(f"concept {i}", c["body"]) for i, c in self.concepts.items()] + [(f"role {i}", r["body"]) for i, r in self.roles.items()] \
+              + [(f"chapter {i}", c["body"]) for i, c in self.chapters.items()] + [("cs-source/index.md", self.index)]
+        for fn in sorted(os.listdir(LESSONS)):
+            if fn.endswith(".md"):
+                texts.append((f"lessons/{fn}", read(os.path.join(LESSONS, fn))))
+        for where, text in texts:
+            for ph in STALE_PHRASES:
+                if ph in text.lower():
+                    self.problems.add(where, f"stale wording {ph!r}: the generator says which concepts have entries, exercises or cross-cutting reasons")
 
     def _languages(self):
         """id -> display name, from lessons/cs-source/languages.txt (`id: Name`, optional quotes)."""
@@ -230,6 +253,16 @@ class Model:
                              f"(a maintainer adds new ones)")
             if len(set(e.get("tags", []))) != len(e.get("tags", [])):
                 p.add(w, "duplicate tag")
+            for key in ("analogies", "counterexamples"):
+                for t in e.get(key, []):
+                    if t not in self.concepts:
+                        p.add(w, f"unknown concept {t!r} in {key}; use the file names in lessons/cs-source/concepts/")
+                    if t in e.get("tags", []):
+                        p.add(w, f"{t!r} is both a tag (a demonstration) and in {key}; an entry relates to a concept one way")
+                if len(set(e.get(key, []))) != len(e.get(key, [])):
+                    p.add(w, f"duplicate in {key}")
+            for t in set(e.get("analogies", [])) & set(e.get("counterexamples", [])):
+                p.add(w, f"{t!r} is both an analogy and a counterexample")
             for l in e.get("languages", []):
                 if l not in self.languages:
                     p.add(w, f"unknown language {l!r}; languages are listed in lessons/cs-source/languages.txt "
@@ -254,6 +287,7 @@ class Model:
             if not c["body"].strip():
                 p.add(w, "empty body")
             self._lint_links(w, c["body"])
+            self._lint_grounding(cid, c)
         for rid, r in sorted(self.roles.items()):
             self._lint_links(f"role {rid}", r["body"])
         for n in range(1, 10):
@@ -269,6 +303,42 @@ class Model:
             for k, ids in orders.items():
                 if len(ids) > 1:
                     p.add(name + "s", f"same order {k} for {', '.join(sorted(ids))}")
+
+    def related(self, cid):
+        """concept id -> [(entry dir, kind)] where kind is 'demonstrates', 'analogy' or 'counterexample'; sorted."""
+        return sorted(((d, kind) for d, e in self.entries.items() for key, kind in RELATIONS if cid in e.get(key, [])),
+                      key=lambda dk: (dk[0].casefold(), dk[0]))
+
+    def applies(self, cid):
+        """The entries a cross-cutting concept applies to (all of them, or those with a given field)."""
+        how = self.concepts[cid].get("applies-to")
+        if how == "all":
+            return sorted(self.entries, key=str.casefold)
+        if how and how.startswith("has:"):
+            return sorted((d for d, e in self.entries.items() if how[4:] in e), key=str.casefold)
+        return []
+
+    def _lint_grounding(self, cid, c):
+        """Every concept needs something real behind it: an entry (in any relation), a stated cross-cutting fact, or an exercise."""
+        p, w = self.problems, f"concept {cid}"
+        how = c.get("applies-to")
+        if how is not None and how not in APPLIES_TO:
+            p.add(w, f"applies-to must be one of {APPLIES_TO}")
+        if how is not None and len(c.get("applies-because", "").split()) < 8:
+            p.add(w, "applies-to needs an applies-because sentence (at least 8 words) saying why it is true of every one of those entries")
+        if how is None and "applies-because" in c:
+            p.add(w, "applies-because without applies-to")
+        if "exercise" in c:
+            ex = c["exercise"]
+            if not ex.startswith("exercises.md#"):
+                p.add(w, "exercise must look like exercises.md#heading-anchor")
+            else:
+                self._check_lesson(w, ex)
+        if not self.related(cid) and how is None and "exercise" not in c:
+            p.add(w, "no entry demonstrates, parallels or contradicts it, it has no applies-to, and it has no exercise: "
+                     "ground it with an honest link, or write an exercise; do not invent evidence")
+        if how is not None and "exercise" not in c and not self.related(cid) and not self.applies(cid):
+            p.add(w, f"applies-to {how!r} matches no entry")
 
     def _check_lesson(self, where, lesson):
         path, _, frag = lesson.partition("#")
@@ -362,6 +432,46 @@ def tbl_entries_for(model, L, pred):
     rows = [(L.entry(e["dir"]), model.lang_names(e), cap(e["teaches"])) for e in sorted_entries(model, pred)]
     return table(["Entry", "Language", "What it teaches"], rows) if rows else ""
 
+def heading_for(rel):
+    """The text of the heading that a lessons-relative link 'file.md#anchor' points at."""
+    path, _, frag = rel.partition("#")
+    for m in re.finditer(r"^(#{1,6}) (.+)$", read(os.path.join(LESSONS, path)), re.M):
+        if slug(m.group(2)) == frag:
+            return m.group(2).strip()
+    return rel
+
+def in_this_repo(model, L, cid):
+    """The 'In this repo' block of one concept: a table of entries with HOW each relates, plus any cross-cutting
+    statement or exercise. A concept never says 'no entry uses this'; the linter makes sure there is always something."""
+    c, parts = model.concepts[cid], []
+    how = c.get("applies-to")
+    if how == "all":
+        parts.append(f"**Applies to every entry** ({len(model.entries)}). {c['applies-because']}")
+    elif how:
+        n = len(model.applies(cid))
+        parts.append(f"**Applies to every entry that names its machine** ({n} of {len(model.entries)}; see the "
+                     f"[table of machines]({L.lessons('goals.md')})). {c['applies-because']}")
+    rel = model.related(cid)
+    if rel:
+        rows = [(L.entry(d), model.lang_names(model.entries[d]), kind, cap(model.entries[d]["teaches"])) for d, kind in rel]
+        parts.append(table(["Entry", "Language", "How it relates", "What it teaches"], rows))
+    if "exercise" in c:
+        parts.append(f"**Practice it:** [{heading_for(c['exercise'])}]({L.lessons(c['exercise'])})."
+                     + ("" if rel or how else " No entry demonstrates this idea, so the exercise is the example."))
+    return "**In this repo:**\n\n" + "\n\n".join(parts)
+
+def users_of(model, cid, fmt=lambda d: f"`{d}`"):
+    """Short text for the indexes: who is tied to this concept, and how."""
+    out = [fmt(d) + ("" if kind == "demonstrates" else f" ({kind})") for d, kind in model.related(cid)]
+    c = model.concepts[cid]
+    if c.get("applies-to") == "all":
+        out.append("all entries")
+    elif c.get("applies-to"):
+        out.append("every entry that names its machine")
+    if "exercise" in c:
+        out.append("an exercise")
+    return out
+
 def blk_roles(model, L, expand):
     parts = []
     for rid, r in sorted(model.roles.items(), key=lambda kv: kv[1]["order"]):
@@ -427,8 +537,7 @@ def generate_cs(model):
         parts = [BANNER, f"# {ch['title']}", expand(ch["body"])]
         for cid, c in sorted(((i, c) for i, c in model.concepts.items() if c["chapter"] == n), key=lambda kv: kv[1]["order"]):
             parts.append(f"## {c['title']}\n\n{expand(c['body'])}")
-            tbl = tbl_entries_for(model, L, lambda e, cid=cid: cid in e["tags"])
-            parts.append("**In this repo:**\n\n" + tbl if tbl else "**In this repo:** no entry uses this yet; it is background for the others.")
+            parts.append(in_this_repo(model, L, cid))
         out["cs/" + fn] = "\n\n".join(p for p in parts if p.strip()) + "\n"
     # opener: chapter list, then an A-Z index
     chapters = []
@@ -439,12 +548,32 @@ def generate_cs(model):
             ids = [r["title"] for r in sorted(model.roles.values(), key=lambda r: r["order"])]
         chapters.append(f"- [{title}]({fn})" + (f": {', '.join(ids)}" if ids else ""))
     idx = table(["Concept", "Chapter", "Entries that use it"], [
-        (L.concept(cid), model.chapters[model.chapter_files[c["chapter"]][:-3]]["title"],
-         ", ".join(f"`{d}`" for d in sorted((d for d, e in model.entries.items() if cid in e["tags"]), key=str.casefold)))
+        (L.concept(cid), model.chapters[model.chapter_files[c["chapter"]][:-3]]["title"], ", ".join(users_of(model, cid)))
         for cid, c in sorted(model.concepts.items(), key=lambda kv: kv[1]["title"].casefold())])
     out["cs/README.md"] = "\n\n".join([BANNER, "# By computer science concept", expand(model.index),
                                        "## The chapters\n\n" + "\n".join(chapters), "## Concept index\n\n" + idx]) + "\n"
     return out
+
+def orphan_report(model):
+    """A deterministic report of how every concept is grounded. Returns (lines, number of concepts with nothing behind them)."""
+    groups = {"demonstrated by an entry": [], "only an analogy or counterexample": [], "cross-cutting": [], "exercise only": [], "NOTHING": []}
+    for cid in sorted(model.concepts):
+        c, rel = model.concepts[cid], model.related(cid)
+        if any(k == "demonstrates" for _, k in rel):
+            groups["demonstrated by an entry"].append(f"{cid} ({sum(k == 'demonstrates' for _, k in rel)} direct)")
+        elif rel:
+            groups["only an analogy or counterexample"].append(f"{cid} ({', '.join(f'{d}: {k}' for d, k in rel)})")
+        elif c.get("applies-to"):
+            groups["cross-cutting"].append(f"{cid} ({c['applies-to']}: {len(model.applies(cid))} entries)")
+        elif "exercise" in c:
+            groups["exercise only"].append(f"{cid} ({c['exercise']})")
+        else:
+            groups["NOTHING"].append(cid)
+    lines = []
+    for name, ids in groups.items():
+        lines.append(f"{name}: {len(ids)}")
+        lines += [f"  {i}" for i in ids] if name != "demonstrated by an entry" else []
+    return lines, len(groups["NOTHING"])
 
 def letter(text):
     for ch in text:
@@ -472,8 +601,7 @@ def lesson_title(rel):
 def generate_index(model):
     L = Links(model, "")
     dirs = lambda ids: ", ".join(L.entry(d) for d in sorted(ids, key=str.casefold))
-    concepts = [(c["title"], f"- {L.concept(cid)}: "
-                 + (dirs(d for d, e in model.entries.items() if cid in e["tags"]) or "background for the others"))
+    concepts = [(c["title"], f"- {L.concept(cid)}: " + ", ".join(users_of(model, cid, L.entry)))
                 for cid, c in model.concepts.items()]
     langs = []
     for lid, name in model.languages.items():

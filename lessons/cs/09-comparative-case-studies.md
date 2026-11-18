@@ -8,7 +8,7 @@ The tables are *generated* from the metadata at the top of each entry's README, 
 
 ## An ordinary loop, used in an unusual place
 
-The loop is still a loop. What changes is *where* the work happens. In the C#, Java and Go entries the loop has an empty body, and the three clauses of the `for` header do everything. In [`cmake`](../../src/cmake/README.md) a `while()` condition runs a regex, and its captures are the registers. In [`cobol`](../../src/cobol/README.md) the condition is a named fact about the data (`OVER-FORTY`), and `PERFORM ... UNTIL` repeats until it is true. Forth, Lisp and Tcl use their ordinary loop words. Read these beside the others: they show what stays the same when the loop is honest.
+The loop is still a loop. What changes is *where* the work happens. In the C#, Java and Go entries the loop has an empty body, and the three clauses of the `for` header do everything. In [`cmake`](../../src/cmake/README.md) a `while()` condition runs a regex, and its captures are the registers. In [`cobol`](../../src/cobol/README.md) the condition is a named fact about the data (`OVER-FORTY`), and `PERFORM ... UNTIL` repeats until it is true. Forth, Lisp and Tcl use their ordinary loop words. Read these beside the others: they show what stays the same when the loop is honest. [`javascript`](../../src/javascript/README.md) is the original's bodiless `for` in Node.js: three clauses, an object literal for state, and a timer for the animation.
 
 **Entries:**
 
@@ -21,11 +21,12 @@ The loop is still a loop. What changes is *where* the work happens. In the C#, J
 | [`forth`](../../src/forth/README.md) | Forth |  |  | eager | guaranteed |
 | [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go |  |  | eager | guaranteed |
 | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java |  |  | eager | guaranteed |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | Three expression slots | Properties of one object literal | eager | guaranteed |
 | [`tcl`](../../src/tcl/README.md) | Tcl |  |  | eager | implementation-permitted |
 
 ## A lazy sequence that someone keeps asking for
 
-There is no loop. There is a sequence that someone keeps asking for, and the program stops when the asking stops. [`haskell`](../../src/haskell/README.md) describes the cards as an infinite lazy list and takes a prefix with `span`. [`haskell-weird`](../../src/haskell-weird/README.md) puts the effects inside the list, so reading it does the work. LINQ builds a deferred pipeline that a final eager operator forces. Kotlin's `generateSequence`, Rust's `successors` and Python's `iter(step, False)` give a similar shape in other languages. The difference between the entries is *who forces the sequence*, and *when*.
+There is no loop. There is a sequence that someone keeps asking for, and the program stops when the asking stops. [`haskell`](../../src/haskell/README.md) describes the cards as an infinite lazy list and takes a prefix with `span`. [`haskell-weird`](../../src/haskell-weird/README.md) puts the effects inside the list, so reading it does the work. LINQ builds a deferred pipeline that a final eager operator forces. Kotlin's `generateSequence`, Rust's `successors` and Python's `iter(step, False)` give a similar shape in other languages. The difference between the entries is *who forces the sequence*, and *when*. [`javascript-weird`](../../src/javascript-weird/README.md) has no loop statement: three closures make cards, and an iterator pipeline pulls one card at a time until the machine says it is done.
 
 **Entries:**
 
@@ -33,6 +34,7 @@ There is no loop. There is a sequence that someone keeps asking for, and the pro
 | --- | --- | --- | --- | --- | --- |
 | [`haskell`](../../src/haskell/README.md) | Haskell |  |  | lazy | guaranteed |
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | A lazy graph reducer | Thunks: which parts of a list have been demanded | lazy | implementation-permitted |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | A closure-backed state machine, pulled by a lazy iterator | Variables captured by closures: the generator's number, and the machine's card count, total and stop flag | lazy | guaranteed |
 | [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin |  |  | lazy | guaranteed |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ |  |  | deferred | guaranteed |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ |  |  | deferred | guaranteed |
@@ -51,19 +53,20 @@ Do it to all of them at once, then cut. [`apl`](../../src/apl/README.md) draws f
 
 ## Text that is rewritten and read again
 
-The program is text, and repetition is rewriting it. [`regex-sed`](../../src/regex-sed/README.md) keeps one line of text and applies substitutions until none match. [`m4`](../../src/m4/README.md) defines a macro whose replacement text contains the macro itself, so the output is scanned again, and again. [`make-gnu`](../../src/make-gnu/README.md) remakes a makefile that it includes, and then *starts over* with the new one. In all three the repeated thing is a read of rewritten input, and the state is whatever the text (or the set of files) says now.
+The program is text, and repetition is rewriting it. [`regex-sed`](../../src/regex-sed/README.md) keeps one line of text and applies substitutions until none match. [`m4`](../../src/m4/README.md) defines a macro whose replacement text contains the macro itself, so the output is scanned again, and again. [`make-gnu`](../../src/make-gnu/README.md) remakes a makefile that it includes, and then *starts over* with the new one. In all three the repeated thing is a read of rewritten input, and the state is whatever the text (or the set of files) says now. [`ed-weird`](../../src/ed-weird/README.md) rewrites lines with guarded substitutions, and joins lines so that marks are added side by side. It has no `sed`-style branch: its only repeat is one global command.
 
 **Entries:**
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | A string-rewriting machine with line addresses | The editor buffer: one line per card, and marks (x) that are added by joining lines | rewriting | accidentally-exploited |
 | [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | A dependency graph that can restart itself | Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | declarative | accidentally-exploited |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | A string-rewriting system (a Markov algorithm) | One line of text, rewritten until no rule applies | rewriting | accidentally-exploited |
 | [`m4`](../../src/m4/README.md) | m4 | A text-rescanning machine | The input stream: whatever macro text has not been read yet | rewriting | implementation-permitted |
 
 ## Control flow that rewrites itself
 
-The program changes where it goes next. [`cobol-weird`](../../src/cobol-weird/README.md) uses `ALTER` to rewire a `GO TO`. [`forth-weird`](../../src/forth-weird/README.md) moves `>in`, the text interpreter's parse position, backward to run the same words again. [`apl-weird`](../../src/apl-weird/README.md) reads its own source with `⎕CR`, rewrites it, and defines the new function with `⎕FX`: each step makes its own successor. This is the most dangerous role in the book. It is also the clearest picture of what a program counter really is.
+The program changes where it goes next. [`cobol-weird`](../../src/cobol-weird/README.md) uses `ALTER` to rewire a `GO TO`. [`forth-weird`](../../src/forth-weird/README.md) moves `>in`, the text interpreter's parse position, backward to run the same words again. [`apl-weird`](../../src/apl-weird/README.md) reads its own source with `⎕CR`, rewrites it, and defines the new function with `⎕FX`: each step makes its own successor. This is the most dangerous role in the book. It is also the clearest picture of what a program counter really is. [`ex-weird`](../../src/ex-weird/README.md) copies a line of data from a tape into a register and runs it. On the tape the instruction is `@a` (run the program again) or a comment (stop), so the program reads its next step out of the data.
 
 **Entries:**
 
@@ -71,6 +74,7 @@ The program changes where it goes next. [`cobol-weird`](../../src/cobol-weird/RE
 | --- | --- | --- | --- | --- | --- |
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | An array machine, with code that is also an array | Arrays, and the source text of functions | eager | implementation-permitted |
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | A program whose jump targets are mutable | The target of one `GO TO` | eager | implementation-permitted |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | A register machine whose registers are editor marks, and whose program is a register that runs itself | The marks (where we are on a tape of numbered lines), the first line of the buffer (the next card), and registers a, d and n | eager | implementation-permitted |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | A stack machine with a movable instruction pointer | The data stack and the parse position `>in` | eager | implementation-permitted |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | A tree walk that grows the tree it is walking, with find itself reading the depth and the clock | The path from the start directory to the directory being visited; its depth is the running total | declarative | accidentally-exploited |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | A tree walk that grows the tree it is walking | The path from the start directory to the directory being visited | declarative | accidentally-exploited |
@@ -90,13 +94,14 @@ The program is a search that fails on purpose. [`regex-perl`](../../src/regex-pe
 
 ## Dispatch and triggers: the rule fires the next step
 
-The rule fires the next step. In [`lisp-weird`](../../src/lisp-weird/README.md) a class hierarchy is the loop: each method calls the next one up the class precedence list, and the `or` method combination stops at the first true value. In [`tcl-weird`](../../src/tcl-weird/README.md) a SQLite trigger inserts the next card, which fires the trigger again, and the loop ends when a `WHERE` clause finds nothing to insert. In both, the repeat is invisible in the code that starts it.
+The rule fires the next step. In [`lisp-weird`](../../src/lisp-weird/README.md) a class hierarchy is the loop: each method calls the next one up the class precedence list, and the `or` method combination stops at the first true value. In [`tcl-weird`](../../src/tcl-weird/README.md) a SQLite trigger inserts the next card, which fires the trigger again, and the loop ends when a `WHERE` clause finds nothing to insert. In both, the repeat is invisible in the code that starts it. [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) gets its callbacks from GNU tar: every record that tar writes runs one transition of a small state machine, so the archive's layout sets the pace.
 
 **Entries:**
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | A method dispatcher with a pluggable combination rule | The class precedence list, and each method's return value | eager | implementation-permitted |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | A finite-state machine, driven by a logical clock that tar supplies | One SQLite row (the machine's registers) and the number of records tar has written | eager | implementation-permitted |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | A string-command interpreter whose command lookup can be hooked | A TEMP table of proc source, and the depth of trigger recursion | eager | accidentally-exploited |
 
 ## The input is the loop
@@ -112,13 +117,47 @@ The input is the loop. AWK reads one record at a time and runs every pattern-act
 
 ## Document order is the program
 
-The order of the document is the order of the program. [`xaml`](../../src/xaml/README.md) has no code behind it. The XAML parser builds objects in the order it reads them, and several of those objects call methods as they are made. Four unrolled passes replace the loop, "carrier" arrays are the variables, and SQL or `DataTable` expressions make the decisions. The program is the markup file, and it runs while the file is parsed.
+The order of the document is the order of the program. [`xaml`](../../src/xaml/README.md) has no code behind it. The XAML parser builds objects in the order it reads them, and several of those objects call methods as they are made. Four unrolled passes replace the loop, "carrier" arrays are the variables, and SQL or `DataTable` expressions make the decisions. The program is the markup file, and it runs while the file is parsed. [`tar-gnu`](../../src/tar-gnu/README.md) is the same idea with a tape instead of a markup file: the members of a tar archive are the instructions, and the order of the archive is the order of the program.
 
 **Entries:**
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | A tape reader (tar) feeding a five-word interpreter | The archive's members, which are the program, plus one SQLite row that says whether the run has halted or faulted | eager | implementation-permitted |
 | [`xaml`](../../src/xaml/README.md) | XAML, C# | An object-graph constructor that runs methods as it parses | Document order, plus "carrier" arrays | declarative | accidentally-exploited |
+
+## Where does the program live, and what makes the next step run?
+
+Ask these two questions of any entry, and the strange ones stop looking alike. The first says where the program and its state are kept. The second says what causes the next step to execute.
+
+| Entry | Where the program and its state live | What advances it |
+| --- | --- | --- |
+| [`xaml`](../../src/xaml/README.md) | A declarative document, built into objects | The parser: objects are made in document order |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | Serialized archive members, plus a contract (`tarprog/1`) that tar knows nothing about | Tar's walk over the members, and the operator's `--to-command` |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | The archive's layout, and one row of registers in SQLite | GNU tar's checkpoint events: one tick per record written |
+| [`ed-weird`](../../src/ed-weird/README.md) | The editor buffer: lines, and rows of marks | Addressed editing: one global command, and substitutions that apply only when they match |
+| [`ex-weird`](../../src/ex-weird/README.md) | The buffer, the editor's marks and registers, and a tape of numbered lines | Ex itself: a register that runs itself, steered by a line of data |
+| [`make-gnu`](../../src/make-gnu/README.md) | Targets, dependencies and restart state | Resolving the build graph, and restarting |
+| [`find-posix`](../../src/find-posix/README.md) and [`find-gnu`](../../src/find-gnu/README.md) | The directory tree, its depth and the names | The tree walk |
+| [`haskell-weird`](../../src/haskell-weird/README.md) | Lazy values with effects in them | Demand: whatever is forced runs |
+| [`tcl-weird`](../../src/tcl-weird/README.md) | SQL rows that hold stored source | The interpreter's lookup of an unknown command, and triggers |
+| [`javascript`](../../src/javascript/README.md) | Properties of one object literal, in a bodiless `for` | The `for` statement: initializer, condition, iterator |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | Variables captured by closures | A consumer's demand on an iterator: each `next()` runs one step |
+
+## Writing a program down, reading it back, running it
+
+Four different acts hide behind the words "the program is data". **Serialization** writes something down as bytes. **Deserialization** reads the bytes back into pieces. **Interpretation** gives the pieces a meaning. **Execution** gives that meaning an effect. A format can stop after any of them, and a consumer can combine them. What matters for safety is *which consumer you gave which authority to*. See [Serialization, deserialization and object pickling](06-state-beyond-variables.md#serialization-deserialization-and-object-pickling).
+
+| Entry | Serialization | Deserialization | Interpretation and execution | The round-trip promise it makes |
+| --- | --- | --- | --- | --- |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | A builder writes the members of an archive, in a fixed order, from a seed | Tar parses the members. A passive inspector does the same without running anything | A dispatcher gives four record types a meaning, and runs them only when the operator passes `--to-command` | Same seed, same bytes (checked with `cmp`). The inspector and the database agree on every card. One archive in two fresh databases gives the same cards. It does **not** promise to resume a stopped run |
+| [`xaml`](../../src/xaml/README.md) | A `.xaml` file is an object graph written as markup | `XamlReader.Load` parses it | The same call runs it: methods are called as objects are made | None. Parsing *is* running, and the entry never writes the document back |
+| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl source is stored as rows in SQLite | An overridden `unknown` command fetches a row | The fetched text is defined and evaluated as Tcl | The source comes back as the text that was stored. It does not keep any object identity |
+| [`apl-weird`](../../src/apl-weird/README.md) | `⎕CR` writes a function out as a matrix of characters | `⎕FX` defines a function from such a matrix | Each function rewrites its source, defines the copy, and calls it | The matrix is what `⎕FX` accepts back: a property of GNU APL that the entry uses |
+| [`regex-sed`](../../src/regex-sed/README.md) and [`m4`](../../src/m4/README.md) | None apart from the text itself: the state *is* text | None: there is nothing to read back | The rules rewrite the text until none applies | The text is its own representation, so a round trip is the identity. This is an analogy, and not serialization in the object-graph sense |
+
+Read down the last column. Only one of the five makes a promise about *behavior* after a round trip, and it names what it does not promise. That is the honest shape of the topic: "I can write it down and read it back" is a weaker claim than "it will do the same thing", and both are weaker than "I can pause it and carry on".
+
 
 ## Every entry at a glance
 
@@ -135,15 +174,21 @@ The order of the document is the order of the program. [`xaml`](../../src/xaml/R
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | eager | implementation-permitted | [`cobol`](../../src/cobol/README.md) |
 | [`lisp`](../../src/lisp/README.md) | Common Lisp | idiomatic | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`lisp-weird`](../../src/lisp-weird/README.md) |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | weird | [Dispatch and triggers: the rule fires the next step](09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step) | eager | implementation-permitted | [`lisp`](../../src/lisp/README.md) |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | rewriting | accidentally-exploited | [`ex-weird`](../../src/ex-weird/README.md) |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | eager | implementation-permitted | [`ed-weird`](../../src/ed-weird/README.md) |
 | [`forth`](../../src/forth/README.md) | Forth | idiomatic | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`forth-weird`](../../src/forth-weird/README.md) |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | eager | implementation-permitted | [`forth`](../../src/forth/README.md) |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | declarative | accidentally-exploited | [`find-posix`](../../src/find-posix/README.md) |
 | [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | declarative | accidentally-exploited | [`cmake`](../../src/cmake/README.md) |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | rewriting | accidentally-exploited |  |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | idiomatic | [Document order is the program](09-comparative-case-studies.md#document-order-is-the-program) | eager | implementation-permitted | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | weird | [Dispatch and triggers: the rule fires the next step](09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step) | eager | implementation-permitted | [`tar-gnu`](../../src/tar-gnu/README.md) |
 | [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | port | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`haskell`](../../src/haskell/README.md) | Haskell | idiomatic | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`haskell-weird`](../../src/haskell-weird/README.md) |
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | implementation-permitted | [`haskell`](../../src/haskell/README.md) |
 | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | port | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | port | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`javascript-weird`](../../src/javascript-weird/README.md) |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`javascript`](../../src/javascript/README.md) |
 | [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | port | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | deferred | guaranteed | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | deferred | guaranteed | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) |

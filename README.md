@@ -1,9 +1,9 @@
 # Code Challenge - Learn Programming the Weird Way!
 
-> **33 challenges in 25 languages**
+> **39 challenges in 29 languages**
 <!-- Keep this line current whenever an entry is added: challenges = the folders in src/; languages = the distinct ids that entries list under `languages:` (the same languages as the book's Index of languages). `python lessons/book/build.py --check` prints both numbers and warns when this line is stale. -->
 
-A series of responses to a code challenge that has morphed into a set of educational exercises about programming languages and how to think about programming languages. **New: [Learn Programming the Weird Way!](lessons/README.md)**, a set of lessons built on these examples.
+A series of responses to a code challenge that has morphed into a set of educational exercises about programming languages and how to think about programming languages. **New: [Learn Programming the Weird Way!](lessons/README.md)**, a set of lessons built on these examples. The book is numbered from v3 on: see [what each version added](lessons/book/VERSIONS.md).
 
 ## Why this exists
 
@@ -52,12 +52,18 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **C# (the original)** | Jim | Empty-body `for`; everything else lives in its three clauses | Runtime XAML, LINQ, EF Core, WPF animation | [`src/ModernChallenge1`](src/ModernChallenge1/README.md) |
 | **COBOL** | Ken | `PERFORM DRAW-CARD UNTIL OVER-FORTY`: the stop rule is declared as data on the total, not coded in the procedure | A stop rule declared as data, and a number's picture doing your rounding | [`src/cobol`](src/cobol/README.md) |
 | **COBOL, weirder** | Ken | No `IF`, `PERFORM` or `UNTIL`: `ALTER` rewires a `GO TO` at run time, and a two-digit field overflowing is the stop rule | Why structured programming won, via self-rewriting control flow | [`src/cobol-weird`](src/cobol-weird/README.md) |
+| **ed, weirder** | Jim | GNU `ed` computes the whole program: line addresses order the categories, a rewrite table turns digits into rows of marks, one global command joins each card to the total above it, and a regex over the marks is the stop rule | Text rewriting, state in unary, and a failed substitution as an `if` | [`src/ed-weird`](src/ed-weird/README.md) |
+| **Ex, weirder** | Jim | A one-line program is copied into a register and run with `@`. Editor marks do the arithmetic, and a tape of numbered lines holds the stop rule. It runs on nvi and Vim | Code as text, state outside the text, and where nvi and Vim disagree | [`src/ex-weird`](src/ex-weird/README.md) |
 | **Forth** | Jim | One `begin ... until`, and `outfile-execute` points the output at SQLite | A stack language as a whole program | [`src/forth`](src/forth/README.md) |
 | **Forth, weirder** | Jim | No control-flow word and no variable: the state rides the data stack while the loop moves the text interpreter's own `>in` backwards | The parse position as a program counter | [`src/forth-weird`](src/forth-weird/README.md) |
 | **Go** | Ken | The same challenge, serving a pulsing page in your browser | The same trick, as a one-request web server | [`src/GoChallenge1`](src/GoChallenge1/README.md) |
+| **GNU tar** | Jim | The program is a tar archive: members are instructions, tar walks them, and the operator's `--to-command` gives them meaning. A passive inspector reads the same archive and runs nothing | Serialization versus execution, trust boundaries, and a fail-closed interpreter | [`src/tar-gnu`](src/tar-gnu/README.md) |
+| **GNU tar, weirder** | Jim | tar's checkpoints are the clock: one record written is one hour, and a state machine takes one step per tick. The archive's layout sets the pace | Logical clocks, event-driven control, and implementation-dependent counts | [`src/tar-gnu-weird`](src/tar-gnu-weird/README.md) |
 | **Haskell** | Jim | One pure function: random hours, `scanl1`, `span` | A lazy list and one `span` as the whole stop rule | [`src/haskell`](src/haskell/README.md) |
 | **Haskell on drugs** | Jim | An infinite list of cards whose elements have side effects: each running total is read off the card before it, and forcing a cell writes its row | Lazy IO as control flow, knot-tied with `fix` and `fixIO` | [`src/haskell-weird`](src/haskell-weird/README.md) |
 | **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | The same bodiless-loop trick, Java style | [`src/JavaChallenge1`](src/JavaChallenge1/README.md) |
+| **JavaScript** | Jim | The original's empty-bodied `for`, in Node.js: an object for state, `node:sqlite`, and a timer that pulses the DEMO ONLY line on a terminal | The `for` clauses, the comma operator, and the event loop | [`src/javascript`](src/javascript/README.md) |
+| **JavaScript, weirder** | Jim | No loop statement. Three closures make the cards, and an iterator pipeline pulls them one at a time. `reduce` adds up the finished list, because it cannot stop early | Closures, lazy iteration, and why `reduce` cannot stop | [`src/javascript-weird`](src/javascript-weird/README.md) |
 | **Kotlin** | Ken | The same challenge, built as a sequence | The same trick, with Kotlin's sequence builders | [`src/KotlinChallenge1`](src/KotlinChallenge1/README.md) |
 | **LINQ, fluent chain** | Jim | One LINQ method chain is the entire program | LINQ method chains, end to end | [`src/LinqChallenge1`](src/LinqChallenge1/README.md) |
 | **LINQ, query expression** | Jim | Nearly every line is `from`/`where`/`let`/`select` | C# query syntax, pushed as far as it goes | [`src/LinqChallenge2`](src/LinqChallenge2/README.md) |
@@ -115,6 +121,12 @@ src/
   apl-weird/                  # APL: functions that copy themselves with ⎕CR and ⎕FX
   haskell/                    # Haskell: one pure function, scanl1 and span
   haskell-weird/              # Haskell: an infinite list of cards whose elements write their own rows
+  ed-weird/                   # ed: the buffer is the machine; a failed substitution is the if
+  ex-weird/                   # Ex: a register that runs itself; marks are registers (nvi and Vim)
+  tar-gnu/                    # GNU tar: the archive is a serialized program; tar --to-command runs it
+  tar-gnu-weird/              # GNU tar: checkpoints are the clock of a state machine
+  javascript/                 # JavaScript (Node.js): the original's bodiless for
+  javascript-weird/           # JavaScript (Node.js): closures and a lazy iterator, no loop statement
   forth/                      # Forth: one begin ... until and a pipe to SQLite
   forth-weird/                # Forth: no control-flow words; the loop rewinds >in
   lisp/                       # Common Lisp: one LOOP form

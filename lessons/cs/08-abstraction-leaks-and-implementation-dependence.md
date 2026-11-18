@@ -4,7 +4,7 @@
 
 Every abstraction hides something, and sooner or later the hidden thing shows. This chapter is about those moments. A language standard promises some things, allows others and ignores the rest. An optimizer may skip code that the language says nobody can see. A regex that is fast on every test can take a year on one bad input. A feature that nobody promised can still be the one that everybody uses.
 
-These ideas explain the three tags used in every lesson. **Guaranteed** means the specification promises it. **Implementation-permitted** means one implementation allows it. **Accidentally exploited** means it works, and nobody promised it. The concepts below give you the vocabulary for each: leaky abstractions, undefined and unspecified behavior, portability, optimizers, Hyrum's law, time complexity and ReDoS.
+These ideas explain the three tags used in every lesson. **Guaranteed** means the specification promises it. **Implementation-permitted** means one implementation allows it. **Accidentally exploited** means it works, and nobody promised it. The concepts below give you the vocabulary for each: leaky abstractions, undefined and unspecified behavior, portability, optimizers, Hyrum's law, time complexity, ReDoS, and reproducibility (writing down every input so that the same sources give the same result).
 
 ## Leaky abstractions
 
@@ -18,7 +18,11 @@ An abstraction hides details so that you can think at a higher level. A *leaky* 
 - [Leaky abstraction](https://en.wikipedia.org/wiki/Leaky_abstraction) (Wikipedia)
 - [Abstraction (computer science)](https://en.wikipedia.org/wiki/Abstraction_(computer_science)) (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Undefined, unspecified and implementation-defined behavior
 
@@ -35,11 +39,11 @@ Standards use three different words for "the standard does not fully say". **Und
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | Why structured programming won, by running a program whose control flow rewrites itself. |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | Why structured programming won, by running a program whose control flow rewrites itself. |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Portability
 
@@ -55,11 +59,14 @@ Software is portable if it runs correctly in more than one environment: another 
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`awk-weird`](../../src/awk-weird/README.md) | AWK | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | Program exit codes as control flow. |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`awk-weird`](../../src/awk-weird/README.md) | AWK | demonstrates | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Optimizers
 
@@ -76,10 +83,10 @@ An optimizing compiler rewrites your program so that it runs faster or uses less
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | Regex callouts as a tiny instruction set. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
 
 ## Hyrum's law
 
@@ -95,12 +102,14 @@ Hyrum's law says: with enough users of an interface, *every* observable behavior
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`cmake`](../../src/cmake/README.md) | CMake | `while()` plus regex as a tiny register machine. |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | Arithmetic and looping in plain Make syntax, no shell required. |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Performance cliffs and time complexity
 
@@ -117,9 +126,9 @@ Time complexity describes how running time grows with the size of the input: lin
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 
 ## Regular-expression denial of service
 
@@ -136,6 +145,29 @@ ReDoS (regular-expression denial of service) is an attack that sends an input on
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
+
+## Reproducibility and deterministic builds
+
+A result is **reproducible** if the same inputs give the same answer, every time and on every machine. A build is **deterministic** if the same sources give the same bytes. Both depend on writing down everything that is an input: the seed, the order of the items, the versions of the tools, the time. What you forget to write down is where the difference comes from.
+
+The book you are reading is built this way: every list is sorted, nothing reads the clock, and the build date is fixed in a metadata file, so the same sources give the same bytes. The entries use the idea in four ways. [`tar-gnu`](../../src/tar-gnu/README.md) writes a tar archive in a fixed format with a fixed order, time and owner, so the same seed makes the same archive, byte for byte, which `cmp` checks. [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) makes a run a function of a seed and the archive's layout. [`javascript`](../../src/javascript/README.md) and [`javascript-weird`](../../src/javascript-weird/README.md) replay a run with `SEED=42`, because `Math.random` cannot be seeded and a small closure over a number can. Each one says what "the same" means: the bytes, the structure, or the behavior (see [Serialization, deserialization and object pickling](06-state-beyond-variables.md#serialization-deserialization-and-object-pickling)).
+
+- **Use it when:** you must debug, test or audit a result later. Make the inputs explicit, and record the seed.
+- **Avoid it when:** you confuse it with determinism of *everything*. A run is reproducible in the ways you named, and not in the ones you did not, such as the date in a week number near New Year.
+
+**Read more:**
+
+- [Reproducible builds](https://en.wikipedia.org/wiki/Reproducible_builds) (Wikipedia)
+- [Deterministic algorithm](https://en.wikipedia.org/wiki/Deterministic_algorithm) (Wikipedia)
+
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
+| [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |

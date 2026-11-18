@@ -197,6 +197,139 @@ if selected B15; then echo "B15 GNU find stop rule and profile"
   if contains "$W/b15b.txt" "real success rate" && contains "$W/b15b.txt" "est success rate"; then ok "B15 FIND_D=rates prints est and real success rates"; else bad B15b "no profile on stderr"; fi
 fi
 
+if selected B16; then echo "B16 tar: read the program, then run it"
+  d=$(copy src/tar-gnu b16)
+  "$sbx" "$d" sh -c '
+    set -e
+    sh build-archive.sh --seed 1 --hours "12 12 12 12 12" a.tar
+    sh inspect.sh a.tar > /dev/null; sh interpret.sh --execute a.tar > step1.txt
+    mkdir x; tar -C x -xf a.tar; printf "limit=20\n" > x/021.stop-over
+    O="000.begin 010.card 011.stop-over 020.card 021.stop-over 030.card 031.stop-over 040.card 041.stop-over 050.card 051.stop-over 990.show"
+    tar --format=ustar -cf b.tar -C x $O; rm "$TARPROG_DB" 2>/dev/null || true; rm -f "$XDG_DATA_HOME/TarGnu/demo-timecards.db"
+    sh interpret.sh --execute b.tar > step2.txt
+    sqlite3 "$XDG_DATA_HOME/TarGnu/demo-timecards.db" "select count(*) from trace where outcome like \"ignored%\"" > ignored.txt
+    printf "touch pwned\n" > x/025.exec
+    tar --format=ustar -cf c.tar -C x 000.begin 010.card 011.stop-over 020.card 021.stop-over 025.exec 030.card 031.stop-over 990.show
+    set +e; sh inspect.sh c.tar > insp.txt; r1=$?; sh interpret.sh --execute c.tar > /dev/null 2> interp.err; r2=$?; set -e
+    [ "$r1" = 4 ] && [ "$r2" = 4 ] && [ ! -e pwned ] && grep -q "REFUSE (unknown record type)" insp.txt
+    mkdir plain; tar -C plain -xf c.tar; [ -f plain/025.exec ] && [ ! -e plain/pwned ] && [ ! -e pwned ]
+    cat step1.txt; echo ---STEP2; cat step2.txt; echo ---IGN; cat ignored.txt' > "$W/b16.txt" 2>&1
+  s1=${W}/b16-1.txt; sed -n '1,/^---STEP2/p' "$W/b16.txt" | grep -v '^---' > "$s1"
+  sed -n '/^---STEP2/,/^---IGN/p' "$W/b16.txt" | grep -v '^---' > "$W/b16-2.txt"
+  expect "B16 step 1: four cards pass check-demo" "$chk" "$s1"
+  if grep -qE $'^Learning\t12\t48\t' "$s1" && contains "$s1" "total=48 entries=4"; then ok "B16 step 1: 12, 24, 36, 48"; else bad B16a "$(tr '\n' ' ' < "$s1")"; fi
+  expect "B16 step 2: limit 20 in the archive stops after two cards" "$chk" "$W/b16-2.txt" 20
+  if contains "$W/b16-2.txt" "total=24 entries=2" && tail -1 "$W/b16.txt" | grep -qx 3; then ok "B16 step 2: two cards, three slots ignored"; else bad B16b "$(tr '\n' ' ' < "$W/b16-2.txt") / $(tail -1 "$W/b16.txt")"; fi
+  if grep -q '^---IGN' "$W/b16.txt"; then ok "B16 step 3: inspector and interpreter exit 4, no pwned, plain tar -xf inert"; else bad B16c "$(tail -3 "$W/b16.txt" | tr '\n' ' ')"; fi
+fi
+
+if selected B17; then echo "B17 tar weirder: predict the clock"
+  d=$(copy src/tar-gnu-weird b17)
+  "$sbx" "$d" sh -c '
+    set +e
+    sh run-clock.sh --seed 42 --ticks 45 > s45.txt 2> s45.err; echo $? > s45.rc
+    rm -rf "$XDG_DATA_HOME/TarGnuWeird"
+    sh run-clock.sh --seed 42 --ticks 46 > s46.txt 2>/dev/null; echo $? > s46.rc
+    rm -rf "$XDG_DATA_HOME/TarGnuWeird"
+    sh run-clock.sh --seed 42 --ticks 92 --interval 2 > i92.txt 2>/dev/null; echo $? > i92.rc
+    sqlite3 "$XDG_DATA_HOME/TarGnuWeird/demo-timecards.db" "select tick from fsm" > i92.tick
+    rm -rf "$XDG_DATA_HOME/TarGnuWeird"
+    sh run-clock.sh --seed 42 --ticks 91 --interval 2 > i91.txt 2>/dev/null; echo $? > i91.rc
+    rm -rf "$XDG_DATA_HOME/TarGnuWeird"
+    sh run-clock.sh --seed 42 --ticks 260 --blocking 4 > b4.txt 2>/dev/null; echo $? > b4.rc
+    echo "tape=$(wc -c < "$XDG_DATA_HOME/TarGnuWeird/tape.tar") idle=$(sqlite3 "$XDG_DATA_HOME/TarGnuWeird/demo-timecards.db" "select idle from fsm") nonzero=$(tr -d "\\000" < "$XDG_DATA_HOME/TarGnuWeird/tape.tar" | wc -c)" > b4.info
+    for f in s45.rc s45.err s46.rc i92.rc i92.tick i91.rc b4.rc b4.info; do echo "== $f"; cat $f; done
+    echo "== s45rows"; grep -c "^[A-Z][a-z]*	" s45.txt; echo "== s46rows"; grep -c "^[A-Z][a-z]*	" s46.txt' > "$W/b17.txt" 2>&1
+  b=$(tr '\n' '|' < "$W/b17.txt")
+  if [[ $b == *"== s45.rc|3|"* && $b == *"clock ran out"* && $b == *"== s45rows|2|"* ]]; then ok "B17 45 ticks: two cards, the clock ran out, exit 3"; else bad B17a "$b"; fi
+  if [[ $b == *"== s46.rc|0|"* && $b == *"== s46rows|3|"* ]]; then ok "B17 46 ticks: three cards, exit 0"; else bad B17b "$b"; fi
+  if [[ $b == *"== i92.rc|0|"* && $b == *"== i92.tick|92|"* && $b == *"== i91.rc|3|"* ]]; then ok "B17 --interval 2: 92 records finish (last TAR_CHECKPOINT 92), 91 stall"; else bad B17c "$b"; fi
+  nz=$(sed -nE 's/.*nonzero=([0-9]+).*/\1/p' "$W/b17.txt")
+  if [[ $b == *"== b4.rc|0|"* && $b == *"tape=133120 idle=19 nonzero="* && ${nz:-999} -lt 100 ]]; then ok "B17 -b 4: 65 ticks, 19 idle, a 133120-byte tape that is zeros but for one header"; else bad B17d "$b"; fi
+fi
+
+if selected B18; then echo "B18 ed: move the stop rule and break the cleanup"
+  d=$(copy src/ed-weird b18)
+  "$sbx" -e DICE="0 0 0 0 0" "$d" sh ./timecards.sh > "$W/b18a.txt" 2>&1
+  "$sbx" -e DICE="9 9 9 9 9" "$d" sh ./timecards.sh > "$W/b18b.txt" 2>&1
+  if grep -qE $'^Meetings\t10\t50\t' "$W/b18a.txt" && contains "$W/b18a.txt" "total=50 entries=5"; then ok "B18 ten-hour cards: five cards, 40 continues, 50 stops"; else bad B18a "$(tr '\n' ' ' < "$W/b18a.txt")"; fi
+  if grep -qE $'^Debugging\t19\t57\t' "$W/b18b.txt" && contains "$W/b18b.txt" "total=57 entries=3"; then ok "B18 nineteen-hour cards: three cards, total 57"; else bad B18b "$(tr '\n' ' ' < "$W/b18b.txt")"; fi
+  "$sbx" -e DICE="3 3 3 3 3" "$d" sh ./timecards.sh > "$W/b18c.txt" 2>&1
+  contains "$W/b18c.txt" "total=52 entries=4" && ok "B18 before: 13 13 13 13 gives four cards" || bad B18c "$(tr '\n' ' ' < "$W/b18c.txt")"
+  d=$(copy src/ed-weird b18d); mutate "$d/timecards.ed" 'x\{41,\}' 'x\{31,\}'
+  "$sbx" -e DICE="3 3 3 3 3" "$d" sh ./timecards.sh > "$W/b18d.txt" 2>&1
+  expect "B18 x{31,}: stops above 30" "$chk" "$W/b18d.txt" 30
+  contains "$W/b18d.txt" "total=39 entries=3" && ok "B18 x{31,}: three cards, total 39" || bad B18d "$(tr '\n' ' ' < "$W/b18d.txt")"
+  d=$(copy src/ed-weird b18e); mutate "$d/timecards.ed" $'g/^Dead /d\n' ''
+  "$sbx" "$d" sh -c "printf '3\\n3\\n3\\n3\\n3\\n' > d.txt; ed -s d.txt < timecards.ed" > "$W/b18e.txt" 2>&1
+  if grep -qx 'Dead 0 52' "$W/b18e.txt"; then ok "B18 without the cleanup: Dead 0 52 shows"; else bad B18e "$(tr '\n' ' ' < "$W/b18e.txt")"; fi
+fi
+
+if selected B19; then echo "B19 Ex: move the limit on the tape and cut the loop"
+  d=$(copy src/ex-weird b19)
+  "$sbx" -e DICE="1 1 1 1 1" "$d" sh ./timecards.sh > "$W/b19a.txt" 2>&1
+  if contains "$W/b19a.txt" "total=44 entries=4"; then ok "B19 eleven-hour cards: four cards, 44"; else bad B19a "$(tr '\n' ' ' < "$W/b19a.txt")"; fi
+  expect "B19 step 1 passes check-demo" "$chk" "$W/b19a.txt"
+  d=$(copy src/ex-weird b19b); "$sbx" "$d" sh -c "true" >/dev/null 2>&1
+  python -I -c 'import re,sys; p=sys.argv[1]; s=open(p).read(); s=re.sub(r"(?m)^(4[1-5]) \"$", r"\1 @a", s); open(p,"w").write(s)' "$d/timecards.ex"
+  "$sbx" -e DICE="1 1 1 1 1" "$d" sh ./timecards.sh > "$W/b19b.txt" 2>&1
+  if contains "$W/b19b.txt" "total=55 entries=5"; then ok "B19 tape 45: five cards, 55"; else bad B19b "$(tr '\n' ' ' < "$W/b19b.txt")"; fi
+  expect "B19 tape 45 passes check-demo at 45" "$chk" "$W/b19b.txt" 45
+  d=$(copy src/ex-weird b19c)
+  python -I -c 'import sys; p=sys.argv[1]; s=open(p).read(); assert "|@n\n" in s; open(p,"w").write(s.replace("|@n\n","\n",1))' "$d/timecards.ex"
+  "$sbx" -e DICE="5 5 5 5 5" "$d" sh ./timecards.sh > "$W/b19c.txt" 2>&1
+  if grep -qE $'^Meetings\t15\t15\t' "$W/b19c.txt" && contains "$W/b19c.txt" "entries=1"; then ok "B19 no @n: one card"; else bad B19c "$(tr '\n' ' ' < "$W/b19c.txt")"; fi
+fi
+
+if selected B20; then echo "B20 JavaScript: read the clauses, move the limit, fail the structure check"
+  d=$(copy src/javascript b20)
+  "$sbx" -e SEED=42 "$d" node timecards.mjs > "$W/b20a.txt" 2>&1
+  if grep -qE $'^Meetings\t12\t12\t' "$W/b20a.txt" && grep -qE $'^Coding\t17\t29\t' "$W/b20a.txt" && grep -qE $'^Debugging\t17\t46\t' "$W/b20a.txt"; then ok "B20 SEED=42: 12, 29, 46"; else bad B20a "$(tr '\n' ' ' < "$W/b20a.txt")"; fi
+  expect "B20 step 1 passes check-demo" "$chk" "$W/b20a.txt"
+  d=$(copy src/javascript b20b); mutate "$d/timecards.mjs" '<= 40' '<= 20'
+  "$sbx" -e SEED=42 "$d" node timecards.mjs > "$W/b20b.txt" 2>&1
+  contains "$W/b20b.txt" "total=29 entries=2" && ok "B20 <= 20: two cards, 29" || bad B20b "$(tr '\n' ' ' < "$W/b20b.txt")"
+  expect "B20 <= 20 passes check-demo at 20" "$chk" "$W/b20b.txt" 20
+  d=$(copy src/javascript b20c); mutate "$d/timecards.mjs" '{ /* Intentionally empty. */ }' '{ i.frames++; }'
+  "$sbx" -e SEED=42 "$d" node timecards.mjs > "$W/b20c.txt" 2>&1
+  contains "$W/b20c.txt" "total=46 entries=3" && ok "B20 a statement in the body: the program still runs" || bad B20c "$(tr '\n' ' ' < "$W/b20c.txt")"
+  expectnot "B20 ...and check-structure.mjs fails" "$sbx" "$d" node check-structure.mjs timecards.mjs
+  d=$(copy src/javascript b20d)
+  "$sbx" -e SEED=42 -e NOW=2026-12-31 "$d" node timecards.mjs > "$W/b20d1.txt" 2>&1
+  "$sbx" -e SEED=42 -e NOW=2024-12-30 "$d" node timecards.mjs > "$W/b20d2.txt" 2>&1
+  if grep -qE $'\t2026-W53\t' "$W/b20d1.txt" && grep -qE $'\t2025-W01\t' "$W/b20d2.txt"; then ok "B20 weeks: 2026-W53 and 2025-W01"; else bad B20d "$(tr '\n' ' ' < "$W/b20d1.txt") / $(tr '\n' ' ' < "$W/b20d2.txt")"; fi
+fi
+
+if selected B21; then echo "B21 JavaScript weirder: move the stop rule in a closure, watch the demand"
+  d=$(copy src/javascript-weird b21)
+  "$sbx" "$d" node --expose-gc --test check.mjs > "$W/b21a.txt" 2>&1
+  if grep -q '^ℹ pass 12' "$W/b21a.txt" && grep -q '^ℹ fail 0' "$W/b21a.txt"; then ok "B21 the lab passes: 12 tests"; else bad B21a "$(grep '^ℹ' "$W/b21a.txt" | tr '\n' ' ')"; fi
+  d=$(copy src/javascript-weird b21b); mutate "$d/core.mjs" 'over = total > 40' 'over = total > 20'
+  "$sbx" -e SEED=42 "$d" node timecards.mjs > "$W/b21b.txt" 2>&1
+  contains "$W/b21b.txt" "total=29 entries=2" && ok "B21 over > 20: two cards, 29" || bad B21b "$(tr '\n' ' ' < "$W/b21b.txt")"
+  "$sbx" "$d" node --expose-gc --test check.mjs > "$W/b21c.txt" 2>&1
+  if grep -q '^ℹ pass 5' "$W/b21c.txt" && grep -q '^ℹ fail 7' "$W/b21c.txt"; then ok "B21 over > 20: the lab shows 5 passes and 7 failures"; else bad B21c "$(grep '^ℹ' "$W/b21c.txt" | tr '\n' ' ')"; fi
+  d=$(copy src/javascript-weird b21d)
+  "$sbx" "$d" node --input-type=module -e "import { cards, machine } from './core.mjs'; const m = machine(() => (console.log('drawn'), 15)); const p = Iterator.from(cards(m)).map(c => c.total); console.log('built'); console.log(p.take(1).toArray());" > "$W/b21d.txt" 2>&1
+  [[ $(tr '\n' '|' < "$W/b21d.txt") == "built|drawn|[ 15 ]|" ]] && ok "B21 built, drawn, [ 15 ]" || bad B21d "$(tr '\n' '|' < "$W/b21d.txt")"
+  "$sbx" "$d" node --input-type=module -e "import { cards, machine } from './core.mjs'; const m = machine(() => (console.log('drawn'), 15)); const p = Iterator.from(cards(m)).map(c => c.total); console.log('built'); console.log(p.take(2).toArray());" > "$W/b21e.txt" 2>&1
+  [[ $(tr '\n' '|' < "$W/b21e.txt") == "built|drawn|drawn|[ 15, 30 ]|" ]] && ok "B21 take(2): two draws" || bad B21e "$(tr '\n' '|' < "$W/b21e.txt")"
+fi
+
+if selected F2; then echo "F2 Trojan Source: hide a character, then find it"
+  d="$W/f2"; mkdir -p "$d"
+  printf 'const user = "admin\xe2\x80\x8b";\nconsole.log(user === "admin");\n' > "$d/greet.js"
+  printf 'const user = "admin";\nconsole.log(user === "admin");\n' > "$d/clean.js"
+  cls='[\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{2064}\x{2066}-\x{2069}\x{FEFF}\x{00AD}\x{2028}\x{2029}]'
+  "$sbx" "$d" node greet.js > "$W/f2a.txt" 2>&1; [[ $(cat "$W/f2a.txt") == false ]] && ok "F2 the program that looks true prints false" || bad F2a "$(cat "$W/f2a.txt")"
+  LC_ALL=C.UTF-8 grep -nP "$cls" "$d/greet.js" > "$W/f2b.txt"; [[ $(cut -d: -f1 "$W/f2b.txt") == 1 ]] && ok "F2 the scan finds line 1" || bad F2b "$(cat "$W/f2b.txt")"
+  od -c "$d/greet.js" | head -2 | grep -q '342 200 213' && ok "F2 od shows the bytes 342 200 213" || bad F2c "no 342 200 213"
+  if LC_ALL=C.UTF-8 grep -qP "$cls" "$d/clean.js"; then bad F2d "the scan fired on the clean file"; else ok "F2 negative control: the scan finds nothing in the clean file"; fi
+  "$sbx" "$d" node clean.js > "$W/f2e.txt" 2>&1; [[ $(cat "$W/f2e.txt") == true ]] && ok "F2 the clean program prints true" || bad F2e "$(cat "$W/f2e.txt")"
+  if LC_ALL=C.UTF-8 grep -rlP "$cls" src/apl-weird | grep -q .; then bad F2f "the scan fired on APL source"; else ok "F2 visible APL glyphs pass the scan"; fi
+  grep -qP '[^\x00-\x7F]' src/apl-weird/*.apl 2>/dev/null || grep -rqP '[^\x00-\x7F]' src/apl-weird && ok "F2 (and src/apl-weird really is non-ASCII)" || bad F2g "apl-weird has no non-ASCII text, so the test proves nothing"
+fi
+
 if selected C1; then echo "C1 weird next to boring (measured)"
   for p in cobol haskell forth apl lisp tcl awk; do
     a=$(cat src/$p/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)'); b=$(cat src/$p-weird/timecards.* | grep -vcE '^\s*(#|\\|--|\*|⍝|;)')

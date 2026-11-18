@@ -11,6 +11,7 @@ pairs-with: cmake
 machine: "A dependency graph that can restart itself"
 state: "Which `.tc-N.mk` files exist, and `MAKE_RESTARTS`"
 tags: [build-automation, control-flow, declarative-programming, dependency-graph, fixed-point-iteration, hyrums-law, state, turing-completeness]
+analogies: [continuation, dataflow-programming, logical-clock]
 ---
 # GNU Make: the build tool is the interpreter
 

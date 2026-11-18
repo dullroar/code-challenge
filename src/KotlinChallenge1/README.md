@@ -9,6 +9,7 @@ evaluation: lazy
 assurance: guaranteed
 pairs-with: JavaChallenge1
 tags: [generators, lazy-evaluation, side-effect, thread-safety]
+analogies: [coroutine]
 ---
 # One Statement, Kotlin Edition
 

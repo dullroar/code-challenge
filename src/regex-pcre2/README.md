@@ -10,7 +10,7 @@ assurance: implementation-permitted
 pairs-with: regex-perl
 machine: "A backtracking search with hooks"
 state: "A C struct that never rewinds"
-tags: [backtracking, compiler-optimization, cut, domain-specific-language, regular-expression, side-effect, state]
+tags: [backtracking, compiler-optimization, computation-versus-orchestration, cut, domain-specific-language, interpreter-and-virtual-machine, regular-expression, side-effect, state]
 ---
 # Regex challenge, Track 2: PCRE2 callouts as a tiny DSL
 

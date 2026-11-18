@@ -10,6 +10,7 @@ assurance: implementation-permitted
 machine: "A text-rescanning machine"
 state: "The input stream: whatever macro text has not been read yet"
 tags: [fixed-point-iteration, lazy-evaluation, macro-processing, recursion, scope-and-binding, state, term-rewriting, turing-completeness]
+analogies: [serialization-deserialization-pickling, turing-machine]
 ---
 # m4
 

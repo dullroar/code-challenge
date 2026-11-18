@@ -39,9 +39,11 @@ Several entries replace "loop with an accumulator" with a transformation of a wh
 | **Reshape and recycle** | [APL](../src/apl/timecards.apl#L39) `(≢Hours)⍴Categories` | A modulo you get for free |
 | **Accumulate and stop in one clause list** | [Lisp `LOOP`](../src/lisp/timecards.lisp#L42-L46) `sum ... into`, `collect`, `until` | The clause order is the order of execution, so `until` after `collect` keeps the crossing card |
 | **A circular list** | [Lisp reader `#1=`](../src/lisp-weird/timecards.lisp#L44-L46) | The categories repeat forever with no `mod` |
+| **A pipeline that pulls one value at a time** | [JavaScript weird](../src/javascript-weird/timecards.mjs) `Iterator.from(cards(...)).map(...).map(...).toArray()` | Each value goes through every stage before the next is asked for. A `reduce` adds up the finished list, because `reduce` cannot stop early |
+| **A closure that is the state machine** | [JavaScript weird](../src/javascript-weird/core.mjs) `machine` | A function with captured variables: each call makes the next card, and a flag says when it is over |
 | **Stream of records, one rule per step** | [AWK `{ t += h = 10 + RT }` ... `t > 40 { exit }`](../src/awk-weird/timecards.awk#L56-L69) | The input supplies the iterations; each rule is one step of the pipeline |
 
-The common shape: *describe the full answer, then say how much of it you want.* The differences are about **when** the work happens (eager `Aggregate` and APL arrays vs. lazy Haskell lists and LINQ `Select`) and **where** state lives. Compare how LINQ and Haskell answer "when does it run?" in [C#](languages/csharp-linq-xaml.md#deferred-execution-and-the-void-to-value-trick) and [Haskell](languages/haskell.md#lazy-io-as-control-flow).
+The common shape: *describe the full answer, then say how much of it you want.* (The JavaScript entry reverses it: it describes how to make *one* answer, and lets the consumer ask for as many as it wants.) The differences are about **when** the work happens (eager `Aggregate` and APL arrays vs. lazy Haskell lists and LINQ `Select`) and **where** state lives. Compare how LINQ and Haskell answer "when does it run?" in [C#](languages/csharp-linq-xaml.md#deferred-execution-and-the-void-to-value-trick) and [Haskell](languages/haskell.md#lazy-io-as-control-flow).
 
 ## Control state outside variables
 
@@ -57,11 +59,17 @@ Where does "where am I in the program?" live when you have no loop counter?
 | `CMAKE_MATCH_1`..`5`, rebuilt every pass | [make-cmake](languages/make-cmake.md#cmake): [`cmake`](../src/cmake/README.md) |
 | The target of one `GO TO` | [cobol](languages/cobol.md#alter): [`cobol-weird`](../src/cobol-weird/README.md) |
 | The class precedence list, and each method's return value | [lisp](languages/lisp.md#method-combination-as-control-flow): [`lisp-weird`](../src/lisp-weird/README.md) |
+| The editor buffer: one line per card, and marks (x) that are added by joining lines | [editors](languages/editors.md#the-buffer-is-the-machine): [`ed-weird`](../src/ed-weird/README.md) |
+| The marks (where we are on a tape of numbered lines), the first line of the buffer (the next card), and registers a, d and n | [editors](languages/editors.md#a-program-you-can-edit): [`ex-weird`](../src/ex-weird/README.md) |
 | The data stack and the parse position `>in` | [forth](languages/forth.md): [`forth-weird`](../src/forth-weird/README.md) |
 | The path from the start directory to the directory being visited; its depth is the running total | [find](languages/find.md): [`find-gnu`](../src/find-gnu/README.md) |
 | Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | [make-cmake](languages/make-cmake.md#gnu-make): [`make-gnu`](../src/make-gnu/README.md) |
 | One line of text, rewritten until no rule applies | [regex](languages/regex.md#gnu-sed): [`regex-sed`](../src/regex-sed/README.md) |
+| The archive's members, which are the program, plus one SQLite row that says whether the run has halted or faulted | [tar](languages/tar.md#a-program-that-is-an-archive): [`tar-gnu`](../src/tar-gnu/README.md) |
+| One SQLite row (the machine's registers) and the number of records tar has written | [tar](languages/tar.md#the-archive-is-the-clock): [`tar-gnu-weird`](../src/tar-gnu-weird/README.md) |
 | Thunks: which parts of a list have been demanded | [haskell](languages/haskell.md#lazy-io-as-control-flow): [`haskell-weird`](../src/haskell-weird/README.md) |
+| Properties of one object literal | [javascript](languages/javascript.md#the-bodiless-for-in-node): [`javascript`](../src/javascript/README.md) |
+| Variables captured by closures: the generator's number, and the machine's card count, total and stop flag | [javascript](languages/javascript.md#closures-all-the-way-down): [`javascript-weird`](../src/javascript-weird/README.md) |
 | The input stream: whatever macro text has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning): [`m4`](../src/m4/README.md) |
 | A C struct that never rewinds | [regex](languages/regex.md#pcre2-callouts-as-an-instruction-set): [`regex-pcre2`](../src/regex-pcre2/README.md) |
 | SQLite rows, and the exit code of each callout | [regex](languages/regex.md#pcre2grep-exit-codes-as-control-flow): [`regex-pcre2grep`](../src/regex-pcre2grep/README.md) |
@@ -103,6 +111,20 @@ LINQ, Haskell and XAML each put an effect inside something that looks like a pur
 | An unexpected failure code is deliberately *not* "no match" (`PCRE2_ERROR_CALLOUT`, not `-1`) | [PCRE2](languages/regex.md#pcre2-callouts-as-an-instruction-set) |
 
 Notice that **`CHECK(demo_only=1)` appears in nearly every entry**: a table that makes a non-demo row unrepresentable, which each `check.sh` tries to violate. That is error handling used as a *guarantee* rather than a control flow, and a pattern worth keeping.
+
+## Programs stored as data
+
+Four entries keep their program somewhere that is not a source file. Each is a different answer to "what is written down, and what reads it?" See the [comparative chapter](cs/09-comparative-case-studies.md#writing-a-program-down-reading-it-back-running-it) for the round-trip promise each one makes.
+
+| Where the program is written down | What reads it, and gives it meaning | Entry |
+| --- | --- | --- |
+| The members of a tar archive: names are instructions, bodies are operands | GNU tar walks them, and a dispatcher that the *operator* attached gives them meaning (a passive inspector reads the same bytes and runs nothing) | [`tar-gnu`](../src/tar-gnu/README.md), [tar](languages/tar.md#a-program-that-is-an-archive) |
+| The layout of an archive: how many records tar writes | Tar's checkpoints are a clock, and a state machine takes one step per tick | [`tar-gnu-weird`](../src/tar-gnu-weird/README.md), [tar](languages/tar.md#the-archive-is-the-clock) |
+| Rows in a SQLite table | An overridden `unknown` fetches Tcl source and evaluates it | [`tcl-weird`](../src/tcl-weird/README.md), [Tcl](languages/tcl.md#sqlite-as-the-program) |
+| A line of text in an editor buffer, copied into a register | Ex runs the register, and the program reads its next instruction from a tape of lines | [`ex-weird`](../src/ex-weird/README.md), [editors](languages/editors.md#a-program-you-can-edit) |
+| The source text of a function | `⎕CR` writes it out, the function rewrites it, and `⎕FX` defines the copy | [`apl-weird`](../src/apl-weird/README.md), [APL](languages/apl.md#2-self-modifying-functions-apl-weird) |
+
+The question that separates them: *can you read the program without running it?* In `tar-gnu` you can, with the inspector, because tar extraction alone runs nothing. In `tcl-weird` and `ex-weird` the reading and the running are the same act, so there is no safe way to look except to read the text yourself.
 
 ## Read next
 

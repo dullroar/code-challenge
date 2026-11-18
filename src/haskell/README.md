@@ -8,7 +8,8 @@ loop-by: lazy-demand
 evaluation: lazy
 assurance: guaranteed
 pairs-with: haskell-weird
-tags: [evaluation-strategy, generators, lazy-evaluation, referential-transparency]
+tags: [evaluation-strategy, first-class-and-higher-order-functions, generators, lazy-evaluation, monoid-and-fold, referential-transparency]
+analogies: [category-theory]
 ---
 # Haskell
 

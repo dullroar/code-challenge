@@ -10,7 +10,7 @@ assurance: accidentally-exploited
 pairs-with: tcl
 machine: "A string-command interpreter whose command lookup can be hooked"
 state: "A TEMP table of proc source, and the depth of trigger recursion"
-tags: [arbitrary-code-execution, control-flow, database-trigger, homoiconicity, recursion, reflection-and-metaprogramming, scope-and-binding, state]
+tags: [arbitrary-code-execution, control-flow, database-trigger, homoiconicity, interpreter-and-virtual-machine, recursion, reflection-and-metaprogramming, scope-and-binding, serialization-deserialization-pickling, state]
 ---
 # Tcl, weirder
 

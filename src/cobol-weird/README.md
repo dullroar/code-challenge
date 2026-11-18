@@ -11,6 +11,7 @@ pairs-with: cobol
 machine: "A program whose jump targets are mutable"
 state: "The target of one `GO TO`"
 tags: [control-flow, exception-handling, goto-and-structured-programming, program-counter, self-modifying-code, state, undefined-behavior]
+analogies: [continuation]
 ---
 # COBOL, weirder
 

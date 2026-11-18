@@ -8,7 +8,7 @@ loop-by: lazy-demand
 evaluation: deferred
 assurance: guaranteed
 pairs-with: LinqChallenge1
-tags: [declarative-programming, deferred-execution, domain-specific-language, lazy-evaluation, side-effect, thread-safety]
+tags: [dataflow-programming, declarative-programming, deferred-execution, domain-specific-language, lazy-evaluation, side-effect, thread-safety]
 ---
 # LINQ challenge, Variant B: one SQL-like query-expression statement
 

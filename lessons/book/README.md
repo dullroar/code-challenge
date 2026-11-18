@@ -8,7 +8,7 @@ python lessons/book/build.py --check    # builds the HTML and verifies every int
 ```
 
 - `chapters.txt` is the reading order. Add a chapter by adding its path there.
-- `metadata.yaml` holds the title, author and table-of-contents settings.
+- `metadata.yaml` holds the title, the edition number (`book-version`), author and table-of-contents settings. The book is numbered from v3 on: bump `book-version`, the title, the title page in `front-matter.md` and add a section to [`VERSIONS.md`](VERSIONS.md) (what that edition added). `build.py` fails if they disagree.
 - `build.py` concatenates the chapters and rewrites links first: a link to another chapter becomes an in-book anchor, a link to the web index becomes plain text, and a link to anything else in the repo (source files, `src/*/README.md`, `CHALLENGE.md`) becomes its GitHub URL. The chapters themselves stay ordinary GitHub-friendly Markdown.
 - **PDF** is written to the repo root as `learn-programming-the-weird-way.pdf` and needs [WeasyPrint](https://weasyprint.org) (`uv tool install weasyprint` or `pipx install weasyprint`; it also needs the Pango library, which most Linux desktops and WSL images already have). Without it the script skips the PDF with a note; the EPUB and HTML are complete either way. The layout is `book.css`; fonts are DejaVu, whose mono face has the APL glyphs (`⍴ ⍳ ⎕`; see [Seeing the glyphs](../../src/apl/README.md#seeing-the-glyphs)).
 - **Title and copyright pages** are in [`front-matter.md`](../front-matter.md) (plain HTML, inserted before the table of contents). Edit authors and the copyright line there.
@@ -26,6 +26,8 @@ Part of the book is **generated** from data, so it can never disagree with the c
 | [`cs-source/roles/<id>.md`](../cs-source/roles/): one file per "what plays the loop" role | A section of the comparative chapter (chapter 9) |
 | [`cs-source/chapters/NN-name.md`](../cs-source/chapters/) and [`cs-source/index.md`](../cs-source/index.md) | The chapter introductions and the opener of the "By computer science concept" part |
 | [`link-hosts.txt`](link-hosts.txt) | The only external hosts the prose may link to |
+
+**How a concept is grounded.** Every concept page needs something real behind it, and the build fails if it has nothing. An entry can relate to a concept in three ways, set in its frontmatter: `tags` (it **demonstrates** the idea), `analogies` (it resembles the idea) or `counterexamples` (it shows what the idea is not). The concept's "In this repo" table has a column that says which. Some facts are true of *every* entry, and a maintainer states them once in the concept's own frontmatter instead of tagging 39 entries: `applies-to: all` (or `has:machine`, for the entries that name their machine) with a required `applies-because:` sentence. A concept that no entry demonstrates at all can instead point at a focused exercise with `exercise: exercises.md#anchor`. The prose "no entry uses this yet" is rejected: the generator now says what is behind each concept. `python lessons/book/build.py --orphans` prints the grounding of every concept and fails if one has none. `python lessons/book/test_cs.py` tests the rules.
 
 Run `python lessons/book/build.py --generate` to refresh the generated Markdown (the files in `lessons/cs/` and the marked blocks) without running pandoc. The generated files are **committed**, so GitHub readers see the full chapters, and `--check` fails if they are out of date or if any metadata is invalid (an unknown tag, a missing key, a link to a host that is not on the list).
 

@@ -4,7 +4,7 @@
 
 The programs in this book are *adversarial* on purpose. They do things that code should not do: run code inside a regex match, call methods while parsing a markup file, rewrite their own jump targets. They are safe to study because of how this repository handles them. Every entry writes fictional **DEMO ONLY** data, runs in a [sandbox](../../SANDBOX-SETUP.md), and is reviewed as untrusted code until someone has read and understood it.
 
-This chapter is the reader's safety model. It has two habits. First, **read the weird program next to its ordinary sibling**: [`cobol`](../../src/cobol/README.md) beside [`cobol-weird`](../../src/cobol-weird/README.md), [`haskell`](../../src/haskell/README.md) beside [`haskell-weird`](../../src/haskell-weird/README.md). The difference shows you exactly what the stunt costs. Second, **ask what kind of promise stands behind each trick**: guaranteed, implementation-permitted or accidentally exploited (see the [intro](../intro.md#three-kinds-of-knowledge)). The topics below are the security and review ideas that make those habits work.
+This chapter is the reader's safety model. It has two habits. First, **read the weird program next to its ordinary sibling**: [`cobol`](../../src/cobol/README.md) beside [`cobol-weird`](../../src/cobol-weird/README.md), [`haskell`](../../src/haskell/README.md) beside [`haskell-weird`](../../src/haskell-weird/README.md). The difference shows you exactly what the stunt costs. Second, **ask what kind of promise stands behind each trick**: guaranteed, implementation-permitted or accidentally exploited (see the [intro](../intro.md#three-kinds-of-knowledge)). The topics below are the security and review ideas that make those habits work. They include one that the tar entries bring out: authority comes from the command that runs a program, not from the data it reads ([Capability and authority](01-reading-an-adversarial-program.md#capability-and-authority)).
 
 ## Threat model
 
@@ -26,10 +26,11 @@ A threat model answers four plain questions. What are we protecting? Who might a
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | Executable code inside a live regex match. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
 
 ## Arbitrary code execution
 
@@ -47,11 +48,12 @@ Arbitrary code execution means that an attacker makes a program run instructions
 
 **In this repo:**
 
-| Entry | Language | What it teaches |
-| --- | --- | --- |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | Executable code inside a live regex match. |
-| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
+| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
 
 ## Sandbox
 
@@ -65,7 +67,9 @@ A sandbox is a restricted place where untrusted code can run without being trust
 - [Sandbox (computer security)](https://en.wikipedia.org/wiki/Sandbox_(computer_security)) (Wikipedia)
 - [Operating-system-level virtualization](https://en.wikipedia.org/wiki/Operating-system-level_virtualization), the idea behind containers (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+**Applies to every entry** (39). Every entry ships a Dockerfile for the locked-down Linux container, or a Windows Sandbox command, and its check script runs inside one of them.
 
 ## Principle of least privilege
 
@@ -79,7 +83,11 @@ The principle of least privilege says that every part of a system should get onl
 - [Principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege) (Wikipedia)
 - [RFC 4949: Internet Security Glossary](https://www.rfc-editor.org/rfc/rfc4949), which defines the term (search the page for "least privilege")
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 
 ## Code review
 
@@ -92,7 +100,9 @@ Code review means that another person reads your code before it is accepted. It 
 
 - [Code review](https://en.wikipedia.org/wiki/Code_review) (Wikipedia)
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+**Applies to every entry** (39). Every entry README has a How the stunt works section, the plain-English account that a reviewer reads the code against, and the gate refuses a new entry without it.
 
 ## Trojan Source: characters you cannot see
 
@@ -107,7 +117,9 @@ Trojan Source is an attack on the human reviewer. Unicode includes characters th
 - [Bidirectional text](https://en.wikipedia.org/wiki/Bidirectional_text) (Wikipedia)
 - [RFC 3629: UTF-8](https://www.rfc-editor.org/rfc/rfc3629), the encoding that carries all of this text
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+**Practice it:** [F2. Trojan Source: hide a character, then find it (verified)](../exercises.md#f2-trojan-source-hide-a-character-then-find-it-verified). No entry demonstrates this idea, so the exercise is the example.
 
 ## Specification versus implementation
 
@@ -122,4 +134,32 @@ A language specification says what programs *mean*. An implementation is one par
 - [RFC 2119: key words for use in RFCs](https://www.rfc-editor.org/rfc/rfc2119), two pages that fix the meaning of MUST, SHOULD and MAY
 - [Undefined, unspecified and implementation-defined behavior](08-abstraction-leaks-and-implementation-dependence.md#undefined-unspecified-and-implementation-defined-behavior) and [Hyrum's law](08-abstraction-leaks-and-implementation-dependence.md#hyrums-law) in "Abstraction leaks and implementation dependence"
 
-**In this repo:** no entry uses this yet; it is background for the others.
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+
+## Capability and authority
+
+Who can do what is a question about **authority**, not only about data. A file that cannot do anything on its own gains power when something with authority agrees to act on it. The old rule of **capability security** is that you should hold only the authority you need, and that authority should come from what you were handed, not from what you can name.
+
+[`tar-gnu`](../../src/tar-gnu/README.md) shows it in one line. An archive cannot register a hook for itself. `tar -xf` writes files and runs nothing, and `tar --to-command=...` starts a program for each member. The authority to run something is in the command that the *operator* typed, so the trust boundary is that command. [`ed-weird`](../../src/ed-weird/README.md) and [`ex-weird`](../../src/ex-weird/README.md) make a similar choice about the editors. GNU ed allows a shell escape (`!`) inside a global command list, and Ex has `!` and file commands too. Both programs avoid them, and their check scripts enforce that. The reason is not that the commands are bad. A program that can run a shell can do anything, and one that cannot is much easier to reason about. See also [Sandbox](01-reading-an-adversarial-program.md#sandbox) and [Principle of least privilege](01-reading-an-adversarial-program.md#principle-of-least-privilege).
+
+- **Use it when:** you design an interface that runs something on someone's behalf. Ask what authority each caller carries, and give the callee no more.
+- **Avoid it when:** you treat "it is only data" as a reason to stop thinking. Data is inert only until a consumer with authority acts on it.
+
+**Read more:**
+
+- [Capability-based security](https://en.wikipedia.org/wiki/Capability-based_security) (Wikipedia)
+- [Principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege) (Wikipedia)
+- [Confused deputy problem](https://en.wikipedia.org/wiki/Confused_deputy_problem) (Wikipedia)
+
+**In this repo:**
+
+| Entry | Language | How it relates | What it teaches |
+| --- | --- | --- | --- |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
+| [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
+| [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |

@@ -18,11 +18,17 @@ Every weird entry forces you to name the machine hiding inside a language. Once 
 | CMake | A register machine | `CMAKE_MATCH_1`..`5`, rebuilt every pass | [make-cmake](languages/make-cmake.md#cmake) |
 | COBOL | A program whose jump targets are mutable | The target of one `GO TO` | [cobol](languages/cobol.md#alter) |
 | Common Lisp | A method dispatcher with a pluggable combination rule | The class precedence list, and each method's return value | [lisp](languages/lisp.md#method-combination-as-control-flow) |
+| ed | A string-rewriting machine with line addresses | The editor buffer: one line per card, and marks (x) that are added by joining lines | [editors](languages/editors.md#the-buffer-is-the-machine) |
+| Ex | A register machine whose registers are editor marks, and whose program is a register that runs itself | The marks (where we are on a tape of numbered lines), the first line of the buffer (the next card), and registers a, d and n | [editors](languages/editors.md#a-program-you-can-edit) |
 | Forth | A stack machine with a movable instruction pointer | The data stack and the parse position `>in` | [forth](languages/forth.md) |
 | GNU find | A tree walk that grows the tree it is walking, with find itself reading the depth and the clock | The path from the start directory to the directory being visited; its depth is the running total | [find](languages/find.md) |
 | GNU Make | A dependency graph that can restart itself | Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | [make-cmake](languages/make-cmake.md#gnu-make) |
 | GNU sed | A string-rewriting system (a Markov algorithm) | One line of text, rewritten until no rule applies | [regex](languages/regex.md#gnu-sed) |
+| GNU tar | A tape reader (tar) feeding a five-word interpreter | The archive's members, which are the program, plus one SQLite row that says whether the run has halted or faulted | [tar](languages/tar.md#a-program-that-is-an-archive) |
+| GNU tar | A finite-state machine, driven by a logical clock that tar supplies | One SQLite row (the machine's registers) and the number of records tar has written | [tar](languages/tar.md#the-archive-is-the-clock) |
 | Haskell | A lazy graph reducer | Thunks: which parts of a list have been demanded | [haskell](languages/haskell.md#lazy-io-as-control-flow) |
+| JavaScript | Three expression slots | Properties of one object literal | [javascript](languages/javascript.md#the-bodiless-for-in-node) |
+| JavaScript | A closure-backed state machine, pulled by a lazy iterator | Variables captured by closures: the generator's number, and the machine's card count, total and stop flag | [javascript](languages/javascript.md#closures-all-the-way-down) |
 | m4 | A text-rescanning machine | The input stream: whatever macro text has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning) |
 | PCRE2 | A backtracking search with hooks | A C struct that never rewinds | [regex](languages/regex.md#pcre2-callouts-as-an-instruction-set) |
 | pcre2grep | A backtracking search that runs one program per callout | SQLite rows, and the exit code of each callout | [regex](languages/regex.md#pcre2grep-exit-codes-as-control-flow) |

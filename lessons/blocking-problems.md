@@ -134,6 +134,15 @@ The Linux script entries share a reporting shape (rows, a committed total, a stu
 - **`find-gnu`**: GNU find only (`-fprintf`, `%d`, `%T`, `-regex`, `-D`). `-quit` is avoided because it skips the `-D rates` profile. `/dev/fd/3` must be a pipe, or find truncates it.
 - **Neither** opens a window or a thread, and neither has a glow or pulse.
 
+### tar, ed, Ex and JavaScript
+
+- **`tar-gnu`**: GNU tar only (`--to-command`, `--occurrence`); tested on 1.34 and 1.35. The dice are rolled when the archive is written, and the dispatcher does the one addition (in SQL). It does **not** capture live execution state: a stopped run cannot be resumed, only replayed. tar does not stop when its command fails, so the halt is the interpreter's own.
+- **`tar-gnu-weird`**: one transition, in SQL, does all the arithmetic, and only tar's checkpoints decide *when*. What a checkpoint counts depends on the mode, so only creating an archive is used. Not run on BSD or macOS tar.
+- **`ed-weird`**: GNU ed only (busybox ed cannot run it). That a failed `s` inside a global command is silent is GNU behavior that its manual does not promise. Totals are rows of marks, so the program does not scale past a few dozen. The launcher supplies the dice, since `ed` has no randomness.
+- **`ex-weird`**: the tape is sixty lines of data, one per possible total, and nothing computes a different limit. We ran it on nvi 1.81.6 and Vim 9.1; we did not run a conformance suite. nvi needs its recovery folder to be writable.
+- **`javascript`**: needs Node 24 or newer for `node:sqlite`. No thread, mutex or reflection (the C# had them as a 2008 time capsule). The categories repeat, where the C# stopped after four. The year is the ISO year, where the C# stored the calendar year.
+- **`javascript-weird`**: the lifetime test relies on a forced garbage collection (`WeakRef`), and is the one test that depends on the engine. `map` with effects is a trick. An iterator is spent after one pass.
+
 ### The ports
 
 - Java, Kotlin and Go **Windows Sandbox** profiles are not yet tested on real hardware; Rust has no Windows Sandbox profile; the GUI ports have no check script and the gate does not cover them yet ([`sandbox/README.md`](../sandbox/README.md)).

@@ -60,10 +60,37 @@ RUN set -eux; cd /tmp; \
     make -j"$(nproc)"; make install; \
     cd /tmp; rm -rf apl apl.tar.gz
 
+# Editors and Node.js, for tar-gnu, tar-gnu-weird, ed-weird, ex-weird, javascript and javascript-weird. These are
+# a separate layer on purpose, so adding them did not rebuild the layers above.
+#   tar                already in the Ubuntu base: GNU tar 1.35 (the tar entries need GNU-only options)
+#   ed                 GNU ed (ed-weird); the "other" ed is checked with busybox ed, from busybox-static above
+#   nvi                a 4.4BSD-lineage POSIX ex/vi (ex-weird); Ubuntu's ex/vi alternatives point at Vim, not at this
+#   node 24 LTS        upstream tarball pinned by SHA-256 (Ubuntu 24.04's Node 18 has no node:sqlite)
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ed nvi xz-utils \
+ && rm -rf /var/lib/apt/lists/* \
+ && rm -rf /var/tmp/vi.recover && ln -s /tmp /var/tmp/vi.recover
+# ^ nvi refuses to start unless it can write its crash-recovery files to /var/tmp/vi.recover. The sandbox runs with a
+#   read-only root and a writable /tmp, so the directory is a link to /tmp (the same in cc-rt-nvi, see container/Dockerfile).
+ARG NODE_VERSION=24.22.3
+ARG NODE_SHA256_X64=4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb
+ARG NODE_SHA256_ARM64=6e51a2ada00f0011cc266f65d98922b403d7ad88f809ca2aa615a5fe1ce6e86c
+RUN set -eux; cd /tmp; \
+    case "$(dpkg --print-architecture)" in \
+        amd64) arch=x64;   sha=$NODE_SHA256_X64 ;; \
+        arm64) arch=arm64; sha=$NODE_SHA256_ARM64 ;; \
+        *) echo "no Node build pinned for this CPU" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSLo node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${arch}.tar.xz"; \
+    echo "${sha}  node.tar.xz" | sha256sum -c -; \
+    mkdir -p /opt/node && tar xJf node.tar.xz -C /opt/node --strip-components=1; \
+    rm -rf /tmp/node.tar.xz /opt/node/include /opt/node/share; \
+    /opt/node/bin/node --version
+
 # UTF-8 locale: the APL checks grep for glyphs like ⍣ and →, which a C locale reads as bytes.
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    PATH=/opt/apl/bin:/opt/pcre2/bin:$PATH \
+    PATH=/opt/node/bin:/opt/apl/bin:/opt/pcre2/bin:$PATH \
     PCRE2GREP=/opt/pcre2/bin/pcre2grep \
     DOTNET_CLI_TELEMETRY_OPTOUT=1 \
     DOTNET_NOLOGO=1 \

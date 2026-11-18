@@ -10,7 +10,7 @@ assurance: guaranteed
 pairs-with: JavaChallenge1
 machine: "Three expression slots"
 state: "Fields of one anonymous object"
-tags: [control-flow, deferred-execution, side-effect, thread-safety, markup-language]
+tags: [closure, control-flow, deferred-execution, markup-language, side-effect, thread-safety]
 ---
 # C# challenge: the original (modernized)
 

@@ -275,11 +275,120 @@ Acceptance criteria:
 - Step 1: the new rule is "stop once the path has 31 or more slashes", which is "the total is over 30". `check-demo.sh out.txt 30` passes. The entry's own `check.sh` **fails**: its forced-dice scenarios expect cards that no longer get made. Explain why changing one number in a regular expression is enough to change the stop rule.
 - Step 2: find prints, for every test in the program, a line like `[real success rate 1/94=0.01064]`. You can say how many times the `-name b00` test succeeded (once per card), and you can say why find's own guess (`est success rate`) for the `-regex` tests is so far off.
 
+### B16. tar: read the program, then run it (verified)
+
+**Lesson:** [tar](languages/tar.md). **Entry:** a copy of `src/tar-gnu`.
+
+1. In the copy, write an archive with fixed hours and read it without running it: `sh build-archive.sh --seed 1 --hours "12 12 12 12 12" a.tar`, then `sh inspect.sh a.tar`. **Predict** how many cards will run, and which of the five card slots will be read and ignored. Then run it: `sh interpret.sh --execute a.tar`.
+2. Take the program apart with plain tar: `mkdir x && tar -C x -xf a.tar`. Open `x/021.stop-over` and change `limit=40` to `limit=20`. Pack it again **in the same order**: `tar --format=ustar -cf b.tar -C x 000.begin 010.card 011.stop-over 020.card 021.stop-over 030.card 031.stop-over 040.card 041.stop-over 050.card 051.stop-over 990.show`. **Predict** the rows, then run `b.tar`. Delete the old database first (`rm "$XDG_DATA_HOME/TarGnu/demo-timecards.db"`), so only this run is in it. Run it with the `trace` table in view: `sqlite3 "$XDG_DATA_HOME/TarGnu/demo-timecards.db" 'select * from trace'`.
+3. Add a member that is not in the instruction set: `printf 'touch pwned\n' > x/025.exec`, pack `x` again with `025.exec` after `021.stop-over`, and run `sh inspect.sh c.tar; echo $?`, then `sh interpret.sh --execute c.tar; echo $?`. **Predict** both exit statuses, and whether a file called `pwned` appears.
+
+Acceptance criteria:
+
+- Step 1: four cards (`Meetings 12 12`, `Coding 12 24`, `Debugging 12 36`, `Learning 12 48`), and the fifth slot is read and ignored. `check-demo.sh` passes.
+- Step 2: two cards (`Meetings 12 12`, `Coding 12 24`). The limit is in the archive, so changing a member changed the stop rule, and `dispatch.sh` did not change. The trace shows `ok` for the first two cards and `ignored: halted` for the rest. `check-demo.sh out.txt 20` passes.
+- Step 3: the inspector prints the line `REFUSE (unknown record type)` and exits 4. `interpret.sh` exits 4 and says that nothing was run. No `pwned` file exists. Explain why plain `tar -xf` of the same archive would also not create it.
+- In one sentence each: which step *parsed* the program, which step *ran* it, and where was the trust boundary?
+
+### B17. tar, weirder: predict the clock (verified)
+
+**Lesson:** [tar](languages/tar.md#the-archive-is-the-clock). **Entry:** a copy of `src/tar-gnu-weird`.
+
+For seed 42 the cards are `Meetings 12`, `Coding 17`, `Debugging 17`, so the total reaches 12, 29 and 46 hours. The run needs 46 ticks.
+
+1. **Predict**, then run: `sh run-clock.sh --seed 42 --ticks 45`, and then `--ticks 46`. Look at the exit status of each (`echo $?`).
+2. **Predict** how many ticks you get from `sh run-clock.sh --seed 42 --ticks 92 --interval 2`, and from `--ticks 91 --interval 2`. Then run both.
+3. **Predict** the output of `sh run-clock.sh --seed 42 --ticks 260 --blocking 4`. How many records does tar write?
+4. Open the tape of the last run (`tr -d '\000' < tape.tar | wc -c` counts the bytes that are not zero). What is in it, and does the content matter?
+
+Acceptance criteria:
+
+- Step 1: with 45 ticks the third card is not finished, so you see two cards, the message `the clock ran out`, and exit status 3. With 46 ticks the run ends with three cards and exit status 0.
+- Step 2: with `--interval 2` the callback runs once per two records. 92 records give 46 ticks, so the run finishes. 91 records give 45 ticks, so it stalls. The last `TAR_CHECKPOINT` in the finished run is 92, which is the number of records, and the machine counted 46 calls.
+- Step 3: `-b 4` makes a record four blocks. 260 blocks make 65 records and 65 ticks. The run finishes with the same three cards, and 19 ticks are idle.
+- Step 4: Almost all of `tape.tar` is zeros. The only other bytes are the member's 512-byte header (its name, mode and so on), fewer than 100 of them. The payload does not matter. Its *size* is the clock.
+
+### B18. ed: move the stop rule and break the cleanup (verified)
+
+**Lesson:** [ed and Ex](languages/editors.md#the-buffer-is-the-machine). **Entry:** a copy of `src/ed-weird`.
+
+The launcher takes `DICE="a b c d e"`: five digits. Each card has 10 + its digit hours.
+
+1. **Predict**, then run: `DICE="0 0 0 0 0" sh timecards.sh`, and `DICE="9 9 9 9 9" sh timecards.sh`. How many cards will each print, and why is the fifth card of the first one `Meetings` again?
+2. In the copy, change `x\{41,\}` in `timecards.ed` to `x\{31,\}`. **Predict** the rows for `DICE="3 3 3 3 3"` before and after the change. Then run both.
+3. Delete the line `g/^Dead /d` from `timecards.ed`. Run the ed program on its own: `printf '3\n3\n3\n3\n3\n' > d.txt; ed -s d.txt < timecards.ed`. **Predict** the extra line.
+
+Acceptance criteria:
+
+- Step 1: all ten-hour cards give five cards with totals 10, 20, 30, 40, 50 (a total of exactly 40 does not stop the run, and there are only four categories, so the fifth is `Meetings` again). All 19-hour cards give three cards: 19, 38, 57.
+- Step 2: before the change, `13 13 13 13 13` give four cards (13, 26, 39, 52). After it, three cards (13, 26, 39): the run now stops after the first total over 30. `check-demo.sh out.txt 30` passes. One number in a regular expression moved the stop rule.
+- Step 3: the output ends with an extra line `Dead 0 52`. It is the fifth card, which was turned into a dead card because the total had passed 40 at card 4. The `Dead` rule is the one that stops cards from counting; the cleanup only hides them.
+- In one sentence: which ed feature made each of the three changes possible?
+
+### B19. Ex: move the limit on the tape and cut the loop (verified)
+
+**Lesson:** [ed and Ex](languages/editors.md#a-program-you-can-edit). **Entry:** a copy of `src/ex-weird`.
+
+The launcher takes `DICE="a b c d e"`: five digits. Each card has 10 + its digit hours.
+
+1. **Predict**, then run: `DICE="1 1 1 1 1" sh timecards.sh`. How many cards, and what are the totals?
+2. In the copy, make the tape say "go on" up to 45 instead of 40: `sed -i 's/^\(4[1-5]\) "$/\1 @a/' timecards.ex`. **Predict** the rows for the same dice, then run them.
+3. Take the loop out: `sed -i 's/|@n$//' timecards.ex`. **Predict** how many cards run, then run it with `DICE="5 5 5 5 5"`.
+4. Look at the end of the program line in `timecards.ex`. Which command is the loop, and which line of the tape makes it stop?
+
+Acceptance criteria:
+
+- Step 1: four cards, 11, 22, 33 and 44. The total passes 40 at the fourth card, so the tape row `44` is the first "stop" instruction that the program reads, and the run ends there. `check-demo.sh` passes.
+- Step 2: five cards, 11, 22, 33, 44 and 55. Row 44 now says `@a`, so the run goes on, and row 55 still says `"`. `check-demo.sh out.txt 45` passes. The program did not change: only a line of data did.
+- Step 3: one card. The program runs once and never starts itself again, because nothing runs register `n` any more. With `DICE="5 5 5 5 5"` the row is `Meetings 15 15`.
+- Step 4: `@n` is the loop, and register `n` holds the instruction from the tape line. The line that stops it is the first one whose instruction is `"`, which is the one for a total of 41.
+
+### B20. JavaScript: read the clauses, move the limit and fail the structure check (verified)
+
+**Lesson:** [JavaScript](languages/javascript.md#the-bodiless-for-in-node). **Entry:** a copy of `src/javascript`.
+
+1. **Predict**, then run: `SEED=42 node timecards.mjs`. Which card crosses 40? (The generator is Park-Miller, and the hours of the first three cards for this seed are 12, 17 and 17.)
+2. In the copy, change `<= 40` in the condition to `<= 20`. **Predict** the rows for `SEED=42`, then run them.
+3. Put a statement in the loop body: replace `{ /* Intentionally empty. */ }` with `{ i.frames++; }`. Run `node timecards.mjs`, then `node check-structure.mjs timecards.mjs`.
+4. Run `NOW=2026-12-31 SEED=42 node timecards.mjs` and `NOW=2024-12-30 SEED=42 node timecards.mjs`. **Predict** the week column.
+
+Acceptance criteria:
+
+- Step 1: three cards, `Meetings 12 12`, `Coding 17 29`, `Debugging 17 46`, and the third card crosses 40. `check-demo.sh` passes.
+- Step 2: two cards, 12 and 29. The condition is evaluated after the iterator has added a card, so the card that takes the total from 12 to 29 is saved, and then the test (29 is over 20) ends the loop. `check-demo.sh out.txt 20` passes.
+- Step 3: the program still runs and prints the same cards (the extra statement changes a counter that nothing reads), and the structure check **fails** with a message about the body. The constraint was a rule you broke, and the check is the proof that it was real.
+- Step 4: `2026-W53` and `2025-W01`. The week is the ISO week, and the year printed is the ISO year, which can differ from the calendar year at New Year.
+
+### B21. JavaScript, weirder: move the stop rule in a closure and watch the demand (verified)
+
+**Lesson:** [JavaScript](languages/javascript.md#closures-all-the-way-down). **Entry:** a copy of `src/javascript-weird`.
+
+1. Run the closure lab on the untouched copy: `node --expose-gc --test check.mjs`. How many tests pass?
+2. In `core.mjs`, change the stop rule `over = total > 40` to `over = total > 20`. **Predict** the rows for `SEED=42 node timecards.mjs` (the hours of the first cards are 12, 17 and 17). Then run the lab again. **Predict** whether it passes.
+3. Run this, and **predict** what it prints, and in what order:
+
+   ```bash
+   node --input-type=module -e "
+   import { cards, machine } from './core.mjs';
+   const m = machine(() => (console.log('drawn'), 15));
+   const p = Iterator.from(cards(m)).map(c => c.total);
+   console.log('built');
+   console.log(p.take(1).toArray());"
+   ```
+4. In the same command, change `take(1)` to `take(2)`. How many `drawn` lines do you get?
+
+Acceptance criteria:
+
+- Step 1: all 12 tests pass.
+- Step 2: two cards (`Meetings 12 12`, `Coding 17 29`): the machine says `over` as soon as the total passes 20. The lab does **not** pass: 7 of the 12 tests fail, and they are the ones that pin the stop rule (the crossing card, exactly 40, the draw counts, the replay of seed 42). The 5 that pass are about closures and do not care about the limit. In one sentence: why do the closure tests not care?
+- Step 3: `built`, then `drawn`, then `[ 15 ]`. Building the pipeline draws nothing. `take(1)` asks for one card, so one hours value is drawn.
+- Step 4: two `drawn` lines (and `[ 15, 30 ]`). The consumer decides how many cards exist.
+
 ## C. By solution pattern
 
 ### C1. Weird next to boring (verified)
 
-**Lesson:** [Weird next to boring](intro.md#weird-next-to-boring). The repo has seven ready-made pairs: `cobol`/`cobol-weird`, `haskell`/`haskell-weird`, `forth`/`forth-weird`, `apl`/`apl-weird`, `lisp`/`lisp-weird`, `tcl`/`tcl-weird` and `awk`/`awk-weird`.
+**Lesson:** [Weird next to boring](intro.md#weird-next-to-boring). The repo has many ready-made pairs, among them `cobol`/`cobol-weird`, `haskell`/`haskell-weird`, `forth`/`forth-weird`, `apl`/`apl-weird`, `lisp`/`lisp-weird`, `tcl`/`tcl-weird`, `awk`/`awk-weird`, `tar-gnu`/`tar-gnu-weird`, `ed-weird`/`ex-weird` and `javascript`/`javascript-weird`.
 
 Compare one pair. Run both, and count code lines (not comments) in each program.
 
@@ -377,6 +486,29 @@ Acceptance criteria:
 - The test runs in the sandbox and **passes** against current behavior.
 - You also show it **fails** under a deliberate change (a negative control).
 - You say whether the claim is **guaranteed**, **implementation-permitted** or **accidentally exploited**, and cite the evidence.
+
+### F2. Trojan Source: hide a character, then find it (verified)
+
+**Lesson:** [Trojan Source](cs/01-reading-an-adversarial-program.md#trojan-source-characters-you-cannot-see). **Entry:** none. No entry in this repository may contain an invisible character, so you make the file yourself, in a scratch folder, and you never commit it. The claim to prove is the one in [`CONTRIBUTING.md`](../CONTRIBUTING.md): "no invisible or direction-changing Unicode characters. APL glyphs and other visible Unicode are fine."
+
+1. In a scratch folder, make a program with a zero-width space (U+200B) after `admin` in the first line:
+
+   ```bash
+   printf 'const user = "admin\xe2\x80\x8b";\nconsole.log(user === "admin");\n' > greet.js
+   ```
+
+   Look at it with `cat greet.js`. **Predict** what `node greet.js` prints, then run it (for example with `lessons/tools/run-in-sandbox.sh <folder> node greet.js`).
+2. Find the character the way the gate does: `LC_ALL=C.UTF-8 grep -nP '[\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{2064}\x{2066}-\x{2069}\x{FEFF}\x{00AD}\x{2028}\x{2029}]' greet.js`. Then look at the bytes: `od -c greet.js | head`.
+3. **Negative control.** Make the same file without the character (`printf 'const user = "admin";\nconsole.log(user === "admin");\n' > clean.js`). Run the scan on it, and run it with `node`.
+4. **The other half of the claim.** Run the same scan over `src/apl-weird` (its source is full of visible APL glyphs): `LC_ALL=C.UTF-8 grep -rlP '<the class above>' src/apl-weird`. **Predict** what it finds.
+
+Acceptance criteria:
+
+- Step 1: the file looks like a program that prints `true`, and it prints `false`. The string has five characters that you can see (`a d m i n`) and one that you cannot, so it is not equal to `admin`.
+- Step 2: the scan prints line 1 of `greet.js`, and `od` shows the three bytes `342 200 213` after `admin`.
+- Step 3: the scan finds nothing in `clean.js`, and the program prints `true`. This is the negative control: the scan fires on the hidden character, and on nothing else.
+- Step 4: the scan finds **no file** in `src/apl-weird`. Visible Unicode (`⍴`, `⍳`, `⎕`) is not in the class, so a reviewer can read it and the gate lets it through. Say in one sentence why banning all non-ASCII text would be the wrong defense.
+- Say whether the claim is **guaranteed**, **implementation-permitted** or **accidentally exploited**, and cite the evidence. (Hint: the gate's rule is written down in `sandbox/scope-check.sh`, and `grep -P` with a character class is its mechanism. The class lists only the characters we know of.)
 
 ## G. Open challenges (not verified; may be impossible)
 

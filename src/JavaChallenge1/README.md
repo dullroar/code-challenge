@@ -9,6 +9,7 @@ evaluation: eager
 assurance: guaranteed
 pairs-with: ModernChallenge1
 tags: [control-flow, side-effect, thread-safety]
+analogies: [closure]
 ---
 # One Statement, Java Edition
 
