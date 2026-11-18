@@ -101,6 +101,19 @@ Rewriting means replacing parts of a structure according to rules, again and aga
 
 A macro is a name that is replaced by text, or by code, *before* the real language sees it. The C preprocessor is the best-known one. m4 is a general macro processor. Lisp macros work on code as data, not as text. They exist to let you build abstractions that functions cannot: repeated boilerplate, new syntax, code generated at compile time. [`m4`](../../src/m4/README.md) has no loop statement and no variable. It builds a loop from a macro whose replacement text contains itself, so the output is scanned again. [`lisp-weird`](../../src/lisp-weird/README.md) uses a `defcard` macro to write five similar classes and methods, at compile time.
 
+```mermaid
+flowchart TB
+    accTitle: Macro expansion becomes computation when expanded text is read again and can trigger further expansion
+    accDescr: A feedback loop. The scanner reads input text such as LOOP(3). If the text is not a macro call, it is copied to the output. If it is a macro call, the expander substitutes the replacement text, which can contain another macro call such as LOOP(2). An arrow sends the expanded text back to the scanner, which reads it again. Expansion continues until the replacement text holds no more macro calls, so only plain text reaches the output.
+    IN(["Input text: LOOP(3)"]) --> SC["Scanner reads the text"]
+    SC --> Q{{"Is it a macro call?"}}
+    Q -->|"no: copy it"| OUT(["Plain text output"])
+    Q -->|"yes"| EX["Expander substitutes: body, then LOOP(2)"]
+    EX -->|"expanded text is read again"| SC
+```
+
+The important arrow is the one that goes back. The expander does not just print its replacement text. It puts the text back in front of the scanner, so a macro call inside the replacement is expanded too. Here `LOOP(3)` leaves `LOOP(2)` behind, and the process ends when the replacement holds no macro call. [`m4`](../../src/m4/README.md) works this way. Other macro systems may not read their own output again.
+
 - **Use it when:** you generate repetitive code, or define a small language on top of a bigger one.
 - **Avoid it when:** a plain function would do. Macro bugs are hard to debug, and text macros can capture names by accident. Lisp-style *hygienic* macros reduce this danger.
 
@@ -190,6 +203,20 @@ A markup language is text with annotations that describe its structure: HTML, XM
 ## Build automation
 
 Build automation tools rebuild only what changed, and they do it in dependency order. Make, created at Bell Labs in 1976, is the classic example. CMake and Gradle are modern ones. They exist because compiling everything every time is slow, and building in the wrong order is wrong. The state of a build is *files*: which exist, and which are newer than what they depend on. That makes a build tool a strange computer. [`make-gnu`](../../src/make-gnu/README.md) counts with files that are created one per pass, and loops by making Make read a generated makefile again. [`cmake`](../../src/cmake/README.md) loops with a `while()` whose regex leaves its results in variables.
+
+```mermaid
+flowchart TB
+    accTitle: A build tool is a dependency-driven scheduler that chooses what to run from the graph and the changed inputs
+    accDescr: A build graph with five files. The files source.tc and config.mk feed stage-1. Stage-1 feeds stage-2, and stage-2 feeds final. The file source.tc has just been edited, so it is drawn with a thick border and it is newer than stage-1. The tool therefore rebuilds stage-1, then stage-2, then final, in that order. The file config.mk is unchanged and plays no part in the decision.
+    src["source.tc: edited, newer"] -->|"newer"| s1["stage-1: rebuild"]
+    cfg["config.mk: unchanged"] --> s1
+    s1 -->|"rebuilt, so newer"| s2["stage-2: rebuild"]
+    s2 -->|"rebuilt, so newer"| fin["final: rebuild"]
+    classDef changed stroke-width: 4px
+    class src changed
+```
+
+The tool compares file dates along the arrows. `source.tc` is newer than `stage-1`, so `stage-1` is stale and is rebuilt. That makes it newer than `stage-2`, and so on down the chain. `config.mk` did not change, so it causes no work. The tool decides what to run and in what order. It does not pass values from step to step as [Dataflow programming](04-evaluation-and-demand.md#dataflow-programming) does. Some entries use this decision machinery as a loop: [`make-gnu`](../../src/make-gnu/README.md) remakes a generated makefile and then starts the walk again.
 
 - **Use it when:** you compile, package or generate files from other files.
 - **Avoid as a general computer.** Timestamps can be coarse (WSL and some file systems), and a build that depends on hidden state is not reproducible.

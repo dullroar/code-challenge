@@ -87,6 +87,23 @@ The program counter is a register that holds the address of the next instruction
 
 A recursive definition uses itself. A function calls itself on a smaller problem until the problem is so small that the answer is obvious. It exists because many things are naturally nested: trees, folders, grammars, arithmetic expressions. Loops and recursion are equally powerful, and functional languages use recursion instead of loops. Several entries here recurse in disguise. In [`m4`](../../src/m4/README.md) a macro whose replacement text contains itself is read again, which makes a loop. In [`tcl-weird`](../../src/tcl-weird/README.md) a database trigger inserts a row, which fires the same trigger again. The stop rule is a query that finds nothing.
 
+```mermaid
+flowchart LR
+    accTitle: Recursion moves toward a base case, then unwinds with the accumulated results
+    accDescr: Two columns for sum of 3. The left column, read downward, shows the calls moving inward. Sum of 3 calls sum of 2, which calls sum of 1, which calls sum of 0. Sum of 0 is the base case and returns 0 without calling anything. The right column, read upward, shows the results coming back outward. Sum of 1 is 1 plus 0, which is 1. Sum of 2 is 2 plus 1, which is 3. Sum of 3 is 3 plus 3, which is 6.
+    subgraph DOWN["Calls go down"]
+        direction TB
+        n3["sum(3)"] -->|calls| n2["sum(2)"] -->|calls| n1["sum(1)"] -->|calls| n0(["sum(0): base case"])
+    end
+    subgraph UP["Results come back up"]
+        direction BT
+        u0["sum(0) = 0"] -->|returns| u1["sum(1) = 1 + 0 = 1"] -->|returns| u2["sum(2) = 2 + 1 = 3"] -->|returns| u3["sum(3) = 3 + 3 = 6"]
+    end
+    DOWN --> UP
+```
+
+On the way down, each call hands a smaller problem to the next call. The base case, `sum(0)`, is the only call that answers without calling again. Without it the calls never stop. On the way up, each call finishes the work it was waiting to do. [The call stack](06-state-beyond-variables.md#the-call-stack) shows where those waiting calls are kept.
+
 - **Use it when:** the data is nested, or the problem splits into smaller copies of itself.
 - **Avoid it when:** the depth is unbounded and the language does not remove tail calls. The stack can run out. Always know the stop rule, and know what happens if it never fires.
 
@@ -109,6 +126,17 @@ A recursive definition uses itself. A function calls itself on a smaller problem
 
 A *fixed point* of a function is a value that the function leaves unchanged: f(x) = x. Fixed-point iteration finds one by applying the function again and again until nothing changes. It exists because many problems are really "keep going until it settles": balance an equation, compute a closure, or simplify an expression. This repository is full of it. [`regex-sed`](../../src/regex-sed/README.md) applies substitutions until none matches. [`make-gnu`](../../src/make-gnu/README.md) remakes its own makefile until the makefile is up to date. A compiler's optimizer does the same, passing over the code until no more improvements appear.
 
+```mermaid
+flowchart TB
+    accTitle: Fixed-point iteration means keep transforming until one more pass changes nothing
+    accDescr: A chain of values, top to bottom. The start value x0 goes through f to give x1, through f again to give x2, and through f again to give x-star. Applying f to x-star gives x-star again, so the value is unchanged. Because the output equals the input, the iteration stops. That unchanged value is the fixed point.
+    x0["x0: start"] -->|"apply f"| x1["x1"] -->|"apply f"| x2["x2"] -->|"apply f"| xs["x*"]
+    xs -->|"apply f"| same["x*: unchanged"]
+    same ==>|"output equals input: stop"| done(["Fixed point: f(x*) = x*"])
+```
+
+Every pass applies the same function `f`. The run stops when a pass returns its own input, so that `f(x*) = x*`. The value `x` does not have to be a number. It can be a line of text (as in [`regex-sed`](../../src/regex-sed/README.md)), a makefile or a piece of code. A real program also needs a limit, in case the values never settle.
+
 - **Use it when:** each step is a clear improvement and "no change" is a clear signal to stop.
 - **Avoid it when:** the process might never settle. It can bounce between two states forever. Always add a limit, or a timeout. The sandbox gives every `check.sh` a time limit.
 
@@ -128,6 +156,28 @@ A *fixed point* of a function is a value that the function leaves unchanged: f(x
 ## Coroutines
 
 A coroutine is a function that can pause in the middle and resume later, with its local variables intact. Ordinary functions run from start to finish. A coroutine can hand a value to its caller, wait, and carry on when asked. It exists for producers and consumers, for generators and for cooperative multitasking (`async`/`await` is built on the idea). Several entries are coroutines wearing a different hat. A Rust iterator made with `successors`, a Kotlin `generateSequence` and Python's `iter(step, False)` each produce the next value only when the loop asks for it.
+
+```mermaid
+sequenceDiagram
+    accTitle: Coroutines suspend and resume cooperatively, keeping their own local state between yields
+    accDescr: A sequence diagram with a caller and two coroutines, A and B. The caller starts A. A runs and yields to B. B runs and yields back to A. A resumes just after its yield, with its local variables intact, runs more, and yields to B again. B resumes just after its own yield. B yields back to A, A finishes and returns to the caller. Only one routine runs at a time, and control moves only when a routine yields.
+    participant C as Caller
+    participant A as Coroutine A
+    participant B as Coroutine B
+    C->>A: start
+    Note over A: runs until its first yield
+    A->>B: yield to B
+    Note over B: starts, runs until its first yield
+    B->>A: yield back to A
+    Note over A: resumes after its yield, locals intact
+    A->>B: yield to B again
+    Note over B: resumes after its yield, not from the top
+    B->>A: yield back to A
+    A->>C: finishes, returns to the caller
+    Note over A,B: one runs at a time: nothing preempts it
+```
+
+Control moves only when a coroutine yields, so only one routine runs at a time. That is the difference from threads: nothing preempts a coroutine, and nothing runs in parallel. A coroutine that resumes continues after its last `yield`, with its local variables as it left them. An ordinary call would start again from the top.
 
 - **Use it when:** you process a stream, or you want two pieces of code to take turns without threads.
 - **Avoid it when:** you need real parallelism, or when the many pause points make the program hard to follow.

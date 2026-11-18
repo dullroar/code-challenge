@@ -114,6 +114,26 @@ Eager evaluation computes a value as soon as the code asks for it. It is the def
 
 Lazy evaluation delays a computation until its result is needed, and then remembers the answer. The waiting computation is called a *thunk*. It exists so that you can describe the *whole* answer and then take only what you want. In [`haskell`](../../src/haskell/README.md) one `span` over an infinite lazy list is the entire stop rule. The price is that "when does this run?" becomes hard to answer. In [`haskell-weird`](../../src/haskell-weird/README.md) the list elements perform input and output, so *reading the list* is what does the work. Reading too early or too late changes the result.
 
+```mermaid
+flowchart TB
+    accTitle: Lazy evaluation turns possible work into deferred work, and only demanded parts become real
+    accDescr: Three columns, one for each cell of a list. Cell A starts as a thunk. The first demand evaluates it to 19, and the value is stored and shared for later use. Cell B starts as a thunk. The second demand evaluates it to 23, and the value is stored. Cell C starts as a thunk, is never demanded, and is never evaluated.
+    subgraph C["Cell C"]
+        direction TB
+        c1["thunk"] -.->|"no demand"| c2["never evaluated"]
+    end
+    subgraph B["Cell B"]
+        direction TB
+        b1["thunk"] -->|"2nd demand"| b2["evaluate: 23"] --> b3["23, stored"]
+    end
+    subgraph A["Cell A"]
+        direction TB
+        a1["thunk"] -->|"1st demand"| a2["evaluate: 19"] --> a3["19, stored and shared"]
+    end
+```
+
+A thunk is a promise to compute a value. Demanding a cell runs its thunk once and stores the value, so a second demand for `A` costs nothing. Cell `C` is never demanded, so its work never happens. Storing the value is part of lazy evaluation in the strict sense. A pipeline that only delays work, such as a generator, may compute the same value again on each pass. See [Iterators and generators](04-evaluation-and-demand.md#iterators-and-generators).
+
 - **Use it when:** the code is pure (no effects), you want infinite sequences, or some results may not be needed.
 - **Avoid it when:** effects are involved, or when memory matters. A pile of unevaluated thunks can use a lot of it (a *space leak*).
 
@@ -139,6 +159,29 @@ Lazy evaluation delays a computation until its result is needed, and then rememb
 ## Short-circuit evaluation
 
 Short-circuit evaluation means that `and` and `or` stop as soon as the answer is known. In `a && b`, if `a` is false, `b` never runs. It exists for speed, and for a very useful habit: guard first, then act (`x != null && x.length > 0`). The same idea can be a loop. In [`lisp-weird`](../../src/lisp-weird/README.md) the `or` method combination calls methods one after another and stops at the first one that returns a true value. A class hierarchy becomes the loop, and `or` becomes the stop rule.
+
+```mermaid
+flowchart TB
+    accTitle: Short-circuiting is control flow that can suppress work and side effects
+    accDescr: Two panels. In the first, false AND expensive() evaluates the left side, which is false. A false left side makes AND false whatever the right side is, so the result is false and the call to expensive() is skipped. In the second, true OR expensive() evaluates the left side, which is true. A true left side makes OR true whatever the right side is, so the result is true and the call to expensive() is skipped. In both panels the skipped call is drawn with a dashed border and an arrow that is never followed.
+    subgraph P1["false AND expensive()"]
+        direction TB
+        l1["left side: false"] --> d1{{"false AND anything is false"}}
+        d1 -->|"answer known"| r1(["result: false"])
+        d1 -.->|"skipped"| x1["expensive(): never runs"]
+    end
+    subgraph P2["true OR expensive()"]
+        direction TB
+        l2["left side: true"] --> d2{{"true OR anything is true"}}
+        d2 -->|"answer known"| r2(["result: true"])
+        d2 -.->|"skipped"| x2["expensive(): never runs"]
+    end
+    P1 ~~~ P2
+    classDef skip stroke-dasharray: 5 5
+    class x1,x2 skip
+```
+
+In both panels the left operand settles the answer, so the right operand is skipped. Anything it would have done, such as a slow query, a write or a printed line, does not happen. That is why `x != null && x.length > 0` is safe. It also means that an effect in the right operand is not a promise. See [Side effects](07-effects-errors-and-commitment.md#side-effects).
 
 - **Use it when:** you guard a risky operation, or pick the first good answer.
 - **Avoid it when:** the second operand has an effect you expect to always happen. It silently will not.
@@ -185,6 +228,26 @@ Deferred execution means that you describe a query or a pipeline now, and it run
 ## Iterators and generators
 
 An *iterator* is an object that answers "give me the next one". A *generator* is a function you write as ordinary straight-line code that hands out values one at a time with `yield`. Both exist so that you can handle a sequence that is too big to store, or has no end, and so that the code that produces values stays separate from the code that uses them. Four entries are built on the idea: Rust's `successors`, Kotlin's `generateSequence`, Python's `iter(step, False)` and Haskell's lazy lists. In each one, the loop "stops" because the consumer stops asking. JavaScript spells the idea out as the **iteration protocol**: an iterable has a `[Symbol.iterator]()` method that answers an object with a `next()` method, and `next()` answers `{ value, done }`. [`javascript-weird`](../../src/javascript-weird/README.md) writes one by hand around a closure, and a consumer such as `toArray()` or `take(1)` decides how many values ever exist. It also shows the one-shot trap: a second pass over the same iterator finds it already used up.
+
+```mermaid
+sequenceDiagram
+    accTitle: Generators answer one next-value request at a time, resuming from where they last yielded
+    accDescr: A sequence diagram with a consumer and a generator. The consumer calls next. The generator runs to its first yield and hands back 19. The consumer calls next again, and the generator resumes after the yield and hands back 23. Another call gives 17. On the fourth call the generator has nothing left and signals done. The consumer drives every step, and the generator keeps its internal state between yields.
+    participant C as Consumer
+    participant G as Generator
+    C->>G: next()
+    G-->>C: yield 19
+    C->>G: next()
+    Note right of G: resumes after the last yield
+    G-->>C: yield 23
+    C->>G: next()
+    G-->>C: yield 17
+    C->>G: next()
+    G-->>C: done
+    Note right of G: internal state is kept between yields
+```
+
+The consumer asks and the generator answers. This is *pull*: nothing runs until `next()` is called, and the generator does only enough work to reach its next `yield`. A push design, such as a callback, would draw the arrows the other way (see [Callbacks](10-events-callbacks-and-reactive-control-flow.md#callbacks)). The consumer can also stop early by not asking again.
 
 - **Use it when:** you stream data, or describe an unlimited series and take a prefix.
 - **Avoid:** iterators with hidden effects, and the surprise of a one-shot iterator that is already used up.
@@ -253,6 +316,18 @@ The left side can be replaced by `5` anywhere. The right side cannot: the call's
 ## Array programming
 
 Array programming applies an operation to a whole array at once. Scalars stretch to match, and explicit loops mostly disappear. Kenneth Iverson invented APL for this in the 1960s, and the idea lives on in J, K, R, MATLAB and NumPy. It exists because it makes the code short and because hardware can do many elements at the same time (SIMD, GPUs). [`apl`](../../src/apl/README.md) shows the style: five random draws, a running sum `+\` and a take-while replace the loop. You describe the full answer, then trim it.
+
+```mermaid
+flowchart TB
+    accTitle: Array programming describes bulk transformations on whole vectors, often replacing explicit control flow
+    accDescr: A pipeline of whole arrays with no loop. The hours array is 19, 16, 19, 11. A running sum gives the totals 19, 35, 54, 65. Comparing every total with 40 gives the flags 1, 1, 0, 0. Summing the flags gives 2, and adding 1 gives 3 cards to keep. Taking 3 items from the hours gives 19, 16, 19.
+    H["hours: 19 16 19 11"] -->|"running sum"| T["totals: 19 35 54 65"]
+    T -->|"compare every total with 40"| F["at most 40: 1 1 0 0"]
+    F -->|"sum the flags, add 1"| N["cards to keep: 3"]
+    N -->|"take 3 from hours"| K["kept: 19 16 19"]
+```
+
+Read the picture from top to bottom. Each step is one operation on a whole array, and no step is a loop. The comparison gives a flag for every total at once. The number of flags that are 1, plus one, is the number of cards to keep, because the card that crosses 40 is kept too. [`apl`](../../src/apl/README.md) works this way. The numbers here are only an example, and the idea does not depend on APL's symbols.
 
 - **Use it when:** you work with numbers, tables and signals.
 - **Avoid it when:** the algorithm is inherently one step after another, or the intermediate arrays are too big for memory. Also remember that a dense notation is hard for a team that does not read it.
@@ -357,6 +432,20 @@ An associative operation is not the same as a commutative one. `"ab" + "c"` is n
 ## Dataflow programming
 
 In **dataflow programming** you describe how values flow from one step to the next, and the order of execution follows from the data: a step runs when its input is ready, or when its output is asked for. A spreadsheet is the familiar example. A LINQ query and an iterator pipeline are small ones. The program is a graph of steps, and the machine decides when each runs.
+
+```mermaid
+flowchart TB
+    accTitle: In a dataflow view, edges carry values and nodes fire when the needed inputs arrive
+    accDescr: A small graph. The sources hours and categories feed the graph. Hours feeds a running total node and a pair node. Categories feeds the pair node. The pair node needs both of its inputs, so it fires only when an hour and a category have both arrived. The running total and the pairs both feed a stop node, which keeps rows until the total is over 40. The stop node feeds the output node, rows. Arrows are data dependencies, not a call order.
+    H(["hours"]) --> T["running total"]
+    H --> P["pair: fires when both inputs arrive"]
+    K(["categories"]) --> P
+    T --> S["keep rows until total is over 40"]
+    P --> S
+    S --> R(["rows"])
+```
+
+Each arrow is a data dependency: the node at the head needs a value from the node at the tail. The `pair` node has two inputs, so it cannot fire until both have arrived. The picture does not say which node a program calls first. The arrival of values decides. [Dependency graphs](06-state-beyond-variables.md#dependency-graphs) also draws arrows between things, but there the arrows say what to redo after a change.
 
 It matters here because several entries move control out of statements and into such a graph. In [`LinqChallenge1`](../../src/LinqChallenge1/README.md) and [`LinqChallenge2`](../../src/LinqChallenge2/README.md) a query describes the cards, and the final operator asks for them. In [`javascript-weird`](../../src/javascript-weird/README.md) the pipeline `Iterator.from(...).map(...).map(...).toArray()` is a chain of steps, and each card flows through all of them before the next one is asked for. [`make-gnu`](../../src/make-gnu/README.md) has a related shape: a dependency graph decides what runs and in what order. That is *dependency*, which is not the same as the flow of data, so it is an analogy here.
 

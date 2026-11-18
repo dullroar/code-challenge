@@ -10,6 +10,23 @@ The entries here play with all three. A regex engine runs the whole demo and the
 
 A side effect is anything an operation does besides returning a value: writing a file, changing a variable, printing, inserting a database row. Programs exist to cause effects, so effects are not bad. The problem is that *order, number and timing* start to matter. Run it twice and you may get two rows. Run it later and you may get a different answer. Several entries put an effect inside something that looks like a plain description: a lazy Haskell list, a LINQ query, a XAML tree. A rule falls out of that: **whoever reads the structure decides whether, and when, the effect happens.** `evaluate (length cards)` in Haskell and the final `Aggregate` in LINQ both mean "force it now".
 
+```mermaid
+flowchart LR
+    accTitle: A side effect changes or reveals something outside the value a function returns
+    accDescr: Two computations. The first is pure. The call add(19, 35) has one output, the return value 54, and nothing else in the world changes. The second call, add_card(19), has two outputs. One is the return value, a running total of 54. The other is a side effect, a row written to SQLite, which anyone can see later without having the return value.
+    subgraph EFF["With a side effect: two outputs"]
+        direction LR
+        e1["add_card(19)"] -->|"return value"| e2["running total 54"]
+        e1 -.->|"side effect"| e3[("row written to SQLite")]
+    end
+    subgraph PURE["Pure: one output"]
+        direction LR
+        p1["add(19, 35)"] -->|"return value"| p2["54"]
+    end
+```
+
+Both calls return a value. Only the second also changes something outside itself: a row now exists in the database, and it still exists if the caller ignores the return value. That is why a side effect is not just another return value. The caller sees the return value only if it looks, but the effect has already happened. Compare [Referential transparency](04-evaluation-and-demand.md#referential-transparency): a pure call can be replaced by its value, and the second call cannot.
+
 - **Use effects when:** at the edges of a program, where it talks to the world, and in places where you can say exactly when they run.
 - **Avoid effects when:** they hide in lazy or "pure-looking" code, where nobody can say who triggers them.
 
@@ -65,6 +82,25 @@ Pure functional languages have a neat answer to side effects: describe the effec
 
 Exception handling is a language feature for errors: raise a signal, unwind the stack, and let a handler deal with it. It exists to keep the normal path of the code free of error checks. COBOL has an older, simpler form. `ON SIZE ERROR` runs when an arithmetic result does not fit the field, and the field stays unchanged. In [`cobol-weird`](../../src/cobol-weird/README.md) that overflow *is* the stop rule: a two-digit counter overflows on purpose, and the error branch ends the loop. Errors as control flow work, but they hide the real design from the next reader.
 
+```mermaid
+sequenceDiagram
+    accTitle: Exceptions alter control flow by unwinding outward until a handler accepts them
+    accDescr: A sequence diagram of three nested calls. The function main, which has a try and catch, calls process, and process calls save. Save throws an exception. The exception does not return to process in the normal way. It passes through process, which has no handler, so the rest of process is skipped. It reaches main, where the catch block handles it. After the handler, normal flow continues in main. The normal return statements of save and process never run.
+    participant M as main: try and catch
+    participant P as process
+    participant S as save
+    M->>P: call
+    P->>S: call
+    Note over S: throws an exception
+    S--xP: unwinds, no normal return
+    Note over P: no handler, the rest is skipped
+    P--xM: unwinds, no normal return
+    Note over M: catch block runs
+    Note over M: normal flow resumes after the try
+```
+
+The normal `return` of `save` and `process` never runs. The exception passes outward through each call until a `catch` accepts it, and then normal flow resumes after the `try` in `main`. If nothing catches it, it leaves the program. Unwinding only moves control. It does not undo what the skipped code already did: a row that `save` wrote stays written, unless a transaction rolls it back (see [Transactions](07-effects-errors-and-commitment.md#transactions)).
+
 - **Use it when:** something truly unexpected happens, and the caller can recover or must be told.
 - **Avoid it when:** the "error" is a normal, frequent outcome (such as "end of input"), or when you catch everything and move on in silence.
 
@@ -83,6 +119,17 @@ Exception handling is a language feature for errors: raise a signal, unwind the 
 ## Exit status
 
 An exit status is the number that a finished process hands back to whoever started it. On Unix, `0` means success and anything else means failure, in the range 0 to 255. It exists so that programs can be glued together: `if`, `&&` and `||` in a shell all read it. It is also a control signal in this repository. In [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) the exit code of a small program steers the regex match. In [`regex-sed`](../../src/regex-sed/README.md) the script exits `1` on purpose, and the wrapper maps that back to success. Every `check.sh` exits non-zero on any failure, so the sandbox gate can judge a run without reading it.
+
+```mermaid
+flowchart TB
+    accTitle: Exit status is a tiny interface in which one small code tells the caller which branch to take
+    accDescr: A command runs and exits with a status code. The caller, usually a shell, reads the code. If the status is 0, it takes the success path, so in cmd1 and cmd2 the second command runs. If the status is anything from 1 to 255, it takes the failure path, so in cmd1 or fallback the fallback runs.
+    P["cmd1 runs, then exits"] -->|"exit status"| S{{"Caller reads it: is it 0?"}}
+    S -->|"yes: 0"| Y["success path: cmd1 && cmd2 runs cmd2"]
+    S -->|"no: 1 to 255"| N["failure path: cmd1 || fallback runs fallback"]
+```
+
+The status is one small number. The caller does not learn what went wrong, only which branch to take. In `cmd1 && cmd2` the shell runs `cmd2` after a 0. In `cmd1 || fallback` it runs `fallback` after any other value. A shell `if` reads the same status. A program that needs to say more must also print a message or write a file.
 
 - **Use it when:** scripts and tools that other tools call. Document what each code means.
 - **Avoid:** using it for rich data (it is one small number), and assuming every platform uses the same range.
@@ -129,6 +176,19 @@ An integrity constraint is a rule that the database itself enforces: `NOT NULL`,
 
 Backtracking is a systematic search. Try a choice, go on, and if you get stuck, undo the choice and try the next one. It exists for problems with many possible answers and some rules to prune them: puzzles, parsing, and pattern matching. Perl, PCRE2 and .NET regex engines work this way. The entries in this repository turn it around: *do the work in side effects, then fail on purpose.* The match returns false only after every row has been written. What survives the failure is the whole lesson. Perl's `local` variables are restored, but its `INSERT` and `print` calls cannot be undone. [`regex-dotnet`](../../src/regex-dotnet/README.md) cannot play this game at all, because a failed .NET match throws its captures away.
 
+```mermaid
+flowchart TB
+    accTitle: Backtracking searches by trying one path and retreating to the last open choice when the path fails
+    accDescr: A small search tree. From the start there are two choices, A and B. Step 1, the search tries A and goes to A1. Step 2, A1 is a dead end. Step 3, the search backtracks to the start, the last choice with an alternative left, shown as a dotted arrow. Step 4, it tries B and goes to B1. Step 5, B1 succeeds.
+    S(["Start: two choices"]) -->|"1. try A"| A["A"]
+    A --> A1["2. A1: dead end"]
+    A1 -.->|"3. backtrack to the last open choice"| S
+    S -->|"4. try B"| B["B"]
+    B --> B1(["5. B1: success"])
+```
+
+The search remembers the choices that still have untried alternatives. When a path fails, it goes back to the most recent one. Here that is the start, where `B` is still open. Undoing a choice undoes the search's own state, not the outside world. As the paragraph above says, a row written along a failed path stays written.
+
 - **Use it when:** the search space is small, or you can prune it early.
 - **Avoid it when:** effects cannot be undone, or when the input comes from an attacker (see [Regular-expression denial of service](08-abstraction-leaks-and-implementation-dependence.md#regular-expression-denial-of-service)).
 
@@ -149,6 +209,21 @@ Backtracking is a systematic search. Try a choice, go on, and if you get stuck, 
 ## The cut: committing to a choice
 
 The *cut* is a Prolog idea: once the program has passed this point, commit to the choices made so far and discard the alternatives. It exists for speed and for determinism: you do not want a search to explore, or repeat, work you already know is settled. Regex engines have the same tools: PCRE's `(*COMMIT)`, atomic groups and possessive quantifiers. [`regex-pcre2`](../../src/regex-pcre2/README.md) and its siblings end the pattern with `(*COMMIT)(*FAIL)`. Without `(*COMMIT)` the engine would retry shorter loops, and the finalizer would run more than once. Prolog programmers distinguish "green" cuts (only speed) from "red" cuts (they change the answer).
+
+```mermaid
+flowchart TB
+    accTitle: The cut changes the search space itself, so abandoned alternatives are no longer considered
+    accDescr: A search tree with a cut. From the start there are two choices, A and B. The search takes A and reaches the cut, which commits to A. Choice B is drawn with a dashed border and marked pruned, because the cut removed it, and plain backtracking would have tried it later. After the cut, the search can still try the alternatives that come after the cut, A1 and then A2. A1 is a dead end and A2 succeeds. If A2 had failed as well, the whole search would fail and B would still never be tried.
+    S(["Start: two choices"]) -->|"1. try A"| A["A"]
+    A --> C{{"CUT: commit to A"}}
+    C --> A1["A1: dead end"]
+    C --> A2(["A2: success"])
+    S -.->|"B is cut off"| B["B: pruned, never tried"]
+    classDef pruned stroke-dasharray: 5 5
+    class B pruned
+```
+
+Compare this picture with plain backtracking. There, `B` would be tried after `A` failed. Here the cut commits to `A` first, so `B` is pruned. After the cut the search can still try the alternatives that come *after* it (`A1`, then `A2`). If all of them fail, the whole search fails. It does not go back to `B`. That is what "the cut changes the search space" means. Prolog's cut also discards choices made earlier in the same clause, and the picture shows only the simplest case.
 
 - **Use it when:** you know that later failure should never lead to a retry.
 - **Avoid it when:** you are not sure which kind of cut you have. A red cut hides a logic change inside a speed trick.
