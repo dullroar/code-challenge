@@ -13,6 +13,7 @@ A picture of how every program runs, one new entry and one new chapter, on event
 - **New entry:** [`javascript-events`](../../src/javascript-events/README.md): ten listeners on one `EventEmitter` are the whole program, and `setImmediate` gives the event loop a turn between cards.
 - **New chapter 10, "Events, callbacks and reactive control flow".** Who chooses what runs next, a synchronous `emit()` against the event loop, a trace you can read, state machines, backpressure, and a table that separates real events from look-alikes such as a window's own loop. It adds the concepts callbacks, publish and subscribe, the event loop and scheduling turns, and backpressure, and moves event-driven programming here from chapter 3.
 - **New exercise:** B22 (predict the event trace, then remove the scheduling boundary), checked by `lessons/tools/verify-exercises.sh`.
+- **A faster PDF.** The figures no longer put thousands of transparency groups into the PDF, which made Edge and Chrome show white pages for a long time. The Mermaid look is now flat (`classic`), and each SVG is post-processed (`flatten-text.mjs`). The PDF has about 400 objects instead of 7,500 and is half the size. The figures look the same.
 - **Build:** `python lessons/book/build.py` renders the diagrams with a pinned Mermaid CLI (see [`README.md`](README.md)); `--check-diagrams` is the full render gate.
 
 ## v3

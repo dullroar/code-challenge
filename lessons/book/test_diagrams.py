@@ -192,6 +192,28 @@ class RealRender(unittest.TestCase):
         self.assertIn("Parse error", errs[0])
         self.assertEqual(os.listdir(diagrams.CACHE), [], "no blank or partial figure is left behind")
 
+    SEQ = "sequenceDiagram\n    accTitle: T\n    accDescr: D\n    participant A\n    participant B\n    A->>B: hello\n    Note over A,B: a note"
+    STATE = "stateDiagram-v2\n    accTitle: T\n    accDescr: D\n    [*] --> One\n    One --> Two: go\n    Two --> [*]"
+
+    def test_the_svg_is_light_for_pdf_viewers(self):
+        """No centered text and no half-transparent shapes: WeasyPrint turns each into a PDF transparency group, and Edge's viewer
+        (PDFium) draws every group into an off-screen bitmap, so a book full of figures showed white pages for a long time."""
+        import re, shutil, subprocess
+        figs, errs = diagrams.render_all(self.r, {self.GOOD: "a", self.SEQ: "b", self.STATE: "c"})
+        self.assertEqual(errs, [])
+        for src, fig in figs.items():
+            svg = read(fig.svg)
+            self.assertNotIn(b'text-anchor="middle"', svg, fig.family)
+            if shutil.which("weasyprint"):
+                html, pdf = fig.svg + ".html", fig.svg + ".pdf"
+                with open(html, "w", encoding="utf-8") as f:
+                    f.write("<html><body style='margin:0'>" + svg.decode("utf-8") + "</body></html>")
+                subprocess.run(["weasyprint", "-q", html, pdf], check=True, capture_output=True)
+                with open(pdf, "rb") as f:
+                    data = f.read()
+                self.assertEqual(len(re.findall(rb"/S /Transparency", data)), 0, fig.family + ": the PDF has transparency groups")
+                self.assertEqual(len(re.findall(rb"/PatternType", data)), 0, fig.family + ": the PDF has gradient patterns")
+
     def test_the_output_is_the_same_twice(self):
         a, _ = diagrams.render_all(self.r, {self.GOOD: "a"})
         first = read(a[self.GOOD].svg)
