@@ -117,6 +117,8 @@ sequenceDiagram
 
 ### Two kinds of "then"
 
+The Node.js documentation says the same in two places: [`events`](https://nodejs.org/api/events.html) for `emit()`, and the guide to the [event loop, timers and `process.nextTick()`](https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick) for `setImmediate()`.
+
 This is the lesson. The table says *now* in some rows and *on a later turn* in others, and they are not the same.
 
 - **`emit()` is a call.** `events.emit('card-created', card)` calls every listener of `card-created`, in the order they were registered, and *returns only after they have all returned*. The listener runs on top of the caller on the **call stack**. If the listener emits another event, that is one more level. This is documented, and `check.mjs` proves it: a listener's output comes before the line after `emit()`.

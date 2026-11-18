@@ -65,6 +65,8 @@ sequenceDiagram
 
 ## Node's rules that matter here
 
+The sources are the Node.js [`events` documentation](https://nodejs.org/api/events.html) and its guide to the [event loop, timers and `process.nextTick()`](https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick).
+
 - **`emit()` is synchronous.** Listeners run in registration order, before `emit` returns. This is documented, so it is a promise and not an accident.
 - **The name `error` is special.** `emit('error', e)` with no listener *throws* `e`. Every other name with no listener does nothing.
 - **A copy of the listener list is made for each `emit`.** A listener that removes listeners (or adds some) changes the *next* emit, not the one in flight.
@@ -131,6 +133,7 @@ A window is not enough to make a program event-driven. The WPF, Tk, GLib and Swi
 
 - [Event-driven programming](https://en.wikipedia.org/wiki/Event-driven_programming) (Wikipedia)
 - [The event loop](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Event_loop) (MDN)
+- [Events: EventEmitter](https://nodejs.org/api/events.html) (Node.js documentation)
 
 **In this repo:**
 
@@ -158,6 +161,7 @@ A callback can be called at once, before the function you handed it to returns (
 **Read more:**
 
 - [Callback (computer programming)](https://en.wikipedia.org/wiki/Callback_(computer_programming)) (Wikipedia)
+- [Events: EventEmitter](https://nodejs.org/api/events.html) (Node.js documentation)
 
 **In this repo:**
 
@@ -183,6 +187,7 @@ The idea has two halves that are easy to confuse. *Who is called* is decided by 
 **Read more:**
 
 - [Publish-subscribe pattern](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) (Wikipedia)
+- [Events: EventEmitter](https://nodejs.org/api/events.html) (Node.js documentation)
 
 **In this repo:**
 
@@ -207,6 +212,7 @@ User-interface toolkits run the same kind of loop. The WPF dispatcher (`Applicat
 
 - [Event loop](https://en.wikipedia.org/wiki/Event_loop) (Wikipedia)
 - [The event loop](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Event_loop) (MDN)
+- [The Node.js event loop, timers and process.nextTick()](https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick) (Node.js documentation)
 
 **In this repo:**
 

@@ -16,3 +16,4 @@ User-interface toolkits run the same kind of loop. The WPF dispatcher (`Applicat
 
 - [Event loop](https://en.wikipedia.org/wiki/Event_loop) (Wikipedia)
 - [The event loop](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Event_loop) (MDN)
+- [The Node.js event loop, timers and process.nextTick()](https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick) (Node.js documentation)
