@@ -13,3 +13,4 @@ A callback can be called at once, before the function you handed it to returns (
 **Read more:**
 
 - [Callback (computer programming)](https://en.wikipedia.org/wiki/Callback_(computer_programming)) (Wikipedia)
+- [Events: EventEmitter](https://nodejs.org/api/events.html) (Node.js documentation)

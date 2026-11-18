@@ -127,7 +127,7 @@ The [README](../../src/javascript-events/README.md#how-the-stunt-works) has the 
 - **The name `error` is special.** `emit('error', e)` with no listener throws `e`.
 - **Cleanup is part of the design.** A listener, timer or immediate that stays behind keeps a process alive or leaks.
 
-Tags: `EventEmitter`'s synchronous call and its order, and `setImmediate()` running after the current operation, are documented Node behavior (**guaranteed**). The order of `setImmediate` against `setTimeout(fn, 0)` is not promised everywhere, so the program does not depend on it.
+Tags: `EventEmitter`'s synchronous call and its order, and `setImmediate()` running after the current operation, are documented Node behavior (**guaranteed**). See the Node.js [`events` documentation](https://nodejs.org/api/events.html). The order of `setImmediate` against `setTimeout(fn, 0)` is not promised everywhere, so the program does not depend on it.
 
 ### 4. Do this in production and you're fired
 

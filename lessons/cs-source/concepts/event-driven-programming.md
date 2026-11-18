@@ -16,3 +16,4 @@ A window is not enough to make a program event-driven. The WPF, Tk, GLib and Swi
 
 - [Event-driven programming](https://en.wikipedia.org/wiki/Event-driven_programming) (Wikipedia)
 - [The event loop](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Event_loop) (MDN)
+- [Events: EventEmitter](https://nodejs.org/api/events.html) (Node.js documentation)

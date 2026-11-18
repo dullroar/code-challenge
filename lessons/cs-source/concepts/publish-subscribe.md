@@ -13,3 +13,4 @@ The idea has two halves that are easy to confuse. *Who is called* is decided by 
 **Read more:**
 
 - [Publish-subscribe pattern](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) (Wikipedia)
+- [Events: EventEmitter](https://nodejs.org/api/events.html) (Node.js documentation)
