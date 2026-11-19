@@ -57,3 +57,11 @@ figure.diagram figcaption { font: 9pt/1.3 "DejaVu Sans", sans-serif; color: #333
 /* A heading, and the line that says where a diagram came from, stay on the page with the diagram. */
 h3 + p:has(+ figure.diagram), p:has(+ figure.diagram) { break-after: avoid; }
 figure.diagram { break-before: auto; }
+
+@media print {
+  /* Pandoc reserves 5em for code line numbers, even on unnumbered code. */
+  pre.sourceCode:not(.numberSource) > code.sourceCode > span { text-indent: 0; padding-left: 0; }
+  /* The seven-column entry summary otherwise exceeds the page at its minimum auto width. */
+  #every-entry-at-a-glance + table { table-layout: fixed; }
+  #every-entry-at-a-glance + table :is(th, td) { overflow-wrap: anywhere; }
+}
