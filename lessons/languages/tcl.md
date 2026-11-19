@@ -2,6 +2,8 @@
 
 Entries: [`src/tcl`](../../src/tcl/README.md) (a `while` loop, dicts, an optional Tk window) and [`src/tcl-weird`](../../src/tcl-weird/README.md) (the program lives in SQLite).
 
+For an advanced reading path with traces and experiments, see the [Tcl study guide](../study-guides/languages/tcl.md).
+
 ## What makes Tcl special
 
 Tcl's rule is "everything is a command, and every command receives its arguments as strings". There is no keyword for `while`, `proc` or `if`: they are commands, and `{...}` is just a way to hand a command an unevaluated string. That makes the language tiny, and makes two features cheap that most languages treat as exotic: **rewriting how unknown commands are resolved** and **running a string as code in another scope**.

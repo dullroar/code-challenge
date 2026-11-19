@@ -2,6 +2,8 @@
 
 Entries: [`src/ed-weird`](../../src/ed-weird/README.md) (the buffer is the machine) and [`src/ex-weird`](../../src/ex-weird/README.md) (a program you can edit). `ed` is the original Unix line editor, from 1969 to 1971. You tell it which lines (an *address*) and what to do to them (a *command*). It has no screen. Everything it does to a file, it does to a **buffer** of lines in memory, one command at a time. The commands are so general that the program in this book is made of nothing else. `ex` is its bigger descendant: the command language of `vi`. It adds registers, marks, `@` and the bar.
 
+For an advanced reading path with traces and experiments, see the [ed and Ex study guide](../study-guides/languages/ed-and-ex.md).
+
 ## What makes ed special
 
 | Feature | What it teaches |

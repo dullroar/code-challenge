@@ -2,6 +2,8 @@
 
 Entries: [`src/lisp`](../../src/lisp/README.md) (one `LOOP` form) and [`src/lisp-weird`](../../src/lisp-weird/README.md) (no loop, no `if`: a class hierarchy and a method combination do the work).
 
+For an advanced reading path with traces and experiments, see the [Common Lisp study guide](../study-guides/languages/common-lisp.md).
+
 ## What makes Common Lisp special
 
 Common Lisp is the language where almost every mechanism the language *uses* is also a mechanism you can *reach*: the reader that turns text into data, the macro expander, the object system's dispatch, the condition system. The idiomatic entry uses very little of that. The weird one uses the object system as a control-flow construct.

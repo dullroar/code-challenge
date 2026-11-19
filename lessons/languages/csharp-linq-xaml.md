@@ -2,6 +2,8 @@
 
 Entries: [`ModernChallenge1`](../../src/ModernChallenge1/README.md), [`LinqChallenge1`](../../src/LinqChallenge1/README.md), [`LinqChallenge2`](../../src/LinqChallenge2/README.md), [`xaml`](../../src/xaml/README.md), and the ports [Java](../../src/JavaChallenge1/README.md), [Kotlin](../../src/KotlinChallenge1/README.md), [Python](../../src/PythonChallenge1/README.md), [Go](../../src/GoChallenge1/README.md), [Rust](../../src/RustChallenge1/README.md).
 
+For an advanced reading path with traces and experiments, see the [C#, LINQ, XAML and ports study guide](../study-guides/languages/csharp-linq-xaml-and-ports.md).
+
 C# is the *canonical* language of the repo: the challenge began as a 2008 classroom exercise showing off C# 3.0 and .NET 3.x features. It is also where the [blocking problems](../blocking-problems.md) are measured from.
 
 ## The original: ModernChallenge1

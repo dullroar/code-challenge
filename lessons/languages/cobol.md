@@ -2,6 +2,8 @@
 
 Entries: [`src/cobol`](../../src/cobol/README.md) (the idiomatic one) and [`src/cobol-weird`](../../src/cobol-weird/README.md) (no `IF`, no `PERFORM`).
 
+For an advanced reading path with traces and experiments, see the [COBOL study guide](../study-guides/languages/cobol.md).
+
 COBOL (1959) was built for records, totals and reports, and it shows. What makes it special is that it moves rules and shapes *out of the procedure and into the data description*. What makes it a rich field for quirks is that it is old enough to have a feature, `ALTER`, that the standard has since deleted.
 
 ## What makes COBOL special

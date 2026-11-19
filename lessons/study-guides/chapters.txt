@@ -1,0 +1,25 @@
+# The study guides' chapters, in reading order. Paths are relative to lessons/study-guides/.
+# README.md is both the GitHub index and the first chapter of the standalone document.
+# These are NOT chapters of the book (lessons/book/chapters.txt does not list them).
+README.md
+concepts/reading-adversarial-programs.md
+languages/csharp-linq-xaml-and-ports.md
+languages/cobol.md
+languages/haskell.md
+languages/forth.md
+languages/make-and-cmake.md
+languages/regex-engines-and-sed.md
+languages/apl.md
+languages/javascript.md
+languages/common-lisp.md
+languages/m4.md
+languages/tcl.md
+languages/ed-and-ex.md
+languages/tar.md
+concepts/state-and-control-beyond-variables.md
+concepts/evaluation-demand-and-laziness.md
+concepts/formal-languages-and-weird-machines.md
+concepts/effects-errors-and-commitment.md
+concepts/portability-abstraction-and-cost.md
+concepts/events-callbacks-and-reactive-control.md
+concepts/comparative-machine-design.md

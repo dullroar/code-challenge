@@ -2,6 +2,8 @@
 
 Entries: [`src/apl`](../../src/apl/README.md) (five rolls and one take-while) and [`src/apl-weird`](../../src/apl-weird/README.md) (functions that write their successors).
 
+For an advanced reading path with traces and experiments, see the [APL study guide](../study-guides/languages/apl.md).
+
 APL gets a page to itself, because it is the odd one out in the whole repo. Every other language here was built to *run* programs. APL began as a way to *describe* them.
 
 ## APL was meant for the whiteboard

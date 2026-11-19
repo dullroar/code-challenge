@@ -2,6 +2,8 @@
 
 Entries: [`src/make-gnu`](../../src/make-gnu/README.md) and [`src/cmake`](../../src/cmake/README.md). Both are build tools asked to behave like programming languages, in different ways.
 
+For an advanced reading path with traces and experiments, see the [Make and CMake study guide](../study-guides/languages/make-and-cmake.md).
+
 ## GNU Make
 
 ### 1. Behold the monstrosity

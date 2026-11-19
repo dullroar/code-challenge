@@ -635,6 +635,23 @@ def lesson_title(rel):
             return line[2:].strip()
     return rel
 
+def study_guides_section():
+    """The "Study guides" section of the index: one link per guide, read from lessons/study-guides/chapters.txt (the guides are hand-written;
+    only this list is generated). Returns "" when the study guides do not exist, so the book builds without them."""
+    manifest = os.path.join(LESSONS, "study-guides", "chapters.txt")
+    if not os.path.isfile(manifest):
+        return ""
+    paths = [l.strip() for l in read(manifest).splitlines() if l.strip() and not l.startswith("#") and l.strip() != "README.md"]
+    def entry(rel):
+        title = lesson_title(f"study-guides/{rel}")
+        return f"- [{title}](study-guides/{rel})"
+    langs = [entry(r) for r in paths if r.startswith("languages/")]
+    concepts = [entry(r) for r in paths if r.startswith("concepts/")]
+    return "\n\n".join(["## Study guides",
+                         "Hand-written guides for advanced readers: traces of a fixed run, predictions before execution, and evidence. They are a "
+                         "separate document from the book. See [the study guides](study-guides/README.md).",
+                         "**Language families**\n\n" + "\n".join(langs), "**Concepts**\n\n" + "\n".join(concepts)])
+
 def generate_index(model):
     L = Links(model, "")
     dirs = lambda ids: ", ".join(L.entry(d) for d in sorted(ids, key=str.casefold))
@@ -662,6 +679,9 @@ def generate_index(model):
              "## Index of languages", wrap(lettered(langs)),
              "## Index of entries", wrap(lettered(entries)),
              "## Index of roles: what plays the loop", wrap(lettered(roles))]
+    guides = study_guides_section()
+    if guides:
+        parts.append(guides)
     return "\n\n".join(parts) + "\n"
 
 MARK = re.compile(r"(<!-- BEGIN GENERATED ([\w:./-]+) -->)\n.*?(<!-- END GENERATED \2 -->)", re.S)

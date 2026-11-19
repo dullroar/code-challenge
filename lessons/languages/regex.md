@@ -2,6 +2,8 @@
 
 Entries: [`regex-perl`](../../src/regex-perl/README.md), [`regex-pcre2`](../../src/regex-pcre2/README.md), [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md), [`regex-dotnet`](../../src/regex-dotnet/README.md), [`regex-sed`](../../src/regex-sed/README.md).
 
+For an advanced reading path with traces and experiments, see the [regex engines and sed study guide](../study-guides/languages/regex-engines-and-sed.md).
+
 A regular expression looks like a pattern. These entries treat it as a **program**: the match is the computation, backtracking is the search, and the side effects are what you *wanted*. The recurring signature move is to do all the work and then **return "no match" on purpose**.
 
 ## What makes each engine special

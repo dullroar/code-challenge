@@ -2,6 +2,8 @@
 
 # What counts as a machine?
 
+For an advanced reading path with traces and experiments, see the [state and control beyond variables study guide](../study-guides/concepts/state-and-control-beyond-variables.md).
+
 Before you can say that a regex engine, a build tool or a markup file "computes", you need to say what a machine is. The answer is smaller than you might think. A machine has a **state**, a set of allowed **steps**, a way to **represent** its values, and some facts that stay true while it runs (**invariants**). If you can say what those four are, you have named the machine.
 
 ```mermaid

@@ -146,9 +146,10 @@ def collect_diagrams(texts):
             wanted.setdefault(src, where_of(c, text, first))
     return wanted
 
-def render_figures(texts, required):
+def render_figures(texts, required, prune_cache=True):
     """Render the book's diagrams (cached). Returns {source: Figure}, or None when there is no renderer and none is required.
-    Never returns a partial result: any diagram that fails to render or cannot print legibly stops the build."""
+    Never returns a partial result: any diagram that fails to render or cannot print legibly stops the build.
+    `prune_cache=False` keeps cached figures that this document set does not use (the study guides share the cache with the book)."""
     wanted = collect_diagrams(texts)
     if not wanted:
         return {}
@@ -168,7 +169,7 @@ def render_figures(texts, required):
         raise SystemExit(f"{len(bad)} diagram problem(s)")
     hits = sum(1 for f in figs.values() if f.hit)
     print(f"diagrams: {len(figs)} rendered with {renderer.describe()} ({hits} from cache, {len(figs) - hits} drawn now)")
-    gone = diagrams.prune(figs)
+    gone = diagrams.prune(figs) if prune_cache else []
     if gone:
         print(f"diagrams: removed {len(gone)} stale cached file(s)")
     return figs
@@ -211,9 +212,9 @@ def pdf_engine():
         if shutil.which(e):
             return e
 
-def source_date_epoch():
-    """Midnight UTC of `date:` in metadata.yaml; the only 'now' the build ever sees."""
-    with open(os.path.join(HERE, "metadata.yaml"), encoding="utf-8") as f:
+def source_date_epoch(metadata=None):
+    """Midnight UTC of `date:` in metadata.yaml (or the given metadata file); the only 'now' the build ever sees."""
+    with open(metadata or os.path.join(HERE, "metadata.yaml"), encoding="utf-8") as f:
         m = re.search(r"^date:\s*(\d{4}-\d\d-\d\d)\s*$", f.read(), re.M)
     if not m:
         raise SystemExit("metadata.yaml needs a `date: YYYY-MM-DD` line (it fixes the build timestamp)")
@@ -345,31 +346,38 @@ def main():
     generate("--check" in sys.argv)
     if "--generate" in sys.argv:        # refresh the generated Markdown only; skip pandoc
         return
-    os.environ["SOURCE_DATE_EPOCH"] = source_date_epoch()
     checking = "--check" in sys.argv
     texts = chapter_texts()
-    figs = render_figures(texts, required=not checking)     # a full build needs the renderer; --check only notes its absence
-    md = build_markdown(texts, figs, "svg", "book.md")
-    base = lambda src: ["pandoc", "-f", "gfm+gfm_auto_identifiers+yaml_metadata_block", "--metadata-file", os.path.join(HERE, "metadata.yaml"),
-            "--wrap=none", "--toc", "--toc-depth=2", "--number-sections", "--include-before-body", FRONT, src]
+    html = build_documents(texts, BOOK, os.path.join(HERE, "metadata.yaml"), FRONT, "weird-way.html", "book", checking)
+    if checking:
+        check(html)
+
+def build_documents(texts, stem, metadata, front, html_name, md_stem, checking, prune_cache=True):
+    """Build one document set from `texts` ({chapter path relative to lessons/: Markdown}): standalone HTML in lessons/book/out/
+    and, unless `checking`, `<stem>.epub` and `<stem>.pdf` in the artifacts directory. The book and the study guides both call this,
+    so they share one Pandoc command line, one stylesheet, one diagram renderer and one reproducibility rule. Returns the HTML path."""
+    os.environ["SOURCE_DATE_EPOCH"] = source_date_epoch(metadata)
+    figs = render_figures(texts, required=not checking, prune_cache=prune_cache)     # a full build needs the renderer; --check only notes its absence
+    md = build_markdown(texts, figs, "svg", md_stem + ".md")
+    base = lambda src: ["pandoc", "-f", "gfm+gfm_auto_identifiers+yaml_metadata_block", "--metadata-file", metadata,
+            "--wrap=none", "--toc", "--toc-depth=2", "--number-sections", "--include-before-body", front, src]
     # Pandoc's gfm reader does not read a YAML block from --metadata-file as document metadata
     # for every writer, so pass it explicitly too.
-    outs = [("html", md, ["-s", "--embed-resources", "--css", CSS, "-o", os.path.join(OUT, "weird-way.html")])]
+    outs = [("html", md, ["-s", "--embed-resources", "--css", CSS, "-o", os.path.join(OUT, html_name)])]
     if not checking:
         # The EPUB gets PNGs (every e-reader draws them); the PDF and HTML get SVG, which is sharper and scales to the page.
-        epub_md = build_markdown(texts, figs, "png", "book-epub.md") if figs else md
-        outs.append(("epub", epub_md, ["--epub-title-page=false", "--css", CSS, "-o", os.path.join(artifacts_dir(), BOOK + ".epub")]))
+        epub_md = build_markdown(texts, figs, "png", md_stem + "-epub.md") if figs else md
+        outs.append(("epub", epub_md, ["--epub-title-page=false", "--css", CSS, "-o", os.path.join(artifacts_dir(), stem + ".epub")]))
         engine = pdf_engine()
         if engine:
             outs.append(("pdf", md, ["--pdf-engine=" + engine, "--css", CSS, "--lua-filter", os.path.join(HERE, "wrap-code.lua"),
-                                     "--metadata", "toc-title=Contents", "-o", os.path.join(artifacts_dir(), PDF_NAME)]))
+                                     "--metadata", "toc-title=Contents", "-o", os.path.join(artifacts_dir(), stem + ".pdf")]))
         else:
             print("note: weasyprint not found (uv tool install weasyprint); skipping PDF")
     for name, src, extra in outs:
         subprocess.run(base(src) + extra, check=True)
         print("wrote", extra[-1])
-    if checking:
-        check(os.path.join(OUT, "weird-way.html"))
+    return os.path.join(OUT, html_name)
 
 def check(html_path):
     with open(html_path, encoding="utf-8") as f:

@@ -2,6 +2,8 @@
 
 Entries: [`src/javascript`](../../src/javascript/README.md) (the original's bodiless `for`, in Node.js), [`src/javascript-weird`](../../src/javascript-weird/README.md) (closures and a lazy iterator, with no loop statement) and [`src/javascript-events`](../../src/javascript-events/README.md) (ten listeners on an `EventEmitter`, with no loop statement and no pipeline). JavaScript is the language of the browser, and with Node.js it is also a general-purpose scripting language on the server. Its `for` statement is the C `for`: three clauses and a body. Here the body is empty and the three clauses are the whole program.
 
+For an advanced reading path with traces and experiments, see the [JavaScript study guide](../study-guides/languages/javascript.md).
+
 ## What makes JavaScript special
 
 | Feature | What it teaches |
