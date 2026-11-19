@@ -364,7 +364,29 @@ def diagram_gate():
     print(f"FULL RENDER GATE PASSED: {len(figs)} diagram(s) rendered in {len(families)} families ({', '.join(families)}); "
           f"every one fits a printed page at >= {diagrams.MIN_SCALE:.0%} scale; a second pass came entirely from the cache")
 
+def lint_written_pdf(path, release):
+    """Use the same standalone checker for both documents, with the actual output path."""
+    folder = os.path.join(OUT, "pdf-lint", os.path.splitext(os.path.basename(path))[0])
+    command = [sys.executable, os.path.join(HERE, "lint_pdf.py"), path,
+               "--json", os.path.join(folder, "report.json"), "--annotate-dir", os.path.join(folder, "pages")]
+    if release:
+        command.append("--release")
+    status = subprocess.run(command).returncode
+    if status and release:
+        raise SystemExit(status)
+    if status:
+        print("note: PDF lint returned", status, "(use --release to gate a full build)")
+
+
+def release_mode():
+    release = "--release" in sys.argv
+    if release and any(flag in sys.argv for flag in ("--check", "--check-diagrams", "--generate", "--orphans", "--check-links")):
+        raise SystemExit("--release requires a full PDF build")
+    return release
+
+
 def main():
+    release_mode()
     if "--orphans" in sys.argv:
         orphans()
         return
@@ -390,6 +412,10 @@ def build_documents(texts, stem, metadata, front, html_name, md_stem, checking, 
     """Build one document set from `texts` ({chapter path relative to lessons/: Markdown}): standalone HTML in lessons/book/out/
     and, unless `checking`, `<stem>.epub` and `<stem>.pdf` in the artifacts directory. The book and the study guides both call this,
     so they share one Pandoc command line, one stylesheet, one diagram renderer and one reproducibility rule. Returns the HTML path."""
+    release = release_mode()
+    engine = None if checking else pdf_engine()
+    if release and not engine:
+        raise SystemExit("release PDF build requires weasyprint")
     os.environ["SOURCE_DATE_EPOCH"] = source_date_epoch(metadata)
     figs = render_figures(texts, required=not checking, prune_cache=prune_cache)     # a full build needs the renderer; --check only notes its absence
     document = prepare_document(texts, figs, "svg", md_stem)
@@ -401,7 +427,6 @@ def build_documents(texts, stem, metadata, front, html_name, md_stem, checking, 
         # The EPUB gets PNGs (every e-reader draws them); the PDF and HTML get SVG, which is sharper and scales to the page.
         epub_document = prepare_document(texts, figs, "png", md_stem + "-epub", front=front)
         outs.append(("epub", epub_document, ["--epub-title-page=false", "--css", CSS, "-o", os.path.join(artifacts_dir(), stem + ".epub")]))
-        engine = pdf_engine()
         if engine:
             outs.append(("pdf", document, front_option + ["--pdf-engine=" + engine, "--css", CSS, "--lua-filter", os.path.join(HERE, "wrap-code.lua"),
                                      "--metadata", "toc-title=Contents", "-o", os.path.join(artifacts_dir(), stem + ".pdf")]))
@@ -409,7 +434,9 @@ def build_documents(texts, stem, metadata, front, html_name, md_stem, checking, 
             print("note: weasyprint not found (uv tool install weasyprint); skipping PDF")
     for name, src, extra in outs:
         subprocess.run(base + extra, input=src, encoding="utf-8", check=True)
-        print("wrote", extra[-1])
+        print("wrote", extra[-1], flush=True)
+        if name == "pdf":
+            lint_written_pdf(extra[-1], release)
     return os.path.join(OUT, html_name)
 
 def check(html_path):

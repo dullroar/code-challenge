@@ -35,11 +35,12 @@ STEM = "learn-programming-the-weird-way-study-guides"
 HTML = "study-guides.html"
 
 def main():
+    book = load_book_build()
+    book.release_mode()
     if "--check-links" in sys.argv:        # (network) every external link in the guides must load; separate from the build, like the book's
         bad = study_guides.check_external()
         print("\n".join("BROKEN  " + b for b in bad) or "all external links in the study guides load")
         sys.exit(1 if bad else 0)
-    book = load_book_build()
     checking = "--check" in sys.argv
     problems = study_guides.check_all()
     if problems:

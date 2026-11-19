@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from PIL import Image
 import pymupdf as pdf
@@ -40,6 +41,39 @@ class GeometryTests(unittest.TestCase):
         region = (10, 10, 90, 90)
         self.assertEqual(overflow((20, 20, 91.49, 80), region, 1.5), {})
         self.assertAlmostEqual(overflow((20, 20, 91.51, 80), region, 1.5)["right"], 1.51)
+
+
+class BuildHookTests(unittest.TestCase):
+    def test_only_the_new_pdf_is_linted_and_release_propagates_status(self):
+        import build
+
+        with tempfile.TemporaryDirectory() as directory:
+            for checking in (True, False):
+                args = ["build.py", "--artifacts-dir", directory, "--check" if checking else "--release"]
+                with (patch.object(build.sys, "argv", args),
+                      patch.object(build, "source_date_epoch", return_value="0"),
+                      patch.object(build, "render_figures"),
+                      patch.object(build, "prepare_document", return_value="{}"),
+                      patch.object(build, "pdf_engine", return_value="weasyprint"),
+                      patch.object(build.subprocess, "run") as run):
+                    run.return_value.returncode = 2
+                    with redirect_stdout(StringIO()):
+                        if checking:
+                            build.build_documents({}, "custom", "metadata", "front", "check.html", "test", True)
+                        else:
+                            with self.assertRaises(SystemExit) as raised:
+                                build.build_documents({}, "custom", "metadata", "front", "test.html", "test", False)
+                            self.assertEqual(raised.exception.code, 2)
+                    commands = [call.args[0] for call in run.call_args_list]
+                    if checking:
+                        self.assertEqual(len(commands), 1)
+                        self.assertTrue(commands[0][-1].endswith("check.html"))
+                    else:
+                        self.assertEqual(len(commands), 4)
+                        expected = str(Path(directory) / "custom.pdf")
+                        self.assertEqual(commands[2][-1], expected)
+                        self.assertEqual(commands[3][2], expected)
+                        self.assertEqual(commands[3][-1], "--release")
 
 
 class Fixtures(unittest.TestCase):
