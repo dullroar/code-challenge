@@ -109,7 +109,7 @@ Integer width, timestamp precision, optimizer behavior, event loops and differen
 | **ed weird** | busybox `ed` has no `g`, `t`, `j` or `#` comments and cannot substitute on `^` | The check asserts that it cannot run the program, and the README says GNU ed only | A standard does not make two implementations equal |
 | **Ex weird** | nvi will not start if it cannot write `/var/tmp/vi.recover`, and the sandbox root is read-only | The sandbox images link that folder to `/tmp` | A tool's startup needs are part of its interface |
 | **Ex weird** | nvi writes its messages, and a note about having no terminal, to standard output | The launcher drops that one known line and fails on any other line that is not a card row | Check every line a tool prints |
-| **JavaScript** | `crypto.randomInt` is a module function, and the global `crypto` is Web Crypto | `crypto.getRandomValues` for the default seed | Same name, different object |
+| **JavaScript** | `randomInt` is exported by `node:crypto`, and the global `crypto` is Web Crypto | `crypto.getRandomValues` for the default seed | Same name, different object |
 | **JavaScript** | `mkdirSync(path, { recursive: true })` under `/proc` never returned (Node 24.15, Linux) | The error test uses a plain file as the parent folder | A negative test must not hang |
 
 ## Making failure visible and the rules enforceable

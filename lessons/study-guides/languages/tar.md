@@ -40,9 +40,9 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn, with the category wrapping to Meetings. Final totals are 41 to 59, with 3 to 5 cards. Rows go into SQLite and a summary is printed.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn, with the category wrapping to Meetings. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-In `tar-gnu`, the archive has five card slots (Meetings, Coding, Debugging, Learning, Meetings), each followed by a `stop-over` member that carries `limit=40` and means "halt if the total is *over* 40". Exactly 40 is not over 40, so the next slot runs. In `tar-gnu-weird`, a card is closed at the tick whose number equals the running total, and `done` is set when `total > 40`. A run needs between 41 and 59 ticks.
+Both tar entries report from SQLite. The archive program dispatches member operations, while the checkpoint program commits each tick. In `tar-gnu`, the archive has five card slots (Meetings, Coding, Debugging, Learning, Meetings), each followed by a `stop-over` member that carries `limit=40` and means "halt if the total is *over* 40". Exactly 40 is not over 40, so the next slot runs. In `tar-gnu-weird`, a card is closed at the tick whose number equals the running total, and `done` is set when `total > 40`. A run needs between 41 and 59 ticks.
 
 ## The machine to identify
 

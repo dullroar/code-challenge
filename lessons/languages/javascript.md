@@ -28,9 +28,9 @@ One statement, about 80 lines long. The body is empty. No function is declared i
 
 ### 2. How the hell does that work?
 
-- **The initializer builds the state.** One `let i = ...` holds a list of hours, the database, the clock and a seeded random generator. A `for` allows one declaration, so the state is one object.
+- **The initializer builds the state.** One `let i = ...` holds a list of hours, the database, the clock and a seeded random generator. A `for` allows one declaration, so the state is one object. The global Web Crypto object supplies a seed through `crypto.getRandomValues` when `SEED` is unset. `randomInt` is a separate export of `node:crypto`.
 - **The condition is the stop rule, and the report.** `total <= 40 ? true : (print, false)`. While it says `true` the loop goes on. When it says `false` it has already printed the result.
-- **The iterator is the work.** It draws the hours and saves the card. It runs *before* each test, so the card that crosses 40 is saved before the test sees it. That is why the crossing card is included.
+- **The iterator is the work.** It draws the hours and saves the card. After the initial test, each update saves its card before the next test. That is why the crossing card is included.
 - **A timer is the animation.** On a terminal, `setInterval` pulses the DEMO ONLY line. It starts only after the loop, so it cannot slow the cards down.
 
 The [README](../../src/javascript/README.md#how-the-stunt-works) has the table of what the C# did and what this does, and a measured comparison with the original.
@@ -147,7 +147,7 @@ See [exercise B22](../exercises.md#b22-javascript-event-driven-predict-the-trace
 <!-- BEGIN GENERATED program-flow:languages/javascript.md -->
 ## How each program runs
 
-Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) shows what the challenge asks for and where entries differ.
 
 ### Program flow of `javascript`
 

@@ -40,9 +40,9 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and the fifth card is drawn, with the category wrapping to Meetings. Final totals are 41 to 59, with 3 to 5 cards.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and the fifth card is drawn, with the category wrapping to Meetings. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-Both scripts handle this the same way: the launcher supplies **five** dice, because five cards of at least 10 hours always reach 50. The editor script decides how many of the five count. ed marks the first card whose marks reach 41 (`x\{41,\}`, [L46](../../../src/ed-weird/timecards.ed#L46)) and turns every later card into a "Dead" card. Ex reads a tape line for each new total: lines 0 to 40 say `@a` (go on), and lines 41 to 59 say `"` (a comment: do nothing) ([L53](../../../src/ex-weird/timecards.ex#L53)). A total of exactly 40 reads tape line 40, which says go on.
+The launchers load the editor output into SQLite. Both scripts limit the input the same way: the launcher supplies **five** dice, because five cards of at least 10 hours always reach 50. The editor script decides how many of the five count. ed marks the first card whose marks reach 41 (`x\{41,\}`, [L46](../../../src/ed-weird/timecards.ed#L46)) and turns every later card into a "Dead" card. Ex reads a tape line for each new total: lines 0 to 40 say `@a` (go on), and lines 41 to 59 say `"` (a comment: do nothing) ([L53](../../../src/ex-weird/timecards.ex#L53)). A total of exactly 40 reads tape line 40, which says go on.
 
 ## The machine to identify
 
@@ -97,6 +97,8 @@ The Ex diagram has a cycle that goes through a register, and the cycle ends when
 
 Use `DICE="5 9 2 0 0"`: hours 15, 19, 12, 10, 10. Both traces were produced by running scratch copies of the scripts in the sandbox with a few print commands added.
 
+On GNU ed 1.20.1 and Vim Ex 9.1, the launchers with `DICE="5 9 2 0 0"` reproduced 15, 34 and 46 on stdout and in SQLite 3.45.1. The Ex tape can be inspected in a scratch copy by adding `'tp` immediately after `@d`.
+
 ### ed: the buffer after each stage
 
 The scratch copy printed the buffer (`,p`) after each stage:
@@ -146,7 +148,7 @@ Coding 19 34
 Debugging 12 46
 ```
 
-The line `15 @a` is the tape line the mark points at after card 1: total 15, instruction "go on". After card 3 the mark is at line 46, whose instruction is `"`: a comment, so `@n` does nothing and the program ends.
+After card 1 the tape line is `15 @a`. The script copies that line to the end of the buffer, strips the leading digits and space with `$s/^[0-9]* //`, then yanks the remaining `@a` into register `n` and deletes the copy ([source](../../../src/ex-weird/timecards.ex#L85-L88)). This is a second copy of the tape line. The first copy supplied the total for the printed row. After card 3 the tape line is `46 "`, so `n` receives only the comment and `@n` ends the run.
 
 | Pass | Mark `t` before | Card hours | Mark `t` after (= total) | Tape instruction | What `@n` runs |
 | --- | ---: | ---: | ---: | --- | --- |

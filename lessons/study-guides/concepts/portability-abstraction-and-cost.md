@@ -17,7 +17,7 @@ Scope limits. The guide is about *claims*: how to word them and test them. It do
 
 ## Before you begin
 
-**Safety model.** Every entry writes fictional **DEMO ONLY** data to a local scratch file or database, and the programs start processes. Read the source first and run it in the sandbox first, for example `sandbox/container/run-image.sh src/awk-weird`. Work on copies ([Running things safely](../../exercises.md#running-things-safely)). Never run a runaway experiment outside a timeout: use `SANDBOX_TIMEOUT=30`, and do not run `awk-weird` under mawk on `/dev/urandom`.
+**Safety model.** The cards are fictional **DEMO ONLY** data. Programs can write to local scratch files or databases and can start processes. Read the source first and run it in the sandbox first, for example `sandbox/container/run-image.sh src/awk-weird`. Work on copies ([Running things safely](../../exercises.md#running-things-safely)). Never run a runaway experiment outside a timeout: use `SANDBOX_TIMEOUT=30`, and do not run `awk-weird` under mawk on `/dev/urandom`.
 
 **Prediction rule.** For each claim you make, write the evidence that would show it is *false*. A claim with no such evidence is a hope.
 
@@ -33,9 +33,9 @@ Scope limits. The guide is about *claims*: how to word them and test them. It do
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19; categories cycle through Meetings, Coding, Debugging and Learning; the running total rises until it passes 40; the run **retains the first card that takes the total above 40**; a total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Final totals are 41 to 59, with 3 to 5 cards. Rows are saved to SQLite with the ISO week (`2026-W47`) and a `DEMO ONLY` marker.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-For a portability reader, the challenge has four *host dependencies* hidden inside it: a random source, a clock and the ISO week, a database, and the platform's tools. Each entry takes them from somewhere different, and each choice is a portability decision. The shared checker `lessons/tools/check-demo.sh` tests the *result* the same way for all.
+For a portability reader, the entries have host dependencies hiding in the clock, random source, storage and toolchain. Find which ones your entry actually uses. The fixed LINQ weeks need no random draws, and the C PCRE2 and .NET regex examples need a writable TSV path. The shared checker `lessons/tools/check-demo.sh` tests the numeric report for runs that implement the challenge.
 
 ## The machine to identify
 
@@ -49,7 +49,7 @@ For portability, the five questions become questions about *dependencies*.
 
 **What stops it.** The stop rule is usually portable. The failure modes are not: a missing feature may stop the program loudly, or let it succeed with the wrong answer.
 
-**What commits.** Each entry commits through `sqlite3` or a SQLite library. A missing `sqlite3` is a loud failure, which is the good kind.
+**What commits.** Check the storage dependency before predicting failure. An entry that calls the `sqlite3` command needs it on the host; a linked SQLite library or a plain TSV writer has a different failure boundary.
 
 ## Trace one run
 
@@ -85,7 +85,7 @@ Every row was run in the sandbox or in a scratch folder. Two of them name "Park-
 | **Portability** | Broad | Narrow, and the README says how narrow |
 | **Cost** | Normal | A cliff may be the point |
 
-The repository's own tally of how strong each entry's promise is, taken from the `assurance` key of the READMEs: **17** entries are guaranteed (the ports, the LINQ entries, the JavaScript entries, plain COBOL, Haskell, Forth, Lisp and awk, and `regex-dotnet`), **16** are implementation-permitted (APL, `awk-weird`, `cobol-weird`, `forth-weird`, `haskell-weird`, `lisp-weird`, `m4`, the other regex entries, both tar entries, Tcl, `tcl-weird` and `ex-weird`), and **7** are accidentally exploited (`cmake`, `ed-weird`, `find-gnu`, `find-posix`, `make-gnu`, `regex-sed` and `xaml`). (`tcl-weird` was in the last group until its hours were drawn into a table instead of depending on SQLite's evaluation order.) Idiomatic entries tend to be guaranteed, and the weird entries are not.
+The `assurance` key of each README records the weakest dependency required by the mechanism. A table can count the declarations, while source, manuals and tests support specific claims. The tally is **17** entries are guaranteed (the ports, the LINQ entries, the JavaScript entries, plain COBOL, Haskell, Forth, Lisp and awk, and `regex-dotnet`), **16** are implementation-permitted (APL, `awk-weird`, `cobol-weird`, `forth-weird`, `haskell-weird`, `lisp-weird`, `m4`, the other regex entries, both tar entries, Tcl, `tcl-weird` and `ex-weird`), and **7** are accidentally exploited (`cmake`, `ed-weird`, `find-gnu`, `find-posix`, `make-gnu`, `regex-sed` and `xaml`). (`tcl-weird` was in the last group until its hours were drawn into a table instead of depending on SQLite's evaluation order.)
 
 ## What the exercises demonstrate
 
@@ -109,6 +109,9 @@ The repository's own tally of how strong each entry's promise is, taken from the
 | m4's `eval` is 32-bit | **Implementation-permitted** | GNU m4 1.4.x. `2147483647*4` gives `-4` silently. |
 | GNU tar's checkpoint callbacks and record counting | **Implementation-permitted** | Documented GNU options. The counts were measured on 1.34 and 1.35. |
 | Listing a tar archive gives a different tick count from creating it | **Accidentally exploited** knowledge | Tar skips data it need not read. Nobody promises it. |
+| POSIX `find -exec` substitutes `{}` as a whole argument | **Guaranteed** within POSIX syntax | POSIX leaves substitution inside a longer argument such as `{}/b09` unspecified; GNU find 4.9, bfs 3.1.2 and BusyBox 1.36.1 do it in the tested entry. |
+| `find-posix` visits a directory created while traversal is in progress | **Accidentally exploited** | Observed on those same three implementations. POSIX gives no traversal promise for a change made during the walk. This is the weaker dependency and determines the README label. |
+| .NET balancing groups remove a capture from another group | **Guaranteed** within the documented .NET API | The .NET engine documents it. The guarantee applies to that engine and makes no portability promise for other regex implementations. |
 | The `pcre2grep` callout script feature | **Implementation-permitted** | A build option. Ubuntu's own `pcre2grep` lacks it. |
 | Make's restart used as a loop | **Accidentally exploited** | Hyrum's law: a feature used for what it was not for. |
 | A sed regex used as a clock | **Accidentally exploited** | A performance cliff, and it varies by CPU. |

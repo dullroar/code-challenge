@@ -41,9 +41,9 @@ Work on a copy for any edit ([Running things safely](../../exercises.md#running-
 
 ## The shared challenge
 
-A *card* has a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add cards to a running total. The run **retains the first card that takes the total above 40**. A total of exactly 40 continues, so four 10-hour cards need a fifth. Totals end between 41 and 59, with 3 to 5 cards. Rows are saved to a local SQLite file as one transaction, and a summary is printed.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add cards to a running total. The run **retains the first card that takes the total above 40**. A total of exactly 40 continues, so four 10-hour cards need a fifth. Totals end between 41 and 59, with 3 to 5 cards.
 
-In Haskell the rule appears as the predicate `(<= 40)` inside `span`. That detail matters. `<= 40` is true for exactly 40, so exactly 40 stays in the "under" half and the next card is read. The crossing card is the *first element of the other half*, which is why the program writes `under ++ take 1 over`.
+Both Haskell entries save the cards in one SQLite transaction and print a summary. In Haskell the rule appears as the predicate `(<= 40)` inside `span`. That detail matters. `<= 40` is true for exactly 40, so exactly 40 stays in the "under" half and the next card is read. The crossing card is the *first element of the other half*, which is why the program writes `under ++ take 1 over`.
 
 ## The machine to identify
 

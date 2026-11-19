@@ -3,9 +3,9 @@ title: "Comparative case studies"
 ---
 For an advanced reading path with traces and experiments, see the [comparative machine design study guide](../study-guides/concepts/comparative-machine-design.md).
 
-The same job (add cards until the total passes 40, save them, show a window) is done here by a loop with no body, a regex that fails on purpose, a Makefile that rereads itself, and a list whose elements write to a database. This chapter puts them side by side. Each section names **a role** that something must play in every solution, such as "what repeats?", and shows which machinery plays it in each entry.
+The [shared challenge](../intro.md#what-the-challenge-does) asks for fictional cards up to and including the first card that takes the total over 40, a local record of those cards and a result the reader can see. Some entries print to a terminal, others open a window. See [where entries differ](../intro.md#where-entries-differ) for fixed LINQ data, the four-pass XAML ceiling and persistence variations. Each section asks what plays a particular **role**, starting with what repeats.
 
-The tables are *generated* from the metadata at the top of each entry's README, so they always match the code. Compare the rows within a section to see the same role played by different machines. Compare the sections to see how many different ways there are to build a loop. At the end, one table lists every entry with its kind, its evaluation strategy and the strength of its promises.
+The tables are generated from the metadata at the top of each entry’s README. The README and executable source are where you can check the classification. Evaluation describes what drives the main computation. In the C# `for`, for example, an embedded deferred LINQ projection is consumed immediately by `Sum()` on each test of the loop condition. The final table lists every entry with its kind, evaluation strategy and weakest required assurance.
 
 {{table:roles}}
 

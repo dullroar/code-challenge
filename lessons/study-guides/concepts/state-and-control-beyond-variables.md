@@ -17,7 +17,7 @@ Scope limits. The guide uses facts verified in the language guides and does not 
 
 ## Before you begin
 
-**Safety model.** Every entry writes fictional **DEMO ONLY** data to a local scratch file or database, and the programs start processes. Read the source first and run it in the sandbox first, for example `sandbox/container/run-image.sh src/cobol-weird`. Work on copies ([Running things safely](../../exercises.md#running-things-safely)).
+**Safety model.** The cards are fictional **DEMO ONLY** data. Programs can write to local scratch files or databases and can start processes. Read the source first and run it in the sandbox first, for example `sandbox/container/run-image.sh src/cobol-weird`. Work on copies ([Running things safely](../../exercises.md#running-things-safely)).
 
 **Prediction rule.** Before each run, write the *two* facts a trace needs: where the program is, and what it remembers. They are different columns. For COBOL's `ALTER`, one tells you where execution *is*, and the other tells you where the next `GO TO` *will go*.
 
@@ -33,9 +33,9 @@ Scope limits. The guide uses facts verified in the language guides and does not 
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19; categories cycle through Meetings, Coding, Debugging and Learning; the running total rises until it passes 40; the run **retains the first card that takes the total above 40**; a total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Final totals are 41 to 59, with 3 to 5 cards.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-As a machine, the challenge has a small state: `(cards so far, total)`, plus the next category. One step takes a number of hours, adds it to the total, records the card and either continues or finishes. The *invariant* after each recorded card is "the total equals the sum of the recorded hours". For the weird COBOL variant there is a second invariant that holds only after each successful add: `WS-HEADROOM` equals 59 plus the total. Each entry represents this same tiny machine in a different substance.
+As a machine, the challenge has a small state: `(cards so far, total)`, plus the next category. One step takes a number of hours, adds it to the total, records the card and either continues or finishes. The *invariant* after each recorded card is "the total equals the sum of the recorded hours". For the weird COBOL variant there is a second invariant that holds only after each successful add: `WS-HEADROOM` equals 59 plus the total. The examples in this trace represent that machine in different ways. The fixed LINQ demos and the XAML ceiling show where the shared model needs an extra stopping condition.
 
 ## The machine to identify
 
@@ -64,7 +64,7 @@ Use this worksheet for every entry. The five answers in the first column were ch
 
 **What stops it.** How the machine halts: an overflowing field, a flag that is zero, a file that is not written, a literal of 41 characters, a comment on a tape line, an empty compression, a method that returns true. A stop rule can be a *value* (a flag) or an *absence* (no file, no row, no input left).
 
-**What commits.** Where the effects become permanent: all the entries write one SQLite transaction or a script run once. State and commit are separate concerns: a debugger can see the state while the commit has not happened.
+**What commits.** Look for where the effects become permanent. A transaction can collect a whole run, while pcre2grep uses separate SQLite calls and the .NET regex host appends a TSV report. State and commit are separate concerns: a debugger can see the state while the commit has not happened.
 
 <!-- diagram-source: lessons/cs-source/chapters/02-what-counts-as-a-machine.md#block-1 -->
 
@@ -96,7 +96,7 @@ Read across. Three different substances hold the same facts: a jump target and a
 
 **Look at the stopped state.** In COBOL, `WS-HEADROOM` held 93 *twice*: once after a successful add and once after a failed one. A field that holds the same value at two different moments with two different meanings is a sign that the program's state is partly elsewhere: here, in the jump target.
 
-**Exactly 40.** In every entry that cycles through four categories, a total of 40 continues. The entries that bound the run by a finite list of four names cannot ([Comparative machine design](comparative-machine-design.md) lists them). The machine's *representation* decides what boundary it can express.
+**Exactly 40.** A conforming entry has a fifth card available even though there are four different category names. A supply of four slots makes that impossible, as in XAML and the original four-name implementations ([Comparative machine design](comparative-machine-design.md) traces the fixes). The machine's *representation* decides what boundary it can express.
 
 ## Compare the ordinary and weird designs
 

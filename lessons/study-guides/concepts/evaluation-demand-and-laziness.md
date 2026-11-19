@@ -17,7 +17,7 @@ Scope limits. The guide compares entries using facts verified in the language gu
 
 ## Before you begin
 
-**Safety model.** Every entry writes fictional **DEMO ONLY** data to a local scratch file or database, and the programs start processes. Read the source first and run it in the sandbox first (`sandbox/container/run-image.sh src/haskell-weird`). Work on copies ([Running things safely](../../exercises.md#running-things-safely)).
+**Safety model.** The cards are fictional **DEMO ONLY** data. Programs can write to local scratch files or databases and can start processes. Read the source first and run it in the sandbox first (`sandbox/container/run-image.sh src/haskell-weird`). Work on copies ([Running things safely](../../exercises.md#running-things-safely)).
 
 **Prediction rule.** Before each run, write how many hours values will be *drawn*, and what will have *happened* at each moment. In this topic the order of effects is part of the answer.
 
@@ -33,9 +33,9 @@ Scope limits. The guide compares entries using facts verified in the language gu
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19; categories cycle through Meetings, Coding, Debugging and Learning; the running total rises until it passes 40; the run **retains the first card that takes the total above 40**; a total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Final totals are 41 to 59, with 3 to 5 cards.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-The demand view of the challenge is: *the consumer wants cards until the total passes 40, and the crossing card must exist*. The crossing card is the awkward one, because you only know a card crosses by building it. Every strategy has to answer "how many values did I produce to find out?" That count is the clearest measure of what each strategy costs.
+For implementations that follow the numeric rule, *the consumer wants cards until the total passes 40, and the crossing card must exist*. The two fixed-week LINQ entries instead end at 40 hours, so the generator in the trace below is a separate teaching experiment. The crossing card is the awkward one, because you only know a card crosses by building it. Every strategy has to answer "how many values did I produce to find out?" That count is the clearest measure of what each strategy costs.
 
 ## The machine to identify
 
@@ -78,20 +78,21 @@ For hours 15, 19, 12 the question is "how many values were drawn to produce thre
 | --- | --- | ---: | --- |
 | `apl` | eager, whole array | **5** drawn, 2 discarded | the program draws five up front (`?5⍴10`), and the scan and take trim them |
 | `haskell` and `haskell-weird` | lazy by need | **3** | a scratch run with `[15, 19, 12] ++ error "a 4th card was demanded"` finished normally in both |
-| LINQ generator with `TakeWhile` keeping the crossing card | deferred, pull | **4** | a scratch console run printed four `drew` lines: the test must see the card after the crossing card fail |
+| `ModernChallenge1` and the plain Node header | eager conditions | **3** | source: C# immediately enumerates a deferred projection with `Sum()`; Node immediately applies `reduce`. Both test the total before the next draw. |
+| Scratch LINQ generator with `TakeWhile` keeping the crossing card | deferred, pull | **4** | a scratch console run printed four `drew` lines: the test must see the card after the crossing card fail |
 | `javascript-weird` | pull | **3** draws, **4** asks | the machine answered four times; the fourth said `undefined` |
 | `lisp-weird` | method chain, `or` | **3** | three methods ran, two did not |
 | `cmake` | regex pass, no short-circuit | **4** lookups | the final registers held a fourth lookup (10 hours) that was never logged |
 | `tar-gnu`, `ed-weird`, `ex-weird` | up-front draws | **5** drawn, 3 count | the builder or launcher draws five values first |
 | `m4` | rescanning | **3** | three expansions of `tc_card` |
 
-Read the column by strategy. **Lazy** programs draw exactly what the stop rule needs. **Eager and up-front** programs draw the worst-case bound (five cards of at least 10 hours reach 50) and trim. **Deferred pipelines** can overshoot by one because a test needs to see a value before it can refuse it. **CMake** overshoots by one for a different reason: both operands of its `AND` ran.
+Read the column by strategy. The Haskell implementations draw exactly what their predicate needs. APL draws up to the worst-case bound before testing the total and trims. An eager driver can also work one card at a time, as the C# and Node headers do. **Deferred pipelines** can overshoot by one because a test needs to see a value before it can refuse it. **CMake** overshoots by one for a different reason: both operands of its `AND` ran.
 
 **The Haskell timing, in order.** In `haskell-weird`, `sheet` returns at once and nothing has run. Then `evaluate (length cards)` forces cell 1 (effect: print and insert), cell 2, cell 3, and `span` stops without forcing cell 4. Only after that does `COMMIT` and `hClose` run. If the count were lazy, the cells would be forced after `hClose`, and the first insert would fail with `handle is closed`. The *same* cells, forced at a different moment, give a different program.
 
 **Remembered against rerun.** In the B7 experiment, `q.Sum()` then `q.ToList()` printed the effects six times (0, 3, 6, 3 lines for the four steps). A Haskell cell is forced at most once, so the same pair of demands would run its effects once.
 
-**Exactly 40.** All the eager and lazy entries that cycle categories continue at 40. The entries with a four-name list cannot (see [Comparative machine design](comparative-machine-design.md)). The boundary shows a hidden dependency: the stop rule depends on a *supply* (names, dice) as well as a test.
+**Exactly 40.** In the challenged entries, a comparison that continues at 40 still needs another name or slot to draw from. XAML can run out of passes while the total is exactly 40 (see [Comparative machine design](comparative-machine-design.md)). The boundary shows a hidden dependency: the stop rule depends on a *supply* (names, dice) as well as a test.
 
 ## Compare the ordinary and weird designs
 
@@ -124,7 +125,7 @@ The three non-eager strategies fail differently. A lazy value *remembers*, so a 
 | A lazy value is forced at most once | **Guaranteed** (sharing) | The usual call-by-need semantics; GHC implements it, and the language report leaves some freedom. |
 | `unsafeInterleaveIO` defers its action until the result is demanded | **Guaranteed** | Documented, and "unsafe" because of what it does not promise. |
 | Where that effect lands relative to unrelated effects | **Implementation-permitted** | The program is correct because of data dependence. |
-| A LINQ query reruns on every enumeration | **Guaranteed** | Documented deferred execution. |
+| The LINQ-to-Objects `Select` in B7 defers its projection and another enumeration does the work again | **Guaranteed** for the pipeline shown | B7 runs the effect zero times at construction, three times per full enumeration. Terminal `Sum()` immediately enumerates in the C# condition. |
 | `reduce` cannot stop early | **Guaranteed** | It visits every element. |
 | `emit()` is synchronous and `setImmediate` is a later turn | **Guaranteed** | Documented Node.js behavior. |
 | Lisp's `or` stops at the first true method | **Guaranteed** | Standard method combination. |

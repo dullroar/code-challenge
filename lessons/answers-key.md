@@ -21,7 +21,7 @@ Debugging  12   46      <- crossing card: the total before it was 34, which is <
 ```
 
 - The card that crosses is the first whose running total is **over 40**; the total before it is always **at most 40** (otherwise the run would have stopped earlier). The totals can end anywhere from 41 to 59.
-- Exactly 40 does not stop the run because every stop rule asks "is the total *over* 40?" (`<= 40` keeps going, `41` or more stops). Four 10-hour cards total exactly 40, so a fifth card is drawn. (Until the five-name fix, the regex entries and the `for`-header entries stopped at four cards and 40; each now forces that case in its check. [`xaml`](../src/xaml/README.md) still cannot deal a fifth card, see the [intro](intro.md).) [`regex-dotnet`](../src/regex-dotnet/README.md) prints no running-total column, so `check-demo.sh` adds the hours itself.
+- Exactly 40 continues under the challenge rule. Four 10-hour cards total exactly 40, so a conforming run keeps a fifth card. The former four-name ceiling in the regex and `for`-header entries has been fixed. See the [intro](intro.md#where-entries-differ) for the four-pass XAML ceiling and the fixed LINQ demos. [`regex-dotnet`](../src/regex-dotnet/README.md) prints no running-total column, so `check-demo.sh` adds the hours itself.
 
 ## B1. COBOL: predict, then break ALTER
 
@@ -125,11 +125,11 @@ Console.WriteLine(string.Join(" ", Enumerable.Range(0, 5).Select(_ => r.Next(10,
 | (c) `Sum()` and `ToList()` | 6 | Each enumeration re-runs the pipeline and every side effect in it. |
 | (d) `ToList()` then sum the list | 3 | `ToList()` is eager and snapshots the values; summing a list re-runs nothing. |
 
-Seed 42 gives `16 11 11 15 11`. A `System.Random` with a fixed seed is a deterministic sequence, and the `.xaml` file creates `new Random(42)` with no other entropy, so every run produces the same cards. The eager operator that forces the lazy tail in `LinqChallenge1` is the final `.Aggregate(0, (count, _) => count + 1)`.
+Seed 42 gives `16 11 11 15 11`. A `System.Random` with a fixed seed is a deterministic sequence, and the `.xaml` file creates `new Random(42)` with no other entropy, so every run produces the same cards. The eager operator that forces the lazy tail in `LinqChallenge1` is the final `.Aggregate(0, (count, _) => count + 1)`. In `ModernChallenge1`, the enclosing `for` evaluates its condition each turn. `Sum()` consumes the deferred projection during that condition test, before the comparison can decide whether to continue.
 
 ## B8. Regex: what survives a failed match
 
-- **.NET:** with `(?!)` appended the match can never succeed; the host's `match.Success` is false and a failed `Match` exposes **no captures**, so every card accumulated in the stacks is lost:
+- **.NET:** the fixed all-10 tape normally returns a successful match with five rows, total 50 and exit status 0. With `(?!)` appended, `Match.Success` is false and the failed match exposes no captures. The host exits 1 after printing and appending a report containing only its header and summary.
 
   ```text
   match returned: false
@@ -138,7 +138,7 @@ Seed 42 gives `16 11 11 15 11`. A `System.Random` with a fixed seed is a determi
 
   This is why the .NET entry must *return true* while the Perl and PCRE2 entries can return false after writing everything: their output is a side effect, `regex-dotnet`'s output is the captures.
 - **pcre2grep:** `pcre2grep` starts a callout program with `fork` and `execv`, which does not search `PATH`. A bare `sqlite3` fails to start, which the engine treats exactly like a callout that returned non-zero, i.e. a vetoed branch. The run prints **nothing**, exits 0, and writes no rows.
-- **Contrast (three sentences):** In Perl, `local` variables unwind on backtracking but `print`s and `INSERT`s already happened, so the work survives a failed match. In PCRE2 the callout state lives in a C struct that backtracking never touches, so everything survives. In .NET the only output *is* the captures, and a failed match discards them, so nothing survives.
+- **Contrast (three sentences):** In Perl, `local` variables unwind on backtracking but `print`s and `INSERT`s already happened, so the work survives a failed match. In the C PCRE2 entry, state lives in a host struct and the completion callout closes the TSV before deliberate failure. In the .NET entry, failed-match captures are unavailable to the host, so its report has zero card rows.
 
 ## B9. sed: watch a computation
 

@@ -40,9 +40,9 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn. Final totals are 41 to 59, with 3 to 5 cards. Rows go into SQLite as one transaction and a summary is printed.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-Lisp writes the boundary as `(> total 40)`: false for 40. In the `LOOP` the test is `until (> total +limit+)` and comes *after* `collect`, which is why the crossing card is kept ([L39-46](../../../src/lisp/timecards.lisp#L39-L46)). In the weird program each method ends with `(> (total ledger) 40)`, and the method that returns true stops the chain ([L84](../../../src/lisp-weird/timecards.lisp#L84)).
+Both Lisp entries save the cards in one SQLite transaction and print a summary. Lisp writes the boundary as `(> total 40)`: false for 40. In the `LOOP` the test is `until (> total +limit+)` and comes *after* `collect`, which is why the crossing card is kept ([L39-46](../../../src/lisp/timecards.lisp#L39-L46)). In the weird program each method ends with `(> (total ledger) 40)`, and the method that returns true stops the chain ([L84](../../../src/lisp-weird/timecards.lisp#L84)).
 
 ## The machine to identify
 
@@ -66,7 +66,7 @@ flowchart TD
     B --> C["for hours = a fresh random 10 to 19"]
     C --> D["sum hours into total"]
     D --> E["collect a card: number, category, hours, total"]
-    E --> F{{"until total > 40?"}}
+    E --> F{{"until total ≥ 41?"}}
     F -->|no| B
     F -->|yes| G["Build the SQL script as a string, run sqlite3 with run-program, print the rows"]
 ```

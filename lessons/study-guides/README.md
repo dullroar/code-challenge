@@ -11,13 +11,13 @@ The guides are hand-written. They began with a COBOL study guide by the book's c
 Every guide has the same eleven sections, so you can find the same thing in the same place:
 
 1. **What this guide is for**: three to six learning outcomes, and what is out of scope.
-2. **Before you begin**: the safety model (every entry writes fictional **DEMO ONLY** data, and you read the source and run it in the sandbox first), the prediction rule and the vocabulary.
-3. **The shared challenge**: the time-card task, stated precisely. A card has 10 to 19 hours. The run keeps the **first card that takes the total above 40**. A total of **exactly 40 continues**.
+2. **Before you begin**: the safety model (fictional **DEMO ONLY** data, source review, and a sandbox run first), the prediction rule and the vocabulary.
+3. **The shared challenge**: the [time-card specification](../intro.md#what-the-challenge-does) and how the entries in this guide behave. A conforming run keeps the **first card that takes the total above 40**, so exactly 40 continues. Check stop, storage and output separately.
 4. **The machine to identify**: what repeats, where state lives, what advances the next step, what stops it, and which effects commit.
 5. **Trace one run**: a fixed run, normally hours 15, 19, 12, with the decisive state before and after each step.
 6. **Compare the ordinary and weird designs**: by representation, observability, tests, debugging, portability and cost, not by line count.
 7. **What the exercises demonstrate**: links to the verified exercises, each with the prediction you make first.
-8. **Failure modes, costs, and boundaries**: every behavior labeled **guaranteed**, **implementation-permitted** or **accidentally exploited** (see [Three kinds of knowledge](../intro.md#three-kinds-of-knowledge)).
+8. **Failure modes, costs, and boundaries**: specific behavior claims labeled **guaranteed**, **implementation-permitted** or **accidentally exploited**, with evidence for each (see [Three kinds of knowledge](../intro.md#three-kinds-of-knowledge)).
 9. **Connections across the repository**: other guides and book chapters.
 10. **Self-check**: a trace question, an explanation question, a transfer question and an evidence question.
 11. **Further reading**: short and annotated.
@@ -33,7 +33,7 @@ Every guide has the same eleven sections, so you can find the same thing in the 
 | [Haskell](languages/haskell.md) | `haskell`, `haskell-weird` | Who demands work, and what happens when a forcing point moves? |
 | [Forth](languages/forth.md) | `forth`, `forth-weird` | What can serve as a program counter, and what can serve as memory? |
 | [Make and CMake](languages/make-and-cmake.md) | `make-gnu`, `cmake` | When the tool decides what runs next, where does the program's state live? |
-| [Regex engines and sed](languages/regex-engines-and-sed.md) | `regex-perl`, `regex-pcre2`, `regex-pcre2grep`, `regex-dotnet`, `regex-sed` | What does each engine keep, undo and lose when a match fails? |
+| [Regex engines and sed](languages/regex-engines-and-sed.md) | `regex-perl`, `regex-pcre2`, `regex-pcre2grep`, `regex-dotnet`, `regex-sed` | Which engines preserve effects after failure, and which need a successful match? |
 | [APL](languages/apl.md) | `apl`, `apl-weird` | What replaces the loop when the program works on whole arrays, or on its own source? |
 | [JavaScript](languages/javascript.md) | `javascript`, `javascript-weird`, `javascript-events` | Who owns the next step: the loop header, the consumer or the event loop? |
 | [Common Lisp](languages/common-lisp.md) | `lisp`, `lisp-weird` | Can the object system's dispatch rules serve as the loop and the stop rule? |

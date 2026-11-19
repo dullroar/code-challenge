@@ -42,7 +42,7 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 
 **E**
 
-- [Eager evaluation](cs/04-evaluation-and-demand.md#eager-evaluation): [`apl`](../src/apl/README.md), [`apl-weird`](../src/apl-weird/README.md), [`javascript`](../src/javascript/README.md), [`javascript-weird`](../src/javascript-weird/README.md)
+- [Eager evaluation](cs/04-evaluation-and-demand.md#eager-evaluation): [`apl`](../src/apl/README.md), [`apl-weird`](../src/apl-weird/README.md), [`javascript`](../src/javascript/README.md), [`javascript-weird`](../src/javascript-weird/README.md), [`ModernChallenge1`](../src/ModernChallenge1/README.md)
 - [Evaluation strategies](cs/04-evaluation-and-demand.md#evaluation-strategies): [`haskell`](../src/haskell/README.md), [`haskell-weird`](../src/haskell-weird/README.md), [`PythonChallenge1`](../src/PythonChallenge1/README.md)
 - [Event-driven programming](cs/10-events-callbacks-and-reactive-control-flow.md#event-driven-programming): [`javascript`](../src/javascript/README.md), [`javascript-events`](../src/javascript-events/README.md), [`javascript-weird`](../src/javascript-weird/README.md), [`LinqChallenge1`](../src/LinqChallenge1/README.md) (counterexample), [`ModernChallenge1`](../src/ModernChallenge1/README.md) (counterexample), [`PythonChallenge1`](../src/PythonChallenge1/README.md) (counterexample), [`RustChallenge1`](../src/RustChallenge1/README.md) (counterexample), [`tar-gnu-weird`](../src/tar-gnu-weird/README.md), [`xaml`](../src/xaml/README.md) (counterexample)
 - [Exception handling](cs/07-effects-errors-and-commitment.md#exception-handling): [`cobol-weird`](../src/cobol-weird/README.md), [`javascript-events`](../src/javascript-events/README.md)
@@ -299,10 +299,10 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 
 **R**
 
-- [`regex-dotnet`](../src/regex-dotnet/README.md): C#, Regular expressions; weird; [A search that fails on purpose](cs/09-comparative-case-studies.md#a-search-that-fails-on-purpose)
-- [`regex-pcre2`](../src/regex-pcre2/README.md): C, PCRE2, Regular expressions; weird; [A search that fails on purpose](cs/09-comparative-case-studies.md#a-search-that-fails-on-purpose)
-- [`regex-pcre2grep`](../src/regex-pcre2grep/README.md): PCRE2, Regular expressions; weird; [A search that fails on purpose](cs/09-comparative-case-studies.md#a-search-that-fails-on-purpose)
-- [`regex-perl`](../src/regex-perl/README.md): Perl, Regular expressions; weird; [A search that fails on purpose](cs/09-comparative-case-studies.md#a-search-that-fails-on-purpose)
+- [`regex-dotnet`](../src/regex-dotnet/README.md): C#, Regular expressions; weird; [Regex search that returns captures](cs/09-comparative-case-studies.md#regex-search-that-returns-captures)
+- [`regex-pcre2`](../src/regex-pcre2/README.md): C, PCRE2, Regular expressions; weird; [Regex search with side effects and deliberate failure](cs/09-comparative-case-studies.md#regex-search-with-side-effects-and-deliberate-failure)
+- [`regex-pcre2grep`](../src/regex-pcre2grep/README.md): PCRE2, Regular expressions; weird; [Regex search with side effects and deliberate failure](cs/09-comparative-case-studies.md#regex-search-with-side-effects-and-deliberate-failure)
+- [`regex-perl`](../src/regex-perl/README.md): Perl, Regular expressions; weird; [Regex search with side effects and deliberate failure](cs/09-comparative-case-studies.md#regex-search-with-side-effects-and-deliberate-failure)
 - [`regex-sed`](../src/regex-sed/README.md): GNU sed, Regular expressions; weird; [Text that is rewritten and read again](cs/09-comparative-case-studies.md#text-that-is-rewritten-and-read-again)
 - [`RustChallenge1`](../src/RustChallenge1/README.md): Rust; port; [A lazy sequence that someone keeps asking for](cs/09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for)
 
@@ -326,7 +326,6 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 **A**
 
 - [A lazy sequence that someone keeps asking for](cs/09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for): [`haskell`](../src/haskell/README.md), [`haskell-weird`](../src/haskell-weird/README.md), [`javascript-weird`](../src/javascript-weird/README.md), [`KotlinChallenge1`](../src/KotlinChallenge1/README.md), [`LinqChallenge1`](../src/LinqChallenge1/README.md), [`LinqChallenge2`](../src/LinqChallenge2/README.md), [`PythonChallenge1`](../src/PythonChallenge1/README.md), [`RustChallenge1`](../src/RustChallenge1/README.md)
-- [A search that fails on purpose](cs/09-comparative-case-studies.md#a-search-that-fails-on-purpose): [`regex-dotnet`](../src/regex-dotnet/README.md), [`regex-pcre2`](../src/regex-pcre2/README.md), [`regex-pcre2grep`](../src/regex-pcre2grep/README.md), [`regex-perl`](../src/regex-perl/README.md)
 - [An ordinary loop, used in an unusual place](cs/09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place): [`cmake`](../src/cmake/README.md), [`cobol`](../src/cobol/README.md), [`forth`](../src/forth/README.md), [`GoChallenge1`](../src/GoChallenge1/README.md), [`JavaChallenge1`](../src/JavaChallenge1/README.md), [`javascript`](../src/javascript/README.md), [`lisp`](../src/lisp/README.md), [`ModernChallenge1`](../src/ModernChallenge1/README.md), [`tcl`](../src/tcl/README.md)
 
 **C**
@@ -337,6 +336,11 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 
 - [Dispatch and triggers: the rule fires the next step](cs/09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step): [`javascript-events`](../src/javascript-events/README.md), [`lisp-weird`](../src/lisp-weird/README.md), [`tar-gnu-weird`](../src/tar-gnu-weird/README.md), [`tcl-weird`](../src/tcl-weird/README.md)
 - [Document order is the program](cs/09-comparative-case-studies.md#document-order-is-the-program): [`tar-gnu`](../src/tar-gnu/README.md), [`xaml`](../src/xaml/README.md)
+
+**R**
+
+- [Regex search that returns captures](cs/09-comparative-case-studies.md#regex-search-that-returns-captures): [`regex-dotnet`](../src/regex-dotnet/README.md)
+- [Regex search with side effects and deliberate failure](cs/09-comparative-case-studies.md#regex-search-with-side-effects-and-deliberate-failure): [`regex-pcre2`](../src/regex-pcre2/README.md), [`regex-pcre2grep`](../src/regex-pcre2grep/README.md), [`regex-perl`](../src/regex-perl/README.md)
 
 **T**
 

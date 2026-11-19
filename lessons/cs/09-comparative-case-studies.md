@@ -4,9 +4,9 @@
 
 For an advanced reading path with traces and experiments, see the [comparative machine design study guide](../study-guides/concepts/comparative-machine-design.md).
 
-The same job (add cards until the total passes 40, save them, show a window) is done here by a loop with no body, a regex that fails on purpose, a Makefile that rereads itself, and a list whose elements write to a database. This chapter puts them side by side. Each section names **a role** that something must play in every solution, such as "what repeats?", and shows which machinery plays it in each entry.
+The [shared challenge](../intro.md#what-the-challenge-does) asks for fictional cards up to and including the first card that takes the total over 40, a local record of those cards and a result the reader can see. Some entries print to a terminal, others open a window. See [where entries differ](../intro.md#where-entries-differ) for fixed LINQ data, the four-pass XAML ceiling and persistence variations. Each section asks what plays a particular **role**, starting with what repeats.
 
-The tables are *generated* from the metadata at the top of each entry's README, so they always match the code. Compare the rows within a section to see the same role played by different machines. Compare the sections to see how many different ways there are to build a loop. At the end, one table lists every entry with its kind, its evaluation strategy and the strength of its promises.
+The tables are generated from the metadata at the top of each entry’s README. The README and executable source are where you can check the classification. Evaluation describes what drives the main computation. In the C# `for`, for example, an embedded deferred LINQ projection is consumed immediately by `Sum()` on each test of the loop condition. The final table lists every entry with its kind, evaluation strategy and weakest required assurance.
 
 ## An ordinary loop, used in an unusual place
 
@@ -16,7 +16,7 @@ The loop is still a loop. What changes is *where* the work happens. In the C#, J
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | Three expression slots | Fields of one anonymous object | deferred | guaranteed |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | Three expression slots | Fields of one anonymous object | eager | guaranteed |
 | [`cmake`](../../src/cmake/README.md) | CMake | A register machine | `CMAKE_MATCH_1`..`5`, rebuilt every pass | eager | accidentally-exploited |
 | [`cobol`](../../src/cobol/README.md) | COBOL |  |  | eager | guaranteed |
 | [`lisp`](../../src/lisp/README.md) | Common Lisp |  |  | eager | guaranteed |
@@ -81,18 +81,27 @@ The program changes where it goes next. [`cobol-weird`](../../src/cobol-weird/RE
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | A tree walk that grows the tree it is walking, with find itself reading the depth and the clock | The path from the start directory to the directory being visited; its depth is the running total | declarative | accidentally-exploited |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | A tree walk that grows the tree it is walking | The path from the start directory to the directory being visited | declarative | accidentally-exploited |
 
-## A search that fails on purpose
+## Regex search with side effects and deliberate failure
 
-The program is a search that fails on purpose. [`regex-perl`](../../src/regex-perl/README.md), [`regex-pcre2`](../../src/regex-pcre2/README.md) and [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) do all the work as side effects inside one match, and finish with `(*COMMIT)(*FAIL)` so that the match returns false. What survives the failure differs between the engines, and that is the lesson. [`regex-dotnet`](../../src/regex-dotnet/README.md) cannot do this, because a failed .NET match discards its captures. It must succeed, and it uses balancing groups as a counter.
+[`regex-perl`](../../src/regex-perl/README.md), [`regex-pcre2`](../../src/regex-pcre2/README.md) and [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) use one match to drive callbacks or embedded code. The actions build the result outside the matcher. Each pattern eventually forces the match to fail, and completed writes can survive that failure. Perl’s localized variables unwind on backtracking, while PCRE2 callouts keep their state in the C host or in external helpers.
+
+**Entries:**
+
+| Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
+| --- | --- | --- | --- | --- | --- |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | A backtracking search with hooks | A C struct that never rewinds | search | implementation-permitted |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | A backtracking search that runs one program per callout | SQLite rows, and the exit code of each callout | search | implementation-permitted |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | A backtracking search with hooks | `local` variables that unwind (effects do not) | search | implementation-permitted |
+
+## Regex search that returns captures
+
+[`regex-dotnet`](../../src/regex-dotnet/README.md) spends tokens from a capture stack as it matches unary hours. An empty budget prevents another card from starting, so the match can succeed with the prefix that includes the crossing card. The host reads that match’s captures to build a TSV report. A failed match exposes no captures, so the same tape with a final failure assertion produces zero cards.
 
 **Entries:**
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
 | [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | A counter built from a stack | Balancing-group capture stacks | search | guaranteed |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | A backtracking search with hooks | A C struct that never rewinds | search | implementation-permitted |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | A backtracking search that runs one program per callout | SQLite rows, and the exit code of each callout | search | implementation-permitted |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | A backtracking search with hooks | `local` variables that unwind (effects do not) | search | implementation-permitted |
 
 ## Dispatch and triggers: the rule fires the next step
 
@@ -167,12 +176,12 @@ Read down the last column. Only one of the five makes a promise about *behavior*
 
 | Entry | Languages | Kind | What plays the loop | Evaluation | Assurance | Pairs with |
 | --- | --- | --- | --- | --- | --- | --- |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | weird | [A search that fails on purpose](09-comparative-case-studies.md#a-search-that-fails-on-purpose) | search | guaranteed | [`regex-perl`](../../src/regex-perl/README.md) |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | weird | [Regex search that returns captures](09-comparative-case-studies.md#regex-search-that-returns-captures) | search | guaranteed | [`regex-perl`](../../src/regex-perl/README.md) |
 | [`apl`](../../src/apl/README.md) | APL | idiomatic | [Whole-array operations instead of steps](09-comparative-case-studies.md#whole-array-operations-instead-of-steps) | eager | implementation-permitted | [`apl-weird`](../../src/apl-weird/README.md) |
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | eager | implementation-permitted | [`apl`](../../src/apl/README.md) |
 | [`awk`](../../src/awk/README.md) | AWK | idiomatic | [The input is the loop](09-comparative-case-studies.md#the-input-is-the-loop) | eager | guaranteed | [`awk-weird`](../../src/awk-weird/README.md) |
 | [`awk-weird`](../../src/awk-weird/README.md) | AWK | weird | [The input is the loop](09-comparative-case-studies.md#the-input-is-the-loop) | eager | implementation-permitted | [`awk`](../../src/awk/README.md) |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | weird | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | deferred | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | weird | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`cmake`](../../src/cmake/README.md) | CMake | weird | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | accidentally-exploited | [`make-gnu`](../../src/make-gnu/README.md) |
 | [`cobol`](../../src/cobol/README.md) | COBOL | idiomatic | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`cobol-weird`](../../src/cobol-weird/README.md) |
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | eager | implementation-permitted | [`cobol`](../../src/cobol/README.md) |
@@ -198,9 +207,9 @@ Read down the last column. Only one of the five makes a promise about *behavior*
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | deferred | guaranteed | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | weird | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | deferred | guaranteed | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) |
 | [`m4`](../../src/m4/README.md) | m4 | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | rewriting | implementation-permitted |  |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | weird | [A search that fails on purpose](09-comparative-case-studies.md#a-search-that-fails-on-purpose) | search | implementation-permitted | [`regex-perl`](../../src/regex-perl/README.md) |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | weird | [A search that fails on purpose](09-comparative-case-studies.md#a-search-that-fails-on-purpose) | search | implementation-permitted | [`regex-pcre2`](../../src/regex-pcre2/README.md) |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | weird | [A search that fails on purpose](09-comparative-case-studies.md#a-search-that-fails-on-purpose) | search | implementation-permitted | [`regex-pcre2`](../../src/regex-pcre2/README.md) |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | weird | [Regex search with side effects and deliberate failure](09-comparative-case-studies.md#regex-search-with-side-effects-and-deliberate-failure) | search | implementation-permitted | [`regex-perl`](../../src/regex-perl/README.md) |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | weird | [Regex search with side effects and deliberate failure](09-comparative-case-studies.md#regex-search-with-side-effects-and-deliberate-failure) | search | implementation-permitted | [`regex-pcre2`](../../src/regex-pcre2/README.md) |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | weird | [Regex search with side effects and deliberate failure](09-comparative-case-studies.md#regex-search-with-side-effects-and-deliberate-failure) | search | implementation-permitted | [`regex-pcre2`](../../src/regex-pcre2/README.md) |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | declarative | accidentally-exploited | [`find-gnu`](../../src/find-gnu/README.md) |
 | [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | port | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | port | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |

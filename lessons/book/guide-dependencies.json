@@ -1,0 +1,13 @@
+{
+  "lessons/answers-key.md": ["languages/forth.md", "languages/csharp-linq-xaml-and-ports.md", "languages/regex-engines-and-sed.md"],
+  "lessons/cs-source/chapters/09-comparative-case-studies.md": ["concepts/comparative-machine-design.md"],
+  "lessons/cs-source/roles/backtracking-search.md": ["languages/regex-engines-and-sed.md", "concepts/comparative-machine-design.md", "concepts/effects-errors-and-commitment.md", "concepts/portability-abstraction-and-cost.md", "concepts/reading-adversarial-programs.md"],
+  "lessons/cs-source/roles/capture-search.md": ["languages/regex-engines-and-sed.md", "concepts/comparative-machine-design.md", "concepts/effects-errors-and-commitment.md", "concepts/portability-abstraction-and-cost.md", "concepts/reading-adversarial-programs.md"],
+  "lessons/front-matter.md": [],
+  "lessons/intro.md": ["*"],
+  "lessons/problems-overcome.md": ["concepts/effects-errors-and-commitment.md", "languages/tcl.md"],
+  "lessons/tools/verify-exercises.sh": ["languages/csharp-linq-xaml-and-ports.md", "languages/regex-engines-and-sed.md", "concepts/comparative-machine-design.md"],
+  "src/awk-weird/README.md": ["concepts/comparative-machine-design.md", "concepts/formal-languages-and-weird-machines.md"],
+  "src/find-posix/README.md": ["concepts/portability-abstraction-and-cost.md", "concepts/formal-languages-and-weird-machines.md"],
+  "src/regex-dotnet/Program.cs": ["concepts/portability-abstraction-and-cost.md"]
+}

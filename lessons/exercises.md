@@ -33,7 +33,7 @@ Ground rules:
 
 ### The shared checker
 
-[`lessons/tools/check-demo.sh`](tools/check-demo.sh) validates the *shape* of any entry's output: a `DEMO ONLY` marker, every row's hours in 10-19, every running total equal to the previous total plus the hours, the run stopped on the first card whose total passed the limit (default 40), and the `# committed` (or `# captured`) line agrees with the rows. Exit 0 is PASS.
+[`lessons/tools/check-demo.sh`](tools/check-demo.sh) checks a report that follows the [shared numeric rule](intro.md#what-the-challenge-does): a `DEMO ONLY` marker, every row's hours in 10-19, every running total equal to the previous total plus the hours, the run stopped on the first card whose total passed the limit (default 40), and the `# committed` (or `# captured`) line agrees with the rows. Exit 0 is PASS.
 
 ```bash
 sandbox/container/run-image.sh src/cobol-weird > out.txt 2>&1
@@ -47,7 +47,7 @@ bash lessons/tools/check-demo.sh out.txt 50       # the same check against a lim
 
 **Goal:** tell, from the output alone, which card stopped the run and why that is not off by one.
 
-1. Run three entries from different [languages](languages/README.md) and save each output.
+1. Choose three entries from different [languages](languages/README.md) that implement the crossing-card rule. See the [entry differences](intro.md#where-entries-differ) before picking. Run them and save each output.
 2. For each, write down how many cards there were, which card crossed 40, and what the card *before* it totaled.
 3. Run a fourth (try `src/regex-dotnet`, whose rows have no running-total column) and predict its card count before looking.
 
@@ -154,20 +154,20 @@ Acceptance criteria:
 
 - (a) 0, (b) 3, (c) 6, (d) 3 `effect` lines. Name the property of `Select` that makes (a) zero and (c) six.
 - The five hours for seed 42 are `16 11 11 15 11`. Say why a XAML program seeded with 42 produces the same cards on every run.
-- Name the one operator in [`LinqChallenge1/Program.cs`](../src/LinqChallenge1/Program.cs#L45) that is *eager* and forces the lazy stages that follow.
+- Name the one operator in [`LinqChallenge1/Program.cs`](../src/LinqChallenge1/Program.cs#L45) that is *eager* and forces the lazy stages. In [`ModernChallenge1`](../src/ModernChallenge1/Program.cs#L64-L68), when does the query produce the sum that controls the loop?
 
 ### B8. Regex: what survives a failed match (verified)
 
 **Lessons:** [Regex](languages/regex.md). **Entries:** copies of `src/regex-dotnet` and `src/regex-pcre2grep`.
 
-1. **.NET:** change the end of the pattern on [L13](../src/regex-dotnet/Program.cs#L13) from `)*");` to `)*(?!)");`. Predict what the host can still read.
+1. **.NET:** for a fixed witness, replace `Random.Shared.Next(10, 20)` in `Draw()` with `10`. Run once in a fresh scratch data directory. Then change the end of the pattern on [L13](../src/regex-dotnet/Program.cs#L13) from `)*");` to `)*(?!)");` and run in another fresh directory. Predict what the host can still read. Compare stdout, process exit status and the saved TSV.
 2. **pcre2grep:** in `timecards.sh`, change the first `(?C{/usr/bin/sqlite3` to `(?C{sqlite3`. Predict what happens.
 
 Acceptance criteria:
 
-- .NET: the output says `match returned: false` and the summary is `total=0 entries=0`; `sandbox/run.sh` on your copy fails. A failed `Match` exposes no captures.
+- .NET: the unmutated pattern returns true, with five rows, a total of 50 and exit 0. The forced failure returns false, with zero rows, a total of zero and exit 1. The host still appends the header and summary to its TSV.
 - pcre2grep: **no output at all**, exit code 0, no rows; `check-demo.sh` fails. A callout that cannot be started is indistinguishable from a vetoed branch.
-- Write three sentences contrasting what survives a failed match in Perl (`local` unwinds, side effects stay), PCRE2 (the C struct persists) and .NET (nothing).
+- Write three sentences contrasting what survives a failed match in Perl (`local` unwinds, side effects stay), PCRE2 (the C struct persists) and .NET (zero returned captures, with the host still printing and writing its empty report).
 
 ### B9. sed: watch a computation (verified)
 

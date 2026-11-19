@@ -43,10 +43,27 @@ mkdir "$data/fixed"; cp RegexDotnet.csproj "$data/fixed/"
 sed "s/string Draw() => new('a', Random.Shared.Next(10, 20));/string Draw() => new('a', 10);/" Program.cs > "$data/fixed/Program.cs"
 grep -q "new('a', 10)" "$data/fixed/Program.cs" || { echo "FAIL: the exactly-40 test could not rewrite Draw() in Program.cs"; exit 1; }
 (cd "$data/fixed" && dotnet build -c Release -v q --nologo -o "$data/fixedbin" >/dev/null)
-out=$(dotnet "$data/fixedbin/RegexDotnet.dll")
+out=$(XDG_DATA_HOME="$data/success" dotnet "$data/fixedbin/RegexDotnet.dll")
+grep -qx 'match returned: true' <<<"$out" || { echo "FAIL: the fixed tape must match"; exit 1; }
 [[ $(grep -cE '^(Meetings|Coding|Debugging|Learning)	' <<<"$out") -eq 5 ]] || { echo "FAIL: all-10 cards must give five rows (exactly 40 continues)"; echo "$out"; exit 1; }
 grep -q '^# captured total=50 entries=5' <<<"$out" || { echo "FAIL: expected total=50 entries=5"; echo "$out"; exit 1; }
 mapfile -t rows < <(grep -E '^(Meetings|Coding|Debugging|Learning)	' <<<"$out")
 [[ ${rows[3]} == Learning* && ${rows[4]} == Meetings* ]] || { echo "FAIL: the fourth card must be Learning and the fifth Meetings"; echo "$out"; exit 1; }
+diff -u <(sed -n '/^# DEMO ONLY/,$p' <<<"$out") "$data/success/RegexDotnet/demo-timecards.tsv"
 
-echo "OK: 25 runs, every one stopped exactly when the total passed 40; exactly 40 continued to a fifth card"
+# 4. Use the same tape, but force the whole match to fail. The host still writes its report.
+mkdir "$data/forced-failure"
+cp RegexDotnet.csproj "$data/forced-failure/"
+sed 's/)[*]");$/)*(?!)");/' "$data/fixed/Program.cs" > "$data/forced-failure/Program.cs"
+grep -Fq ')*(?!)");' "$data/forced-failure/Program.cs" || { echo "FAIL: could not add the final failure assertion"; exit 1; }
+(cd "$data/forced-failure" && dotnet build -c Release -v q --nologo -o "$data/forced-bin" >/dev/null)
+rc=0
+out=$(XDG_DATA_HOME="$data/failed" dotnet "$data/forced-bin/RegexDotnet.dll") || rc=$?
+[[ $rc -eq 1 ]] || { echo "FAIL: expected exit 1 from the failed match, got $rc"; exit 1; }
+grep -qx 'match returned: false' <<<"$out" || { echo "FAIL: the mutated pattern must fail to match"; exit 1; }
+grep -qx '# captured total=0 entries=0 DEMO ONLY' <<<"$out" || { echo "FAIL: a failed match must expose zero captures"; exit 1; }
+failed_report="$data/failed/RegexDotnet/demo-timecards.tsv"
+diff -u <(sed -n '/^# DEMO ONLY/,$p' <<<"$out") "$failed_report"
+[[ $(wc -l < "$failed_report") -eq 2 ]] || { echo "FAIL: expected only the header and summary in the failed report"; exit 1; }
+
+echo "OK: 25 runs stopped exactly when the total passed 40; fixed tape gave five rows on success and zero on failure"

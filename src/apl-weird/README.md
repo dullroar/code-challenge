@@ -56,7 +56,7 @@ flowchart TD
     accDescr: A flowchart. The function Card0 runs with its genes: the card number, category, hours and running total. It prints its row and inserts it into SQLite. It draws the next hours and builds the four gene lines for the next card as text. A boolean Alive is 1 while the total is 40 or less. The function then takes its own source with the quad-CR function, replaces the header and genes, and compresses the whole child away with Alive. The quad-FX function defines a new function, Card1, from what is left, or defines nothing. Executing the name, also compressed by Alive, then calls Card1, which does the same steps. When Alive is 0, nothing is written or called, and the chain of calls returns.
     A["CardN runs with its genes: number, category, hours, total"] --> B["Print the row and INSERT it"]
     B --> C["Draw the next hours; build four new gene lines as text"]
-    C --> D{{"Alive is 40 >= total?"}}
+    C --> D{{"Alive: total ≤ 40?"}}
     D -->|"1: keep the child"| E["Quad-CR reads this function's own source; quad-FX defines Card N+1 from it with the new genes"]
     E --> F["Execute the name Card N+1: it is a different function with the same body"]
     F --> A

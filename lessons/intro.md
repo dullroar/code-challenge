@@ -2,29 +2,40 @@
 
 You already know how to write a loop, query a database and call a function. You have read the tutorials. This is what comes after them.
 
-The [code challenge](../README.md) asks one question in many accents: *how far can a language's own machinery be pushed before it starts acting like a general-purpose program?* Every entry builds the same small demo (fictional time cards of 10-19 hours, added until the total passes 40, saved to a local **DEMO ONLY** SQLite file; the two LINQ entries are the exception, see below) under an absurd constraint: one statement, no loop, no `IF`, nothing but a regex, nothing but a markup file.
+The [code challenge](../README.md) asks one question in many accents: *how far can a language's own machinery be pushed before it starts acting like a general-purpose program?* The entries take on a small fictional time-card demo under an absurd constraint: one statement, no loop, no `IF`, nothing but a regex, nothing but a markup file.
 
 The stunts are the door. These lessons are what is behind it.
 
+For the purposes of this book, WEIRD stands for **Weird Execution, Indirect Results and Data**. It doesn't, of course. But it is a surprisingly serviceable description of what these programs are up to.
+
 ## What the challenge does
 
-Every entry does the same four things. The picture below says **what** happens. It is the same for all of them, and it says nothing about **how**.
+Start with a total of zero. Draw fictional time cards of 10–19 whole hours and cycle through Meetings, Coding, Debugging and Learning. Add the hours and keep the first card that takes the total over 40. Exactly 40 continues. That gives 3–5 cards and a final total of 41–59. Save the cards locally as **DEMO ONLY** records and show the result through the available interface. The picture shows the usual SQLite version of that task. Each program chooses when to persist the rows.
 
 ```mermaid
 flowchart TD
     accTitle: What the challenge does
-    accDescr: A flowchart of the shared task. Start a DEMO ONLY run. Generate a fictional time card of 10 to 19 hours, with a category that cycles through Meetings, Coding, Debugging and Learning. Save it as a DEMO ONLY record in a local SQLite file. Add its hours to the running total. If the total is 40 or less, generate another card. If the total is over 40, show the result and finish.
+    accDescr: A flowchart of the shared task. Start a DEMO ONLY run. Generate a fictional time card of 10 to 19 hours, with a category that cycles through Meetings, Coding, Debugging and Learning. Keep the card and add its hours to the running total. If the total is 40 or less, generate another card. If the total is over 40, finish saving the kept cards as DEMO ONLY records in local SQLite and show the result.
     A["Start a DEMO ONLY run"] --> B["Generate a fictional card: 10 to 19 hours, next category"]
-    B --> C["Save it as a DEMO ONLY record in local SQLite"]
-    C --> D["Add its hours to the running total"]
-    D --> E{{"Total over 40?"}}
-    E -->|No| B
-    E -->|Yes| F["Show the result and finish"]
+    B --> C["Keep it and add its hours to the running total"]
+    C --> D{{"Total over 40?"}}
+    D -->|No| B
+    D -->|Yes| E["Finish saving DEMO ONLY records in local SQLite, then show the result"]
 ```
 
 *How* it happens is what the entries disagree about. Each entry's README has a **Program Flow** section with its own picture, and the book shows it on the lesson page of that entry's language, under **How each program runs**. Those pictures are not all flowcharts, because the machines are not all alike. A COBOL program with a rewritten `GO TO` is a state that changes. A Haskell program is a demand that pulls. An m4 program is text that is read again. A Node program built from listeners is a conversation. If a picture could be pasted unchanged into ten entries, it would not be teaching anything.
 
-**The LINQ exception, and the XAML limit.** [`LinqChallenge1`](../src/LinqChallenge1/README.md) and [`LinqChallenge2`](../src/LinqChallenge2/README.md) teach deferred execution, not the stop rule. They draw no random hours: their work week is five fixed 8-hour days, capped so that the total is exactly 40.0 hours and no card crosses the line. One more entry differs for a mechanical reason: [`xaml`](../src/xaml/README.md) is written as four copied passes, so it can deal at most four cards, and a run of four 10-hour cards would end at exactly 40 instead of continuing to a fifth. Its files seed the generator with 42, which always gives four cards totalling 53, so the shipped program never meets that case. Every other entry follows the rule that a total of exactly 40 continues; the shared checker [`check-demo.sh`](tools/check-demo.sh) fails a run that stops at 40.
+### Where entries differ
+
+| Entries | What differs from the usual run |
+| --- | --- |
+| [LINQ method chain](../src/LinqChallenge1/README.md) and [LINQ query syntax](../src/LinqChallenge2/README.md) | Five fixed 8-hour days end at 40.0 hours. These demos teach deferred execution with a fixed work week. |
+| [XAML](../src/xaml/README.md) | Four copied passes can deal at most four cards. Four tens would reach 40 with no fifth pass available. On the shipped .NET runtime, seed 42 draws 16, 11, 11 and 15 for a total of 53. The strict variant saves XML, with SQLite used by the other variants. |
+| [.NET regex](../src/regex-dotnet/README.md) | The numeric stop rule still applies. The host appends a TSV report from the successful match's captures and prints it. |
+| [PCRE2 in C](../src/regex-pcre2/README.md) | The numeric stop rule still applies. Callouts write TSV during the match and close the file before deliberate match failure. |
+| [Stock pcre2grep](../src/regex-pcre2grep/README.md) | The numeric stop rule still applies. Separate `sqlite3` invocations save cards as the match runs. The regex's `(*COMMIT)` prunes retries, and earlier writes survive the final failed match. |
+
+The [shared output checker](tools/check-demo.sh) tests the numeric stop rule on a report, including the requirement to continue at 40. To see whether a report agrees with durable state, check the corresponding database or file as well.
 
 ## The teaching philosophy
 
@@ -55,13 +66,15 @@ Without step 5 this would be a museum of curiosities. The exercise is what turns
 
 ## Three kinds of knowledge
 
-Experienced programmers sometimes confuse "I've done this for twenty years" with "the language guarantees this." Every lesson tags what it leans on:
+Experienced programmers sometimes confuse "I've done this for twenty years" with "the language guarantees this." Ask which particular behavior is promised, by which specification or runtime manual, and which behavior you have only seen in a test.
 
 | Tag | Meaning | Example |
 | --- | --- | --- |
-| **Guaranteed** | The specification or documented semantics promise it. | `span` on a lazy list reads only as far as it must. |
+| **Guaranteed** | A named specification or documented API promises the behavior within its scope. | The .NET regex API documents balancing-group pops. That promise applies to the .NET regex engine. |
 | **Implementation-permitted** | Works because of a particular compiler, runtime, platform or version. | GnuCOBOL still runs `ALTER`. `pcre2grep` callout scripts need a special build. |
-| **Accidentally exploited** | Works today, but nobody promised it. | Make restarting itself because a makefile it can remake was "remade". |
+| **Accidentally exploited** | A test may show it works, but the implementation makes no promise about the behavior. | A pre-order `find` may descend into a directory just created by its own `-exec`. POSIX leaves traversal of newly added files unspecified. |
+
+An entry’s single assurance label records the weakest behavior its trick needs. A documented operation can sit right beside an undocumented assumption in the same program.
 
 ## The recurring question
 
@@ -85,4 +98,4 @@ Then see [goals](goals.md), what was [overcome](problems-overcome.md), what is s
 
 ## A word of caution
 
-This is not a production style guide. Do not try any of it at work, and do not tell the boss. Every program here writes **DEMO ONLY** data to a local throwaway file; run them in the [container or sandbox](exercises.md#running-things-safely) rather than trusting them.
+This is not a production style guide. Do not try any of it at work, and do not tell the boss. These programs work with **DEMO ONLY** data and local scratch storage. Run them in the [container or sandbox](exercises.md#running-things-safely).

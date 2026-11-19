@@ -30,7 +30,7 @@ The honest summary: APL is an astonishingly good *thinking* notation and an unfo
 sandbox/container/run-image.sh src/apl
 ```
 
-The whole challenge ("add 10-19 hour cards until the total passes 40") is three array expressions: no loop and no `if`.
+Four named array assignments decide which cards to keep. `Drawn` holds five rolls, and `Hours`, `Totals` and `Kinds` derive the kept rows. No loop and no `if`.
 
 ### How the hell does that work?
 
@@ -47,7 +47,7 @@ Read each right to left.
 
 1. **Draw everything up front.** `5⍴10` is five tens, `?` rolls each, and `10-⎕IO` shifts to 10..19. Why five? Every card is at least 10, so five always total at least 50. Five is a *bound that can never be too small*, not a loop count.
 2. **Apply the stop rule as data.** `+\Drawn` is the running total; `40≥` turns it into `1 1 0 0 ...`; `+/` counts the 1s; `1+` adds the card that crosses; `↑⍨` takes that many.
-3. **Derive the rest.** `⍴` *recycles* when the right argument is shorter than the target, so four category names reshaped to seven slots rotate without a modulo.
+3. **Derive the rest.** `⍴` *recycles* when the right argument is shorter than the target, so four category names fill a slot for each kept card, up to five. The fifth slot, if there is one, gets `Meetings` again.
 
 ### What did we just learn?
 
@@ -125,7 +125,7 @@ The first isn't a terrible idea; it is how APL programmers actually think. The s
 <!-- BEGIN GENERATED program-flow:languages/apl.md -->
 ## How each program runs
 
-Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) shows what the challenge asks for and where entries differ.
 
 ### Program flow of `apl`
 
@@ -157,7 +157,7 @@ flowchart TD
     accDescr: A flowchart. The function Card0 runs with its genes: the card number, category, hours and running total. It prints its row and inserts it into SQLite. It draws the next hours and builds the four gene lines for the next card as text. A boolean Alive is 1 while the total is 40 or less. The function then takes its own source with the quad-CR function, replaces the header and genes, and compresses the whole child away with Alive. The quad-FX function defines a new function, Card1, from what is left, or defines nothing. Executing the name, also compressed by Alive, then calls Card1, which does the same steps. When Alive is 0, nothing is written or called, and the chain of calls returns.
     A["CardN runs with its genes: number, category, hours, total"] --> B["Print the row and INSERT it"]
     B --> C["Draw the next hours; build four new gene lines as text"]
-    C --> D{{"Alive is 40 >= total?"}}
+    C --> D{{"Alive: total ≤ 40?"}}
     D -->|"1: keep the child"| E["Quad-CR reads this function's own source; quad-FX defines Card N+1 from it with the new genes"]
     E --> F["Execute the name Card N+1: it is a different function with the same body"]
     F --> A

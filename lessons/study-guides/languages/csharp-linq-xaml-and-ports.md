@@ -41,13 +41,13 @@ The ports for Go, Java, Kotlin, Python and Rust run in the Linux sandbox with `s
 
 ## The shared challenge
 
-The shared time-card challenge is: a *card* is a category and a whole number of hours from 10 to 19; categories cycle through Meetings, Coding, Debugging and Learning; keep a running total and stop when it passes 40; **retain the first card that takes the total above 40**; a total of exactly 40 does *not* stop the run. Final totals are 41 to 59, with 3 to 5 cards.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for this: a *card* is a category and a whole number of hours from 10 to 19; categories cycle through Meetings, Coding, Debugging and Learning; keep a running total and stop when it passes 40; **retain the first card that takes the total above 40**; a total of exactly 40 does *not* stop the run. Final totals are 41 to 59, with 3 to 5 cards.
 
-This family follows it with three exceptions you must know.
+The two LINQ demos and XAML depart from that contract. The older four-name headers explain how the same edge case used to affect the ports.
 
 1. **`LinqChallenge1` and `LinqChallenge2` do not draw random hours.** Their work week is five fixed 8-hour days, and they refuse any day that would push the total past 40. The result is exactly 40.0 hours over five rows, every run. They teach deferred execution, not the stop rule. Exercise E1 states this.
 2. **The `for`-header entries used to stop after four cards, and `xaml` still does.** The original and the Java, Go, Kotlin, Python and Rust ports test `total <= 40 && a category remains` and take each category once. In `ModernChallenge1` the condition is `Sum() <= 40d && i.categories.MoveNext()`, where `categories` is a one-pass enumerator. With four category names, a reduction of that header run in a console project with every card worth 10 hours stopped with `stop: total 40 after 4 cards`: one run in 10,000 for random hours, and a contradiction of "exactly 40 continues". The 2008 original had four names, and the entry READMEs described that faithfully. It is now fixed in `ModernChallenge1` and in all five ports by a fifth name (`Meetings` repeats). After the fix, the same reduction stops with `stop: total 50 after 5 cards`, the C# project builds, Rust's unit tests pass (they now assert that exactly 40 continues), and Go, Java and Kotlin compile. The XAML entry's four unrolled passes still have the ceiling: a fifth pass could not be tested without Windows, so it was not added. With the shipped seed (`Random(42)`: 16, 11, 11, 15) it deals four cards and ends at 53, so the case never arises unless you change the seed (exercise E2).
-3. **`xaml` keeps the 40-hour limit in a SQL trigger** that deletes a row if the earlier rows already total more than 40. The crossing card is kept, because its *earlier* rows total at most 40.
+3. **Storage depends on the XAML variant.** The EF Core variant has a SQLite trigger that deletes a row if the earlier rows already total more than 40. The direct SQLite variant puts the equivalent test in the insert statement. Both keep the crossing card. The strict variant writes XML. See [where entries differ](../../intro.md#where-entries-differ).
 
 ## The machine to identify
 
@@ -59,7 +59,7 @@ This family follows it with three exceptions you must know.
 
 **What stops it.** In the `for` family, the condition slot: when the total passes 40 (or the categories run out), the conditional's else branch shows the window and returns `false`. In the LINQ entries, a prefix cap (`where` recomputes a running total, or `Aggregate` refuses a day). In `xaml`, the trigger deletes late rows. In Rust, `extended` returns `None`.
 
-**What commits.** In `ModernChallenge1`, each card is added to EF Core's context under a mutex and saved; the window is shown after the loop. In `LinqChallenge1`, tracked entities are saved by one `SaveChanges()` *eagerly*, inside the one statement but before the lazy stages. In `xaml`, each provider calls `Add` and `SaveChanges` during parsing, so a card is committed *while the document is still being read*.
+**What commits.** In `ModernChallenge1`, each card is added to EF Core's context under a mutex and saved; the window is shown after the loop. In `LinqChallenge1`, tracked entities are saved by one `SaveChanges()` *eagerly*, inside the one statement but before the lazy stages. XAML providers invoke `Add` and `SaveChanges` in the EF Core variant, `ExecuteNonQuery` in the direct SQLite variant and `WriteXml` in the strict variant.
 
 <!-- diagram-source: src/ModernChallenge1/README.md#program-flow -->
 
@@ -77,7 +77,7 @@ flowchart TD
     F --> G["Double.IsNaN of the result is false: the for ends"]
 ```
 
-The original's flow is a loop with a conditional exit. The three slots are the three nodes.
+The original's flow is a loop with a conditional exit. Its condition is eager: the query expression constructs a deferred `Select`, then the terminal `Sum()` enumerates it immediately, on that condition check. This is the same placement of work as JavaScript's `reduce`. The LINQ demos below have deferred stages of their own and use terminal operators to run them.
 
 <!-- diagram-source: src/LinqChallenge1/README.md#program-flow -->
 
@@ -163,7 +163,7 @@ q.Sum() then q.ToList():  effect 1..3, then effect 1..3 again
 q.ToList() once, then Sum on the list:  effect 1..3 once
 ```
 
-That is 0, 3, 6 and 3 effect lines, as exercise B7 states. `Select` stores a description; each enumeration runs it again. A second experiment is this guide's own. It builds a lazy generator of cards (15, 19, 12, 10, 10) and takes `TakeWhile(c => c.total - c.hours <= 40)`, which keeps the crossing card. It printed *four* `drew` lines for three kept cards. To keep the crossing card, `TakeWhile` must look at the card *after* it to see the test fail, so the generator drew one card too many. Haskell's `span` has no such cost (see [Haskell](haskell.md)). A cap that retains the crossing card without over-drawing needs a stateful iterator, such as the weird JavaScript machine's `over` flag, or an `Aggregate` that refuses.
+Running the [B7 console fixture](../../solutions/b7-linq/Program.cs) with .NET SDK 10.0.401 reproduces 0, 3, 6 and 3 effect lines. `Select` stores a description; each enumeration runs it again. A second experiment is this guide's own. It builds a lazy generator of cards (15, 19, 12, 10, 10) and takes `TakeWhile(c => c.total - c.hours <= 40)`, which keeps the crossing card. It printed *four* `drew` lines for three kept cards. To keep the crossing card, `TakeWhile` must look at the card *after* it to see the test fail, so the generator drew one card too many. Haskell's `span` has no such cost (see [Haskell](haskell.md)). A cap that retains the crossing card without over-drawing needs a stateful iterator, such as the weird JavaScript machine's `over` flag, or an `Aggregate` that refuses.
 
 **`LinqChallenge1`: eager first, lazy second (read).** The innermost `Aggregate` folds the five fixed days into tracked entities and runs first, because it is the innermost argument. The tuple `(..., ctx.SaveChanges())` evaluates left to right, so `SaveChanges()` runs after every entity is tracked. Then a chain of `Select` and `SelectMany` stages does nothing until the final `Aggregate` pulls: query, fold, build the window, pulse and `Application.Run`. The reported total is 40.0 for five rows.
 
@@ -182,7 +182,7 @@ That is 0, 3, 6 and 3 effect lines, as exercise B7 states. `Select` stores a des
 
 ### The ports, side by side
 
-All five ports keep "one statement, empty body". Each finds its own three clauses.
+All five ports keep "one statement, empty body". Each finds its own three clauses. The result uses the port's host interface: for example, Go serves its summary over local HTTP.
 
 | Port | Header mechanism | State holder | Stop test |
 | --- | --- | --- | --- |
@@ -209,7 +209,7 @@ The ports show that the "bodiless loop" is a *shape*, not a C# feature. What car
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| A LINQ query is deferred and reruns on each enumeration | **Guaranteed** | Documented LINQ semantics. Verified by B7 and by the run above. |
+| The B7 `Enumerable.Select` projection runs on enumeration, and the effect runs again on a second enumeration of that pipeline | **Guaranteed** | The LINQ-to-Objects `Select` contract; verified by B7. In the header, `Sum()` enumerates the projection during every check. |
 | `Aggregate` is eager | **Guaranteed** | By definition: it consumes the sequence. |
 | Tuple elements evaluate left to right | **Guaranteed** | C# language rule. It is why `SaveChanges()` runs after the entities are tracked. |
 | `&&` short-circuits | **Guaranteed** | C# language rule. It is why the category enumerator advances once per card. |
@@ -242,7 +242,7 @@ The ports show that the "bodiless loop" is a *shape*, not a C# feature. What car
 Answer before you read the italic text after each question.
 
 1. **Trace.** In the `ModernChallenge1` header, hours are 13, 14, 13, 10. Give the sum when each condition runs, and say when `MoveNext()` is called. *(Conditions see sums 0, 13, 27, 40, then 50. `MoveNext()` is called on the first four, giving Meetings, Coding, Debugging and Learning. The fifth condition has sum 50, so `&&` skips `MoveNext()`. The fourth card is the crossing card.)*
-2. **Explain.** Why does `q.Sum()` followed by `q.ToList()` print the effects twice? *(`q` is a description. Each enumeration runs the `Select` again. To run it once, enumerate once into a list and reuse the list.)*
+2. **Explain.** Why does `q.Sum()` followed by `q.ToList()` print the effects twice? What does that predict for the C# header? *(Each call enumerates the `Select` pipeline, so its effects run twice. In the header, each condition check constructs and immediately sums its projection, so the sum is computed before any next draw. Materializing the B7 projection with `ToList()` lets later consumers reuse its results.)*
 3. **Transfer.** Which construct in Python plays the part of the C# `for` header's condition slot in `iter(step, False)`? *(The sentinel: the loop ends when `step` returns `False`, so the stop test lives inside the function that makes the next card.)*
 4. **Evidence.** A reviewer says "four 10-hour cards in a `for`-header entry continue to a fifth." Design a test that could fail. *(Reproduce the header with all-10 hours, as the reduction above did, and check for five cards and a total of 50. The negative control is the header with four names, which stops at four cards and 40. The reduction was run for C#. Rust's unit tests assert it directly, and Go, Java and Kotlin were only compiled, so for those it is read from the source.)*
 

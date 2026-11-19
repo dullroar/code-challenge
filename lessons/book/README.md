@@ -10,11 +10,11 @@ python lessons/book/build.py --check-diagrams   # the full render gate for the P
 
 - `chapters.txt` is the reading order. Add a chapter by adding its path there.
 - `metadata.yaml` holds the title, the edition number (`book-version`), author and table-of-contents settings. The book is numbered from v3 on: bump `book-version`, the title, the title page in `front-matter.md` and add a section to [`VERSIONS.md`](VERSIONS.md) (what that edition added). `build.py` fails if they disagree.
-- `build.py` concatenates the chapters and rewrites links first: a link to another chapter becomes an in-book anchor, a link to the web index becomes plain text, and a link to anything else in the repo (source files, `src/*/README.md`, `CHALLENGE.md`) becomes its GitHub URL. The chapters themselves stay ordinary GitHub-friendly Markdown.
+- `build.py` assembles the chapters and rewrites links after Pandoc parses the Markdown. Code samples stay literal. A link to another chapter becomes an in-book anchor, a link to the web index becomes plain text, and a link to anything else in the repo (source files, `src/*/README.md`, `CHALLENGE.md`) becomes its GitHub URL. The chapters themselves stay ordinary GitHub-friendly Markdown.
 - **PDF** is written to the repo root as `learn-programming-the-weird-way.pdf` and needs [WeasyPrint](https://weasyprint.org) (`uv tool install weasyprint` or `pipx install weasyprint`; it also needs the Pango library, which most Linux desktops and WSL images already have). Without it the script skips the PDF with a note; the EPUB and HTML are complete either way. The layout is `book.css`; fonts are DejaVu, whose mono face has the APL glyphs (`⍴ ⍳ ⎕`; see [Seeing the glyphs](../../src/apl/README.md#seeing-the-glyphs)).
-- **Title and copyright pages** are in [`front-matter.md`](../front-matter.md) (plain HTML, inserted before the table of contents). Edit authors and the copyright line there.
+- **Title and copyright pages** are in [`front-matter.md`](../front-matter.md) (plain HTML, inserted before the table of contents). EPUB puts this material on its opening page. Edit authors and the copyright line in the source.
 - **Long code lines** (regexes, XAML, CMake) are hard-wrapped in the PDF by `wrap-code.lua` so nothing runs off the page. A line that continues ends in `↩` and the next line starts with `↪`. The Markdown source is untouched; HTML and EPUB reflow on their own.
-- The PDF and EPUB in the repo root are committed; the HTML (and the intermediate `book.md`) go to `lessons/book/out/`, which is git-ignored.
+- The PDF and EPUB in the repo root are committed. The HTML and assembled Markdown go to `lessons/book/out/`, which is git-ignored.
 - **The study guides are a separate document set.** [`lessons/study-guides/`](../study-guides/README.md) holds hand-written guides that build with `python lessons/study-guides/build.py` into `learn-programming-the-weird-way-study-guides.pdf` and `.epub` beside the book's. That script imports this one (`build_documents`), so the link rewriting, diagram rendering, Pandoc call, stylesheet and reproducibility rule are shared and not copied. The guides are not in `chapters.txt`, and the book only links to them. [`study_guides.py`](study_guides.py) checks them and [`test_study_guides.py`](test_study_guides.py) tests those checks.
 
 ## Diagrams
@@ -58,7 +58,7 @@ After that the build works offline. If Chromium's sandbox does not work in your 
 
 ## Metadata-driven chapters
 
-Part of the book is **generated** from data, so it can never disagree with the code:
+Part of the book is **generated** from metadata and author-written Markdown. The freshness check verifies agreement with those inputs. Review the labels against the implementation and its tests before changing the metadata.
 
 | Source (hand-written) | What it becomes |
 | --- | --- |
@@ -68,7 +68,7 @@ Part of the book is **generated** from data, so it can never disagree with the c
 | [`cs-source/chapters/NN-name.md`](../cs-source/chapters/) and [`cs-source/index.md`](../cs-source/index.md) | The chapter introductions and the opener of the "By computer science concept" part |
 | [`link-hosts.txt`](link-hosts.txt) | The only external hosts the prose may link to |
 
-**How a concept is grounded.** Every concept page needs something real behind it, and the build fails if it has nothing. An entry can relate to a concept in three ways, set in its frontmatter: `tags` (it **demonstrates** the idea), `analogies` (it resembles the idea) or `counterexamples` (it shows what the idea is not). The concept's "In this repo" table has a column that says which. Some facts are true of *every* entry, and a maintainer states them once in the concept's own frontmatter instead of tagging 39 entries: `applies-to: all` (or `has:machine`, for the entries that name their machine) with a required `applies-because:` sentence. A concept that no entry demonstrates at all can instead point at a focused exercise with `exercise: exercises.md#anchor`. The prose "no entry uses this yet" is rejected: the generator now says what is behind each concept. `python lessons/book/build.py --orphans` prints the grounding of every concept and fails if one has none. `python lessons/book/test_cs.py` tests the rules.
+**How a concept is grounded.** Every concept page needs something real behind it, and the build fails if it has nothing. An entry can relate to a concept in three ways, set in its frontmatter: `tags` (it **demonstrates** the idea), `analogies` (it resembles the idea) or `counterexamples` (it shows what the idea is not). The concept's "In this repo" table has a column that says which. Some facts are true of *every* entry, and a maintainer states them once in the concept's own frontmatter instead of tagging every entry: `applies-to: all` (or `has:machine`, for the entries that name their machine) with a required `applies-because:` sentence. A concept that no entry demonstrates at all can instead point at a focused exercise with `exercise: exercises.md#anchor`. The prose "no entry uses this yet" is rejected: the generator now says what is behind each concept. `python lessons/book/build.py --orphans` prints the grounding of every concept and fails if one has none. `python lessons/book/test_cs.py` tests the rules.
 
 Run `python lessons/book/build.py --generate` to refresh the generated Markdown (the files in `lessons/cs/` and the marked blocks) without running pandoc. The generated files are **committed**, so GitHub readers see the full chapters, and `--check` fails if they are out of date or if any metadata is invalid (an unknown tag, a missing key, a link to a host that is not on the list).
 
@@ -87,3 +87,15 @@ The same sources give the same bytes. Every list is sorted, nothing reads the cl
 After merging a new entry: add its row to the root `README.md` table, add any new tag, role or language to `lessons/cs-source/`, run `python lessons/book/build.py` (it regenerates the chapters, the index and the PDF and EPUB), and update the bold **"N challenges in M languages"** line at the top of the root `README.md`. The build prints the right numbers and warns when that line is stale. It is the one count that is kept by hand.
 
 To keep the book building: give every chapter exactly one `# ` title, link between chapters with relative `.md` links, and put exercises' answers in [`answers-key.md`](../answers-key.md).
+
+### Guide impact review
+
+Compare a proposed revision with its base before building both volumes. The report uses entry and concept IDs, source links and the indirect dependencies in [`guide-dependencies.json`](guide-dependencies.json). It is a reading list for the reviewer. Add missing dependencies when a guide teaches a mechanism without naming the edited source. If a changed file has no affected guides, record an empty list for that path in the dependency file after review.
+
+```bash
+python lessons/book/guide_impact.py master                    # compare master with HEAD
+python lessons/book/guide_impact.py master --worktree         # include uncommitted edits
+python lessons/book/guide_impact.py master --check-review review.json
+```
+
+Once you've checked a guide's traces, exercises, boundaries and source citations, record its printed token in a JSON object keyed by guide path, such as `languages/apl.md`. The check rejects missing tokens and tokens made stale by an edit to the guide or the relevant sources. Record the supporting run or source evidence in the review. Rebuild the book and the separate study guides together.

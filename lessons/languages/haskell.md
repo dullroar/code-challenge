@@ -77,7 +77,7 @@ Inside a library that implements lazy streaming and has been carefully tested fo
 <!-- BEGIN GENERATED program-flow:languages/haskell.md -->
 ## How each program runs
 
-Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) shows what the challenge asks for and where entries differ.
 
 ### Program flow of `haskell`
 

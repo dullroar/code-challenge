@@ -103,7 +103,7 @@ When the input *is* the loop. A regex record separator is the idiomatic way to r
 <!-- BEGIN GENERATED program-flow:languages/awk.md -->
 ## How each program runs
 
-Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) shows what the challenge asks for and where entries differ.
 
 ### Program flow of `awk`
 
@@ -136,7 +136,7 @@ flowchart TD
     A["BEGIN: RS is [0-9], /dev/urandom added to ARGV, sqlite3 pipe opened"] --> B["awk reads a record: the bytes up to the next digit, and RT is that digit"]
     B --> C["Rules 1 to 3: skip empty RT; hours = 10 + RT, add to total; build the card in the fields"]
     C --> D["Rules 4 and 5: print the INSERT to the pipe, print the row"]
-    D --> E{{"Last rule: t > 40?"}}
+    D --> E{{"Last rule: t ≥ 41?"}}
     E -->|no| B
     E -->|yes| F["exit: END commits, closes the pipe, prints the summary"]
 ```

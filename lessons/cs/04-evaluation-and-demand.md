@@ -33,6 +33,7 @@ The values 1 to 5 are only a sample. Haskell's call-by-need *remembers* an evalu
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | eager |
 | [`awk`](../../src/awk/README.md) | AWK | eager |
 | [`awk-weird`](../../src/awk-weird/README.md) | AWK | eager |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# `for` | eager |
 | [`cmake`](../../src/cmake/README.md) | CMake | eager |
 | [`cobol`](../../src/cobol/README.md) | COBOL | eager |
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | eager |
@@ -55,7 +56,6 @@ The values 1 to 5 are only a sample. Haskell's call-by-need *remembers* an evalu
 | [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | lazy |
 | [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | lazy |
 | [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | lazy |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# `for` | deferred |
 | [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | LINQ | deferred |
 | [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | LINQ | deferred |
 | [`ed-weird`](../../src/ed-weird/README.md) | ed | rewriting |
@@ -111,6 +111,7 @@ Eager evaluation computes a value as soon as the code asks for it. It is the def
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | demonstrates | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
 
 ## Lazy evaluation
 

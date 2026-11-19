@@ -93,7 +93,7 @@ When the "loop" is really *a set of independently-registered participants* (plug
 <!-- BEGIN GENERATED program-flow:languages/lisp.md -->
 ## How each program runs
 
-Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) shows what the challenge asks for and where entries differ.
 
 ### Program flow of `lisp`
 
@@ -107,7 +107,7 @@ flowchart TD
     B --> C["for hours = a fresh random 10 to 19"]
     C --> D["sum hours into total"]
     D --> E["collect a card: number, category, hours, total"]
-    E --> F{{"until total > 40?"}}
+    E --> F{{"until total ≥ 41?"}}
     F -->|no| B
     F -->|yes| G["Build the SQL script as a string, run sqlite3 with run-program, print the rows"]
 ```

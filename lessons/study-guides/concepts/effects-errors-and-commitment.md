@@ -17,7 +17,7 @@ Scope limits. The guide uses facts checked in the language guides and the exerci
 
 ## Before you begin
 
-**Safety model.** Every entry writes fictional **DEMO ONLY** data to a local scratch file or database, and the programs start processes. Read the source first and run it in the sandbox first, for example `sandbox/container/run-image.sh src/regex-perl`. Work on copies ([Running things safely](../../exercises.md#running-things-safely)). Failure experiments may leave half-written scratch files, so use a copy and a scratch data folder.
+**Safety model.** The cards are fictional **DEMO ONLY** data. Programs can write to local scratch files or databases and can start processes. Read the source first and run it in the sandbox first, for example `sandbox/container/run-image.sh src/regex-perl`. Work on copies ([Running things safely](../../exercises.md#running-things-safely)). Failure experiments may leave half-written scratch files, so use a copy and a scratch data folder.
 
 **Prediction rule.** Before each failure experiment, write down three lists: what will be *undone*, what will *stay*, and what you will *see on the terminal*. They are usually different.
 
@@ -34,9 +34,9 @@ Scope limits. The guide uses facts checked in the language guides and the exerci
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19; categories cycle through Meetings, Coding, Debugging and Learning; the running total rises until it passes 40; the run **retains the first card that takes the total above 40**; a total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Final totals are 41 to 59, with 3 to 5 cards.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-The effects of a run are three: the *rows printed*, the *rows saved*, and the *summary line*, which says `committed`. Every entry saves its rows in one SQLite transaction (or one script run once), and every row carries `DEMO ONLY`, enforced by a `CHECK(demo_only=1)` constraint in the table. The word "committed" in the summary is a claim. This guide tests it.
+Check the *rows shown*, the *rows saved*, and the *summary* separately. A SQLite table can enforce `CHECK(demo_only=1)`. A TSV writer applies its own rules. Some demos save in one transaction, pcre2grep saves in separate calls, and .NET reports `captured` for the regex result. The summary is a claim about the run. This guide tests it against the effects.
 
 ## The machine to identify
 
@@ -50,7 +50,7 @@ Here the five questions are about *effects*.
 
 **What stops it.** An effect can stop a run by *failing*: a constraint violation (`stop rule fired: total exceeds 40`), a size error that is handled, a vetoed callout branch, a halted flag, an exit status. Stopping by failure only works if the failure is *distinguishable* from a real error.
 
-**What commits.** The commit point differs by entry. SQLite `COMMIT` after the loop (most). Each statement at once, with no transaction (pcre2grep, and the CMake and Make stop-rule insert). The *host* after the match, because the notation cannot write (.NET). The launcher after the editor ends (ed, Ex). A halted run's dispatcher (tar-gnu).
+**What commits.** Some entries issue one SQLite `COMMIT` after the loop. In pcre2grep, separate SQLite connections autocommit as the helper statements finish. CMake and Make issue their final stop-rule probe after the card writes. The .NET host appends a TSV report after the match. The PCRE2 C host writes and closes a TSV in callouts before the final failure. For ed and Ex, SQLite receives the rows from the launcher after the editor finishes.
 
 <!-- diagram-source: lessons/cs-source/concepts/transaction.md#block-1 -->
 
@@ -87,7 +87,7 @@ The decisive trace here is of a *failure*. For each entry the table gives the fa
 | Entry and failure | Undone | Stays | Seen from outside |
 | --- | --- | --- | --- |
 | `haskell-weird`, count made lazy (B2) | nothing: no commit | the first card printed | `handle is closed`, and the summary line printed garbage before the crash |
-| `regex-dotnet`, append `(?!)` (B8) | every capture | nothing was written yet | `match returned: false`, `total=0 entries=0` |
+| `regex-dotnet`, append `(?!)` (B8) | every capture | the host still appends an empty-run report | `match returned: false`, `total=0 entries=0`, exit 1 |
 | `regex-pcre2grep`, relative callout path (B8) | nothing happened | nothing | **no output, exit 0**: a callout that cannot start looks like a vetoed branch |
 | `regex-perl` normal run | `local` total and index | printed rows, the `INSERT`s, the transaction | the match returns *false*, and the data is saved |
 | `regex-pcre2` normal run | nothing is rewound | the file, the rows, the summary | `pcre2_match returned -1`, and the data is saved |
@@ -97,9 +97,9 @@ The decisive trace here is of a *failure*. For each entry the table gives the fa
 | `cobol-weird`, size error | the overflowing add leaves the field | the card is recorded first | the handler rewires `NEXT-CARD`: an *error as the stop rule* |
 | `javascript-events`, a listener throws | an uncommitted insert: `ROLLBACK` once | rows already printed | `timecards: <message>` and exit 1 |
 
-**Reading the table.** The `INSERT`s and `print`s in Perl and PCRE2 survive because they are *effects*, not engine state. The notation's failure changes nothing about them. In .NET the *only* output is engine state, and it dies with the failure. In pcre2grep a failure of the callout is silent, and the entry says so.
+**Reading the table.** The SQLite inserts and prints in Perl and the file writes in the C callouts survive final match failure. In .NET the engine returns only match state. A failed match leaves the host no card captures, though the host still writes its report header and summary. In the pcre2grep relative-path experiment the initial helper fails to start, so there are no rows or output.
 
-**The three kinds of "error as a signal".** In `cobol-weird`, `ON SIZE ERROR` is local arithmetic error control: the field is too small, the clause runs, and the program takes it as the stop rule. In `make-gnu` and `cmake`, the last statement inserts `total <= 40` into a `CHECK(ok=1)` column: SQLite refuses, prints a named constraint error on stderr, and the run goes on to print its summary. The entry's check requires that error to appear *exactly once*. In `regex-sed`, exit status 1 means "returned false on purpose", and the wrapper maps 1 to 0.
+**The three kinds of "error as a signal".** In `cobol-weird`, `ON SIZE ERROR` is local arithmetic error control: the field is too small, the clause runs, and the program takes it as the stop rule. In `make-gnu` and `cmake`, the last statement inserts `total <= 40` into a `CHECK(ok=1)` column: SQLite refuses, prints a named constraint error on stderr, and the run goes on to print its summary. The entry's check requires that error to appear *exactly once*. The pcre2grep wrapper maps the engine's no-match status 1 to success. The sed program deliberately exits 1 too; its wrapper also requires SQLite to exit 0.
 
 **Exactly 40.** The boundary shows what the commit can claim. Before the five-name fix, a regex or `for`-header run that stopped at four cards with a total of exactly 40 still committed and printed `# committed total=40 entries=4`, and the shared checker rejected it. The entry's own claim of success and the shared check disagree: "committed" says the *data was saved*, and the checker asks whether the *rule* was obeyed. Commit is not correctness.
 
@@ -121,7 +121,7 @@ The ordinary `haskell` entry builds the whole SQL script as a pure string, runs 
 | Exercise | Predict first | What the evidence shows |
 | --- | --- | --- |
 | [B2. Haskell: break the laziness](../../exercises.md#b2-haskell-break-the-laziness-verified) | Make `entries` lazy. | `handle is closed`. Forcing after the resource closed. |
-| [B8. Regex: what survives a failed match](../../exercises.md#b8-regex-what-survives-a-failed-match-verified) | `(?!)` on .NET; a relative path in pcre2grep. | Nothing survives in .NET. In pcre2grep the failure is silent. |
+| [B8. Regex: what survives a failed match](../../exercises.md#b8-regex-what-survives-a-failed-match-verified) | `(?!)` on .NET; a relative path in pcre2grep. | The failed .NET match supplies no card captures, and the host writes a zero-row report. In pcre2grep the helper failure is silent. |
 | [B12. Tcl: edit the program in the database](../../exercises.md#b12-tcl-edit-the-program-in-the-database-verified) | Turn recursive triggers off. | One row printed, `entries=2`. |
 | [B17. tar, weirder: predict the clock](../../exercises.md#b17-tar-weirder-predict-the-clock-verified) | Run with a layout one tick short. | `the clock ran out`, exit 3, two cards. A short clock stalls instead of erroring. |
 | [A1. Read the rows](../../exercises.md#a1-read-the-rows-verified) | Which card crossed 40? | The output alone proves "total before the last card is at most 40". |
@@ -134,8 +134,8 @@ The ordinary `haskell` entry builds the whole SQL script as a pure string, runs 
 | A transaction's uncommitted changes are undone by rollback, but not effects outside it | **Guaranteed** | Database semantics. |
 | A size error leaves the receiving field unchanged | **Guaranteed** | Specified COBOL semantics. |
 | Perl unwinds `local` on backtracking, not prints | **Guaranteed** | Documented Perl. |
-| A failed .NET `Match` exposes nothing | **Guaranteed** | Verified in B8. |
-| `CHECK(demo_only=1)` makes a non-demo row unrepresentable | **Guaranteed** | SQLite enforces it, and each check tries a non-demo insert. |
+| A failed .NET `Match` supplies no card captures | **Guaranteed** within the .NET regex API | B8 exercises this property. The host can still write its empty-run report. |
+| A normal insert of 0 into `demo_only INTEGER NOT NULL CHECK(demo_only=1)` fails | **Guaranteed** with SQLite constraint checks enabled | SQLite enforces the declared column constraints. The TSV entries use no such constraint. |
 | `SYSTEM` returns a raw wait status (exit 3 appears as 768) | **Implementation-permitted** | A host detail of the tested COBOL runtime. |
 | tar ignores the checkpoint command's exit status | **Accidentally exploited** | Observed on the tested releases. The entry makes the machine safe against it. |
 | `pcre2grep` cannot tell a callout that failed to start from a vetoed branch | **Implementation-permitted** | Its own design, and the cause of B8's silent result. |

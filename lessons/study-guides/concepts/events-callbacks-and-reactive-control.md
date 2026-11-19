@@ -17,7 +17,7 @@ Scope limits. The guide uses Node.js's `EventEmitter` as the main example and co
 
 ## Before you begin
 
-**Safety model.** Every entry writes fictional **DEMO ONLY** data to a local scratch file or database, and the programs start processes or timers. Read the source first and run it in the sandbox first (`sandbox/container/run-image.sh src/javascript-events`). Work on copies ([Running things safely](../../exercises.md#running-things-safely)). A deliberately removed turn boundary can crash a run: use a scratch data folder.
+**Safety model.** The cards are fictional **DEMO ONLY** data. Programs can write to local scratch files or databases and can start processes or timers. Read the source first and run it in the sandbox first (`sandbox/container/run-image.sh src/javascript-events`). Work on copies ([Running things safely](../../exercises.md#running-things-safely)). A deliberately removed turn boundary can crash a run: use a scratch data folder.
 
 **Prediction rule.** Before each run, write the *order* of events and mark which arrows are plain calls (the stack grows) and which are hops to a later turn (the stack unwinds). In this topic the order is the program.
 
@@ -34,7 +34,7 @@ Scope limits. The guide uses Node.js's `EventEmitter` as the main example and co
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19; categories cycle through Meetings, Coding, Debugging and Learning; the running total rises until it passes 40; the run **retains the first card that takes the total above 40**; a total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Final totals are 41 to 59, with 3 to 5 cards.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
 In the events program the rule is one line: `total-updated` emits `finished` when `total > limit` (so 40 is not over), and otherwise schedules `generate` for a later turn. The category of card *n* is `(n - 1) % 4`, so a fifth card is Meetings again. The program takes a `world` object (`rng`, `schedule`, `open`, ...) so a test can inject its own.
 

@@ -5,12 +5,12 @@ kind: weird
 languages: [c-sharp]
 lesson: "languages/csharp-linq-xaml.md#the-original-modernchallenge1"
 loop-by: loop-statement
-evaluation: deferred
+evaluation: eager
 assurance: guaranteed
 pairs-with: JavaChallenge1
 machine: "Three expression slots"
 state: "Fields of one anonymous object"
-tags: [closure, control-flow, deferred-execution, event-loop, markup-language, side-effect, thread-safety]
+tags: [closure, control-flow, deferred-execution, eager-evaluation, event-loop, markup-language, side-effect, thread-safety]
 counterexamples: [event-driven-programming]
 ---
 # C# challenge: the original (modernized)
@@ -82,7 +82,7 @@ Everything between those two semicolons is the `for` statement. Read it as three
 | **Condition** | `(from hours in i.totalHours select hours).Sum() <= 40d && i.categories!.MoveNext()`. While the running total is 40 or under and there is still a category left to hand out, the condition is `true` and the loop goes again. Once either runs out, the condition builds and shows the result window instead, inline. The category list has five names (`Meetings` repeats), so four 10-hour cards, a total of exactly 40, are followed by a fifth card instead of ending the run. (The 2008 original had four names and stopped there.) The window is the *value* that the comparison would have returned: `Double.IsNaN(i.app.Run(...))`. It is wrapped in a `Func<bool>` so that it can sit where a `bool` is expected. |
 | **Iterator** | Draws one random hour count, adds a new timecard row to the EF Core context, and starts a background `Thread` that calls `Mutex.WaitOne`, `SaveChanges`, and `Mutex.ReleaseMutex` - not directly, but through `MethodInfo.Invoke`. The reflection and the thread add nothing useful; they are here on purpose, as a time capsule of 2008-era style next to the EF Core code that replaced LINQ to SQL. |
 
-The window itself is also built from inside the condition clause: a string of raw XAML is handed to `XamlReader.Load` at runtime, and the `XElement` built in the initializer becomes the `<DoubleAnimation>` that fades the window in and out until it is closed.
+Each condition test constructs a deferred LINQ projection over the list and immediately consumes it with `Sum()`. The eager `for` needs the sum before it can take the next step. The window itself is also built from inside the condition clause: a string of raw XAML is handed to `XamlReader.Load` at runtime, and the `XElement` built in the initializer becomes the `<DoubleAnimation>` that fades the window in and out until it is closed.
 
 ## What changed since 2008, and what did not
 

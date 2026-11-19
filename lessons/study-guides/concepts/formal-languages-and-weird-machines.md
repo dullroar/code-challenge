@@ -17,7 +17,7 @@ Scope limits. The guide is about the *relationship between a notation and the ma
 
 ## Before you begin
 
-**Safety model.** Every entry writes fictional **DEMO ONLY** data to a local scratch file or database, and the programs run code from inside notations (Perl in a pattern, C in a callout, Tcl from a table, Tcl-like text from XAML). Read the source first and run it in the sandbox first, for example `sandbox/container/run-image.sh src/regex-sed`. Work on copies, and run any sed or regex experiment in a scratch folder ([Running things safely](../../exercises.md#running-things-safely)).
+**Safety model.** The cards are fictional **DEMO ONLY** data. Here a notation can cause effects through Perl in a pattern, C in a callout, Tcl read from a table or .NET methods invoked by XAML. Read the source first and run it in the sandbox first, for example `sandbox/container/run-image.sh src/regex-sed`. Work on copies, and run any sed or regex experiment in a scratch folder ([Running things safely](../../exercises.md#running-things-safely)).
 
 **Prediction rule.** Before each run, write what the notation can *represent* and what it cannot, then see whether the program ran into that limit.
 
@@ -33,7 +33,7 @@ Scope limits. The guide is about the *relationship between a notation and the ma
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19; categories cycle through Meetings, Coding, Debugging and Learning; the running total rises until it passes 40; the run **retains the first card that takes the total above 40**; a total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Final totals are 41 to 59, with 3 to 5 cards.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
 For a formal-language reader the challenge needs two capabilities: *counting* (compare a total with 40) and *repetition with memory* (carry the total from one card to the next). A pure regular expression has neither. Every entry in this guide supplies them by borrowing a mechanism: a stack, tally marks, a restart, a host. The boundary is exact: a total of 40 must *continue*, so the machine must tell 40 from 41.
 
@@ -49,7 +49,7 @@ For each entry, ask what plays each role.
 
 **What stops it.** A pattern that fails (`(?!)`), a pattern that stops matching (`/ tot:#{41}/`), a rule that writes nothing (Make), a literal of a given length (CMake), a finite supply (four names, five dice).
 
-**What commits.** In a substrate that cannot write, nothing commits inside it: the .NET entry must return a match and let the *host* write the file. In a substrate with hooks (PCRE2 callouts, Perl code blocks), the effects commit as the match proceeds, and survive its failure.
+**What commits.** The .NET pattern must return a successful match for its host to get card captures for the TSV. The PCRE2 callouts write the TSV during the match, and the Perl code blocks write to SQLite. Those effects survive a failed final match.
 
 ## Trace one run
 
@@ -64,7 +64,7 @@ Here is how three cards, 15, 19 and 12, look in four substrates. Each was verifi
 
 Read the second row: a PCRE2 pattern that "fails" is the program's *success*, because the effects survived. In the first row the opposite holds: the pattern must succeed, because a failed .NET match exposes nothing.
 
-**What the notation cannot do.** The .NET entry cannot draw random numbers or write a file, so the host seeds four unary strings and writes the result. The sed entry has no numbers at all, so a random generator is a 16-character string of `0` and `1`. The CMake regex has no counted repetition, no lookahead and no backreferences, so the stop test is a literal of 41 `x`s, and a pattern parameterized by a register is the only way to look something up.
+**What the notation cannot do.** The .NET entry cannot draw random numbers or write a file, so the host builds a tape of five unary fields and appends the report from the capture collections. The sed entry has no numbers at all, so a random generator is a 16-character string of `0` and `1`. The CMake regex has no counted repetition, no lookahead and no backreferences, so the stop test is a literal of 41 `x`s, and a pattern parameterized by a register is the only way to look something up.
 
 **Exactly 40.** A substrate can express "continue at 40" only if it can tell 40 from 41. A budget of 41 tokens, a literal of 41 marks and a tape line for 40 all do. But the *supply* is finite in several: the category names in a subject, a `cats:` list, the unrolled XAML passes. With four names, a run of four 10-hour cards ended at exactly 40, which the shared checker rejects. The notation was powerful enough to *count* to 41 and not powerful enough to *supply* a fifth name. The regex entries now carry five names and prove it in their checks; `xaml`, with four unrolled passes, still has the limit.
 
@@ -129,7 +129,7 @@ Answer before you read the italic text after each question.
 1. **Trace.** In the .NET entry the draws are 15, 19, 12, 17. Give the budget tokens left after each pass and say which pass ends the loop. *(26, then 7, then 0. After the third pass `b` is empty, so the next pass takes `(?!)` and the loop ends. The fourth draw is ignored.)*
 2. **Explain.** Why does the PCRE2 pattern end in `(*COMMIT)` and `(*FAIL)`, and what does each do? *(`(*COMMIT)` stops the engine from retrying shorter loops, so the `commit` callout runs once. `(*FAIL)` makes the whole match lose after the work is done, which is the signature move.)*
 3. **Transfer.** Name an input language in a system you use that is more powerful than it looks, and say how you would apply the rule of least power. *(For example a template language, a spreadsheet formula or a config format with `include`. Replace it with a weaker declared format, or parse it with a strict grammar before acting.)*
-4. **Evidence.** A reviewer says "the .NET entry cannot write anything." Design a test that could fail. *(Check that `Program.cs` has exactly one `Regex.Match`, no `MatchEvaluator` or `Replace`, and that every file write is in host code after the match, which the entry's `check.sh` does. The negative control is a copy with a `MatchEvaluator`, which the check must reject.)*
+4. **Evidence.** A reviewer says "the .NET pattern itself cannot write a row." Design a test that could fail. *(Check that `Program.cs` has exactly one `Regex.Match`, no `MatchEvaluator` or `Replace`, and that every file write is in host code after the match, which the entry's `check.sh` does. The negative control is a copy with a `MatchEvaluator`, which the check must reject.)*
 
 ## Further reading
 
