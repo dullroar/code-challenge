@@ -2,6 +2,7 @@
 """Build the study guides as their own document set: one HTML file, one EPUB and one PDF.
 
     python lessons/study-guides/build.py            # writes learn-programming-the-weird-way-study-guides.pdf and .epub in the repo root
+    python lessons/study-guides/build.py --release  # build and require PDF layout/content checks
     python lessons/study-guides/build.py --check    # lint the guides, build the HTML and verify every internal link resolves
     python lessons/study-guides/build.py --check-links   # (network) verify every external link in the guides loads
     python lessons/study-guides/build.py --artifacts-dir DIR   # write the PDF and EPUB to DIR (used to test reproducibility)
@@ -35,11 +36,12 @@ STEM = "learn-programming-the-weird-way-study-guides"
 HTML = "study-guides.html"
 
 def main():
+    book = load_book_build()
+    book.release_mode()
     if "--check-links" in sys.argv:        # (network) every external link in the guides must load; separate from the build, like the book's
         bad = study_guides.check_external()
         print("\n".join("BROKEN  " + b for b in bad) or "all external links in the study guides load")
         sys.exit(1 if bad else 0)
-    book = load_book_build()
     checking = "--check" in sys.argv
     problems = study_guides.check_all()
     if problems:

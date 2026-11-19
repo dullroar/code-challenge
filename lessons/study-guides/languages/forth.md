@@ -81,9 +81,9 @@ The first diagram is a loop with a flag test. The flag is computed *after* the c
 flowchart TD
     accTitle: forth-weird: the text interpreter reads the same words again
     accDescr: A flowchart. The Forth text interpreter reads one line: zero zero, then at-in fetch, then step, then rewind-question. Zero zero pushes the card number and the total. At-in fetch pushes the parse position, which is the anchor. The word step runs one card with the anchor kept on the return stack. The word rewind-question makes a flag, minus one while the total is 40 or less, and zero otherwise. It combines the flag with the distance back to the anchor, and adds that to the parse position. If the flag was true, the parse position is back at the anchor, so the interpreter reads step again. If it was false, the parse position is unchanged, and the interpreter goes on to drop, commit and report.
-    A["Interpreter reads: 0 0 >in @ — stack holds n, total and anchor"] --> B["Interpreter reads the word step: runs one card, anchor kept on the return stack"]
+    A["Interpreter reads: 0 0 #gt;in @ — stack holds n, total and anchor"] --> B["Interpreter reads the word step: runs one card, anchor kept on the return stack"]
     B --> C["Interpreter reads rewind?: flag is -1 while total <= 40, else 0"]
-    C --> D["Distance back to the anchor AND flag, added to the parse position >in"]
+    C --> D["Distance back to the anchor AND flag, added to the parse position #gt;in"]
     D --> E{{"Is the parse position back at the anchor?"}}
     E -->|"yes: flag was -1"| B
     E -->|"no: flag was 0"| F["Interpreter reads on: drop the anchor, commit, report"]

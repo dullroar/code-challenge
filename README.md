@@ -5,6 +5,8 @@
 
 A series of responses to a code challenge that has morphed into a set of educational exercises about programming languages and how to think about programming languages. **New: [Learn Programming the Weird Way!](lessons/README.md)**, a set of lessons built on these examples. The book is numbered from v3 on (v4 adds a picture of how every program runs, and a chapter on events): see [what each version added](lessons/book/VERSIONS.md).
 
+**WEIRD** stands for **Weird Execution, Indirect Results and Data**. The W is recursive. At least the programs have a stop rule.
+
 ## Why this exists
 
 The first version was a [2008 classroom exercise](/docs/My%20Code%20Challenge.pdf), built to put new C# 3.0 and .NET 3.x features on display. Keeping the one-statement rule and porting it to new languages turned out to be a great way to learn what those languages actually let you do, once you push past the part the tutorials cover. Each entry answers the same question in its own accent: *how far can this language's own machinery - its iterators, its regex engine, its markup parser, its build tool - be pushed before it starts acting like a general-purpose program?*

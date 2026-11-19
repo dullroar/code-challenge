@@ -25,14 +25,18 @@ def aside_count(book, guides):
 
 
 class Editorial(unittest.TestCase):
-    def test_opening_aside_occurs_once_in_the_book_only(self):
+    def test_recursive_acronym_occurs_once_near_each_opening(self):
         guide_files = [f"lessons/study-guides/{path}" for path in study_guides.manifest(study_guides.GUIDES)]
         book = list(build.chapter_texts().values()) + [read("lessons/front-matter.md")]
         guides = [read(path) for path in guide_files + ["lessons/study-guides/front-matter.md"]]
         self.assertIn(ASIDE, read("lessons/intro.md").split("## What the challenge does")[0])
-        self.assertEqual(aside_count(book, guides), (1, 0))
-        self.assertEqual(aside_count(book + [ASIDE], guides), (2, 0))
-        self.assertEqual(aside_count(book, guides + [ASIDE]), (1, 1))
+        self.assertIn(ASIDE, guides[0].split("## How every guide works")[0])
+        root = read("README.md")
+        self.assertIn(ASIDE, root.split("## Why this exists")[0])
+        self.assertEqual(root.count(ASIDE), 1)
+        self.assertEqual(aside_count(book, guides), (1, 1))
+        self.assertEqual(aside_count(book + [ASIDE], guides), (2, 1))
+        self.assertEqual(aside_count(book, guides + [ASIDE]), (1, 2))
 
     def test_count_and_assurance_tally_follow_the_model(self):
         model = cs.Model()
