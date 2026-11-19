@@ -2,6 +2,7 @@
 """Build the study guides as their own document set: one HTML file, one EPUB and one PDF.
 
     python lessons/study-guides/build.py            # writes learn-programming-the-weird-way-study-guides.pdf and .epub in the repo root
+    python lessons/study-guides/build.py --release  # build and require PDF layout/content checks
     python lessons/study-guides/build.py --check    # lint the guides, build the HTML and verify every internal link resolves
     python lessons/study-guides/build.py --check-links   # (network) verify every external link in the guides loads
     python lessons/study-guides/build.py --artifacts-dir DIR   # write the PDF and EPUB to DIR (used to test reproducibility)

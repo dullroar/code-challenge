@@ -2,6 +2,7 @@
 """Build "Learn Programming the Weird Way!" as one book (EPUB, HTML and, if an engine exists, PDF).
 
     python lessons/book/build.py            # writes lessons/book/out/
+    python lessons/book/build.py --release  # build and require PDF layout/content checks
     python lessons/book/build.py --check    # build HTML and verify every internal link resolves
     python lessons/book/build.py --check-links   # (network) verify every external link in the computer-science prose loads
     python lessons/book/build.py --check-diagrams  # FULL RENDER GATE: render every diagram, check each fits a printed page legibly, list orphans

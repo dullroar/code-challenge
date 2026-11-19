@@ -17,6 +17,51 @@ python lessons/book/build.py --check-diagrams   # the full render gate for the P
 - The PDF and EPUB in the repo root are committed. The HTML and assembled Markdown go to `lessons/book/out/`, which is git-ignored.
 - **The study guides are a separate document set.** [`lessons/study-guides/`](../study-guides/README.md) holds hand-written guides that build with `python lessons/study-guides/build.py` into `learn-programming-the-weird-way-study-guides.pdf` and `.epub` beside the book's. That script imports this one (`build_documents`), so the link rewriting, diagram rendering, Pandoc call, stylesheet and reproducibility rule are shared and not copied. The guides are not in `chapters.txt`, and the book only links to them. [`study_guides.py`](study_guides.py) checks them and [`test_study_guides.py`](test_study_guides.py) tests those checks.
 
+## PDF release gate
+
+Every full build lints the PDF it just wrote. Both the book and the study guides use the same hook, including with `--artifacts-dir`. Run the build with `--release` to require WeasyPrint, a complete lint scan and zero errors. Without `--release`, the post-build lint reports diagnostics and the build continues. The HTML-only `--check` routes need no PDF lint dependencies.
+
+```bash
+# From the repository root, in the Python environment used for the builds.
+python -m pip install -r lessons/book/requirements-pdf-lint.txt
+
+# Check finished PDFs without invoking Pandoc, Mermaid or WeasyPrint.
+python lessons/book/lint_pdf.py --release \
+  --json lessons/book/out/pdf-lint/both.json \
+  --annotate-dir lessons/book/out/pdf-lint/pages \
+  learn-programming-the-weird-way.pdf \
+  learn-programming-the-weird-way-study-guides.pdf
+
+# Run the same ordered gates as CI, with the build and diagram tools installed.
+python lessons/book/build.py --check
+python lessons/study-guides/build.py --check
+python lessons/book/build.py --check-diagrams
+python lessons/book/test_pdf_lint.py
+python lessons/book/build.py --release
+python lessons/study-guides/build.py --release
+```
+
+The standalone CLI uses the publication filenames to select the book and study-guide sentinels. Use `--profile book` or `--profile study-guides` for a renamed copy, or `--profile letter` for geometry on a fixture. Its exit codes are **0** for a complete scan with zero errors, **1** for a completed scan with errors and **2** for an incomplete scan or invocation failure. Warnings are advisory in every mode. `--release` also rasterizes every page at low resolution and fails on a rasterizer exception or an entirely white render with substantial detected content. The [PDF release workflow](../../.github/workflows/pdf-release-gate.yml) builds both documents from source and uploads the lint diagnostics on failure.
+
+The linter derives Letter size and its content rectangle from `book.css`. It checks the MediaBox and CropBox within 0.1 pt, the page edge within 1 pt, and the content margin within 1.5 pt. The placement tolerances allow small variations in glyph metrics. The initial scan also exposed a table and two highlighted listings with measurable intrusions well above these tolerances. Title, copyright, TOC and index content use the regular margins. The footer exemption requires the physical page number, the expected font and size, and a centered position in the footer.
+
+| Rules | Evidence |
+| --- | --- |
+| PDF-001 through PDF-005 | Scan completion, page geometry, glyph and displayed raster placement bounds. |
+| PDF-006 | Advisory vector overrun, using path bounds and enclosing clip bounds. |
+| PDF-007 | Empty publication page when no body or drawing objects are detected. Ambiguous cases and generic Letter fixtures are advisory. |
+| PDF-008 and PDF-009 | Advisory overlap by relative box area, a sparse page, caption with no nearby figure evidence, or matching table grids with an open edge across a page break. |
+| PDF-010 | Named selectable-text sentinels for Mermaid comparisons and Forth labels, APL glyphs, regex/sed literals and selected wraps. The fixture renders literal comparisons and Mermaid's `#gt;` through the pinned SVG route. Its wrap comparison removes only adjacent paired arrows from a deliberately mid-token break, where no source space was lost. |
+| PDF-011 | Release rasterization and diagnostic preview failures. |
+
+Path bounds approximate visible ink. Clip boxes approximate clipping, and content discarded before PDF serialization may be undetectable. Raster measurements describe placement even when masking affects the visible pixels. The selectable-text checks cover the named strings in [the sentinel list](pdf_sentinels.py). Outlined glyphs and semantic row boundaries require visual inspection or evidence from the source. Figure scale remains the responsibility of `--check-diagrams`. A separate `qpdf` structural check is optional and outside this gate.
+
+Keep diagnostics under the ignored `lessons/book/out/`. The build hook stores a report per document in `out/pdf-lint/<stem>/report.json` and writes affected pages to its `pages/` subdirectory. A preview shows the allowed content region in teal, marks measured boxes, and lists the rule and displacement in a side legend. The default cap is 20 console findings and 12 preview pages per PDF, with up to 12 marked items per PNG. `--verbose` prints every finding and produces a preview for every affected page. JSON always includes all findings.
+
+JSON schema version 1 has top-level `documents`, `diagnostics`, `errors`, `warnings` and `exit_status` fields. Each document records its basename, profile, `page_count`, `pages_scanned`, `complete`, `page_failures`, `content_checks` and `findings`. Each finding records the rule, severity, message, one-based physical page (or null), excerpt, `box`, `allowed_box`, `overflow_pt` and a preview filename when available. Boxes are normally unrotated, crop-relative points in `[left, top, right, bottom]` order. Page-geometry findings display the measured and expected page boxes. For an overlap, `allowed_box` is the other object's measured box. A document-level check can have null geometry. Documents sort by basename and findings by page, severity, rule and geometry. Reports contain no timestamps or absolute input paths.
+
+For an intentional exception, specify the profile, rule and observable object signature, record why the position is expected, and test both it and a nearby genuine failure. The development dependency file pins PyMuPDF and Pillow. This repository uses the AGPL distribution of PyMuPDF as an installed local and CI tool, and ships the WeasyPrint publications and lint source without the PyMuPDF package. PyMuPDF remains available under AGPL or Artifex's commercial terms. [PyMuPDF licensing](https://pymupdf.io/licensing)
+
 ## Diagrams
 
 Every entry's README has a `## Program Flow` section with one Mermaid diagram (the contract is in [`CONTRIBUTING.md`](../../CONTRIBUTING.md#program-flow-a-picture-of-the-machine)). The diagram is text in Git, and the build turns it into a figure. The shared "what the challenge does" picture is a fenced `mermaid` block in [`intro.md`](../intro.md), and the chapter on events has one too. **Any** `mermaid` fence in a chapter is rendered.
