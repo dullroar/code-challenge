@@ -16,7 +16,7 @@ tags: [control-flow, stack-data-structure, stack-machine, transaction]
 
 > **DEMO ONLY.** Fictional timecards in a scratch SQLite file. No connection to any real time-reporting system.
 
-The challenge ("add 10-19 hour cards until the total passes 40") is one word, `run`, and it is one line: `begin card over-40? until`. Everything else in [`timecards.fs`](timecards.fs) is a small word that does one thing, defined before it is used.
+The challenge ("add 10 to 19 hour cards until the total passes 40") is one word, `run`, and it is one line: `begin card over-40? until`. Everything else in [`timecards.fs`](timecards.fs) is a small word that does one thing, defined before it is used.
 
 ## Run it
 
@@ -78,7 +78,7 @@ The file is built bottom-up, so each word is made of words above it:
 
 - **Control words only work inside definitions.** Typing `begin ... until` at the top level is an error in standard Forth. That is why `run` is a word. (The weird version cheats the other way.)
 - **`s"` strings are temporary.** In some interpreters, `s"` outside a definition returns a buffer that is overwritten by the next one. The category words are definitions for that reason.
-- **`random` is `0..n-1`.** `10 random 10 +` gives 10..19. Gforth seeds it with `seed`; this file seeds it from `utime` (microseconds), which is also the run id.
+- **`random` is `0..n-1`.** `10 random 10 +` gives 10 to 19. Gforth seeds it with `seed`; this file seeds it from `utime` (microseconds), which is also the run id.
 - **`close-pipe` returns the exit status.** `close-sqlite` turns a non-zero status into an abort, so a failed `sqlite3` is not silently ignored.
 - **Gforth-specific words.** `outfile-execute`, `open-pipe`, `utime` and `s\"` are Gforth extensions, not ISO Forth.
 - **No formatter exists.** The style is by hand: one stack comment per word, short words, two-space indents for bodies, and a trailing `$` on words that leave a string.

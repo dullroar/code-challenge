@@ -14,7 +14,7 @@ REPO = cs.REPO
 
 def snapshot(dest):
     """Copy what cs.Model reads (the entries' READMEs and the whole lessons tree, minus build output) and point cs at it."""
-    shutil.copytree(os.path.join(REPO, "lessons"), os.path.join(dest, "lessons"), ignore=shutil.ignore_patterns("out", "__pycache__"))
+    shutil.copytree(os.path.join(REPO, "lessons"), os.path.join(dest, "lessons"), ignore=shutil.ignore_patterns("out", "__pycache__", "node_modules"))
     for d in os.listdir(os.path.join(REPO, "src")):
         r = os.path.join(REPO, "src", d, "README.md")
         if os.path.isfile(r):
@@ -124,6 +124,10 @@ class TestTheLintersRefuse(Base):
     def test_an_unknown_tag(self):
         self.edit("src/tar-gnu/README.md", lambda s: s.replace("tags: [", "tags: [not-a-concept, ", 1))
         self.assertTrue(any("not-a-concept" in p for p in self.problems()), self.problems())
+
+    def test_teaches_needs_a_that_clause(self):
+        self.edit("src/tar-gnu/README.md", lambda s: s.replace('teaches: "that a', 'teaches: "A', 1))
+        self.assertTrue(any("'teaches' must start" in p for p in self.problems()), self.problems())
 
     def test_a_missing_teaches_match(self):
         self.edit("src/tar-gnu/README.md", lambda s: s.replace("**Teaches you:** that a tar archive", "**Teaches you:** that a TAR archive", 1))

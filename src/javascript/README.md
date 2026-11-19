@@ -91,7 +91,7 @@ Open [`timecards.mjs`](timecards.mjs). After four `import` lines, the file is on
 | **Condition** | `i.hours.reduce(...) <= 40 ? true : (...)`. While the running total is 40 or under, it is `true` and the loop goes again. Once the total passes 40, the condition prints the result, starts the pulse timer on a terminal, and its value is `false`: the loop ends. The report is built inline, as the C# built its window inline |
 | **Iterator** | A comma expression with two parts: draw one random number of hours (10 to 19) and push it, then `INSERT` one card. This is the only place that adds a card |
 
-Without `SEED`, the initializer gets the seed for its Park–Miller generator from the global Web Crypto object’s `crypto.getRandomValues`. Node also offers `randomInt` as an export of `node:crypto`. This entry uses the global Web Crypto method.
+Without `SEED`, the initializer gets the seed for its Park–Miller generator from the global Web Crypto object's `crypto.getRandomValues`. Node also offers `randomInt` as an export of `node:crypto`. This entry uses the global Web Crypto method.
 
 The body is `{ /* Intentionally empty. */ }`. **Trace one card:** the initializer runs once. The condition runs: the total is 0, so it returns `true`. The body does nothing. The iterator runs: it adds a card. Back to the condition: if the total is still 40 or less, it returns `true` again, and so on. The first time the condition sees a total over 40, the crossing card is already in the database, and the condition prints it and returns `false`. So the card that crosses 40 is included, because the iterator ran *before* that test.
 

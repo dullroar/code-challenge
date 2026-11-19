@@ -35,7 +35,7 @@ PROFILES = {
         APL_DIAGRAM, ASCII_DIAGRAM, FORTH_DIAGRAM,
         Sentinel("APL reshape and iota", "basic APL: ⍳, ⍴"),
         Sentinel("APL function definition", "Kid←⎕FX Alive/"),
-        Sentinel("wrapped build instruction", "build the HTML,↩ / ↪ verify every internal link",
-                 r"build the HTML,↩\n[ \t]*↪ verify every internal link"),
+        Sentinel("wrapped Make trace", "total=46↩ / ↪ 41st-word-exists=yes",
+                 r"total=46↩\n[ \t]*↪ 41st-word-exists=yes"),
     ),
 }

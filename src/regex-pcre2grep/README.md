@@ -1,6 +1,6 @@
 ---
 name: "pcre2grep"
-teaches: "program exit codes as control flow."
+teaches: "that program exit codes can steer control flow."
 kind: weird
 languages: [pcre2, regex]
 lesson: "languages/regex.md#pcre2grep-exit-codes-as-control-flow"
@@ -15,7 +15,7 @@ analogies: [callback]
 ---
 # Regex challenge, Track 2b: `pcre2grep` (no custom code at all)
 
-**Teaches you:** program exit codes as control flow.
+**Teaches you:** that program exit codes can steer control flow.
 
 The "host" here is a stock `pcre2grep` and one command line. There is no C, no Perl, no dispatcher to write: the pattern's callout strings name the programs to run, and the **exit codes of those programs steer the match**. Then the match **returns false**. It follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
 
@@ -112,7 +112,7 @@ The exit code is the whole trick. SQLite's `random()` and arithmetic live in the
 
 ## Gotchas worth knowing
 
-- **State cannot live in the pattern.** `pcre2grep` has no variables, so the running total lives in SQLite and each callout re-reads it. That makes the arithmetic the helper's job, not PCRE2's; the pattern supplies the loop, the order, the branching and the failing.
+- **State cannot live in the pattern.** `pcre2grep` has no variables, so the running total lives in SQLite and each callout rereads it. That makes the arithmetic the helper's job, not PCRE2's; the pattern supplies the loop, the order, the branching and the failing.
 - **No transaction this time.** Each helper is its own `sqlite3` process, so each statement commits immediately and nothing can be rolled back. Unlike the Perl track's single transaction, here "abandoned branch, side effects stay" is literal: the rows are already in the database before the match fails.
 - **Callouts need absolute paths.** `pcre2grep` uses `fork` and `execv`, which do not search `PATH`. A bare `true` or `sleep` is silently a failed callout, indistinguishable from a vetoed branch. `check.sh` therefore pins the program list.
 - **Guardrail.** Callouts may only run `/usr/bin/sqlite3`, `/usr/bin/test` and `/bin/sleep`, each with a fixed argument list. `check.sh` fails if any other program (in particular a shell or interpreter) appears. The only value interpolated into SQL is `$1`, one of four fixed category names from the tape.

@@ -18,7 +18,7 @@ analogies: [serialization-deserialization-pickling, turing-machine]
 
 > **DEMO ONLY.** Fictional timecards in a scratch SQLite file. No connection to any real time-reporting system.
 
-There is one m4 entry and no `m4-weird`, because a whole program written in a macro processor is already the weird version. The challenge ("add 10-19 hour cards until the total passes 40") is done by `m4` itself: it generates the random numbers, keeps the running total, decides when to stop, formats the rows, and writes the SQL. [`timecards.m4`](timecards.m4) is the only source file. The shell appears twice, as plumbing: to read the clock and the OS random pool, and, at the very end, to hand a finished SQL script to `sqlite3`.
+There is one m4 entry and no `m4-weird`, because a whole program written in a macro processor is already the weird version. The challenge ("add 10 to 19 hour cards until the total passes 40") is done by `m4` itself: it generates the random numbers, keeps the running total, decides when to stop, formats the rows, and writes the SQL. [`timecards.m4`](timecards.m4) is the only source file. The shell appears twice, as plumbing: to read the clock and the OS random pool, and, at the very end, to hand a finished SQL script to `sqlite3`.
 
 ## Run it
 
@@ -159,7 +159,7 @@ Because it works. m4 was designed to preprocess text, in the 1970s, as the macro
 
 ## What `check.sh` enforces
 
-With `dnl` lines removed: exactly one `syscmd` and exactly three `esyscmd`; `tc_card` ends by expanding itself. With a pinned seed, 47 runs (a fixed set plus 41 consecutive seeds) match an independent bash implementation card for card, including the stop rule and the category cycle. With the self-call removed, exactly one card appears. And 25 real runs each check the rows (hours 10-19, categories in order, correct running totals, the stop rule), and that SQLite holds exactly what was printed, all marked `DEMO ONLY`.
+With `dnl` lines removed: exactly one `syscmd` and exactly three `esyscmd`; `tc_card` ends by expanding itself. With a pinned seed, 47 runs (a fixed set plus 41 consecutive seeds) match an independent bash implementation card for card, including the stop rule and the category cycle. With the self-call removed, exactly one card appears. And 25 real runs each check the rows (hours 10 to 19, categories in order, correct running totals, the stop rule), and that SQLite holds exactly what was printed, all marked `DEMO ONLY`.
 
 ## Run it in a container
 

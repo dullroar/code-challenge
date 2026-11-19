@@ -4,7 +4,7 @@
 
 For an advanced reading path with traces and experiments, see the [state and control beyond variables study guide](../study-guides/concepts/state-and-control-beyond-variables.md).
 
-Before you can say that a regex engine, a build tool or a markup file "computes", you need to say what a machine is. The answer is smaller than you might think. A machine has a **state**, a set of allowed **steps**, a way to **represent** its values, and some facts that stay true while it runs (**invariants**). If you can say what those four are, you have named the machine.
+Before you can say that a regex engine, a build tool or a markup file "computes", you need to say what a machine is. The answer is smaller than you might think. A machine has a **state**, a set of allowed **steps**, a way to **represent** its values and some facts that stay true while it runs (**invariants**). If you can say what those four are, you have named the machine.
 
 ```mermaid
 flowchart TB
@@ -17,7 +17,7 @@ flowchart TB
     T -.-> OUT["observable effect or result (if any)"]
 ```
 
-The picture shows the four parts without naming any hardware: the state and how it is represented, one allowed step, and the invariant that holds before and after it. A regex engine's capture stack, a Make dependency graph and an editor buffer all fit this template. The template does not require finite states, explicit input and output, or machine instructions.
+The picture shows the four parts without naming any hardware: the state and how it is represented, one allowed step and the invariant that holds before and after it. A regex engine's capture stack, a Make dependency graph and an editor buffer all fit this template. The template does not require finite states, explicit input and output or machine instructions.
 
 The first goal of this book is exactly that habit: *name the machine hiding inside the language*. A stack machine, a register machine and a rewriting system can all compute the same things, but they keep their memory in different places. The concepts here are the vocabulary for that: transition systems, operational semantics (state, and one step at a time), Turing machines, Markov algorithms and Turing completeness. One more question goes with them: which part of a design *computes*, and which part only decides what runs next ([Computation versus orchestration](02-what-counts-as-a-machine.md#computation-versus-orchestration))? The chapter "State beyond variables" then returns to the question that matters most for this repository: where does the state live?
 
@@ -26,7 +26,7 @@ The first goal of this book is exactly that habit: *name the machine hiding insi
 A model of computation is a precise description of what "computing" means: what one step is, and what memory exists. It exists because you cannot prove anything about "a computer" in general. You need rules small enough to reason about. Then you can ask: what can this model compute, and how fast? Famous models are the Turing machine, the lambda calculus, register machines and string-rewriting systems. This chapter uses a simple habit: **name the machine**. When a regex engine, a build tool or a markup file starts to compute, ask what kind of machine it has become.
 
 - **Use it when:** you want to explain what a strange system really is, or to argue that it can (or cannot) do something.
-- **Avoid:** confusing the model with real hardware. A Turing machine has an infinite tape. Your laptop does not.
+- **Avoid it when:** you need to describe actual hardware. A Turing machine has an infinite tape. Your laptop does not.
 
 **Read more:**
 
@@ -63,7 +63,7 @@ A transition system is the simplest machine: a set of *states* and a set of allo
 
 ## Representing state
 
-Any state must be written down in something. A number can be tally marks (unary), digits (decimal or binary), or even a single huge integer that encodes a whole program (Gödel numbering). The choice of *representation* decides what is easy. Tally marks are easy to rewrite with find-and-replace, but long. In [`regex-sed`](../../src/regex-sed/README.md) the whole program state is one line of text, and numbers are rows of marks that substitutions grow and shrink. COBOL's `PIC` clauses are also a representation: the picture of a field decides its size, rounding and range.
+Any state must be written down in something. A number can be tally marks (unary), digits (decimal or binary) or even a single huge integer that encodes a whole program (Gödel numbering). The choice of *representation* decides what is easy. Tally marks are easy to rewrite with find-and-replace, but long. In [`regex-sed`](../../src/regex-sed/README.md) the whole program state is one line of text, and numbers are rows of marks that substitutions grow and shrink. COBOL's `PIC` clauses are also a representation: the picture of a field decides its size, rounding and range.
 
 - **Use it when:** your medium has no numbers or no variables, and you must decide for yourself what "a count" looks like.
 - **Avoid unary for large numbers:** one million needs one million marks.
@@ -91,7 +91,7 @@ Any state must be written down in something. A number can be tally marks (unary)
 An invariant is a fact that stays true at every step. It exists because you cannot test every possible state of a program, but you *can* prove two things: the fact is true at the start, and every step keeps it true. Then it is true forever. In this repository a database rule such as `CHECK(demo_only=1)` is an invariant of the data: a non-demo row cannot exist. Each `check.sh` tries to break it, to show that the rule is real. Loop invariants work the same way: "the total so far equals the sum of the cards drawn".
 
 - **Use it when:** you design a loop, a data schema, a concurrent algorithm or an assertion.
-- **Avoid:** invariants that nobody can check, or that are so weak they say nothing.
+- **Avoid it when:** the claim cannot be checked or is too weak to help.
 
 **Read more:**
 
@@ -112,7 +112,7 @@ An invariant is a fact that stays true at every step. It exists because you cann
 Observability is how much of a system's inside you can learn from the outside: through output, logs and traces. It exists because you cannot fix what you cannot see. Several entries have a trace switch for this reason. For example, `TRACE=1 ./timecards.sh` in [`regex-sed`](../../src/regex-sed/README.md) prints the whole program state at every step. But watching can change what you watch. In a lazy language, printing a value *forces* it, so the act of looking makes the computation happen. Programmers call a bug that vanishes when you look at it a *heisenbug*.
 
 - **Use it when:** you design anything you will have to debug later. Log state changes, not only errors.
-- **Avoid:** logging secrets, and forgetting that observation has a cost (and sometimes an effect).
+- **Avoid it when:** the observation would record secrets. Account for the cost and any effect of observation.
 
 **Read more:**
 
@@ -205,17 +205,17 @@ On the left, the instruction names its cells (`R1` and `R2`). On the right, the 
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | That `while()` and a regex can form a tiny register machine. |
 | [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | demonstrates | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | That a regex can use a stack to count. |
 
 ## Turing machines
 
-A Turing machine has an endless tape of cells, a head that reads and writes one cell at a time, and a short table of rules. Alan Turing described it in 1936 to define exactly what an "algorithm" is. With it he showed that some questions have no algorithm at all, such as the halting problem: "does this program ever stop?" Nobody writes software for a Turing machine. It matters because of an argument: if a system can *simulate* one, it can compute anything that can be computed.
+A Turing machine has an endless tape of cells, a head that reads and writes one cell at a time and a short table of rules. Alan Turing described it in 1936 to define exactly what an "algorithm" is. With it he showed that some questions have no algorithm at all, such as the halting problem: "does this program ever stop?" Nobody writes software for a Turing machine. It matters because of an argument: if a system can *simulate* one, it can compute anything that can be computed.
 
 - **Use it when:** you want to argue that a notation is a full computer, or to understand why some problems cannot be solved.
-- **Avoid:** using it to predict speed. Real machines do not walk along a tape.
+- **Avoid it when:** you need to predict the speed of real hardware. Real machines do not walk along a tape.
 
 **Read more:**
 
@@ -232,7 +232,7 @@ A Turing machine has an endless tape of cells, a head that reads and writes one 
 
 ## Markov algorithms
 
-A Markov algorithm is a list of find-and-replace rules, in order. Look for the first rule whose pattern appears in the text, replace it, and start again from the top. Stop when no rule applies (or when a rule says "stop"). The Russian mathematician Andrey Markov Jr. described it in the 1950s, and it can compute anything a Turing machine can. It exists to show that *rewriting text is computing*. [`regex-sed`](../../src/regex-sed/README.md) is exactly this: one line of text, and a script of substitutions that rewrite it until nothing matches. The line is the whole memory.
+A Markov algorithm is a list of find-and-replace rules, in order. Look for the first rule whose pattern appears in the text, replace it and start again from the top. Stop when no rule applies (or when a rule says "stop"). The Russian mathematician Andrey Markov Jr. described it in the 1950s, and it can compute anything a Turing machine can. It exists to show that *rewriting text is computing*. [`regex-sed`](../../src/regex-sed/README.md) is exactly this: one line of text, and a script of substitutions that rewrite it until nothing matches. The line is the whole memory.
 
 ```mermaid
 flowchart TB
@@ -283,7 +283,7 @@ A system is Turing complete if it can simulate any Turing machine (given unlimit
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
 | [`m4`](../../src/m4/README.md) | m4 | demonstrates | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | That GNU Make can do arithmetic and loop in its own syntax, without a shell for either. |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 
 ## Operational semantics
@@ -320,7 +320,7 @@ The entries answer it differently:
 - In [`regex-pcre2`](../../src/regex-pcre2/README.md) the regex engine orchestrates by matching and backtracking, and a bodiless C dispatcher computes what each callout means. [`xaml`](../../src/xaml/README.md) lets the parser orchestrate: document order is the order of execution.
 - In [`javascript-weird`](../../src/javascript-weird/README.md) the consumer orchestrates (it asks for the next card) and three closures compute. The impure parts, such as the database, the clock and the screen, sit at the edge.
 
-Naming the split tells you where a bug can be, what to test, and what an attacker would take over. It also keeps a stunt honest: if the "weird" part only orchestrates while an ordinary program computes, it is a costume change.
+Naming the split tells you where a bug can be, what to test and what an attacker would take over. It also keeps a stunt honest: if the "weird" part only orchestrates while an ordinary program computes, it is a costume change.
 
 ```mermaid
 sequenceDiagram
@@ -356,7 +356,7 @@ The host decides *when*, and the worker decides *what the next value is*. In [`t
 | [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
 | [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | That regex callouts can serve as a tiny instruction set. |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |

@@ -1,6 +1,6 @@
-# Answers key
+# Answer key
 
-Worked solutions for the [exercises](exercises.md). **Try the exercise first**: write your prediction down, run it, and only then read here.
+Worked solutions for the [exercises](exercises.md). **Try the exercise first**: write your prediction down, run it and only then read here.
 
 Every solution below was run against the real entries:
 
@@ -23,7 +23,7 @@ Debugging  12   46      <- crossing card: the total before it was 34, which is <
 - The card that crosses is the first whose running total is **over 40**; the total before it is always **at most 40** (otherwise the run would have stopped earlier). The totals can end anywhere from 41 to 59.
 - Exactly 40 continues under the challenge rule. Four 10-hour cards total exactly 40, so a conforming run keeps a fifth card. The former four-name ceiling in the regex and `for`-header entries has been fixed. See the [intro](intro.md#where-entries-differ) for the four-pass XAML ceiling and the fixed LINQ demos. [`regex-dotnet`](../src/regex-dotnet/README.md) prints no running-total column, so `check-demo.sh` adds the hours itself.
 
-## B1. COBOL: predict, then break ALTER
+## B1. COBOL: predict, then break `ALTER`
 
 ```bash
 cp -r src/cobol-weird "$WORK/"                                   # run everything from the repo root
@@ -33,7 +33,7 @@ bash lessons/tools/check-demo.sh out.txt 50                      # PASS: 4 rows,
 sandbox/run.sh "$WORK/cobol-weird"                               # FAIL run N: kept going after the total passed 40
 ```
 
-- **Prediction:** `WS-HEADROOM` is `PIC 99`. It overflows when `headroom + total` reaches 100, i.e. when `total >= 100 - 49 = 51`. So the run stops on the first card that takes the total **above 50**. (With the original 59 it is above 40.)
+- **Prediction:** `WS-HEADROOM` is `PIC 99`. It overflows when `headroom + total` reaches 100, i.e. when `total >= 100 - 49 = 51`. So the run stops on the first card that takes the total **above 50**. (With the original 59 it is over 40.)
 - The run ends with totals from 51 to 69; `check-demo.sh ... 50` passes. The entry's own `check.sh` fails because it hard-codes 40.
 - **`DISPLAY "x"` inside `NEXT-CARD`:** the *build* fails, because `ALTER` may only rewrite a paragraph that is exactly one `GO TO`:
 
@@ -63,7 +63,7 @@ timecards.cob:158: error: 'NEXT-CARD' is not an alterable paragraph
 ## B3. Forth: move the anchor
 
 - **(a)** `0 0` on its own line, then `>in @ step rewind?`: **works**. `>in @` captures the position *after* the `@`, and the rewind jumps back to that anchor, which is after the `0 0`. So `0 0` is never re-executed. `check-demo.sh` passes.
-- **(b)** `>in @ 0 0 step rewind?`: the anchor is now *before* `0 0`, so every rewind re-runs `0 0` and pushes a fresh zero state. The total restarts from zero on every pass, and the stop rule never fires. With `SANDBOX_TIMEOUT=30` you get hundreds of rows (678 in the verification run), every row has total = hours, and there is no `# committed` line.
+- **(b)** `>in @ 0 0 step rewind?`: the anchor is now *before* `0 0`, so every rewind reruns `0 0` and pushes a fresh zero state. The total restarts from zero on every pass, and the stop rule never fires. With `SANDBOX_TIMEOUT=30` you get hundreds of rows (678 in the verification run), every row has total = hours, and there is no `# committed` line.
 - **(c)** `41 <` to `51 <`: `check-demo.sh out.txt 50` passes (stops when the total reaches 51).
 - **Why only (b)?** The parse position is a program counter: where it jumps back to decides which tokens are the loop body. State must stay *outside* the body (before the anchor).
 
@@ -96,7 +96,7 @@ The stop test must come **first** in the condition because a failed `MATCHES` cl
    TIMEOUT after 40s          (exit 124)
    ```
 
-   On the laptop used for the 2026-11-16 re-run the recursion filled the container's 2 GB memory limit first, so the run ended with `Killed` (exit 137) after about 2,000 lines instead of the timeout. Either way it never reaches `# committed`; which one you see depends on the machine.
+   On the laptop used for the 2026-11-16 rerun the recursion filled the container's 2 GB memory limit first, so the run ended with `Killed` (exit 137) after about 2,000 lines instead of the timeout. Either way it never reaches `# committed`; which one you see depends on the machine.
 
    That is why [`apl-weird/check.sh`](../src/apl-weird/check.sh) runs under `timeout`: this failure is silent and structural.
 2. `⎕IO←1` gives an `INDEX ERROR` on `Card0[5]`, the line `Show(⊃Categories[C])...`. `C` counts categories from 0 (`C←0`, `4|C+1`), which is a valid index only with origin 0. No rows are printed.
@@ -122,8 +122,8 @@ Console.WriteLine(string.Join(" ", Enumerable.Range(0, 5).Select(_ => r.Next(10,
 | --- | --- | --- |
 | (a) declare | 0 | `Select` is **deferred**: it builds a description, not a result. |
 | (b) `Sum()` | 3 | Enumerating runs the lambda once per element. |
-| (c) `Sum()` and `ToList()` | 6 | Each enumeration re-runs the pipeline and every side effect in it. |
-| (d) `ToList()` then sum the list | 3 | `ToList()` is eager and snapshots the values; summing a list re-runs nothing. |
+| (c) `Sum()` and `ToList()` | 6 | Each enumeration reruns the pipeline and every side effect in it. |
+| (d) `ToList()` then sum the list | 3 | `ToList()` is eager and snapshots the values; summing a list reruns nothing. |
 
 Seed 42 gives `16 11 11 15 11`. A `System.Random` with a fixed seed is a deterministic sequence, and the `.xaml` file creates `new Random(42)` with no other entropy, so every run produces the same cards. The eager operator that forces the lazy tail in `LinqChallenge1` is the final `.Aggregate(0, (count, _) => count + 1)`. In `ModernChallenge1`, the enclosing `for` evaluates its condition each turn. `Sum()` consumes the deferred projection during that condition test, before the comparison can decide whether to continue.
 
@@ -137,7 +137,7 @@ Seed 42 gives `16 11 11 15 11`. A `System.Random` with a fixed seed is a determi
   ```
 
   This is why the .NET entry must *return true* while the Perl and PCRE2 entries can return false after writing everything: their output is a side effect, `regex-dotnet`'s output is the captures.
-- **pcre2grep:** `pcre2grep` starts a callout program with `fork` and `execv`, which does not search `PATH`. A bare `sqlite3` fails to start, which the engine treats exactly like a callout that returned non-zero, i.e. a vetoed branch. The run prints **nothing**, exits 0, and writes no rows.
+- **pcre2grep:** `pcre2grep` starts a callout program with `fork` and `execv`, which does not search `PATH`. A bare `sqlite3` fails to start, which the engine treats exactly like a callout that returned non-zero, i.e. a vetoed branch. The run prints **nothing**, exits 0 and writes no rows.
 - **Contrast (three sentences):** In Perl, `local` variables unwind on backtracking but `print`s and `INSERT`s already happened, so the work survives a failed match. In the C PCRE2 entry, state lives in a host struct and the completion callout closes the TSV before deliberate failure. In the .NET entry, failed-match captures are unavailable to the host, so its report has zero card rows.
 
 ## B9. sed: watch a computation
@@ -149,7 +149,7 @@ grep -E 'tot:#{41}' trace.txt | tail -1   # the final state: 41+ tally marks
 ```
 
 - The state is one line, e.g. `run:... k:### rng:0110101000001111 cats:Coding,... tot: n: c:Meetings`; `tot:` grows by tally marks (`#`). About 16 lines per card in the verification run, but it **varies** because of rejection.
-- [L29](../src/regex-sed/timecards.sed#L29), `/ rng:1(01|1)/b draw`, redraws when the 4-bit nibble is 10-15. `1(01|1)` matches `101x` (10, 11) and `11xx` (12-15): the values a 10-19 hour draw cannot use. A rejected draw repeats the shift-register steps, which is why the per-card line count is not constant.
+- [L29](../src/regex-sed/timecards.sed#L29), `/ rng:1(01|1)/b draw`, redraws when the 4-bit nibble is 10-15. `1(01|1)` matches `101x` (10, 11) and `11xx` (12-15): the values a 10 to 19 hour draw cannot use. A rejected draw repeats the shift-register steps, which is why the per-card line count is not constant.
 
 ## B10. Lisp: swap the method combination
 
@@ -217,11 +217,11 @@ grep -E 'tot:#{41}' trace.txt | tail -1   # the final state: 41+ tally marks
    ```
 
    The trigger's rule is `NEW.running_total <= 40`, so a total of exactly 40 draws another card (the same reason as in A1). `check-demo.sh` passes: five cards of 10 hours is a legal run.
-- **The three hooks:** `db function tcl call` (SQL calls Tcl), the `unknown` override (the table is the library), and the recursive trigger (the loop). In step 2 you changed a row that `unknown` fetches: the *program* changed without editing a line of Tcl.
+- **The three hooks:** `db function tcl call` (SQL calls Tcl), the `unknown` override (the table is the library) and the recursive trigger (the loop). In step 2 you changed a row that `unknown` fetches: the *program* changed without editing a line of Tcl.
 
-## B13. AWK: the missing RT
+## B13. AWK: the missing `RT`
 
-The digit file is `1 2` followed by a newline. With `RS="[0-9]"` the records are: `""` ending in `1` (RT=1), `" "` ending in `2` (RT=2), and `"\n"` with **no** digit after it (RT is empty).
+The digit file is `1 2` followed by a newline. With `RS="[0-9]"` the records are: `""` ending in `1` (RT=1), `" "` ending in `2` (RT=2) and `"\n"` with **no** digit after it (RT is empty).
 
 1. Dice 1 and 2 make hours 11 and 12:
 
@@ -239,7 +239,7 @@ The digit file is `1 2` followed by a newline. With `RS="[0-9]"` the records are
    # committed total=0 entries=0 DEMO ONLY
    ```
 
-   No error, exit 0. On `/dev/urandom` the same program never stops and mawk reads until it runs out of memory (verified under a 400 MB limit). A program that *looks* portable and silently computes nothing is worse than one that crashes. `RT` is a **gawk extension**: implementation-permitted, not part of POSIX.
+   No error, exit 0. On `/dev/urandom` the same program never stops and mawk reads until it runs out of memory (verified under a 400 MB limit). A program that *looks* portable and silently computes nothing is worse than one that crashes. `RT` is a gawk extension (**implementation-permitted**) outside POSIX.
 4. `t > 80 { exit }`: the run stops on the first card that takes the total above 80, and `check-demo.sh out.txt 80` passes. The pattern *is* the stop rule: `check.sh` makes the same edit on a stream of 5s to prove it (three cards become six).
 
 ## B14. find: rig the dice
@@ -268,13 +268,13 @@ The fake `mktemp` makes the dice. The walk reads the last character of each six-
 
 1. Four cards run: 12, 24, 36 and 48. The total passes 40 at the fourth card, so the fifth slot (`050.card`) and the `stop-over` members after the halt are read and ignored. The trace table shows `ignored: halted` for them.
 2. Changing `limit=40` to `limit=20` in `021.stop-over` makes the halt happen after the second card (24 is over 20). Nothing in `dispatch.sh` changed: the limit is data, in the archive. `check-demo.sh out.txt 20` passes. Order matters: tar reads members in the order they are in the archive, so a repack in a different order is a different program.
-3. `inspect.sh` marks `025.exec` as `REFUSE (unknown record type)` and exits 4. `interpret.sh --execute` asks the inspector first, so it exits 4, prints that nothing was run, and starts no tar. No `pwned` appears. A plain `tar -xf` writes `025.exec` as an inert file and runs nothing, because an archive cannot register a hook for itself. **Parsing** was done by `tar -t` and `tar -xO` inside `inspect.sh`, and by tar again inside `interpret.sh`. **Running** happened only in `interpret.sh --execute`, in `tar --to-command`. The trust boundary is the command line the operator typed.
+3. `inspect.sh` marks `025.exec` as `REFUSE (unknown record type)` and exits 4. `interpret.sh --execute` asks the inspector first, so it exits 4, prints that nothing was run and starts no tar. No `pwned` appears. A plain `tar -xf` writes `025.exec` as an inert file and runs nothing, because an archive cannot register a hook for itself. **Parsing** was done by `tar -t` and `tar -xO` inside `inspect.sh`, and by tar again inside `interpret.sh`. **Running** happened only in `interpret.sh --execute`, in `tar --to-command`. The trust boundary is the command line the operator typed.
 
 ## B17. tar, weirder: predict the clock
 
 1. With 45 ticks the machine reaches 45 hours of work, but the third card needs the 46th. It prints the two closed cards (`Meetings 12 12`, `Coding 17 29`), reports `the clock ran out` and exits 3. With 46 ticks it finishes: three cards, total 46, exit 0.
 2. `--ticks 92 --interval 2`: 92 records, one callback every second record, so 46 callbacks and the run finishes. `--ticks 91`: 45 callbacks, and it stalls. `TAR_CHECKPOINT` is the record number, so the last value in the finished run is 92 and `fsm.tick` shows it, while the machine has counted 46 hours. The check script says this as: last `TAR_CHECKPOINT` = ticks x K.
-3. 260 blocks at `-b 4` are 65 records, so `floor(65 / 1) = 65` ticks. The same three cards, a total of 46, and 65 - 46 = 19 idle ticks. The tape is 65 x 2,048 = 133,120 bytes.
+3. 260 blocks at `-b 4` are 65 records, so `floor(65 / 1) = 65` ticks. The same three cards, a total of 46, and 65 - 46 = 19 idle ticks. The tape is 65 × 2,048 = 133,120 bytes.
 4. The payload is zeros, and the only other bytes are the member's header (a name and some numbers; 74 non-zero bytes in the test run). Nothing reads the content for its meaning. Only the size counts, because the size decides how many records tar writes.
 
 ## B18. ed: move the stop rule and break the cleanup
@@ -300,7 +300,7 @@ The fake `mktemp` makes the dice. The walk reads the last character of each six-
 ## B21. JavaScript, weirder: move the stop rule in a closure and watch the demand
 
 1. 12 tests pass.
-2. With `over = total > 20` and `SEED=42` the totals are 12 and 29, so the machine is over after the second card: two cards. The lab then shows 7 failures and 5 passes. The failures are the tests that use the number 40 or the seed's three cards: the crossing card, exactly 40, the draw count, replay, and the like. The five passing tests (two environments, lazy versus eager `map`, closure lifetime, closure versus `this`, closure versus continuation) are about how closures behave, and not about when this machine stops. A closure's rules do not depend on what the closure is for.
+2. With `over = total > 20` and `SEED=42` the totals are 12 and 29, so the machine is over after the second card: two cards. The lab then shows 7 failures and 5 passes. The failures are the tests that use the number 40 or the seed's three cards: the crossing card, exactly 40, the draw count, replay and the like. The five passing tests (two environments, lazy versus eager `map`, closure lifetime, closure versus `this`, closure versus continuation) are about how closures behave, and not about when this machine stops. A closure's rules do not depend on what the closure is for.
 3. `built`, `drawn`, `[ 15 ]`. The pipeline is only a description until `toArray()` asks. `take(1)` stops after one value, so the machine is asked once, and the hours source is called once.
 4. `take(2)` prints `drawn` twice, then `[ 15, 30 ]`: the machine's total is 15 after the first card and 30 after the second.
 
@@ -363,7 +363,7 @@ The loop is awk's **implicit main loop**: it runs the rule once per input record
 
 ## D. Port the challenge
 
-A complete reference answer in awk is in [`solutions/awk-port`](solutions/awk-port): `timecards.awk`, a `Dockerfile`, and a `check.sh`. Run it:
+A complete reference answer in awk is in [`solutions/awk-port`](solutions/awk-port): `timecards.awk`, a `Dockerfile` and a `check.sh`. Run it:
 
 ```bash
 sandbox/container/run-image.sh lessons/solutions/awk-port   # build and run, shows the rows and the SQLite table
@@ -374,9 +374,9 @@ How it satisfies the criteria:
 
 | Criterion | How |
 | --- | --- |
-| The stop rule is the trick | `total <= 40 { ... }` is a *pattern*; the five records come from `seq 5`, and once the total passes 40 no later record matches. Five records always suffice (5 x 10 >= 50). |
+| The stop rule is the trick | `total <= 40 { ... }` is a *pattern*; the five records come from `seq 5`, and once the total passes 40 no later record matches. Five records always suffice (5 × 10 ≥ 50). |
 | DEMO ONLY enforced | `CHECK(demo_only = 1)` in the table; `check.sh` tries to insert `demo_only = 0` and fails if it is accepted. |
-| 25 runs, varied hours | `check.sh` loops 25 times, compares the printed rows with the `# committed` line and the SQLite row count, and requires at least 5 distinct hour values. |
+| 25 runs, varied hours | `check.sh` loops 25 times, compares the printed rows with the `# committed` line and the SQLite row count and requires at least 5 distinct hour values. |
 | Constraint is real | `check.sh` strips comments and strings and fails on `for`, `while`, `do`, `function`, `func` or `goto`. |
 
 Verified mutations: adding a `for` loop makes the check fail; making the hours constant (`hours = 10`) makes it fail (fewer than five distinct hour values).
@@ -400,7 +400,7 @@ screenshot: ...\out\screenshot.png
 PASS xaml (still running with a window after 20s; closed cleanly by the harness)
 ```
 
-Fixed-data entries: the LINQ ones always total exactly 40.0h (a fixed work week). Random: `ModernChallenge1` and every other entry; `xaml` is *seeded* random (`Random(42)`), so it is the same every run. Needs the .NET 10 SDK on the host.
+Fixed-data entries: the LINQ ones always total exactly 40 hours (a fixed work week). Random: `ModernChallenge1` and every other entry; `xaml` is *seeded* random (`Random(42)`), so it is the same every run. Needs the .NET 10 SDK on the host.
 
 ## E2. Change the XAML interpreter's seed
 

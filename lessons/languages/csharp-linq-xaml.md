@@ -1,14 +1,16 @@
 # C#, LINQ and XAML (plus the one-statement ports)
 
-Entries: [`ModernChallenge1`](../../src/ModernChallenge1/README.md), [`LinqChallenge1`](../../src/LinqChallenge1/README.md), [`LinqChallenge2`](../../src/LinqChallenge2/README.md), [`xaml`](../../src/xaml/README.md), and the ports [Java](../../src/JavaChallenge1/README.md), [Kotlin](../../src/KotlinChallenge1/README.md), [Python](../../src/PythonChallenge1/README.md), [Go](../../src/GoChallenge1/README.md), [Rust](../../src/RustChallenge1/README.md).
+Entries: [`src/ModernChallenge1`](../../src/ModernChallenge1/README.md), [`src/LinqChallenge1`](../../src/LinqChallenge1/README.md), [`src/LinqChallenge2`](../../src/LinqChallenge2/README.md), [`src/xaml`](../../src/xaml/README.md) and the ports [`src/JavaChallenge1`](../../src/JavaChallenge1/README.md), [`src/KotlinChallenge1`](../../src/KotlinChallenge1/README.md), [`src/PythonChallenge1`](../../src/PythonChallenge1/README.md), [`src/GoChallenge1`](../../src/GoChallenge1/README.md), [`src/RustChallenge1`](../../src/RustChallenge1/README.md).
 
 For an advanced reading path with traces and experiments, see the [C#, LINQ, XAML and ports study guide](../study-guides/languages/csharp-linq-xaml-and-ports.md).
 
 C# is the *canonical* language of the repo: the challenge began as a 2008 classroom exercise showing off C# 3.0 and .NET 3.x features. It is also where the [blocking problems](../blocking-problems.md) are measured from.
 
+This survey covers the original C# entry, the LINQ and XAML variants and the one-statement ports. The examples use the lesson steps that fit each mechanism.
+
 ## The original: ModernChallenge1
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```powershell
 cd src\ModernChallenge1
@@ -17,7 +19,7 @@ dotnet run          # Windows + .NET 10; or: sandbox\windows\run.ps1 src\ModernC
 
 A WPF window fades in and out. `Main` holds exactly one `for` whose body is empty ([`Program.cs` L132](../../src/ModernChallenge1/Program.cs#L132): `{ /* Intentionally empty. */ }`).
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 Read the `for` header as a tiny language of three slots.
 
@@ -25,19 +27,19 @@ Read the `for` header as a tiny language of three slots.
 | --- | --- | --- |
 | **Initializer** | [L37-58](../../src/ModernChallenge1/Program.cs#L37-L58) | One `var i = new { ... }` anonymous object holding all state: EF Core context, `Random`, category enumerator, WPF `Application`, a `Mutex`, an `XElement` that becomes a `DoubleAnimation`. A `for` initializer allows one declaration, so the anonymous object is the one legal container. |
 | **Condition** | [L66-98](../../src/ModernChallenge1/Program.cs#L66-L98) | `(from hours in i.totalHours select hours).Sum() <= 40d && i.categories!.MoveNext() ? true : new Func<bool>(() => Double.IsNaN(i.app.Run(...))).Invoke()`. While the total is 40 or less the loop continues. Once it is not, the condition builds and shows the window inline and returns false. |
-| **Iterator** | [L106-130](../../src/ModernChallenge1/Program.cs#L106-L130) | Draws hours, adds a row to EF Core, and starts a background `Thread` that calls `Mutex.WaitOne`, `SaveChanges` and `ReleaseMutex` *through `MethodInfo.Invoke`*. |
+| **Iterator** | [L106-130](../../src/ModernChallenge1/Program.cs#L106-L130) | Draws hours, adds a row to EF Core and starts a background `Thread` that calls `Mutex.WaitOne`, `SaveChanges` and `ReleaseMutex` *through `MethodInfo.Invoke`*. |
 
 Each test of the `for` condition immediately needs a number. The LINQ projection can defer enumeration, and the terminal `Sum()` immediately enumerates it in the same condition test. The [Node port](javascript.md#the-bodiless-for-in-node) also computes its total eagerly, using `reduce` over the array.
 
 The window is built from a string of raw XAML via `XamlReader.Load` at run time ([L77](../../src/ModernChallenge1/Program.cs#L77)).
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - `for` is three expressions plus a body, and the body is optional.
 - An **anonymous type** is a way to pack mixed state into one expression.
 - A `void` side effect can be turned into a value with a `Func<T>` invoked in place. That is the move every later entry reuses.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **`DbContext` is not thread-safe.** The `Mutex` exists only to keep the thread-plus-reflection shape working at all ([README](../../src/ModernChallenge1/README.md#gotchas-worth-knowing)); it is a historical artifact.
 - **Reflection and a thread add nothing.** They are a deliberate 2008-style time capsule; modern code would `await SaveChangesAsync()`.
@@ -70,20 +72,20 @@ Why two nested `Enumerable.Repeat(..., 1)`? C# allows only a few expression shap
 
 ### What did we just learn?
 
-- **LINQ is an execution pipeline, not just a query language.** Which stages are eager, which are lazy, and which provider (SQL vs. objects) runs each one decide *when your side effects happen*. See the same question in [Haskell](haskell.md#lazy-io-as-control-flow).
+- **LINQ is an execution pipeline, not just a query language.** Which stages are eager, which are lazy and which provider (SQL vs. objects) runs each one decide *when your side effects happen*. See the same question in [Haskell](haskell.md#lazy-io-as-control-flow).
 - **Provider boundaries are real.** Everything before `AsEnumerable()` becomes SQL; everything after is C# running in your process.
 - **Side effects in a lazy pipeline are a bug magnet**, and the entries make that visible.
 
-Tags: deferred vs. immediate execution of each operator is **guaranteed** (documented). Tuple left-to-right evaluation is **guaranteed** by the C# spec. EF translating a given expression is **provider-dependent**.
+Tags: deferred vs. immediate execution of each operator is **guaranteed** (documented). Tuple left-to-right evaluation is **guaranteed** by the C# spec. EF translating a given expression is **implementation-permitted** and depends on the provider.
 
 ### Do this in production and you're fired
 
 - **Hidden mutation.** Both `Aggregate` accumulators are mutated in place (`list.Add`) - a pragmatic shortcut, not LINQ purity.
 - **Re-enumeration runs the effects again.** A query with a side effect in a `Select` that is enumerated twice does the side effect twice.
 - **UI thread affinity.** Building and pumping a WPF window from inside a `Select` lambda only works because of the STA thread and `Application.Run()`; `ShutdownMode` is `OnExplicitShutdown` so the animation's `Completed` handler, not "last window closed", ends the app.
-- **Fixed data.** Both LINQ entries generate a *fixed* five 8-hour-day work week, not random 10-19 hour cards. See [blocking problems](../blocking-problems.md#c-and-linq).
+- **Fixed data.** Both LINQ entries generate a *fixed* five 8-hour-day work week, not random 10 to 19 hour cards. See [blocking problems](../blocking-problems.md#c-and-linq).
 
-### Break it yourself
+### Now break it yourself
 
 See [exercises](../exercises.md#b7-linq-enumerate-twice-verified).
 
@@ -113,7 +115,7 @@ See [exercises](../exercises.md#b7-linq-enumerate-twice-verified).
 
 XAML is supposed to *describe* a tree of objects. The parser does not enforce that: given `ObjectDataProvider` and a few built-in types, parsing and executing become the same act. A 2013 Web Forms [blog post](../../docs/stacked-bar-charts.md) pushed the same idea (a chart with no code-behind), so the lineage is real.
 
-**Tags**: `ObjectDataProvider` calling methods on construction is **documented WPF behavior**; relying on document-order evaluation and in-place carrier arrays is **accidentally exploited**.
+Tags: `ObjectDataProvider` calling methods on construction is **guaranteed** by WPF's documentation; relying on document-order evaluation and in-place carrier arrays is **accidentally exploited**.
 
 **Fired in production**: arbitrary method invocation from a markup file is a code-execution surface. Loading untrusted XAML with `XamlReader.Load` is a well-known risk. Any tooling (designers, linters) assumes the file is data.
 
@@ -131,7 +133,7 @@ Ken's ports keep the bodiless-loop rule and swap in each language's own parts. A
 
 ## Under what circumstances would this terrible idea become reasonable?
 
-Putting everything in a `for` header: never. But knowing that LINQ is lazy, that `IQueryable` and `IEnumerable` are different worlds, that `DbContext` is not thread-safe, and that XAML's parser can call methods are all things you want to learn *before* the production bug that teaches them.
+Putting everything in a `for` header: never. But knowing that LINQ is lazy, that `IQueryable` and `IEnumerable` are different worlds, that `DbContext` is not thread-safe and that XAML's parser can call methods are all things you want to learn *before* the production bug that teaches them.
 
 <!-- BEGIN GENERATED program-flow:languages/csharp-linq-xaml.md -->
 ## How each program runs

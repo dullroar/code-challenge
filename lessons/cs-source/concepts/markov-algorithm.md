@@ -3,7 +3,7 @@ title: "Markov algorithms"
 chapter: 2
 order: 90
 ---
-A Markov algorithm is a list of find-and-replace rules, in order. Look for the first rule whose pattern appears in the text, replace it, and start again from the top. Stop when no rule applies (or when a rule says "stop"). The Russian mathematician Andrey Markov Jr. described it in the 1950s, and it can compute anything a Turing machine can. It exists to show that *rewriting text is computing*. [[entry:regex-sed]] is exactly this: one line of text, and a script of substitutions that rewrite it until nothing matches. The line is the whole memory.
+A Markov algorithm is a list of find-and-replace rules, in order. Look for the first rule whose pattern appears in the text, replace it and start again from the top. Stop when no rule applies (or when a rule says "stop"). The Russian mathematician Andrey Markov Jr. described it in the 1950s, and it can compute anything a Turing machine can. It exists to show that *rewriting text is computing*. [[entry:regex-sed]] is exactly this: one line of text, and a script of substitutions that rewrite it until nothing matches. The line is the whole memory.
 
 ```mermaid
 flowchart TB

@@ -4,7 +4,7 @@ Entries: [`src/find-posix`](../../src/find-posix/README.md) (portable) and [`src
 
 ## What makes find special
 
-A `find` command is an **expression**. It is evaluated once for every file in a tree, left to right, and it stops early, like `&&` and `||` do. Tests (`-name`, `-path`) return true or false. Actions (`-exec`, `-print`) do something and also return true or false. That is all find has: booleans, patterns, side effects, and a walk.
+A `find` command is an **expression**. It is evaluated once for every file in a tree, left to right, and it stops early, like `&&` and `||` do. Tests (`-name`, `-path`) return true or false. Actions (`-exec`, `-print`) do something and also return true or false. That is all find has: booleans, patterns, side effects and a walk.
 
 | Feature | What it teaches |
 | --- | --- |
@@ -15,15 +15,15 @@ A `find` command is an **expression**. It is evaluated once for every file in a 
 
 ## A tree walk that digs its own tree
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/find-posix
 ```
 
-One `find`, about 5.7 KB long, no `-delete`, no `-printf`, no `-regex`, and no shell, `awk` or `expr` anywhere in it. It draws random hours, adds them, decides when to stop, and prints SQL.
+One `find`, about 5.7 KB long, no `-delete`, no `-printf`, no `-regex` and no shell, `awk` or `expr` anywhere in it. It draws random hours, adds them, decides when to stop and prints SQL.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 - **The loop is the walk.** Each directory the walk visits makes the next one with `-exec mkdir {}/...`, and the walk then visits that one. Stopping means the expression just stops making directories.
 - **The path is the call stack, and the names are the registers.** A one-character name is an hour, and it counts 1 to 9 and 0 again, so it is the last digit of the running total. A name like `b07` is a countdown. A six-character name from `mktemp` is the dice. Nothing is added or subtracted. The *next* name is written in the expression as a literal, one branch per value.
@@ -37,7 +37,7 @@ The [README](../../src/find-posix/README.md#how-the-stunt-works) has the full ta
 
 **The optimizer has nothing to move.** `-O3` reorders tests, but never across a side effect. In this program every branch is a test followed by an effect, so the expression tree at `-O0` and at `-O3` is identical, and `-D rates` (find's own profile) shows why the optimizer's flat 80% guesses are wrong here.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **A traversal order is a contract, or it is a habit.** Here it is a habit. It works on GNU find, bfs and busybox, and POSIX does not say it must.
 - **A path pattern is a tiny parser.** With one wildcard that crosses `/`, you can count, look up and test the last segment.
@@ -46,9 +46,9 @@ The [README](../../src/find-posix/README.md#how-the-stunt-works) has the full ta
 - **A tool's own measurements can be your values.** Depth and file time did, in one directive each, what ten-row tables did in the portable version.
 - **An optimizer's promise is cheap to test.** Run at every level and compare. Here the promise held, and nothing moved.
 
-Tags: `-fprintf`, `%d`, `%T`, `-regex` and `-D` are **GNU extensions**. The `-a`/`-o` precedence, `-name`, `-path` and `-exec` are **guaranteed** by POSIX. Walking into a directory that `-exec` just made is **accidentally exploited**. `{}` inside a longer argument is **implementation-permitted**: POSIX leaves it unspecified, and GNU find, bfs and busybox all replace it. `mktemp` is **not in POSIX**, but is on every BSD and Linux system.
+Tags: `-fprintf`, `%d`, `%T`, `-regex` and `-D` are GNU extensions (**implementation-permitted**). The `-a`/`-o` precedence, `-name`, `-path` and `-exec` are **guaranteed** by POSIX. Walking into a directory that `-exec` just made is **accidentally exploited**. `{}` inside a longer argument is **implementation-permitted**: POSIX leaves it unspecified, and GNU find, bfs and busybox all replace it. `mktemp` is outside POSIX, but is on every BSD and Linux system.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **A finished run leaves a path more than a hundred names deep.** The entry makes it in a scratch folder and removes the folder on exit, even on Ctrl-C.
 - **`*` crossing `/` is a trap.** The first version matched `*/1/b*` against an earlier `1/b...` in the same path, and the digit stuck. Patterns must end on a fixed-width name.
@@ -57,7 +57,7 @@ Tags: `-fprintf`, `%d`, `%T`, `-regex` and `-D` are **GNU extensions**. The `-a`
 
 Legitimate uses: `find ... -exec ... {} +` and `-prune` are everyday tools. Changing the tree while find walks it is the thing the manuals warn you about.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercises](../exercises.md#b14-find-rig-the-dice-verified) and [B15](../exercises.md#b15-gnu-find-move-the-stop-rule-read-the-profile-verified).
 
@@ -102,5 +102,11 @@ flowchart TD
 
 **What this shows:** the loop is a tree walk that keeps growing. find reads a directory's entries *after* it visits the directory, so a directory that `-exec` makes inside the current one is walked next. The path from the start is the history, and the directory name is the state. It is the call stack of a recursion, drawn on the file system.
 
-**Why this mechanism matters:** the stop rule is the absence of a new child: at the end of a card, five `0` hour-digits in the path (or four and a nonzero last digit) mean the total is over 40, and no branch digs. The running total is the number of hour directories in the path, and no arithmetic exists anywhere. This relies on the order in which find reads and visits, which is accidental to find, not promised by POSIX.
+**Why this mechanism matters:** the stop rule is the absence of a new child: at the end of a card, five `0` hour-digits in the path (or four and a non-zero last digit) mean the total is over 40, and no branch digs. The running total is the number of hour directories in the path, and no arithmetic exists anywhere. This relies on the order in which find reads and visits, which is accidental to find, not promised by POSIX.
 <!-- END GENERATED program-flow:languages/find.md -->
+
+## Computer science behind this page
+
+<!-- BEGIN GENERATED concepts:languages/find.md -->
+The computer-science ideas behind this page: [Transition systems and state machines](../cs/02-what-counts-as-a-machine.md#transition-systems-and-state-machines), [Representing state](../cs/02-what-counts-as-a-machine.md#representing-state), [Observability](../cs/02-what-counts-as-a-machine.md#observability), [Control flow](../cs/03-control-flow-and-continuations.md#control-flow), [Recursion](../cs/03-control-flow-and-continuations.md#recursion), [Short-circuit evaluation](../cs/04-evaluation-and-demand.md#short-circuit-evaluation), [Regular expressions](../cs/05-formal-languages-as-computational-substrates.md#regular-expressions), [Domain-specific languages](../cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages), [Weird machines](../cs/05-formal-languages-as-computational-substrates.md#weird-machines), [The call stack](../cs/06-state-beyond-variables.md#the-call-stack), [Side effects](../cs/07-effects-errors-and-commitment.md#side-effects), [Integrity constraints](../cs/07-effects-errors-and-commitment.md#integrity-constraints), [Undefined, unspecified and implementation-defined behavior](../cs/08-abstraction-leaks-and-implementation-dependence.md#undefined-unspecified-and-implementation-defined-behavior), [Portability](../cs/08-abstraction-leaks-and-implementation-dependence.md#portability), [Optimizers](../cs/08-abstraction-leaks-and-implementation-dependence.md#optimizers), [Hyrum's law](../cs/08-abstraction-leaks-and-implementation-dependence.md#hyrums-law).
+<!-- END GENERATED concepts:languages/find.md -->

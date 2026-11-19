@@ -1,4 +1,4 @@
-# Effects, errors, and commitment study guide
+# Effects, errors and commitment study guide
 
 ## What this guide is for
 
@@ -6,20 +6,20 @@ A program that does nothing outside itself is an expensive heater. Useful progra
 
 When you finish, you should be able to:
 
-1. Distinguish an effect that is *rolled back* (a database transaction), one that is *unwound* (Perl's `local`), and one that *stays done* (a printed row, a file write, a process already run).
+1. Distinguish an effect that is *rolled back* (a database transaction), one that is *unwound* (Perl's `local`) and one that *stays done* (a printed row, a file write, a process already run).
 2. Explain what a commit is and why it is the point of no return, and identify the commit in each of several entries.
 3. Explain why lazy effects and a closed resource break a commit, using the Haskell and PCRE2 examples.
 4. Explain how an error can be a *signal*: a size error, a constraint violation, an exit status.
 5. Say what a failed callback, a failed match and a failed process each look like from outside.
-6. Label claims as guaranteed, implementation-permitted, or accidentally exploited.
+6. Label claims as guaranteed, implementation-permitted or accidentally exploited.
 
-Scope limits. The guide uses facts checked in the language guides and the exercises. It does not teach database internals or exception hierarchies. Its source chapter is [Effects, errors, and commitment](../../cs/07-effects-errors-and-commitment.md).
+**Scope limits.** The guide uses facts checked in the language guides and the exercises. It does not teach database internals or exception hierarchies. Its source chapter is [Effects, errors and commitment](../../cs/07-effects-errors-and-commitment.md).
 
 ## Before you begin
 
 **Safety model.** The cards are fictional **DEMO ONLY** data. Programs can write to local scratch files or databases and can start processes. Read the source first and run it in the sandbox first, for example `sandbox/container/run-image.sh src/regex-perl`. Work on copies ([Running things safely](../../exercises.md#running-things-safely)). Failure experiments may leave half-written scratch files, so use a copy and a scratch data folder.
 
-**Prediction rule.** Before each failure experiment, write down three lists: what will be *undone*, what will *stay*, and what you will *see on the terminal*. They are usually different.
+**Prediction rule.** Before each failure experiment, write down three lists: what will be *undone*, what will *stay* and what you will *see on the terminal*. They are usually different.
 
 **Vocabulary.**
 
@@ -34,9 +34,9 @@ Scope limits. The guide uses facts checked in the language guides and the exerci
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
-Check the *rows shown*, the *rows saved*, and the *summary* separately. A SQLite table can enforce `CHECK(demo_only=1)`. A TSV writer applies its own rules. Some demos save in one transaction, pcre2grep saves in separate calls, and .NET reports `captured` for the regex result. The summary is a claim about the run. This guide tests it against the effects.
+Check the *rows shown*, the *rows saved* and the *summary* separately. A SQLite table can enforce `CHECK(demo_only=1)`. A TSV writer applies its own rules. Some demos save in one transaction. pcre2grep saves in separate calls. .NET reports `captured` for the regex result. The summary is a claim about the run. This guide tests it against the effects.
 
 ## The machine to identify
 
@@ -99,7 +99,7 @@ The decisive trace here is of a *failure*. For each entry the table gives the fa
 
 **Reading the table.** The SQLite inserts and prints in Perl and the file writes in the C callouts survive final match failure. In .NET the engine returns only match state. A failed match leaves the host no card captures, though the host still writes its report header and summary. In the pcre2grep relative-path experiment the initial helper fails to start, so there are no rows or output.
 
-**The three kinds of "error as a signal".** In `cobol-weird`, `ON SIZE ERROR` is local arithmetic error control: the field is too small, the clause runs, and the program takes it as the stop rule. In `make-gnu` and `cmake`, the last statement inserts `total <= 40` into a `CHECK(ok=1)` column: SQLite refuses, prints a named constraint error on stderr, and the run goes on to print its summary. The entry's check requires that error to appear *exactly once*. The pcre2grep wrapper maps the engine's no-match status 1 to success. The sed program deliberately exits 1 too; its wrapper also requires SQLite to exit 0.
+**The three kinds of "error as a signal".** In `cobol-weird`, `ON SIZE ERROR` is local arithmetic error control: the field is too small, the clause runs and the program takes it as the stop rule. In `make-gnu` and `cmake`, the last statement inserts `total <= 40` into a `CHECK(ok=1)` column: SQLite refuses, prints a named constraint error on stderr and the run goes on to print its summary. The entry's check requires that error to appear *exactly once*. The pcre2grep wrapper maps the engine's no-match status 1 to success. The sed program deliberately exits 1 too; its wrapper also requires SQLite to exit 0.
 
 **Exactly 40.** The boundary shows what the commit can claim. Before the five-name fix, a regex or `for`-header run that stopped at four cards with a total of exactly 40 still committed and printed `# committed total=40 entries=4`, and the shared checker rejected it. The entry's own claim of success and the shared check disagree: "committed" says the *data was saved*, and the checker asks whether the *rule* was obeyed. Commit is not correctness.
 
@@ -114,7 +114,7 @@ The decisive trace here is of a *failure*. For each entry the table gives the fa
 | **Portability** | Standard I/O | Depends on whether the failure semantics are specified (a callout's exit status, a checkpoint's) |
 | **Cost** | A buffer of cards | Partial effects, and the risk of reporting success for a partial run |
 
-The ordinary `haskell` entry builds the whole SQL script as a pure string, runs `sqlite3`, and only then prints the rows. The weird entry prints as it goes. Both commit once, but only the first guarantees that *what is printed is what was saved*.
+The ordinary `haskell` entry builds the whole SQL script as a pure string, runs `sqlite3` and only then prints the rows. The weird entry prints as it goes. Both commit once, but only the first guarantees that *what is printed is what was saved*.
 
 ## What the exercises demonstrate
 
@@ -127,19 +127,19 @@ The ordinary `haskell` entry builds the whole SQL script as a pure string, runs 
 | [A1. Read the rows](../../exercises.md#a1-read-the-rows-verified) | Which card crossed 40? | The output alone proves "total before the last card is at most 40". |
 | [F. Prove a README claim](../../exercises.md#f-prove-a-readme-claim-verified) | Can your test fail? | A claim needs a negative control. |
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| A transaction's uncommitted changes are undone by rollback, but not effects outside it | **Guaranteed** | Database semantics. |
-| A size error leaves the receiving field unchanged | **Guaranteed** | Specified COBOL semantics. |
-| Perl unwinds `local` on backtracking, not prints | **Guaranteed** | Documented Perl. |
-| A failed .NET `Match` supplies no card captures | **Guaranteed** within the .NET regex API | B8 exercises this property. The host can still write its empty-run report. |
-| A normal insert of 0 into `demo_only INTEGER NOT NULL CHECK(demo_only=1)` fails | **Guaranteed** with SQLite constraint checks enabled | SQLite enforces the declared column constraints. The TSV entries use no such constraint. |
-| `SYSTEM` returns a raw wait status (exit 3 appears as 768) | **Implementation-permitted** | A host detail of the tested COBOL runtime. |
-| tar ignores the checkpoint command's exit status | **Accidentally exploited** | Observed on the tested releases. The entry makes the machine safe against it. |
-| `pcre2grep` cannot tell a callout that failed to start from a vetoed branch | **Implementation-permitted** | Its own design, and the cause of B8's silent result. |
-| SQLite refuses an insert that violates a `CHECK`, and prints a named error | **Guaranteed** | Database semantics. The entries *choose* to let that message be the stop rule's announcement, and require it exactly once. |
+| A transaction's uncommitted changes are undone by rollback, but not effects outside it | **guaranteed** | Database semantics. |
+| A size error leaves the receiving field unchanged | **guaranteed** | Specified COBOL semantics. |
+| Perl unwinds `local` on backtracking, not prints | **guaranteed** | Documented Perl. |
+| A failed .NET `Match` supplies no card captures | **guaranteed** within the .NET regex API | B8 exercises this property. The host can still write its empty-run report. |
+| A normal insert of 0 into `demo_only INTEGER NOT NULL CHECK(demo_only=1)` fails | **guaranteed** with SQLite constraint checks enabled | SQLite enforces the declared column constraints. The TSV entries use no such constraint. |
+| `SYSTEM` returns a raw wait status (exit 3 appears as 768) | **implementation-permitted** | A host detail of the tested COBOL runtime. |
+| tar ignores the checkpoint command's exit status | **accidentally exploited** | Observed on the tested releases. The entry makes the machine safe against it. |
+| `pcre2grep` cannot tell a callout that failed to start from a vetoed branch | **implementation-permitted** | Its own design, and the cause of B8's silent result. |
+| SQLite refuses an insert that violates a `CHECK`, and prints a named error | **guaranteed** | Database semantics. The entries *choose* to let that message be the stop rule's announcement, and require it exactly once. |
 
 **Costs to state.**
 
@@ -152,19 +152,19 @@ The ordinary `haskell` entry builds the whole SQL script as a pure string, runs 
 ## Connections across the repository
 
 - **Language guides.** [Haskell](../languages/haskell.md), [Regex engines and sed](../languages/regex-engines-and-sed.md), [Make and CMake](../languages/make-and-cmake.md), [COBOL](../languages/cobol.md), [Tcl](../languages/tcl.md), [tar](../languages/tar.md), [JavaScript](../languages/javascript.md) and [ed and Ex](../languages/ed-and-ex.md) each have a failure case above.
-- **Demand.** [Evaluation, demand, and laziness](evaluation-demand-and-laziness.md) is why lazy effects commit late.
+- **Demand.** [Evaluation, demand and laziness](evaluation-demand-and-laziness.md) is why lazy effects commit late.
 - **Authority.** [Reading adversarial programs](reading-adversarial-programs.md): the database's `CHECK` is data-level authority.
-- **Portability.** [Portability, abstraction, and cost](portability-abstraction-and-cost.md) covers which failure semantics are promised.
+- **Portability.** [Portability, abstraction and cost](portability-abstraction-and-cost.md) covers which failure semantics are promised.
 - **In the book.** [Side effects](../../cs/07-effects-errors-and-commitment.md#side-effects), [Exception handling](../../cs/07-effects-errors-and-commitment.md#exception-handling), [Exit status](../../cs/07-effects-errors-and-commitment.md#exit-status), [Integrity constraints](../../cs/07-effects-errors-and-commitment.md#integrity-constraints), [Backtracking](../../cs/07-effects-errors-and-commitment.md#backtracking), [The cut](../../cs/07-effects-errors-and-commitment.md#the-cut-committing-to-a-choice), [Transactions](../../cs/07-effects-errors-and-commitment.md#transactions) and [Idempotence](../../cs/07-effects-errors-and-commitment.md#idempotence).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** In `regex-perl`, the match ends by returning false after three cards. Which of these survive: the `INSERT`s, the printed rows, the `local` total, the transaction? *(The `INSERT`s, the printed rows and the committed transaction survive. The `local` total is restored when the engine backtracks.)*
 2. **Explain.** Why does the CMake run print `CHECK constraint failed: stop rule fired` and still report `committed`? *(The failing insert is the stop rule's witness, and it is the last statement. The card rows were already saved, with no outer transaction, so the error announces the stop and nothing is lost. The entry's check requires the error exactly once.)*
 3. **Transfer.** In a service you know, name one effect outside the database transaction that a rollback would not undo. *(For example an email sent, a message published or a file written. Make it happen after commit, or make it idempotent.)*
-4. **Evidence.** A reviewer says "the `javascript-events` program rolls back exactly once on failure." Design a test that could fail. *(Inject a world whose `open` or `rng` throws, count `ROLLBACK` calls and error lines, and check one of each. The negative control removes the `removeAllListeners` in `failed`, which should allow a second failure to report again.)*
+4. **Evidence.** A reviewer says, "The `javascript-events` program rolls back exactly once on failure." Design a test that could fail. *(Inject a world whose `open` or `rng` throws, count `ROLLBACK` calls and error lines and check one of each. The negative control removes the `removeAllListeners` in `failed`, which should allow a second failure to report again.)*
 
 ## Further reading
 

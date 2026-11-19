@@ -1,6 +1,6 @@
 ---
 name: "Go"
-teaches: "A one-statement port in Go: a three-part `for` with an empty body does all the work."
+teaches: "that one three-part `for` with an empty body can run the whole Go program."
 kind: port
 languages: [go]
 lesson: "languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery"

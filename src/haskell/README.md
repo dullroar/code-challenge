@@ -64,7 +64,7 @@ flowchart TD
 
 The file reads top to bottom as four steps, each a small function with a type signature.
 
-1. **`rolls :: Word64 -> [Int]`** is an *infinite* list of hours in 10..19. GHC ships no random-number package, so this is a 64-bit linear congruential generator. `iterate next seed` produces `seed, next seed, next (next seed), …`; `tail` drops the seed itself; the high bits (`shiftR 33`) are the good ones. Because `Word64` arithmetic wraps on overflow, the "mod 2^64" the algorithm needs is free.
+1. **`rolls :: Word64 -> [Int]`** is an *infinite* list of hours in 10 to 19. GHC ships no random-number package, so this is a 64-bit linear congruential generator. `iterate next seed` produces `seed, next seed, next (next seed), …`; `tail` drops the seed itself; the high bits (`shiftR 33`) are the good ones. Because `Word64` arithmetic wraps on overflow, the "mod 2^64" the algorithm needs is free.
 2. **`allCards :: Word64 -> [Card]`** is every card there could ever be, also infinite. `cycle [minBound ..]` repeats `Meetings, Coding, Debugging, Learning` forever (the `Category` type derives `Enum` and `Bounded`, so it can list itself). `scanl1 (+) hs` is a *running sum*: `[10, 11, 12]` becomes `[10, 21, 33]`. `zipWith3 Card` glues the three infinite lists into cards.
 3. **`timecards :: Word64 -> [Card]`** is the challenge: `span ((<= 40) . runningTotal) (allCards seed)` splits the list at the first card whose total passes 40, and `under ++ take 1 over` keeps everything before it plus that card.
 4. **Output.** `insert` and `row` turn a card into a SQL statement and a terminal line; `main` pipes SQL to `sqlite3` and prints rows.

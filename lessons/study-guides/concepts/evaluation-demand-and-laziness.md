@@ -1,19 +1,19 @@
-# Evaluation, demand, and laziness study guide
+# Evaluation, demand and laziness study guide
 
 ## What this guide is for
 
-This guide asks one question of every entry: **who demands work, and when?** The same three cards can be produced by computing everything and trimming, by computing exactly what is asked for, by describing a query that runs again each time, or by a consumer that pulls one card at a time. The effects differ. When the work has side effects, "when" decides which rows exist.
+This guide asks one question of every entry: **who demands work, and when?** The same three cards can be produced by computing everything and trimming, by computing exactly what is asked for, by describing a query that runs again each time or by a consumer that pulls one card at a time. The effects differ. When the work has side effects, "when" decides which rows exist.
 
 When you finish, you should be able to:
 
-1. Define eager, lazy by need, deferred, and pull evaluation, and say which entries use which.
+1. Define eager, lazy by need, deferred and pull evaluation, and say which entries use which.
 2. For a given entry, say how many values it *draws* to produce three cards, and which of them were never used.
 3. Explain why a lazy evaluator remembers a value and a deferred pipeline recomputes it, and give the evidence.
 4. Explain how short-circuit evaluation can serve as a stop rule, and why it is not the same in every language.
 5. Predict what changes when a forcing point moves relative to a resource's lifetime.
-6. Label claims as guaranteed, implementation-permitted, or accidentally exploited.
+6. Label claims as guaranteed, implementation-permitted or accidentally exploited.
 
-Scope limits. The guide compares entries using facts verified in the language guides. It does not teach monads, category theory or the type systems involved. Its source chapter is [Evaluation and demand](../../cs/04-evaluation-and-demand.md). For events, a push-style cousin, see [Events, callbacks, and reactive control](events-callbacks-and-reactive-control.md).
+**Scope limits.** The guide compares entries using facts verified in the language guides. It does not teach monads, category theory or the type systems involved. Its source chapter is [Evaluation and demand](../../cs/04-evaluation-and-demand.md). For events, a push-style cousin, see [Events, callbacks and reactive control](events-callbacks-and-reactive-control.md).
 
 ## Before you begin
 
@@ -27,13 +27,13 @@ Scope limits. The guide compares entries using facts verified in the language gu
 | --- | --- |
 | Eager | Compute when written: all values, now. |
 | Lazy (by need) | Compute when first demanded, then remember the result. |
-| Deferred | Describe now, run when something enumerates, and run again each time. |
+| Deferred | Describe now, run when something enumerates and run again each time. |
 | Pull | A consumer asks for the next value. |
 | Forcing | Evaluating a suspended computation, as far as the demand needs. |
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
 For implementations that follow the numeric rule, *the consumer wants cards until the total passes 40, and the crossing card must exist*. The two fixed-week LINQ entries instead end at 40 hours, so the generator in the trace below is a separate teaching experiment. The crossing card is the awkward one, because you only know a card crosses by building it. Every strategy has to answer "how many values did I produce to find out?" That count is the clearest measure of what each strategy costs.
 
@@ -68,7 +68,7 @@ flowchart TB
     class E4,L4,D3 unused
 ```
 
-The book's picture: the same requested prefix, three lanes. The eager lane computes all and trims, the lazy lane computes only what is demanded, and the deferred lane may redo the work when enumerated again.
+The book's picture: the same requested prefix, three lanes. The eager lane computes all and trims, the lazy lane computes only what is demanded and the deferred lane may redo the work when enumerated again.
 
 ## Trace one run
 
@@ -103,7 +103,7 @@ Read the column by strategy. The Haskell implementations draw exactly what their
 | **Tests** | Call and compare | Control the consumer, or inject the effect (`sheet` takes `onBirth`) |
 | **Debugging** | Step through | Which consumer demanded this, and when? |
 | **Portability** | Standard | Iterator helpers (Node 22+), LINQ providers, GHC's `unsafeInterleaveIO` |
-| **Cost** | Computes extras | Defers cost, but can overshoot by one, rerun, or hold a resource open |
+| **Cost** | Computes extras | Defers cost, but can overshoot by one, rerun or hold a resource open |
 
 The three non-eager strategies fail differently. A lazy value *remembers*, so a late force still gives the same answer, but may run at a bad moment. A deferred pipeline *forgets*, so an extra enumeration repeats work and effects. A pull iterator *depends on the consumer*, so a changed consumer changes how many cards exist (`take(1)` against `take(2)` in exercise B21).
 
@@ -117,20 +117,20 @@ The three non-eager strategies fail differently. A lazy value *remembers*, so a 
 | [B11. m4: quote the recursion](../../exercises.md#b11-m4-quote-the-recursion-verified) | Remove the brackets around `tc_card()`. | An endless run (timeout) or `recursion limit exceeded`. m4 expands arguments before the call. |
 | [B10. Lisp: swap the method combination](../../exercises.md#b10-lisp-swap-the-method-combination-verified) | Replace `or` with `progn`. | Five cards on every run: no short-circuit, no stop. |
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| `span` and `take` read only as much of a list as they must | **Guaranteed** | Haskell's non-strict semantics. |
-| A lazy value is forced at most once | **Guaranteed** (sharing) | The usual call-by-need semantics; GHC implements it, and the language report leaves some freedom. |
-| `unsafeInterleaveIO` defers its action until the result is demanded | **Guaranteed** | Documented, and "unsafe" because of what it does not promise. |
-| Where that effect lands relative to unrelated effects | **Implementation-permitted** | The program is correct because of data dependence. |
-| The LINQ-to-Objects `Select` in B7 defers its projection and another enumeration does the work again | **Guaranteed** for the pipeline shown | B7 runs the effect zero times at construction, three times per full enumeration. Terminal `Sum()` immediately enumerates in the C# condition. |
-| `reduce` cannot stop early | **Guaranteed** | It visits every element. |
-| `emit()` is synchronous and `setImmediate` is a later turn | **Guaranteed** | Documented Node.js behavior. |
-| Lisp's `or` stops at the first true method | **Guaranteed** | Standard method combination. |
-| CMake's `AND` evaluates both operands | **Accidentally exploited** | Observed; not promised in the documentation as far as the guide could find, and the program needs it. |
-| m4 expands arguments before the call | **Guaranteed** | Documented. It is the stop rule. |
+| `span` and `take` read only as much of a list as they must | **guaranteed** | Haskell's non-strict semantics. |
+| A lazy value is forced at most once | **guaranteed** (sharing) | The usual call-by-need semantics; GHC implements it, and the language report leaves some freedom. |
+| `unsafeInterleaveIO` defers its action until the result is demanded | **guaranteed** | Documented, and "unsafe" because of what it does not promise. |
+| Where that effect lands relative to unrelated effects | **implementation-permitted** | The program is correct because of data dependence. |
+| The LINQ-to-Objects `Select` in B7 defers its projection and another enumeration does the work again | **guaranteed** for the pipeline shown | B7 runs the effect zero times at construction, three times per full enumeration. Terminal `Sum()` immediately enumerates in the C# condition. |
+| `reduce` cannot stop early | **guaranteed** | It visits every element. |
+| `emit()` is synchronous and `setImmediate` is a later turn | **guaranteed** | Documented Node.js behavior. |
+| Lisp's `or` stops at the first true method | **guaranteed** | Standard method combination. |
+| CMake's `AND` evaluates both operands | **accidentally exploited** | Observed; not promised in the documentation as far as the guide could find, and the program needs it. |
+| m4 expands arguments before the call | **guaranteed** | Documented. It is the stop rule. |
 
 **Costs to state.**
 
@@ -142,20 +142,20 @@ The three non-eager strategies fail differently. A lazy value *remembers*, so a 
 
 ## Connections across the repository
 
-- **Language guides.** [Haskell](../languages/haskell.md), [C#, LINQ, XAML, and ports](../languages/csharp-linq-xaml-and-ports.md), [JavaScript](../languages/javascript.md), [APL](../languages/apl.md), [Common Lisp](../languages/common-lisp.md), [m4](../languages/m4.md) and [Make and CMake](../languages/make-and-cmake.md) each trace one of these.
+- **Language guides.** [Haskell](../languages/haskell.md), [C#, LINQ, XAML and ports](../languages/csharp-linq-xaml-and-ports.md), [JavaScript](../languages/javascript.md), [APL](../languages/apl.md), [Common Lisp](../languages/common-lisp.md), [m4](../languages/m4.md) and [Make and CMake](../languages/make-and-cmake.md) each trace one of these.
 - **State.** [State and control beyond variables](state-and-control-beyond-variables.md) asks where the next step is stored. Demand is one answer: a data dependence.
-- **Commit.** [Effects, errors, and commitment](effects-errors-and-commitment.md) asks which effects survive.
-- **Events.** [Events, callbacks, and reactive control](events-callbacks-and-reactive-control.md) is the push version of this question.
+- **Commit.** [Effects, errors and commitment](effects-errors-and-commitment.md) asks which effects survive.
+- **Events.** [Events, callbacks and reactive control](events-callbacks-and-reactive-control.md) is the push version of this question.
 - **In the book.** [Evaluation strategies](../../cs/04-evaluation-and-demand.md#evaluation-strategies), [Lazy evaluation](../../cs/04-evaluation-and-demand.md#lazy-evaluation), [Deferred execution](../../cs/04-evaluation-and-demand.md#deferred-execution), [Short-circuit evaluation](../../cs/04-evaluation-and-demand.md#short-circuit-evaluation) and [Referential transparency](../../cs/04-evaluation-and-demand.md#referential-transparency).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** Hours are 10, 10, 10, 10, 14. How many values does `haskell`, `apl` and a LINQ `TakeWhile` generator draw? *(Haskell: 5. The totals go 10, 20, 30, 40, 54 and `span` forces five cards. APL: 5, all of the up-front draws. The generator: 6. `TakeWhile` keeps the fifth card, the crossing card, and must draw a sixth to see its test fail.)*
 2. **Explain.** Why does a lazy `let entries = length cards` crash `haskell-weird`, when `evaluate (length cards)` does not? *(The lazy binding is not forced until the summary line, which runs after the pipe is closed. `evaluate` forces it before `COMMIT` and `hClose`.)*
 3. **Transfer.** In a language you use, which operation forces a lazy collection into a list, and where would you put it to keep effects inside a transaction? *(For example `toArray`, `ToList`, `list(...)` or `collect`. Put it inside the transaction, before the commit.)*
-4. **Evidence.** A reviewer says "`take 1 over` never forces a fourth card." Design a test that could fail. *(Replace the hours with a fixed list whose tail is an error, as the scratch run did. The negative control is a variant that matches one cell past the crossing card, where the error must fire.)*
+4. **Evidence.** A reviewer says, "`take 1 over` never forces a fourth card." Design a test that could fail. *(Replace the hours with a fixed list whose tail is an error, as the scratch run did. The negative control is a variant that matches one cell past the crossing card, where the error must fire.)*
 
 ## Further reading
 

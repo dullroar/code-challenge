@@ -10,15 +10,15 @@ When you finish, you should be able to:
 2. Say which parts of each program are *demanded* in a given step, and which are never built.
 3. Explain what `unsafeInterleaveIO` adds, and why that is where the program stops being referentially transparent.
 4. Predict what happens when a forcing point moves relative to the lifetime of a resource (the pipe to `sqlite3`).
-5. Label each behavior as guaranteed, implementation-permitted, or accidentally exploited.
+5. Label each behavior as guaranteed, implementation-permitted or accidentally exploited.
 
-Scope limits. You need to read Haskell type signatures and know what `map`, `zip` and `fix` do. The guide does not teach monads, the type classes in the source, or the SQL. It uses GHC's `runghc`; the programs need only packages that ship with GHC.
+**Scope limits.** You need to read Haskell type signatures and know what `map`, `zip` and `fix` do. The guide does not teach monads, the type classes in the source or the SQL. It uses GHC's `runghc`; the programs need only packages that ship with GHC.
 
 The matching book material is [Haskell](../../languages/haskell.md), and for the idea itself, [Evaluation and demand](../../cs/04-evaluation-and-demand.md).
 
 ## Before you begin
 
-**Safety model.** Every entry writes fictional **DEMO ONLY** records to a local SQLite file. Both programs start the `sqlite3` process, so read the source first and run in the sandbox first:
+**Safety model.** Every entry writes fictional **DEMO ONLY** records to a scratch SQLite file. Both programs start the `sqlite3` process, so read the source first and run it in the sandbox first:
 
 ```bash
 sandbox/container/run-image.sh src/haskell
@@ -27,7 +27,7 @@ sandbox/container/run-image.sh src/haskell-weird
 
 Work on a copy for any edit ([Running things safely](../../exercises.md#running-things-safely)). Output is random, so compare properties, not numbers.
 
-**Prediction rule.** Before each run, write down (a) which list cells will be forced, (b) which effects will fire, and (c) what output would prove you wrong.
+**Prediction rule.** Before each run, write down (a) which list cells will be forced, (b) which effects will fire and (c) what output would prove you wrong.
 
 **Vocabulary.**
 
@@ -41,7 +41,7 @@ Work on a copy for any edit ([Running things safely](../../exercises.md#running-
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add cards to a running total. The run **retains the first card that takes the total above 40**. A total of exactly 40 continues, so four 10-hour cards need a fifth. Totals end between 41 and 59, with 3 to 5 cards.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
 Both Haskell entries save the cards in one SQLite transaction and print a summary. In Haskell the rule appears as the predicate `(<= 40)` inside `span`. That detail matters. `<= 40` is true for exactly 40, so exactly 40 stays in the "under" half and the next card is read. The crossing card is the *first element of the other half*, which is why the program writes `under ++ take 1 over`.
 
@@ -57,9 +57,7 @@ Both programs are demand-driven. The difference is what a demand *does*.
 
 **What stops it.** The consumer stops asking. `span` returns when the predicate first fails, and `take 1 over` takes only the crossing card. No later cell is ever forced.
 
-**What commits.** The two programs differ most here. `haskell` builds the whole SQL script as a pure string, runs `sqlite3` on it with `readProcess`, and only then prints the rows ([L103-120](../../../src/haskell/timecards.hs#L103-L120)). In `haskell-weird`, each forced cell *prints its row and writes its `INSERT` to an open pipe* as a side effect. The `COMMIT` is written afterwards by `main`, and `hClose` ends the stream ([L144-146](../../../src/haskell-weird/timecards.hs#L144-L146)). The rows on the terminal are not part of the transaction, and a row can be printed before the transaction is committed.
-
-The two Program Flow diagrams from the entries follow.
+**What commits.** The two programs differ most here. `haskell` builds the whole SQL script as a pure string, runs `sqlite3` on it with `readProcess` and only then prints the rows ([L103-120](../../../src/haskell/timecards.hs#L103-L120)). In `haskell-weird`, each forced cell *prints its row and writes its `INSERT` to an open pipe* as a side effect. The `COMMIT` is written afterwards by `main`, and `hClose` ends the stream ([L144-146](../../../src/haskell-weird/timecards.hs#L144-L146)). The rows on the terminal are not part of the transaction, and a row can be printed before the transaction is committed.
 
 <!-- diagram-source: src/haskell/README.md#program-flow -->
 
@@ -190,17 +188,17 @@ The weird version gives up an important property: you can no longer treat an exp
 | [F. Prove a README claim](../../exercises.md#f-prove-a-readme-claim-verified) | Will a lazily evaluated `span` ever demand a fourth card? | The book's worked solution tests "`takeWhile` is not enough." A good evidence test needs a negative control: show that the test fails when the claim is false. |
 | *Guide experiment* (verified in the sandbox) | In a scratch copy, replace the random stream with `[15, 19, 12] ++ error "a 4th card was demanded"`. Will the program crash? | It does not. Three effects fire and no more. This is direct evidence that `take 1 over` does not force the cell after the crossing card. It is not in the book's exercise list, so treat it as this guide's own. |
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| `span` and `take` read only as much of a list as their result needs | **Guaranteed** | Non-strict semantics of Haskell. Verified by the error-tail experiment. |
-| Total of card *n* depends on card *n-1*, so cell *n* cannot be forced first | **Guaranteed** | A data dependence in the program. It is why the program is correct, whatever the evaluator does. |
-| `unsafeInterleaveIO` runs its action when its result is demanded, not before | **Guaranteed** | The library documents this contract. The word "unsafe" in the name is about what the contract does *not* say. |
-| Where an interleaved effect lands relative to *unrelated* effects | **Implementation-permitted** | The language does not order them. This program is correct only because each cell depends on the one before it, so the order of the card effects follows from data dependence, not from a promise by the evaluator. |
-| `evaluate (length cards)` forces every kept cell before `COMMIT` | **Guaranteed** | `evaluate` forces to weak head normal form, and `length` walks the spine, so the spine is built, and building it forces the cells. The exact wording of this chain matters: change one link and the effects move. |
-| `fixIO` hands a function the result it is still building | **Guaranteed** | The library documents it. Forcing that result too early is an error you see at run time (`cyclic evaluation in fixIO`), which is what exercise B2 change 2 produces. |
-| The 64-bit generator wraps around at the width of `Word64` | **Guaranteed** | Documented wraparound of the type. The generator uses Knuth's constants and the high bits. |
+| `span` and `take` read only as much of a list as their result needs | **guaranteed** | Non-strict semantics of Haskell. Verified by the error-tail experiment. |
+| Total of card *n* depends on card *n-1*, so cell *n* cannot be forced first | **guaranteed** | A data dependence in the program. It is why the program is correct, whatever the evaluator does. |
+| `unsafeInterleaveIO` runs its action when its result is demanded, not before | **guaranteed** | The library documents this contract. The word "unsafe" in the name is about what the contract does *not* say. |
+| Where an interleaved effect lands relative to *unrelated* effects | **implementation-permitted** | The language does not order them. This program is correct only because each cell depends on the one before it, so the order of the card effects follows from data dependence, not from a promise by the evaluator. |
+| `evaluate (length cards)` forces every kept cell before `COMMIT` | **guaranteed** | `evaluate` forces to weak head normal form, and `length` walks the spine, so the spine is built, and building it forces the cells. The exact wording of this chain matters: change one link and the effects move. |
+| `fixIO` hands a function the result it is still building | **guaranteed** | The library documents it. Forcing that result too early is an error you see at run time (`cyclic evaluation in fixIO`), which is what exercise B2 change 2 produces. |
+| The 64-bit generator wraps around at the width of `Word64` | **guaranteed** | Documented wraparound of the type. The generator uses Knuth's constants and the high bits. |
 
 No behavior here is *accidentally exploited* in the book's sense: nothing relies on an effect nobody promised. The weird entry sits as close to that line as the Haskell entries get, which is why the unrelated-effects row matters.
 
@@ -213,18 +211,18 @@ No behavior here is *accidentally exploited* in the book's sense: nothing relies
 
 ## Connections across the repository
 
-- **The same question as LINQ.** [C#, LINQ, XAML, and ports](csharp-linq-xaml-and-ports.md) asks "when does a description run?" with deferred execution. A LINQ pipeline re-runs when enumerated again, while a Haskell cell is evaluated once and remembered.
+- **The same question as LINQ.** [C#, LINQ, XAML and ports](csharp-linq-xaml-and-ports.md) asks "when does a description run?" with deferred execution. A LINQ pipeline reruns when enumerated again, while a Haskell cell is evaluated once and remembered.
 - **Pull iteration in JavaScript.** [JavaScript](javascript.md)'s lazy iterator in `javascript-weird` is a consumer that pulls one card at a time. The mechanism differs and the shape of the stop rule is the same.
 - **Array languages go the other way.** [APL](apl.md) is eager: it builds more values than it needs and trims the result.
 - **A stop rule as structure.** [COBOL](cobol.md) declares the rule on the data. Haskell chooses it by how much it reads. CMake uses a literal 41 characters long. All three avoid a visible loop condition.
-- **Concept guides.** [Evaluation, demand, and laziness](../concepts/evaluation-demand-and-laziness.md) puts Haskell, LINQ and JavaScript on one scale. [Effects, errors, and commitment](../concepts/effects-errors-and-commitment.md) explains what survives a failure.
+- **Concept guides.** [Evaluation, demand and laziness](../concepts/evaluation-demand-and-laziness.md) puts Haskell, LINQ and JavaScript on one scale. [Effects, errors and commitment](../concepts/effects-errors-and-commitment.md) explains what survives a failure.
 - **In the book.** [Haskell](../../languages/haskell.md) and [Evaluation and demand](../../cs/04-evaluation-and-demand.md).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
-1. **Trace.** Hours are 10, 10, 10, 10, 14. For `haskell`, list the cards `span` forces, say which one is the crossing card, and say how many cards the final list has. *(Five cards are forced. Totals 10, 20, 30, 40, 54. The fifth, Meetings with 14 hours, is the crossing card. The final list has five cards.)*
+1. **Trace.** Hours are 10, 10, 10, 10, 14. For `haskell`, list the cards `span` forces, say which one is the crossing card and say how many cards the final list has. *(Five cards are forced. Totals 10, 20, 30, 40, 54. The fifth, Meetings with 14 hours, is the crossing card. The final list has five cards.)*
 2. **Explain.** In `haskell-weird`, why does the program not need a counter or an accumulator to know card *n*'s total? Which language feature makes `cards` usable before it exists? *(Each card's total is read from the previous card, an element of the same list. `fixIO` passes the list to `sheet` lazily, so reading card *n-1* works once that cell exists.)*
 3. **Transfer.** In a language with generators, such as the JavaScript or Python entries, which construct plays the part of `span`, and what is the equivalent of "stop demanding"? *(The consumer that pulls from the generator, and stopping means not calling `next` again. A `for` loop that breaks is the usual form.)*
 4. **Evidence.** A reviewer says, "`take 1 over` never builds a fourth card." Design a test that could fail. What is the negative control? *(Replace the hours stream with a fixed list whose tail is an error that fires if forced. The program must finish. For the control, write a variant that pattern-matches one cell past the crossing card. The error must then fire.)*

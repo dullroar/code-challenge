@@ -6,11 +6,11 @@ For an advanced reading path with traces and experiments, see the [state and con
 
 If a language has no variables, or if you may not use them, where can a program keep what it remembers? This chapter collects the answers. A stack of marks. A line of text that substitutions rewrite. Which files exist on disk. The captures that a regex leaves behind. The source text of functions. A temporary table of procedures. The depth of a trigger's recursion. A pile of `x` characters.
 
-None of these looks like "state" in the way that a variable does, and every one of them is. The concepts below are the places where it can hide: the call stack, the stack as a data structure, scope and binding, closures (a function plus its environment), code as data, reflection, dependency graphs, database triggers, and serialization (a program or a state written down as bytes, and what it takes to read it back and run it). The first concept is state itself, and the lesson is a habit: for every program, ask *where does it live?* You will find a table of the entries' answers in [By overall goals](../goals.md).
+None of these looks like "state" in the way that a variable does, and every one of them is. The concepts below are the places where it can hide: the call stack, the stack as a data structure, scope and binding, closures (a function plus its environment), code as data, reflection, dependency graphs, database triggers and serialization (a program or a state written down as bytes, and what it takes to read it back and run it). The first concept is state itself, and the lesson is a habit: for every program, ask *where does it live?* You will find a table of the entries' answers in [By overall goals](../goals.md).
 
 ## State
 
-State is whatever a program remembers between steps. Without it, nothing could be computed. The interesting question is *where it lives*: in variables, on a stack, on the heap, in a file, in a database, in an environment variable, over the network. This book's first goal is to ask that question about every program. The answers here are surprising. State lives in the target of a `GO TO`, in one line of text, in which files exist on disk, in the captures of a regex, in the text of functions, in the input stream, and in the depth of trigger recursion. See the table in [By overall goals](../goals.md).
+State is whatever a program remembers between steps. Without it, nothing could be computed. The interesting question is *where it lives*: in variables, on a stack, on the heap, in a file, in a database, in an environment variable, over the network. This book's first goal is to ask that question about every program. The answers here are surprising. State lives in the target of a `GO TO`, in one line of text, in which files exist on disk, in the captures of a regex, in the text of functions, in the input stream and in the depth of trigger recursion. See the table in [By overall goals](../goals.md).
 
 - **Use it when:** make state explicit, small and close to where it is used.
 - **Avoid hidden and global state.** It is hard to test, hard to share and hard to reason about.
@@ -27,25 +27,25 @@ State is whatever a program remembers between steps. Without it, nothing could b
 | --- | --- | --- | --- |
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | demonstrates | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
 | [`awk-weird`](../../src/awk-weird/README.md) | AWK | demonstrates | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
-| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
-| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | Why structured programming won, by running a program whose control flow rewrites itself. |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | That `while()` and a regex can form a tiny register machine. |
+| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | That a program can rewrite its own control flow and that structured programming makes such changes easier to trace. |
 | [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
 | [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | demonstrates | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
-| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
+| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | That reading a lazy list can drive a program when forcing each element has a side effect. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | demonstrates | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | demonstrates | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
 | [`m4`](../../src/m4/README.md) | m4 | demonstrates | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | That GNU Make can do arithmetic and loop in its own syntax, without a shell for either. |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | That a regex can use a stack to count. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | That regex callouts can serve as a tiny instruction set. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | That Perl can execute code during a regex match. |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |
 
 ## The call stack
 
@@ -69,7 +69,7 @@ flowchart TB
 Each active call owns one frame, and the newest frame is on top. When `saveRow` returns, its frame is removed and execution continues at the return address it stored, which is inside `drawCard`. The names here are examples, and the exact layout of a frame differs between languages and processors. The general idea of a stack is in [The stack as a data structure](06-state-beyond-variables.md#the-stack-as-a-data-structure).
 
 - **Use it when:** you read a stack trace, or you reason about recursion depth.
-- **Avoid:** unbounded recursion. A stack overflow ends the program, and in unsafe languages it can become a security hole.
+- **Avoid it when:** the recursion depth has no bound. A stack overflow ends the program, and in unsafe languages it can become a security hole.
 
 **Read more:**
 
@@ -125,11 +125,11 @@ Only the top can be reached. A push adds on top and a pop removes from the top, 
 | --- | --- | --- | --- |
 | [`forth`](../../src/forth/README.md) | Forth | demonstrates | That a stack language needs one `begin ... until` and a pipe to be a whole program. |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | demonstrates | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | That a regex can use a stack to count. |
 
 ## Scope and binding
 
-*Scope* is the part of a program where a name can be seen. *Binding* is the link between a name and a value. Most languages use *lexical* scope: a name means what it means where it is written. Some use *dynamic* scope: a name means whatever the most recent caller set. Dynamic scope can be useful, and it can be dangerous. In [`apl-weird`](../../src/apl-weird/README.md) dynamic scope would let a rewritten function overwrite its parent's variables, so each generated header re-declares its locals. In Tcl, `uplevel` runs code in the scope of another stack frame. [`tcl-weird`](../../src/tcl-weird/README.md) uses `uplevel #0`, which means the global scope. In m4 and Make, every name is global.
+*Scope* is the part of a program where a name can be seen. *Binding* is the link between a name and a value. Most languages use *lexical* scope: a name means what it means where it is written. Some use *dynamic* scope: a name means whatever the most recent caller set. Dynamic scope can be useful, and it can be dangerous. In [`apl-weird`](../../src/apl-weird/README.md) dynamic scope would let a rewritten function overwrite its parent's variables, so each generated header redeclares its locals. In Tcl, `uplevel` runs code in the scope of another stack frame. [`tcl-weird`](../../src/tcl-weird/README.md) uses `uplevel #0`, which means the global scope. In m4 and Make, every name is global.
 
 ```mermaid
 flowchart TB
@@ -150,7 +150,7 @@ flowchart TB
 A name is looked up in the innermost scope first, then outward. Here `x` is found at once in the inner scope, which *shadows* the outer `x = 10`. The name `y` is not bound in the inner scope, so the search goes outward. The scope decides where to look, and the binding is what the search finds. This picture is lexical scope: the boxes are the nesting of the source text.
 
 - **Use it when:** lexical scope, almost always. It lets you read a function without knowing its callers.
-- **Avoid:** dynamic and global scope, except for deliberate, documented settings.
+- **Avoid it when:** a name would need dynamic or global scope without a deliberate, documented reason.
 
 **Read more:**
 
@@ -168,7 +168,7 @@ A name is looked up in the innermost scope first, then outward. Here `x` is foun
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | demonstrates | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
 | [`m4`](../../src/m4/README.md) | m4 | demonstrates | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
-| [`tcl`](../../src/tcl/README.md) | Tcl | demonstrates | Idiomatic Tcl: procs in a namespace, dicts for records, braced `expr`, and `db eval` binding Tcl variables straight into SQL. |
+| [`tcl`](../../src/tcl/README.md) | Tcl | demonstrates | That idiomatic Tcl uses procedures in a namespace, dicts for records, braced `expr` and `db eval` to bind Tcl variables into SQL. |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
 
 ## Closures and lexical environments
@@ -197,11 +197,11 @@ Be exact about three things:
 
 - **A closure captures variables, not values.** Two closures over the same variable share it, and a change made by one is seen by the other. Each call to a factory such as `counter()` makes a *new* variable, so two counters never share state. C# lambdas behave the same way.
 - **Lambda syntax is not a closure.** `x => x + 1` uses no outside variable, so there is nothing interesting to capture. An arrow function that updates a variable that outlives the call is a closure that matters.
-- **A closure is not a continuation.** You can call it again and it does the *next* step. You cannot hand it "the rest of the computation", resume it in the middle of something, or go back. See [Continuations](03-control-flow-and-continuations.md#continuations). Nor is `this` a captured variable: a method that uses `this.n` loses its `n` when you detach it from its object, and a closure keeps its variable.
+- **A closure is not a continuation.** You can call it again and it does the *next* step. You cannot hand it "the rest of the computation", resume it in the middle of something or go back. See [Continuations](03-control-flow-and-continuations.md#continuations). Nor is `this` a captured variable: a method that uses `this.n` loses its `n` when you detach it from its object, and a closure keeps its variable.
 
-The environment lives as long as the function can be reached. When nothing refers to the function any more, the engine may collect it, and its variables with it. [`javascript-weird`](../../src/javascript-weird/README.md) builds its whole algorithm from three closures (a seeded number source, a card machine, and an iterator around it), and its check script proves each claim on this page, including the lifetime one, with a `WeakRef` and a forced garbage collection. [`javascript`](../../src/javascript/README.md) uses a closure over the seed for its random numbers. [`RustChallenge1`](../../src/RustChallenge1/README.md) and [`ModernChallenge1`](../../src/ModernChallenge1/README.md) use closures (and a C# lambda) to move work into places that expect a value.
+The environment lives as long as the function can be reached. When nothing refers to the function any more, the engine may collect it, and its variables with it. [`javascript-weird`](../../src/javascript-weird/README.md) builds its whole algorithm from three closures (a seeded number source, a card machine and an iterator around it), and its check script proves each claim on this page, including the lifetime one, with a `WeakRef` and a forced garbage collection. [`javascript`](../../src/javascript/README.md) uses a closure over the seed for its random numbers. [`RustChallenge1`](../../src/RustChallenge1/README.md) and [`ModernChallenge1`](../../src/ModernChallenge1/README.md) use closures (and a C# lambda) to move work into places that expect a value.
 
-- **Use it when:** you need private state without a class, a function that is configured once and called many times, or a callback that must remember something.
+- **Use it when:** you need private state without a class, a function that is configured once and called many times or a callback that must remember something.
 - **Avoid it when:** the hidden state makes the program hard to test or to read. Captured variables do not show up in a debugger the way fields do, and a long chain of closures is hard to follow.
 
 **Read more:**
@@ -214,11 +214,11 @@ The environment lives as long as the function can be reached. When nothing refer
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | analogy | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
+| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | analogy | That a Java `for (init; condition; update) { }` can preserve the shape of the original C# program. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
-| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | Iterators and closures as control flow. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | That a `for` statement with no body can drive runtime XAML, LINQ to Objects, EF Core and WPF animation. |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | That iterators and closures can express the control flow of a whole Rust program. |
 
 ## Homoiconicity: code as data
 
@@ -239,7 +239,7 @@ A language is *homoiconic* when its programs are written in its own data structu
 | --- | --- | --- | --- |
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | demonstrates | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
 | [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
-| [`lisp`](../../src/lisp/README.md) | Common Lisp | demonstrates | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
+| [`lisp`](../../src/lisp/README.md) | Common Lisp | demonstrates | That Common Lisp `LOOP` can express a whole algorithm as clauses for counting, drawing, summing, collecting and stopping. |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | demonstrates | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
 
@@ -264,9 +264,9 @@ A language is *homoiconic* when its programs are written in its own data structu
 | [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | demonstrates | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | demonstrates | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
-| [`tcl`](../../src/tcl/README.md) | Tcl | demonstrates | Idiomatic Tcl: procs in a namespace, dicts for records, braced `expr`, and `db eval` binding Tcl variables straight into SQL. |
+| [`tcl`](../../src/tcl/README.md) | Tcl | demonstrates | That idiomatic Tcl uses procedures in a namespace, dicts for records, braced `expr` and `db eval` to bind Tcl variables into SQL. |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |
 
 ## Dependency graphs
 
@@ -287,7 +287,7 @@ flowchart LR
 Each arrow here runs from an input to the thing built from it, so a change travels along the arrows. (Some books draw the arrow the other way, from a thing to what it needs. The facts are the same.) Only `categories` changed, so only what is downstream of it must be redone. `raw cards` keeps its old result. The graph says what *must* be recomputed, not when values arrive. For that, see [Dataflow programming](04-evaluation-and-demand.md#dataflow-programming).
 
 - **Use it when:** any problem of the form "A must come before B".
-- **Avoid:** cycles, and dependencies that are not declared. A hidden dependency gives wrong incremental builds.
+- **Avoid it when:** the dependencies form a cycle or the graph leaves some dependencies implicit. A hidden dependency gives wrong incremental builds.
 
 **Read more:**
 
@@ -299,7 +299,7 @@ Each arrow here runs from an input to the thing built from it, so a change trave
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | That GNU Make can do arithmetic and loop in its own syntax, without a shell for either. |
 
 ## Database triggers
 
@@ -335,7 +335,7 @@ The host code runs one `INSERT` and has no loop. The trigger belongs to the tabl
 
 **Serialization** turns something abstract into bytes that you can store or send: an object, a state, a list of instructions. **Deserialization** reads the bytes back. These are two separate acts, and a third act hides behind them: **interpretation**, which gives the decoded data an effect. You can parse a file and do nothing with it. You can also parse a file and run it. Most of the danger in this topic lives in the gap between the two.
 
-**Object pickling** is serialization of an object graph. Python's `pickle` writes the *recipe* to rebuild an object: which class, which arguments, which attributes. Reading a pickle can call any function the recipe names, so unpickling bytes you do not trust runs the sender's code. The Python documentation says so in a warning box. A serialized **program** is the same idea one level up: source text, a syntax tree, bytecode, or a small instruction stream stored as records. [`tar-gnu`](../../src/tar-gnu/README.md) stores a program as the members of a tar archive: each member name is an instruction, each member body is its operand. [`tcl-weird`](../../src/tcl-weird/README.md) stores Tcl source in SQLite rows and runs it on demand. [`apl-weird`](../../src/apl-weird/README.md) reads a function's source, rewrites it, and defines the copy. [`xaml`](../../src/xaml/README.md) stores an object graph as markup that a parser turns into live objects.
+**Object pickling** is serialization of an object graph. Python's `pickle` writes the *recipe* to rebuild an object: which class, which arguments, which attributes. Reading a pickle can call any function the recipe names, so unpickling bytes you do not trust runs the sender's code. The Python documentation says so in a warning box. A serialized **program** is the same idea one level up: source text, a syntax tree, bytecode or a small instruction stream stored as records. [`tar-gnu`](../../src/tar-gnu/README.md) stores a program as the members of a tar archive: each member name is an instruction, each member body is its operand. [`tcl-weird`](../../src/tcl-weird/README.md) stores Tcl source in SQLite rows and runs it on demand. [`apl-weird`](../../src/apl-weird/README.md) reads a function's source, rewrites it and defines the copy. [`xaml`](../../src/xaml/README.md) stores an object graph as markup that a parser turns into live objects.
 
 What does a round trip keep? Be exact, because "the same" has four different meanings:
 
@@ -372,7 +372,7 @@ The four cards are separate promises, and none implies another. Equal bytes do n
 | JSON | Numbers, strings, lists, maps | Plain data | No, unless your code interprets a field | Inside your code that uses the fields |
 | tar | Files: names, bytes, sizes, times, modes | Files on disk, or a stream of members | No, unless the operator passes `--to-command` or `--checkpoint-action` | In the command line the operator wrote |
 
-- **Use it when:** you must store a state, send a value, or ship a program, and you can state which kind of "same" you need back.
+- **Use it when:** you must store a state, send a value or ship a program, and you can state which kind of "same" you need back.
 - **Avoid it when:** the bytes come from someone you do not trust and the format can rebuild arbitrary objects. Use a data-only format and a strict parser.
 
 **Read more:**
@@ -393,4 +393,4 @@ The four cards are separate promises, and none implies another. Equal bytes do n
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | analogy | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |

@@ -16,7 +16,7 @@ Forth has almost no syntax: the interpreter reads a space-delimited word, looks 
 
 ## The parse position as a program counter
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/forth-weird
@@ -28,7 +28,7 @@ The whole program's loop is one line at the top level ([L101](../../src/forth-we
 0 0 >in @ step rewind?                                     \ <== THE LOOP  ( n total anchor )
 ```
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 The text interpreter is a loop you never see. `>in` holds *how far it has read the current line*; `>in @` reads it and `>in !` sets it. Set it to an earlier value and the interpreter reads the same words again.
 
@@ -38,24 +38,24 @@ The text interpreter is a loop you never see. `>in` holds *how far it has read t
 
 The memory is the data stack: there is not one `variable` in the file. The program counter is `>in`.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **An interpreter's position can be a program counter.** If you can read and write it, you have goto.
-- **Booleans as bit masks** are a respectable old trick, and why Forth's true is -1.
+- **Booleans as bit masks** are a respectable old trick. They explain why Forth's true is -1.
 - **State on a stack** is a complete model of memory. (Compare [COBOL's mutable jump](cobol.md#alter), [Make's file-existence state](make-cmake.md#gnu-make) and [CMake's registers](make-cmake.md#cmake).)
 
-Tags: stack effects and flags are **guaranteed** by standard Forth. `>in` manipulation is **guaranteed** to exist in ISO Forth but its effect in a definition vs. at top level is **implementation-sensitive**. `outfile-execute`, `open-pipe` and `utime` are **Gforth extensions**.
+Tags: stack effects and flags are **guaranteed** by standard Forth. `>in` manipulation is **guaranteed** to exist in ISO Forth but its effect in a definition versus at top level is **implementation-permitted**. `outfile-execute`, `open-pipe` and `utime` are Gforth extensions (**implementation-permitted**).
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **It only works at the top level, or in `evaluate`d / `included` text.** `>in` is the parse position of the current input line. Compile the loop *into* a word and there is no line to rewind.
 - **Moving one token breaks it silently.** If the `0 0` moves to *after* the `>in @` (`>in @ 0 0 step rewind?`), the anchor is now before the state, so every rewind pushes a fresh `0 0`: the total resets every pass and the program never stops (verified: hundreds of rows, no `# committed` line). A correct-looking program, a runaway loop. Moving `0 0` to the previous line is harmless, because the anchor is still after it.
 - **No tooling will understand it.** Linters, tracers and humans all assume that parse position is not state.
 - **Portability.** Gforth-specific words; `3dup` is not in Gforth 0.7.3, so the file defines it with `2 pick` three times ([L37](../../src/forth-weird/timecards.fs#L37)).
 
-Legitimate uses: interpreters, debuggers, and parsing words, where manipulating the input stream is the job.
+Legitimate uses: interpreters, debuggers and parsing words, where manipulating the input stream is the job.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercises](../exercises.md#b3-forth-move-the-anchor-verified).
 
@@ -63,7 +63,7 @@ See [exercises](../exercises.md#b3-forth-move-the-anchor-verified).
 
 - **Control words only work inside definitions** in standard Forth. Typing `begin ... until` at the top level is an error, so `run` is a word. The weird version cheats the other way.
 - **`s"` strings can be temporary**: some interpreters return a buffer overwritten by the next one, so the category words are definitions.
-- **`random` is `0..n-1`**, so `10 random 10 +` gives 10..19.
+- **`random` is `0..n-1`**, so `10 random 10 +` gives 10 to 19.
 - **`close-pipe` returns the exit status**; `close-sqlite` turns a non-zero status into an abort so a failed `sqlite3` is not ignored.
 - **Stack comments are the type system.** Nothing enforces `( n total -- n' total' )`; it is convention.
 

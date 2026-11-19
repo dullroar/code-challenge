@@ -5,7 +5,7 @@ order: 90
 ---
 **Serialization** turns something abstract into bytes that you can store or send: an object, a state, a list of instructions. **Deserialization** reads the bytes back. These are two separate acts, and a third act hides behind them: **interpretation**, which gives the decoded data an effect. You can parse a file and do nothing with it. You can also parse a file and run it. Most of the danger in this topic lives in the gap between the two.
 
-**Object pickling** is serialization of an object graph. Python's `pickle` writes the *recipe* to rebuild an object: which class, which arguments, which attributes. Reading a pickle can call any function the recipe names, so unpickling bytes you do not trust runs the sender's code. The Python documentation says so in a warning box. A serialized **program** is the same idea one level up: source text, a syntax tree, bytecode, or a small instruction stream stored as records. [[entry:tar-gnu]] stores a program as the members of a tar archive: each member name is an instruction, each member body is its operand. [[entry:tcl-weird]] stores Tcl source in SQLite rows and runs it on demand. [[entry:apl-weird]] reads a function's source, rewrites it, and defines the copy. [[entry:xaml]] stores an object graph as markup that a parser turns into live objects.
+**Object pickling** is serialization of an object graph. Python's `pickle` writes the *recipe* to rebuild an object: which class, which arguments, which attributes. Reading a pickle can call any function the recipe names, so unpickling bytes you do not trust runs the sender's code. The Python documentation says so in a warning box. A serialized **program** is the same idea one level up: source text, a syntax tree, bytecode or a small instruction stream stored as records. [[entry:tar-gnu]] stores a program as the members of a tar archive: each member name is an instruction, each member body is its operand. [[entry:tcl-weird]] stores Tcl source in SQLite rows and runs it on demand. [[entry:apl-weird]] reads a function's source, rewrites it and defines the copy. [[entry:xaml]] stores an object graph as markup that a parser turns into live objects.
 
 What does a round trip keep? Be exact, because "the same" has four different meanings:
 
@@ -42,7 +42,7 @@ The four cards are separate promises, and none implies another. Equal bytes do n
 | JSON | Numbers, strings, lists, maps | Plain data | No, unless your code interprets a field | Inside your code that uses the fields |
 | tar | Files: names, bytes, sizes, times, modes | Files on disk, or a stream of members | No, unless the operator passes `--to-command` or `--checkpoint-action` | In the command line the operator wrote |
 
-- **Use it when:** you must store a state, send a value, or ship a program, and you can state which kind of "same" you need back.
+- **Use it when:** you must store a state, send a value or ship a program, and you can state which kind of "same" you need back.
 - **Avoid it when:** the bytes come from someone you do not trust and the format can rebuild arbitrary objects. Use a data-only format and a strict parser.
 
 **Read more:**

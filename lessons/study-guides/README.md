@@ -2,9 +2,9 @@
 
 *Traces, predictions and evidence for advanced readers of* Learn Programming the Weird Way!
 
-**WEIRD** stands for **Weird Execution, Indirect Results and Data**. The W is recursive. The rest gives you something to trace: what executes, where the result turns up, and what the program gets away with treating as data.
+**WEIRD** stands for **Weird Execution, Indirect Results and Data**. The W is recursive. The rest gives you something to trace: what executes, where the result turns up and what the program gets away with treating as data.
 
-The book teaches each language by pairing an idiomatic program with a weird one. These guides take the next step. For each language family and for each big idea, a guide asks you to **identify the machine, trace one fixed run, predict before you execute, and prove the claim with evidence**. They are written for a senior undergraduate or a graduate reader. They do not teach what a loop is. They teach why *this* loop-like mechanism has particular consequences.
+Many language chapters pair an idiomatic program with a weird one. These guides take the next step. For each language family and for each big idea, a guide asks you to **identify the machine, trace one fixed run, predict before you execute and prove the claim with evidence**. They are written for a senior undergraduate or a graduate reader. They do not teach what a loop is. They teach why *this* loop-like mechanism has particular consequences.
 
 The guides are hand-written. They began with a COBOL study guide by the book's co-author Ken Astl, and keep its method.
 
@@ -13,13 +13,13 @@ The guides are hand-written. They began with a COBOL study guide by the book's c
 Every guide has the same eleven sections, so you can find the same thing in the same place:
 
 1. **What this guide is for**: three to six learning outcomes, and what is out of scope.
-2. **Before you begin**: the safety model (fictional **DEMO ONLY** data, source review, and a sandbox run first), the prediction rule and the vocabulary.
-3. **The shared challenge**: the [time-card specification](../intro.md#what-the-challenge-does) and how the entries in this guide behave. A conforming run keeps the **first card that takes the total above 40**, so exactly 40 continues. Check stop, storage and output separately.
-4. **The machine to identify**: what repeats, where state lives, what advances the next step, what stops it, and which effects commit.
+2. **Before you begin**: the safety model (fictional **DEMO ONLY** data, source review and a sandbox run first), the prediction rule and the vocabulary.
+3. **The shared challenge**: the [time-card specification](../intro.md#what-the-challenge-does) and how the entries in this guide behave. A conforming run keeps the **first card that takes the total over 40**, so exactly 40 continues. Check stop, storage and output separately.
+4. **The machine to identify**: what repeats, where state lives, what advances the next step, what stops it and which effects commit.
 5. **Trace one run**: a fixed run, normally hours 15, 19, 12, with the decisive state before and after each step.
 6. **Compare the ordinary and weird designs**: by representation, observability, tests, debugging, portability and cost, not by line count.
 7. **What the exercises demonstrate**: links to the verified exercises, each with the prediction you make first.
-8. **Failure modes, costs, and boundaries**: specific behavior claims labeled **guaranteed**, **implementation-permitted** or **accidentally exploited**, with evidence for each (see [Three kinds of knowledge](../intro.md#three-kinds-of-knowledge)).
+8. **Failure modes, costs and boundaries**: specific behavior claims labeled **guaranteed**, **implementation-permitted** or **accidentally exploited**, with evidence for each (see [Three kinds of knowledge](../intro.md#three-kinds-of-knowledge)).
 9. **Connections across the repository**: other guides and book chapters.
 10. **Self-check**: a trace question, an explanation question, a transfer question and an evidence question.
 11. **Further reading**: short and annotated.
@@ -30,7 +30,7 @@ Every guide has the same eleven sections, so you can find the same thing in the 
 
 | Guide | Entries | What it asks |
 | --- | --- | --- |
-| [C#, LINQ, XAML, and ports](languages/csharp-linq-xaml-and-ports.md) | `ModernChallenge1`, `LinqChallenge1`, `LinqChallenge2`, `xaml`, and the Go, Java, Kotlin, Python and Rust ports | What does each slot of the `for` header do, when does a query run, and who owns the thread? |
+| [C#, LINQ, XAML and ports](languages/csharp-linq-xaml-and-ports.md) | `ModernChallenge1`, `LinqChallenge1`, `LinqChallenge2`, `xaml` and the Go, Java, Kotlin, Python and Rust ports | What does each slot of the `for` header do, when does a query run and who owns the thread? |
 | [COBOL](languages/cobol.md) | `cobol`, `cobol-weird` | Where does a program keep "what happens next" and "when to stop"? |
 | [Haskell](languages/haskell.md) | `haskell`, `haskell-weird` | Who demands work, and what happens when a forcing point moves? |
 | [Forth](languages/forth.md) | `forth`, `forth-weird` | What can serve as a program counter, and what can serve as memory? |
@@ -50,11 +50,11 @@ Every guide has the same eleven sections, so you can find the same thing in the 
 | --- | --- | --- |
 | [Reading adversarial programs](concepts/reading-adversarial-programs.md) | [1](../cs/01-reading-an-adversarial-program.md) | What can this program cause before I run it? |
 | [State and control beyond variables](concepts/state-and-control-beyond-variables.md) | [2](../cs/02-what-counts-as-a-machine.md), [3](../cs/03-control-flow-and-continuations.md), [6](../cs/06-state-beyond-variables.md) | Where are the next step and the remembered state stored? |
-| [Evaluation, demand, and laziness](concepts/evaluation-demand-and-laziness.md) | [4](../cs/04-evaluation-and-demand.md) | Who demands work, and when? |
+| [Evaluation, demand and laziness](concepts/evaluation-demand-and-laziness.md) | [4](../cs/04-evaluation-and-demand.md) | Who demands work, and when? |
 | [Formal languages and weird machines](concepts/formal-languages-and-weird-machines.md) | [5](../cs/05-formal-languages-as-computational-substrates.md) | When does a notation become an executable substrate? |
-| [Effects, errors, and commitment](concepts/effects-errors-and-commitment.md) | [7](../cs/07-effects-errors-and-commitment.md) | Which effects survive failure, and what truly commits? |
-| [Portability, abstraction, and cost](concepts/portability-abstraction-and-cost.md) | [8](../cs/08-abstraction-leaks-and-implementation-dependence.md) | What is promised, host-dependent, or a performance cliff? |
-| [Events, callbacks, and reactive control](concepts/events-callbacks-and-reactive-control.md) | [10](../cs/10-events-callbacks-and-reactive-control-flow.md) | Who owns the next turn, and what does reentrancy change? |
+| [Effects, errors and commitment](concepts/effects-errors-and-commitment.md) | [7](../cs/07-effects-errors-and-commitment.md) | Which effects survive failure, and what truly commits? |
+| [Portability, abstraction and cost](concepts/portability-abstraction-and-cost.md) | [8](../cs/08-abstraction-leaks-and-implementation-dependence.md) | What is promised, host-dependent or a performance cliff? |
+| [Events, callbacks and reactive control](concepts/events-callbacks-and-reactive-control.md) | [10](../cs/10-events-callbacks-and-reactive-control-flow.md) | Who owns the next turn, and what does reentrancy change? |
 | [Comparative machine design](concepts/comparative-machine-design.md) | [9](../cs/09-comparative-case-studies.md), [patterns](../patterns.md) | What plays loop, state, clock, decision and commit? |
 
 `find` and AWK have no guide of their own. They appear in the guides on [reading adversarial programs](concepts/reading-adversarial-programs.md), [state and control](concepts/state-and-control-beyond-variables.md) and [comparative machine design](concepts/comparative-machine-design.md).
@@ -64,23 +64,5 @@ Every guide has the same eleven sections, so you can find the same thing in the 
 - **From a language you know.** Open its guide, trace the fixed run, make your predictions, then run the linked exercise. Return to the book page of the same name.
 - **From an idea.** Start with a concept guide. Its trace tables compare several languages at once, and each row links to the guide that checked it.
 - **In order.** Read [Reading adversarial programs](concepts/reading-adversarial-programs.md) first. It is the safety model for everything else.
-
-## Building these guides
-
-The guides build as their own HTML, PDF and EPUB set, separate from the book. The book's PDF and EPUB do not contain them.
-
-```bash
-python lessons/study-guides/build.py --check   # lint the guides, build the HTML, verify every internal link
-python lessons/study-guides/build.py           # write the PDF and EPUB next to the book's, in the repository root
-python lessons/book/test_study_guides.py       # the tests: template, diagrams, links, index
-```
-
-The outputs are `learn-programming-the-weird-way-study-guides.pdf` and `.epub`. The reading order is [`chapters.txt`](chapters.txt). The build reuses the book's own pipeline ([`lessons/book/build.py`](../book/build.py)) for link rewriting, diagrams, Pandoc and reproducibility. [`lessons/book/study_guides.py`](../book/study_guides.py) checks each guide for the template, for placeholder text, for diagrams that match their source, and for links.
-
-The [PDF release gate](../book/README.md#pdf-release-gate) checks the guide PDF after each full build. Pass `--release` to make the PDF and its lint scan required.
-
-**Diagrams.** A Program Flow diagram in a guide is copied verbatim from `src/<entry>/README.md` and marked with `<!-- diagram-source: src/<entry>/README.md#program-flow -->`. The build fails if a copy has drifted. A new diagram is allowed only when it shows a relationship no source diagram shows (cross-language state placement, a lazy-demand trace, a transaction boundary or an authority boundary), and is marked `<!-- diagram-new: kind - why -->`.
-
-**External links.** A guide may link only to the hosts in [`lessons/book/link-hosts.txt`](../book/link-hosts.txt). Wikipedia comes first. The GNU Project manuals (`www.gnu.org/software/`) were added for the guides, because a claim about an implementation needs its manual.
 
 Back to the [lessons](../README.md) and the [challenge](../../README.md).

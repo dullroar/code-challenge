@@ -1,6 +1,6 @@
 # Exercises
 
-Step 5 of every lesson: *now break it yourself*. Each exercise has a goal, a safe way to run it, **acceptance criteria** a student (or their coding agent) can test, and, where practical, a command that tests them. Worked solutions are in the [answers key](answers-key.md). **Every exercise marked "verified" has been run end to end against the real entries**, in Docker or Windows Sandbox, by [`verify-exercises.sh`](tools/verify-exercises.sh) and [`verify-windows.ps1`](tools/verify-windows.ps1); the ones that have not are labeled **open challenge**.
+Step 5 of every lesson: *now break it yourself*. Each exercise has a goal, a safe way to run it, **acceptance criteria** a student (or their coding agent) can test and, where practical, a command that tests them. Worked solutions are in the [answer key](answers-key.md). **Every exercise marked "verified" has been run end to end against the real entries**, in Docker or Windows Sandbox, by [`verify-exercises.sh`](tools/verify-exercises.sh) and [`verify-windows.ps1`](tools/verify-windows.ps1); the ones that have not are labeled **open challenge**.
 
 The rhythm for every exercise is **predict, run, compare**. Write your prediction down *before* you run anything. The check only tells you whether you got a result; the prediction tells you whether you understood.
 
@@ -29,11 +29,11 @@ Ground rules:
 1. **DEMO ONLY data.** Nothing connects to a real time-reporting system, and your exercise must not either.
 2. **Break exercises are expected to fail an entry's own `check.sh`.** That is the point: the check proved the constraint was real.
 3. **Timeouts are results.** Some breaks run forever. Set `SANDBOX_TIMEOUT=30`; the run then prints `TIMEOUT after 30s` and exits `124`.
-4. **Output is random.** Row counts and totals differ on every run. The criteria below are written to hold for *every* run, so do not compare your numbers with the answers key; compare the properties.
+4. **Output is random.** Row counts and totals differ on every run. The criteria below are written to hold for *every* run, so do not compare your numbers with the answer key; compare the properties.
 
 ### The shared checker
 
-[`lessons/tools/check-demo.sh`](tools/check-demo.sh) checks a report that follows the [shared numeric rule](intro.md#what-the-challenge-does): a `DEMO ONLY` marker, every row's hours in 10-19, every running total equal to the previous total plus the hours, the run stopped on the first card whose total passed the limit (default 40), and the `# committed` (or `# captured`) line agrees with the rows. Exit 0 is PASS.
+[`lessons/tools/check-demo.sh`](tools/check-demo.sh) checks a report that follows the [shared numeric rule](intro.md#what-the-challenge-does): a `DEMO ONLY` marker, every row's hours in 10 to 19, every running total equal to the previous total plus the hours, the run stopped on the first card whose total passed the limit (default 40) and the `# committed` (or `# captured`) line agrees with the rows. Exit 0 is PASS.
 
 ```bash
 sandbox/container/run-image.sh src/cobol-weird > out.txt 2>&1
@@ -48,7 +48,7 @@ bash lessons/tools/check-demo.sh out.txt 50       # the same check against a lim
 **Goal:** tell, from the output alone, which card stopped the run and why that is not off by one.
 
 1. Choose three entries from different [languages](languages/README.md) that implement the crossing-card rule. See the [entry differences](intro.md#where-entries-differ) before picking. Run them and save each output.
-2. For each, write down how many cards there were, which card crossed 40, and what the card *before* it totaled.
+2. For each, write down how many cards there were, which card crossed 40 and what the card *before* it totaled.
 3. Run a fourth (try `src/regex-dotnet`, whose rows have no running-total column) and predict its card count before looking.
 
 Acceptance criteria:
@@ -59,7 +59,7 @@ Acceptance criteria:
 
 ## B. By language
 
-### B1. COBOL: predict, then break ALTER (verified)
+### B1. COBOL: predict, then break `ALTER` (verified)
 
 **Lesson:** [COBOL / ALTER](languages/cobol.md#alter). **Entry:** a copy of `src/cobol-weird`.
 
@@ -98,7 +98,7 @@ Acceptance criteria:
 Acceptance criteria:
 
 - (a) is harmless: `check-demo.sh` passes. Explain why (the anchor is still *after* the `0 0`).
-- (b) runs away: use `SANDBOX_TIMEOUT=30`. There is no `# committed` line, many rows appear (hundreds), and every row's running total equals its own hours (the state resets each pass).
+- (b) runs away: use `SANDBOX_TIMEOUT=30`. There is no `# committed` line, many rows appear (hundreds) and every row's running total equals its own hours (the state resets each pass).
 - (c) `check-demo.sh out.txt 50` passes.
 - In one sentence: why does only (b) break the loop?
 
@@ -129,7 +129,7 @@ Acceptance criteria:
 
 ### B6. APL: the off-by-one rewrite (verified)
 
-**Lesson:** [APL, self-modifying functions](languages/apl.md#2-self-modifying-functions-apl-weird). **Entry:** a copy of `src/apl-weird`.
+**Lesson:** [APL, self-modifying functions](languages/apl.md#self-modifying-functions-apl-weird). **Entry:** a copy of `src/apl-weird`.
 
 1. **Predict:** change `,5↓⊂[1]` to `,4↓⊂[1]` on [L53](../src/apl-weird/timecards.apl#L53). What does each child keep from its parent?
 2. Run it with `SANDBOX_TIMEOUT=40`.
@@ -195,7 +195,7 @@ Acceptance criteria:
 
 - Step 1: **exactly five card rows on every run** (run it five times), and the closing note says `PUNCH had 0 OR methods and 5 ran`. The entry's own `check.sh` **fails** on your copy.
 - Step 2: SBCL prints warnings that contain `Invalid qualifiers for PROGN method combination`. Say what the rule is: a method's qualifiers must belong to the combination of its generic function.
-- Step 3: **exactly five rows on every run**, a final total of at most 95, and `check-demo.sh out.txt 100` fails with "does not pass 100". Say why five is the most this program can ever deal, and what you would have to change to support a limit of 100.
+- Step 3: **exactly five rows on every run**, a final total of at most 95 and `check-demo.sh out.txt 100` fails with "does not pass 100". Say why five is the most this program can ever deal, and what you would have to change to support a limit of 100.
 - In one sentence: which single word is the stop rule, and why does removing it not make the program fail with an error?
 
 ### B11. m4: quote the recursion (verified)
@@ -209,7 +209,7 @@ Acceptance criteria:
 Acceptance criteria:
 
 - Step 1: the card rows are identical both times (`Meetings 19`, `Coding 13`, `Debugging 16`, with totals 19, 32, 48); only the run id (it contains the clock) can differ. Say why a pinned seed gives the same cards: the generator is a formula, and the program holds no other source of randomness.
-- Step 2: without `-L` the run ends in `TIMEOUT after 20s` (exit 124) and prints nothing; with `-L 50` m4 stops with `recursion limit of 50 exceeded`, exits non-zero, and there is no `# committed` line. Explain, in terms of *when m4 expands arguments*, why the brackets are the stop rule.
+- Step 2: without `-L` the run ends in `TIMEOUT after 20s` (exit 124) and prints nothing; with `-L 50` m4 stops with `recursion limit of 50 exceeded`, exits non-zero and there is no `# committed` line. Explain, in terms of *when m4 expands arguments*, why the brackets are the stop rule.
 - Step 3: `check-demo.sh out.txt 60` passes.
 
 ### B12. Tcl: edit the program in the database (verified)
@@ -226,9 +226,9 @@ Acceptance criteria:
 - Step 2: every run prints **exactly five rows**, hours all 10, totals 10, 20, 30, 40, 50, and `check-demo.sh` **passes**. Explain why the run does not stop at 40 (compare the last question of [A1](#a1-read-the-rows-verified)).
 - Name the three hooks (an SQL function that calls Tcl, `unknown`, a trigger) and say which one you changed in step 2.
 
-### B13. AWK: the missing RT (verified)
+### B13. AWK: the missing `RT` (verified)
 
-**Lesson:** [AWK](languages/awk.md#2-records-from-a-random-byte-stream-awk-weird). **Entry:** copies of `src/awk-weird`.
+**Lesson:** [AWK](languages/awk.md#records-from-a-random-byte-stream-awk-weird). **Entry:** copies of `src/awk-weird`.
 
 1. **Predict:** on a copy, make a digit file `printf '1 2\n' > d.txt` in the copy's folder and run `lessons/tools/run-in-sandbox.sh <copy> gawk -f timecards.awk d.txt`. What are the cards? (Dice: `10 + RT`.)
 2. **Predict:** on a fresh copy, delete rule 1, the line `RT == "" { next }` ([L52](../src/awk-weird/timecards.awk#L52)), and run the same command.
@@ -237,7 +237,7 @@ Acceptance criteria:
 
 Acceptance criteria:
 
-- Step 1: two cards, `Meetings 11 11` and `Coding 12 23`, and `# committed total=23 entries=2`. The trailing newline of the file leaves an empty last record that rule 1 skips.
+- Step 1: two cards, `Meetings 11 11` and `Coding 12 23` and `# committed total=23 entries=2`. The trailing newline of the file leaves an empty last record that rule 1 skips.
 - Step 2: **three** cards; the third is `Debugging 10 33` and the summary says `entries=3`. Explain why an empty `RT` counted as a 10-hour card (`10 + ""`).
 - Step 3: the header and `# committed total=0 entries=0`, no error, exit 0. Explain why: mawk has no `RT`, so `RT == ""` is true for every record and rule 1 skips them all. Say what this teaches about "portable-looking" code, and which [knowledge level](intro.md#three-kinds-of-knowledge) `RT` is.
 - Step 4: `check-demo.sh out.txt 80` passes.
@@ -259,7 +259,7 @@ Acceptance criteria:
 
 Acceptance criteria:
 
-- Step 1: three cards, `Meetings 19 19`, `Coding 19 38`, `Debugging 19 57`, and `# committed total=57 entries=3`. Every die shows the same group, so every card has 19 hours.
+- Step 1: three cards, `Meetings 19 19`, `Coding 19 38`, `Debugging 19 57` and `# committed total=57 entries=3`. Every die shows the same group, so every card has 19 hours.
 - Step 2: the walk reads the character before the `Y`. That is `x`, in the group `stuvwx`, the fourth group, so every card has 13 hours: `13 13`, `26`, `39`, `52`. Four cards, and the 39 *continues*, because 39 is not over 40. Explain why the stop rule needs a fourth card here.
 - Step 3: both characters are thrown away, so the hours are 10. Five cards: totals 10, 20, 30, 40, 50. The 40 continues (exactly 40 is not over 40), and the fifth card is `Meetings` again, because there are only four categories.
 
@@ -288,7 +288,7 @@ Acceptance criteria:
 - Step 1: four cards (`Meetings 12 12`, `Coding 12 24`, `Debugging 12 36`, `Learning 12 48`), and the fifth slot is read and ignored. `check-demo.sh` passes.
 - Step 2: two cards (`Meetings 12 12`, `Coding 12 24`). The limit is in the archive, so changing a member changed the stop rule, and `dispatch.sh` did not change. The trace shows `ok` for the first two cards and `ignored: halted` for the rest. `check-demo.sh out.txt 20` passes.
 - Step 3: the inspector prints the line `REFUSE (unknown record type)` and exits 4. `interpret.sh` exits 4 and says that nothing was run. No `pwned` file exists. Explain why plain `tar -xf` of the same archive would also not create it.
-- In one sentence each: which step *parsed* the program, which step *ran* it, and where was the trust boundary?
+- In one sentence each: which step *parsed* the program, which step *ran* it and where was the trust boundary?
 
 ### B17. tar, weirder: predict the clock (verified)
 
@@ -303,7 +303,7 @@ For seed 42 the cards are `Meetings 12`, `Coding 17`, `Debugging 17`, so the tot
 
 Acceptance criteria:
 
-- Step 1: with 45 ticks the third card is not finished, so you see two cards, the message `the clock ran out`, and exit status 3. With 46 ticks the run ends with three cards and exit status 0.
+- Step 1: with 45 ticks the third card is not finished, so you see two cards, the message `the clock ran out` and exit status 3. With 46 ticks the run ends with three cards and exit status 0.
 - Step 2: with `--interval 2` the callback runs once per two records. 92 records give 46 ticks, so the run finishes. 91 records give 45 ticks, so it stalls. The last `TAR_CHECKPOINT` in the finished run is 92, which is the number of records, and the machine counted 46 calls.
 - Step 3: `-b 4` makes a record four blocks. 260 blocks make 65 records and 65 ticks. The run finishes with the same three cards, and 19 ticks are idle.
 - Step 4: Almost all of `tape.tar` is zeros. The only other bytes are the member's 512-byte header (its name, mode and so on), fewer than 100 of them. The payload does not matter. Its *size* is the clock.
@@ -440,14 +440,14 @@ Compare one pair. Run both, and count code lines (not comments) in each program.
 Acceptance criteria:
 
 - Both outputs pass `check-demo.sh`.
-- A small table compares line count, what you could unit-test, what a debugger would show, and one thing only the weird version can do.
+- A small table compares line count, what you could unit-test, what a debugger would show and one thing only the weird version can do.
 - You answer the recurring question: *under what circumstances would the weird one be the right choice?*
 
 ### C2. Make the constraint real (verified)
 
 **Lesson:** [patterns](patterns.md). Every entry ships a `check.sh` that proves its rule (for example [`cobol-weird/check.sh`](../src/cobol-weird/check.sh) greps for banned words and counts `ALTER`s).
 
-Write a check for `src/forth-weird`'s rule: *no loop or branch words, no variables, and `>in @` is read at least twice.*
+Write a check for `src/forth-weird`'s rule: *no loop or branch words, no variables and `>in @` is read at least twice.*
 
 Acceptance criteria:
 
@@ -487,7 +487,7 @@ for i in $(seq 25); do
 done
 ```
 
-See [`CONTRIBUTING.md`](../CONTRIBUTING.md) if you want to send it in. A reference answer lives in [`lessons/solutions/awk-port`](solutions/awk-port) (see the [answers key](answers-key.md#d-port-the-challenge)); try yours first. It was written before awk was in the repo and is a short third design (the caller pipes in five records and a pattern is the stop rule), distinct from [`src/awk`](../src/awk/README.md) (a `BEGIN` loop) and [`src/awk-weird`](../src/awk-weird/README.md) (gawk and `RS`/`RT`): compare all three.
+See [`CONTRIBUTING.md`](../CONTRIBUTING.md) if you want to send it in. A reference answer lives in [`lessons/solutions/awk-port`](solutions/awk-port) (see the [answer key](answers-key.md#d-port-the-challenge)); try yours first. It was written before awk was in the repo and is a short third design (the caller pipes in five records and a pattern is the stop rule), distinct from [`src/awk`](../src/awk/README.md) (a `BEGIN` loop) and [`src/awk-weird`](../src/awk-weird/README.md) (gawk and `RS`/`RT`): compare all three.
 
 ## E. Windows Sandbox track (verified on Windows 11 Pro)
 
@@ -503,7 +503,7 @@ sandbox\windows\run.ps1 src\xaml -RunArgs strict.xaml
 Acceptance criteria:
 
 - Each run ends with a `PASS ...` line. The log shows `network: blocked`, so the VM really had no network.
-- `LinqChallenge1` reports one run persisted **exactly 40.0h across 5 fixed rows** (its `check.ps1` expects this), and a `screenshot.png` is written.
+- `LinqChallenge1` reports `exactly 40.0h across 5 fixed rows` (its `check.ps1` expects this), and a `screenshot.png` is written.
 - `xaml` reports it wrote `xaml-demo-timecards.xml` and that the window was closed by the harness.
 - Name one entry whose rows total exactly 40 because the data is fixed, and one whose rows are random.
 
@@ -522,7 +522,9 @@ Acceptance criteria:
 
 ## F. Prove a README claim (verified)
 
-Every README has a "Gotchas" or "Walls" section. Pick **one claim** and write a test that would fail if it were false. A worked example is in the [answers key](answers-key.md#f-prove-a-readme-claim): "`takeWhile` is not enough" ([`src/haskell/README.md`](../src/haskell/README.md#gotchas-worth-knowing)).
+### F1. Test a claim of your choice
+
+Every README has a "Gotchas" or "Walls" section. Pick **one claim** and write a test that would fail if it were false. A worked example is in the [answer key](answers-key.md#f-prove-a-readme-claim): "`takeWhile` is not enough" ([`src/haskell/README.md`](../src/haskell/README.md#gotchas-worth-knowing)).
 
 Other good claims: "`SYSTEM` returns the raw wait status (exit 3 comes back as 768)", "GnuCOBOL warns five times about `ALTER`", "pcre2grep does not search `PATH`".
 
@@ -561,7 +563,7 @@ These are the gaps from [blocking problems](blocking-problems.md). **Nobody has 
 
 | Blocker | Task | Success looks like |
 | --- | --- | --- |
-| LINQ draws no random hours | Replace the fixed work week with random 10-19 hour draws, still **one statement** | `check.ps1` still passes its one-statement rules; hours vary between runs |
+| LINQ draws no random hours | Replace the fixed work week with random 10 to 19 hour draws, still **one statement** | `check.ps1` still passes its one-statement rules; hours vary between runs |
 | `regex-dotnet` cannot fail on purpose | Make the match fail while the host still obtains the rows | Same rows as the unmodified version; you explain how the captures survived |
 | `regex-dotnet` has no side effects | Produce a pulse or a write during the match without `Replace`, `Matches`, `NextMatch` or a host loop | Pulse visible; the entry's `check.sh` banned-API list still passes |
 | `cmake` outputs only after the loop | Print one row from *inside* the `while()` condition | One row per pass before the loop ends, with the no-body rule still passing |
@@ -569,6 +571,6 @@ These are the gaps from [blocking problems](blocking-problems.md). **Nobody has 
 | Only some entries use threads | Add a worker thread to a script entry | Rows are written from the thread, main only waits; `check-demo.sh` passes |
 | `sed`'s RNG is a toy | Replace the 16-bit LFSR with a 32-bit one | Over 25 runs more than 16 distinct first draws appear; `check.sh` passes |
 | `awk-weird` needs gawk | Get a die roll without `RT` so it also runs under mawk | Same shape of output under gawk **and** mawk; no `rand`, `srand`, loop or `if`; `check.sh` passes under both |
-| `m4` needs a shell for its seed and week | Produce the seed and the ISO week without `esyscmd` | The seed differs between runs and the week is right, with only m4 builtins; if you cannot, write down exactly what m4 cannot reach |
+| `m4` needs a shell for its seed and week | Produce the seed and the ISO week without `esyscmd` | The seed differs between runs and the week is right, with only m4 built-ins; if you cannot, write down exactly what m4 cannot reach |
 | `lisp-weird` is SBCL-only | Run it on a second Common Lisp (ECL or CCL) changing only the implementation-specific calls | Same output and the same `or`/`progn` proof on both; list the lines you changed |
 | `find-posix` was never run on BSD | Run `src/find-posix/check.sh` on a BSD or macOS `find` | Either `check.sh` passes, or you list exactly which primary, `{}` use or utility failed and what each BSD does instead |

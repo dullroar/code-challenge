@@ -13,7 +13,7 @@ The entries answer it differently:
 - In [[entry:regex-pcre2]] the regex engine orchestrates by matching and backtracking, and a bodiless C dispatcher computes what each callout means. [[entry:xaml]] lets the parser orchestrate: document order is the order of execution.
 - In [[entry:javascript-weird]] the consumer orchestrates (it asks for the next card) and three closures compute. The impure parts, such as the database, the clock and the screen, sit at the edge.
 
-Naming the split tells you where a bug can be, what to test, and what an attacker would take over. It also keeps a stunt honest: if the "weird" part only orchestrates while an ordinary program computes, it is a costume change.
+Naming the split tells you where a bug can be, what to test and what an attacker would take over. It also keeps a stunt honest: if the "weird" part only orchestrates while an ordinary program computes, it is a costume change.
 
 ```mermaid
 sequenceDiagram

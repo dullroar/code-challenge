@@ -8,7 +8,7 @@ What each approach has **not** solved, measured against a baseline.
 
 | Capability | In `ModernChallenge1` |
 | --- | --- |
-| Random hours (10-19) | `Random.Shared.Next(10, 20)` in the iterator |
+| Random hours (10 to 19) | `Random.Shared.Next(10, 20)` in the iterator |
 | Running total and stop rule | LINQ `Sum() <= 40d` in the condition |
 | Persistence | EF Core to SQLite, `SaveChanges` |
 | Concurrency | A background `Thread` plus a `Mutex` |
@@ -25,7 +25,7 @@ The comparison is not "who is better". It is "which pieces of that list can this
 | Entry | Random | Persist | Window / pulse | Thread | Fail on purpose / one statement |
 | --- | --- | --- | --- | --- | --- |
 | C# `ModernChallenge1` | yes | yes | yes | yes | one `for` |
-| LINQ 1 / 2 | **no** (fixed 5×8h week) | yes | yes | no | one statement |
+| LINQ 1 / 2 | **no** (fixed five 8-hour days week) | yes | yes | no | one statement |
 | XAML | **no** (`Random(42)`, same every run) | yes (`strict`: XML only) | yes | yes | no loop (unrolled x4) |
 | `regex-perl` | yes | yes | terminal pulse | no | one match, returns false |
 | `regex-pcre2` | yes | TSV file | terminal pulse | no | one match, returns false |
@@ -50,7 +50,7 @@ The Linux script entries share a reporting shape (rows, a committed total, a stu
 
 ### C# and LINQ
 
-- **LINQ entries do not draw random hours.** They fold a fixed five-day, 8-hour work week into 40h. The stop rule is still a prefix cap, but the "random 10-19" requirement is not met.
+- **LINQ entries do not draw random hours.** They fold a fixed five-day, 8-hour work week into 40 hours. The stop rule is still a prefix cap, but the "random 10 to 19" requirement is not met.
 - **Every `void` call needs a `Func<T>` wrapper.** Readable code would use a statement.
 - **Some eagerness is unavoidable.** `Aggregate` is eager by definition, and `SaveChanges()` is called once, eagerly, at the point where the outer `Repeat(...)` evaluates its argument.
 - **Mutable accumulators** (`list.Add`) are a shortcut rather than LINQ purity.
@@ -65,7 +65,7 @@ The Linux script entries share a reporting shape (rows, a committed total, a stu
 - `strict.xaml` saves XML rather than a database.
 - The same "random" numbers on every run.
 
-### regex.dotnet
+### `regex-dotnet`
 
 - **A regex cannot draw random numbers**, so the host seeds five unary strings.
 - **A regex cannot write**, so there are no side effects.
@@ -74,21 +74,21 @@ The Linux script entries share a reporting shape (rows, a committed total, a stu
 - **Unrolled randomness**: the tape always holds five draws even when three are needed.
 - **The host still reports**, with a `Zip` over captures.
 
-### regex.pcre2grep
+### `regex-pcre2grep`
 
-- State cannot live in the pattern; the total lives in SQLite and callouts re-read it.
+- State cannot live in the pattern; the total lives in SQLite and callouts reread it.
 - No transaction: each helper commits immediately, so nothing can be rolled back.
 - Callouts need absolute program paths.
 - Needs a callout-capable `pcre2grep` build (Ubuntu's lacks it).
 - Not concurrency-safe: a run is identified by `max(id)`.
 - Only PCRE2 10.49 tested.
 
-### regex.perl and regex.pcre2
+### `regex-perl` and `regex-pcre2`
 
 - Perl: code blocks need package variables; the ISO year can differ near New Year.
 - PCRE2: callouts need the optimizer disabled and no JIT; the author did not test with the flags removed. A C host is still required.
 
-### regex.sed
+### `regex-sed`
 
 - **A toy RNG**: a 16-bit LFSR. Same seed, same cards.
 - **sed has `b` and `t` jumps**, so its loop is "a machine with a program counter", not a single match.
@@ -112,17 +112,17 @@ The Linux script entries share a reporting shape (rows, a committed total, a stu
 - The random draws are a host-made nine-digit tape.
 - The ISO year is patched by hand.
 
-### COBOL, Forth, Haskell, APL
+### COBOL, Forth, Haskell and APL
 
-- **COBOL weird**: `ON SIZE ERROR` is still a conditional, and the data-folder choice relies on a table index computed from a length. The program is not independent of a shell (`CALL "SYSTEM"` for `mkdir` and `sqlite3`).
-- **Forth weird**: works only at the top level or in `evaluate`d text, and the loop and its state must stay on one line.
-- **Haskell weird**: has not been run through `ormolu` or `hlint`; relies on `unsafeInterleaveIO` ordering; no random package ships with GHC.
-- **APL weird**: relies on `⎕IO←0`; a bad rewrite fails by recursing forever; `⎕FIO` and `⊃`/`↑` are interpreter-specific. The straight entry needs a pinned GNU APL build.
+- `cobol-weird`: `ON SIZE ERROR` is still a conditional, and the data-folder choice relies on a table index computed from a length. The program is not independent of a shell (`CALL "SYSTEM"` for `mkdir` and `sqlite3`).
+- `forth-weird`: works only at the top level or in `evaluate`d text, and the loop and its state must stay on one line.
+- `haskell-weird`: has not been run through `ormolu` or `hlint`; relies on `unsafeInterleaveIO` ordering; no random package ships with GHC.
+- `apl-weird`: relies on `⎕IO←0`; a bad rewrite fails by recursing forever; `⎕FIO` and `⊃`/`↑` are interpreter-specific. The straight entry needs a pinned GNU APL build.
 - **None of these open a window or run a thread.**
 
 ### Lisp, m4, Tcl and AWK
 
-- **Lisp (both)**: SBCL only (`sb-ext:run-program` and friends; the `or` combination and `defcard` are standard). No formatter exists. **`lisp-weird`**: the limit is baked into the design (five classes handle "10-19 hours, stop over 40"; a rule needing more cards needs more classes), and its method count uses the MOP.
+- **Lisp (both)**: SBCL only (`sb-ext:run-program` and friends; the `or` combination and `defcard` are standard). No formatter exists. **`lisp-weird`**: the limit is baked into the design (five classes handle "10 to 19 hours, stop over 40"; a rule needing more cards needs more classes), and its method count uses the MOP.
 - **m4**: needs GNU m4 for `esyscmd` and `format`. The clock, the entropy and SQLite all come through the shell; m4 has no I/O of its own. `eval` is 32-bit, so the generator is built around that. Recursion deepens with every card, fine for 3-5 cards and not a pattern for thousands. A missing quote makes a runaway, not an error. There is no `m4-weird` by design.
 - **Tcl**: the `sqlite3` package is separate from Tcl. A `tclsh` that has loaded Tk does not exit at the end of a script unless the script destroys the window, and `DISPLAY=:0` under WSL hangs Tk (the checks use Xvfb). **`tcl-weird`**: relies on SQLite evaluating `tcl('hours')` once per trigger run, which SQLite does not promise (`check.sh` would notice); `unknown` runs whatever is in the table, so it is not a pattern for tables others can edit; SQLite caps trigger recursion (1000 by default).
 - **AWK**: `close()` of a pipe returns different values in different awks, and the one-true-awk build tested returns 0, so a failing `sqlite3` would pass unnoticed there. **`awk-weird`**: gawk only (`RT`); mawk quietly runs forever or reports zero cards. A directory name containing a single quote breaks the shell command that makes the data folder.
@@ -153,7 +153,7 @@ The Linux script entries share a reporting shape (rows, a committed total, a stu
 
 Each of these is an [exercise](exercises.md#g-open-challenges-not-verified-may-be-impossible):
 
-1. Give the LINQ entries random 10-19 hour cards while staying in one statement.
+1. Give the LINQ entries random 10 to 19 hour cards while staying in one statement.
 2. Make `regex-dotnet` fail on purpose without losing its captures.
 3. Give `regex-dotnet` a side effect (a pulse) through a `MatchEvaluator`-free route.
 4. Make `cmake` do its output from the condition, or replace the host's digit tape.

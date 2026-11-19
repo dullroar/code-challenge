@@ -1,6 +1,6 @@
 ---
 name: "Perl"
-teaches: "executable code inside a live regex match."
+teaches: "that Perl can execute code during a regex match."
 kind: weird
 languages: [perl, regex]
 lesson: "languages/regex.md#perl-code-inside-the-match"
@@ -14,7 +14,7 @@ tags: [arbitrary-code-execution, backtracking, cut, regular-expression, side-eff
 ---
 # Regex challenge, Track 1: Perl (the whole program is one match)
 
-**Teaches you:** executable code inside a live regex match.
+**Teaches you:** that Perl can execute code during a regex match.
 
 The file's only statement is a single `=~` match. Seeding, the random draws, the SQLite transaction, the terminal pulse and all the printing happen *inside* that match, and then the match **returns false**. It follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch SQLite file, with no connection to any real time-reporting system.
 
@@ -83,7 +83,7 @@ Below the `use` lines, `timecards.pl` is one line: a constant scaffold string `=
 | `^(?{ ... })` | Initializer: seeds the state, makes the scratch directory, starts `sqlite3` on a pipe, creates the table (with a `CHECK(demo_only=1)` constraint) and opens a transaction |
 | `(?:  ...  )*` | The loop. Perl's greedy quantifier is the iteration; the scaffold string gives each pass something to eat |
 | `(??{ $::t<=40 ? $::c[$::n] // '(*FAIL)' : '(*FAIL)' })` | The stop rule and the category chooser in one: it hands the engine the *next category name as a pattern*, or `(*FAIL)` once the total passes 40 or the categories run out (five names: Meetings repeats, so four 10-hour cards, a total of exactly 40, are followed by a fifth). A failed pass is what ends the quantifier |
-| `(?{ local $::t = ...; local $::n = ...; print ... })` | One timecard: draws 10-19, adds it to the total, advances the category, sends an `INSERT` to SQLite and prints the row |
+| `(?{ local $::t = ...; local $::n = ...; print ... })` | One timecard: draws 10 to 19, adds it to the total, advances the category, sends an `INSERT` to SQLite and prints the row |
 | `(*COMMIT)` | Once the loop ends, backtracking may not retry shorter loops (or the finalizer would run more than once) |
 | `(?{ COMMIT; close; print ... })` | Finalizer: commits the SQLite transaction, closes the pipe (which waits for `sqlite3` to finish), prints the summary |
 | `[A-Za-z]*(?:(?(?{-t STDOUT})~(?{ frame }) \| (?!)))*` | The pulse: one frame per `~` at the end of the scaffold, but only if stdout is a terminal (the conditional is a code block), so pipes and `check.sh` skip it |

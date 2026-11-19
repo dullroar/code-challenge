@@ -1,6 +1,6 @@
 ---
 name: ".NET regex"
-teaches: "a regex as a stack-based counter."
+teaches: "that a regex can use a stack to count."
 kind: weird
 languages: [c-sharp, regex]
 lesson: "languages/regex.md#net-balancing-groups"
@@ -14,7 +14,7 @@ tags: [backtracking, chomsky-hierarchy, parsing, register-machine, regular-expre
 ---
 # Regex challenge, Track 3: .NET balancing groups (the purist's attempt)
 
-**Teaches you:** a regex as a stack-based counter.
+**Teaches you:** that a regex can use a stack to count.
 
 One `Regex.Match` call, no callouts, no inline code, no `MatchEvaluator`. It follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`), which expected this track to hit a wall. It did hit some, and they are listed below, but the core got further than the plan predicted. **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
 
@@ -82,7 +82,7 @@ The host draws five random hour counts and builds a *unary tape*: `Meetings:aaaa
 | `(?(fm)(?(fc)(?(fd)(?(fl)(?(f5)(?!)\|(?<f5>)Meetings)\|(?<fl>)Learning)\|(?<fd>)Debugging)\|(?<fc>)Coding)\|(?<fm>)Meetings)` | The **category picker**: five flag groups are a little state machine. The first pass finds `fm` unset, so it takes Meetings and sets it; the next sees `fm` and takes Coding; and so on. After the second `Meetings`, the last `(?!)` stops a sixth pass |
 | `(?<hrs>(?:(?(b)(?<-b>))(?<s>)a){10,19});` | The entry's hours. Each `a` pops one budget token if any are left (a **balancing group**), pushes one onto the running-total stack `s`, and the `{10,19}` enforces the demo's range |
 
-An entry can push the total over 40 from anywhere in its 10-19 hours; the budget simply runs dry partway through it and the extra `a`s pop nothing. After the entry the stop rule sees an empty stack. The captured state is then: `cat` and `hrs` capture lists (the records), and `s`'s capture count (the total).
+An entry can push the total over 40 from anywhere in its 10 to 19 hours; the budget simply runs dry partway through it and the extra `a`s pop nothing. After the entry the stop rule sees an empty stack. The captured state is then: `cat` and `hrs` capture lists (the records), and `s`'s capture count (the total).
 
 I checked the edges with a throwaway prototype (not in the repo, because the real program has no way to inject a fixed draw): totals of exactly 40 (four 10-hour cards, one token left, which now continues to a fifth card), 41 on the fourth entry, and 45 and 57 stopping after three all came out right. `check.sh` verifies the stop rule on every random run (the total before the last card is at most 40 and the total after it is over 40, with three to five cards), and it builds a copy of the host in which every card is worth 10 hours to prove that exactly 40 continues: five rows, the fourth `Learning`, the fifth `Meetings`, total 50.
 
@@ -92,7 +92,7 @@ I checked the edges with a throwaway prototype (not in the repo, because the rea
 
 ## Gotchas worth knowing
 
-1. **A regex cannot draw random numbers.** The random 10-19 draws had to be seeded by the host, as five unary strings. The plan allows the host to "seed the initial data", so this is within the rules, but the regex does not choose the hours. It only bounds them (`{10,19}`) and accumulates them.
+1. **A regex cannot draw random numbers.** The random 10 to 19 draws had to be seeded by the host, as five unary strings. The plan allows the host to "seed the initial data", so this is within the rules, but the regex does not choose the hours. It only bounds them (`{10,19}`) and accumulates them.
 2. **The host writes after matching.** The pattern supplies captures. The host formats them and calls `File.AppendAllText` once, so the output depends on the capture lists it gets back.
 3. **The match must succeed to yield any cards.** Append `(?!)` to force failure and `Match.Success` is false with zero returned captures. The fixed-tape test checks both outcomes on the real pattern. The guarantee here is the [documented behavior of .NET regex balancing groups and captures](https://learn.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions#balancing-group-definitions). An engine that lacks that API needs a different mechanism.
 4. **No pulse.** The terminal pulse needs side effects during the match. This track has none, and a host loop to animate it would break the rules.

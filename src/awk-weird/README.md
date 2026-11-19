@@ -3,7 +3,7 @@ name: "AWK"
 teaches: "that a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program."
 kind: weird
 languages: [awk]
-lesson: "languages/awk.md#2-records-from-a-random-byte-stream-awk-weird"
+lesson: "languages/awk.md#records-from-a-random-byte-stream-awk-weird"
 loop-by: input-driven
 evaluation: eager
 assurance: implementation-permitted

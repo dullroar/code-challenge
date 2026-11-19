@@ -10,15 +10,15 @@ When you finish, you should be able to:
 
 1. Explain how a level-88 condition name turns a stop rule into a property of the data, and why the idiomatic loop contains no comparison.
 2. Trace both programs through the same three cards and name the state that decides each step: `WS-TOTAL` and `WS-ENTRIES` in one program, the target of `NEXT-CARD` and `WS-HEADROOM` in the other.
-3. Say exactly what `ALTER` changes, what it leaves alone, and why it needs a paragraph that is only one `GO TO`.
+3. Say exactly what `ALTER` changes, what it leaves alone and why it needs a paragraph that is only one `GO TO`.
 4. Explain why a size error is a conditional, and what a field holding 99 can mean.
-5. Label each COBOL behavior in the programs as guaranteed, implementation-permitted, or accidentally exploited, and say what evidence supports the label.
+5. Label each COBOL behavior in the programs as guaranteed, implementation-permitted or accidentally exploited, and say what evidence supports the label.
 
-Scope limits. This is not a COBOL tutorial: it does not teach divisions, files or the full `PICTURE` language. It covers GnuCOBOL 3.1 or later in fixed format. It does not teach the SQL, which both programs build as text and hand to `sqlite3`. For the general lesson, read [COBOL in the book](../../languages/cobol.md) first, or after.
+**Scope limits.** This is not a COBOL tutorial: it does not teach divisions, files or the full `PICTURE` language. It covers GnuCOBOL 3.1 or later in fixed format. It does not teach the SQL, which both programs build as text and hand to `sqlite3`. For the general lesson, read [COBOL in the book](../../languages/cobol.md) first, or after.
 
 ## Before you begin
 
-**Safety model.** Every entry writes fictional **DEMO ONLY** data to a local SQLite file, and nothing connects to a real time-reporting system. The programs start processes (`mkdir`, `sqlite3`), so read the source before you run it, and run it in the sandbox first. From the repository root, with the one-time setup in [`SANDBOX-SETUP.md`](../../../SANDBOX-SETUP.md) done:
+**Safety model.** Every entry writes fictional **DEMO ONLY** data to a scratch SQLite file, and nothing connects to a real time-reporting system. The programs start processes (`mkdir`, `sqlite3`), so read the source before you run it, and run it in the sandbox first. From the repository root, with the one-time setup in [`SANDBOX-SETUP.md`](../../../SANDBOX-SETUP.md) done:
 
 ```bash
 sandbox/container/run-image.sh src/cobol
@@ -27,7 +27,7 @@ sandbox/container/run-image.sh src/cobol-weird
 
 Work on a copy when an exercise asks you to edit (see [Running things safely](../../exercises.md#running-things-safely)). The output is random, so your numbers will differ from every number printed here. The properties will not.
 
-**Prediction rule.** Before each run, write down which state will change, which statement will run next, and what output would prove you wrong. The check script tells you whether you got a result. Only the prediction tells you whether you understood.
+**Prediction rule.** Before each run, write down which state will change, which statement will run next and what output would prove you wrong. The check script tells you whether you got a result. Only the prediction tells you whether you understood.
 
 **Vocabulary you need.**
 
@@ -41,11 +41,11 @@ Work on a copy when an exercise asks you to edit (see [Running things safely](..
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for one time-card row per card, with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The program keeps a running total and adds cards until the total passes 40.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
-Be exact about the boundary. The run retains **the first card that takes the total above 40**. A total of exactly 40 does *not* stop it. Four 10-hour cards total exactly 40, so a fifth card is drawn, and the category wraps back to Meetings. The final total is therefore always 41 to 59, and the card count is 3 to 5. (Two cards reach at most 38, so a run cannot end in two.)
+Two cards reach at most 38 hours, so a conforming run needs at least three cards.
 
-Both COBOL entries save a completed run as a single transaction in a SQLite file and print a summary. The shared checker, [`lessons/tools/check-demo.sh`](../../tools/check-demo.sh), verifies the *shape* of the output: the `DEMO ONLY` marker, hours in range, correct running sums, a stop on the first crossing, and a summary that agrees with the rows.
+Both COBOL entries save a completed run as a single transaction in a SQLite file and print a summary. The shared checker, [`lessons/tools/check-demo.sh`](../../tools/check-demo.sh), verifies the *shape* of the output: the `DEMO ONLY` marker, hours in range, correct running sums, a stop on the first crossing and a summary that agrees with the rows.
 
 For a stop rule of exactly this shape, notice how COBOL says it. In the idiomatic program the rule is `88 OVER-FORTY VALUE 41 THRU 99`: the first total *above* 40. There is no `<=` or `>` anywhere to get wrong.
 
@@ -62,8 +62,6 @@ Name the machine before you read the code. Both programs answer the same five qu
 **What stops it.** In `cobol`, the data declaration `88 OVER-FORTY VALUE 41 THRU 99` on `WS-TOTAL` ([L41-42](../../../src/cobol/timecards.cob#L41-L42)). In `cobol-weird`, an overflow: `ADD WS-HOURS TO WS-HEADROOM ON SIZE ERROR ...` ([L196-199](../../../src/cobol-weird/timecards.cob#L196-L199)). `59 + total` fits in two digits while the total is 40 or less. The first card that makes it 100 or more is a size error, and the handler rewrites `NEXT-CARD` one last time, to `FINISH-RUN`.
 
 **What commits.** Both programs write `INSERT` lines to a line-sequential script file and print each row as they go. Nothing reaches the database until the finishing paragraph closes the file and runs `sqlite3` on it. The script has a `BEGIN` and a `COMMIT`, so the run lands as one transaction or not at all. The `DISPLAY` rows are *not* part of that transaction: they are already on the terminal, whatever `sqlite3` later does.
-
-Here are the two Program Flow diagrams from the entries. Read each one with the five answers above beside it.
 
 <!-- diagram-source: src/cobol/README.md#program-flow -->
 
@@ -157,7 +155,7 @@ Look at step 3. The category paragraph for Debugging has already set the target 
 | 4 | Learning | 40 | 89 | 99, fits |
 | 5 | Meetings | 50 | 99 | size error, stays 99 |
 
-At card 4 the total is exactly 40 and the headroom is 99, the largest value two digits can hold. It still fits, so the run continues. The fifth card overflows it. Now change the starting value from 59 to 49 and run the same ten-hour cards. The headroom reaches 99 on card **5** (total 50), still fits, and overflows on card 6 (total 60). The final total was 60. The field holds 99 at two different moments with two different meanings: "this add fit exactly" and "this add failed and left the old value". To tell them apart, check whether the error clause ran, and where `NEXT-CARD` points now.
+At card 4 the total is exactly 40 and the headroom is 99, the largest value two digits can hold. It still fits, so the run continues. The fifth card overflows it. Now change the starting value from 59 to 49 and run the same ten-hour cards. The headroom reaches 99 on card **5** (total 50), still fits and overflows on card 6 (total 60). The final total was 60. The field holds 99 at two different moments with two different meanings: "this add fit exactly" and "this add failed and left the old value". To tell them apart, check whether the error clause ran, and where `NEXT-CARD` points now.
 
 ## Compare the ordinary and weird designs
 
@@ -167,7 +165,7 @@ Line count is the weakest comparison. By the book's counting convention (non-com
 | --- | --- | --- |
 | **Representation** | The stop rule is a named range on the data: `OVER-FORTY` is true for 41 to 99. The category is arithmetic on a counter. | The next category is the destination of a `GO TO`. The stop rule is the capacity of a two-digit field plus an error clause. |
 | **Observability** | Print `WS-TOTAL`, `WS-ENTRIES` and `OVER-FORTY` and you have the machine. | The variables do not show the next category. You must know the last `ALTER` that ran. The source text of `NEXT-CARD` says `GO TO MEETINGS-CARD` and, at run time, almost never does. |
-| **Tests** | Set `WS-TOTAL` to 40, then 41, and check the condition. | You must drive the program with controlled hours and observe whether the next dispatch finishes. The rule cannot be unit-tested apart from the paragraphs. |
+| **Tests** | Set `WS-TOTAL` to 40, then 41 and check the condition. | You must drive the program with controlled hours and observe whether the next dispatch finishes. The rule cannot be unit-tested apart from the paragraphs. |
 | **Debugging** | A watch on three fields is enough. | A watch on the numeric fields is incomplete. You need the current jump target, which most debuggers do not display. |
 | **Portability** | Standard COBOL: the `PIC`, level 88 and `PERFORM UNTIL` semantics are part of the language. | `ALTER` was declared obsolete in 1985 and deleted from the standard in 2002. GnuCOBOL accepts it and warns five times. A compiler in standards mode may not. |
 | **Cost** | A readable loop. Changing the limit means editing one `VALUE` range, and renaming the condition if you want to keep the name honest. | The program cannot be reentered safely, because two callers would share one rewritten `NEXT-CARD`. Optimizers can assume little about a `GO TO` that might change. |
@@ -188,20 +186,20 @@ All of these exercises are marked verified in the book: the reference solutions 
 
 Two cautions from the book's answer key. In B1 part 1, a single random run can satisfy *both* checkers if it crosses 40 and 50 on the same card, so use the entry's own check for the failure evidence. In F, the book's worked solution uses Haskell. A COBOL version is an adaptation you design yourself, and the claim it proves is the behavior of the tested build only.
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 Label every behavior by the strength of its promise (see [Three kinds of knowledge](../../intro.md#three-kinds-of-knowledge)). The label changes what you may safely rely on.
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| A size error leaves the receiving field unchanged and runs the `ON SIZE ERROR` clause | **Guaranteed** | Specified COBOL semantics. Verified in a scratch run: `ADD 1 TO B ON SIZE ERROR ...` left B at 99. |
-| Without `ON SIZE ERROR`, a two-digit add silently drops the leading digit (99 + 1 gives 00) | **Implementation-permitted** | The standard does not promise a usable result when a size error happens and no handler is written. The tested GnuCOBOL build stored `00`: verified with `ADD 1 TO A` and A = 99. Rely on the clause, not on the truncation. |
-| Storing 17.9 into `PIC 99` gives 17 | **Guaranteed** | Truncation by the receiver's declared scale. Verified: it printed `17`. |
-| `STRING` leaves bytes to the right of what it writes | **Guaranteed** | Defined behavior of `STRING`. Verified: writing `XY` into a buffer holding `ABCDEFGH` left `XYCDEFGH`. Hence `MOVE SPACES` first. |
-| `ALTER` is accepted and runs | **Implementation-permitted** | Deleted from the standard in 2002. GnuCOBOL still supports it and prints five obsolescence warnings. |
-| `CALL "SYSTEM"` returns a raw wait status (exit 3 appears as 768) | **Implementation-permitted** | A host detail of the tested Linux build. The program divides by 256 to recover the exit code. |
-| `ACCEPT ... FROM ENVIRONMENT` blanks the field when the variable is unset | **Implementation-permitted** | This is how the tested runtime behaves. The weird program turns it into a table subscript on purpose (see below). |
-| The program needs `mkdir` and `sqlite3` on the host | **Implementation-permitted** | These are host commands, not COBOL. |
+| A size error leaves the receiving field unchanged and runs the `ON SIZE ERROR` clause | **guaranteed** | Specified COBOL semantics. Verified in a scratch run: `ADD 1 TO B ON SIZE ERROR ...` left B at 99. |
+| Without `ON SIZE ERROR`, a two-digit add silently drops the leading digit (99 + 1 gives 00) | **implementation-permitted** | The standard does not promise a usable result when a size error happens and no handler is written. The tested GnuCOBOL build stored `00`: verified with `ADD 1 TO A` and A = 99. Rely on the clause, not on the truncation. |
+| Storing 17.9 into `PIC 99` gives 17 | **guaranteed** | Truncation by the receiver's declared scale. Verified: it printed `17`. |
+| `STRING` leaves bytes to the right of what it writes | **guaranteed** | Defined behavior of `STRING`. Verified: writing `XY` into a buffer holding `ABCDEFGH` left `XYCDEFGH`. Hence `MOVE SPACES` first. |
+| `ALTER` is accepted and runs | **implementation-permitted** | Deleted from the standard in 2002. GnuCOBOL still supports it and prints five obsolescence warnings. |
+| `CALL "SYSTEM"` returns a raw wait status (exit 3 appears as 768) | **implementation-permitted** | A host detail of the tested Linux build. The program divides by 256 to recover the exit code. |
+| `ACCEPT ... FROM ENVIRONMENT` blanks the field when the variable is unset | **implementation-permitted** | This is how the tested runtime behaves. The weird program turns it into a table subscript on purpose (see below). |
+| The program needs `mkdir` and `sqlite3` on the host | **implementation-permitted** | These are host commands, not COBOL. |
 
 Nothing in the two COBOL entries is merely *accidentally exploited*. `ALTER` has a documented place in the compiler's history, which is not the same as an accident. The label exists for programs like the [Make entry](make-and-cmake.md), whose restart behavior nobody promised.
 
@@ -218,22 +216,20 @@ Nothing in the two COBOL entries is merely *accidentally exploited*. `ALTER` has
 - **Control state outside variables.** `ALTER` is one of several ways in this repository to keep the next step somewhere other than a variable. [Forth](forth.md) keeps it in the parse position `>in`. [Make](make-and-cmake.md) keeps it in which files exist. CMake keeps it in regex captures. [Tcl](tcl.md) keeps it in a database trigger. The concept guide [State and control beyond variables](../concepts/state-and-control-beyond-variables.md) compares them directly.
 - **Self-modifying behavior.** [APL's `apl-weird`](apl.md) rewrites a function while it runs. The comparison with `ALTER` is useful because APL's rewrite is explicit text and COBOL's is a patched jump.
 - **Declarative stop rules.** The level-88 rule resembles the stop rules in [Haskell](haskell.md) (how much of a list you read) and the 41-character literal in CMake. In each, the rule is *data or structure* rather than a comparison in a loop.
-- **Arithmetic error as control flow.** The size-error trick is a cousin of the exception and exit-status ideas in [Effects, errors, and commitment](../concepts/effects-errors-and-commitment.md).
-- **What the label means.** [Portability, abstraction, and cost](../concepts/portability-abstraction-and-cost.md) explains the vocabulary of guaranteed and implementation-permitted behavior.
-- **In the book.** The concept chapters are [What counts as a machine?](../../cs/02-what-counts-as-a-machine.md), [Control flow and continuations](../../cs/03-control-flow-and-continuations.md), [Effects, errors, and commitment](../../cs/07-effects-errors-and-commitment.md) and [Abstraction leaks and implementation dependence](../../cs/08-abstraction-leaks-and-implementation-dependence.md). The language page is [COBOL](../../languages/cobol.md).
+- **Arithmetic error as control flow.** The size-error trick is a cousin of the exception and exit-status ideas in [Effects, errors and commitment](../concepts/effects-errors-and-commitment.md).
+- **What the label means.** [Portability, abstraction and cost](../concepts/portability-abstraction-and-cost.md) explains the vocabulary of guaranteed and implementation-permitted behavior.
+- **In the book.** The concept chapters are [What counts as a machine?](../../cs/02-what-counts-as-a-machine.md), [Control flow and continuations](../../cs/03-control-flow-and-continuations.md), [Effects, errors and commitment](../../cs/07-effects-errors-and-commitment.md) and [Abstraction leaks and implementation dependence](../../cs/08-abstraction-leaks-and-implementation-dependence.md). The language page is [COBOL](../../languages/cobol.md).
 
 ## Self-check
 
-Answer in your own words before you read the italic text after each question, and for each answer say what evidence would prove it.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** Hours are 12, 17, 11, 10, in that order. For `cobol-weird`, write the true total and `WS-HEADROOM` after each card and say what happens on the fourth. *(Totals 12, 29, 40, 50. Headroom 71, 88, 99, then a size error on the fourth. The third card makes the total exactly 40, so the run continues.)*
 2. **Explain.** Why does `DISPLAY "x"` inside `NEXT-CARD` fail to compile, when the same `DISPLAY` inside `RECORD-CARD` works? What would a compiler need to know to patch a jump? *(The target of `ALTER` must be a paragraph that is exactly one unconditional `GO TO`, which the compiler can check before the program runs.)*
 3. **Transfer.** Change the idiomatic program so that it stops on the first total above 50. What do you edit? What would you edit in the weird program, and which of the two edits is easier to review? *(Idiomatic: `OVER-FORTY` becomes `51 THRU 99`, and you should rename it. Weird: the starting value 59 becomes 49. Both are one-line edits, but the first states the rule and the second hides it in an offset.)*
-4. **Evidence.** A colleague claims, "GnuCOBOL warns five times about `ALTER` in `cobol-weird`." Design a test that could fail. What is your negative control, and which label does the claim get? *(Compile the unmodified entry, capture the diagnostics, and assert five `ALTER` warnings. For the control, remove one `ALTER` in a copy and expect four. The claim is implementation-permitted, because it describes one build's diagnostics.)*
+4. **Evidence.** A colleague says, "GnuCOBOL warns five times about `ALTER` in `cobol-weird`." Design a test that could fail. What is your negative control, and which label does the claim get? *(Compile the unmodified entry, capture the diagnostics and assert five `ALTER` warnings. For the control, remove one `ALTER` in a copy and expect four. The claim is implementation-permitted, because it describes one build's diagnostics.)*
 
 ## Further reading
-
-Short, annotated, and every host is on the book's allowlist.
 
 - [COBOL](https://en.wikipedia.org/wiki/COBOL) (Wikipedia): a broad orientation, including the language's history and the standards that followed 1985.
 - [Goto and structured programming](../../cs/03-control-flow-and-continuations.md#goto-and-structured-programming) (this book): the argument that `ALTER` is exhibit A for.

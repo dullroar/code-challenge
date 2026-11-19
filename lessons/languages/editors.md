@@ -16,7 +16,7 @@ For an advanced reading path with traces and experiments, see the [ed and Ex stu
 
 ## The buffer is the machine
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/ed-weird
@@ -24,12 +24,12 @@ sandbox/container/run-image.sh src/ed-weird
 
 Seventy lines of ed commands. A launcher that supplies five random digits and stores the answer. All the computing is the editor changing text.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 - **The category order is addressing.** `1s/^/Meetings /` puts a name on line 1, `2s/^/Coding /` on line 2.
 - **A rewrite table does the lookup.** There are ten rules, `g/x7$/s/7$/xxxxxxx/` and nine more. A digit becomes that many marks.
 - **A marker seeds the ledger.** `Start 0|` supplies the zero total above the first card. After the pass, `g/^Start /d` removes that marker from the output.
-- **Adding is writing marks side by side.** `-t.` copies the line above (the total so far), `-,.j` joins it to the card, and one `s` puts the two sets of marks together.
+- **Adding is writing marks side by side.** `-t.` copies the line above (the total so far), `-,.j` joins it to the card and one `s` puts the two sets of marks together.
 - **A failed `s` is an `if`.** Inside a global command it does nothing, and does not stop the list. So each substitution means "if the line looks like this, rewrite it".
 - **The stop rule is a regular expression.** `x\{41,\}` is "41 or more marks". The bar before the marks becomes a bang, and the next card sees the bang and turns into a `Dead` line.
 
@@ -37,17 +37,17 @@ The [README](../../src/ed-weird/README.md#how-the-stunt-works) has the full tabl
 
 **A rewrite system with a different control.** [`regex-sed`](regex.md#gnu-sed) also rewrites text, but sed has a branch command and can loop until no rule applies. ed cannot. Its only repeat is `g`, and its only choice is a substitution that may not match.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **Numbers can be text.** Unary marks make addition a matter of concatenation. The price is the length of the string.
 - **A guard is a conditional.** "Rewrite only if it matches" is `if` in a language that has none.
 - **Data can carry control.** A bar or a bang in a line says whether the machine is still running. The state travels with the data.
-- **Standards and implementations differ.** busybox ed is an `ed`, and it cannot run this program: no `g`, no `t`, no `j`, no `#`, and no empty match.
+- **Standards and implementations differ.** busybox ed is an `ed`, and it cannot run this program: no `g`, no `t`, no `j`, no `#` and no empty match.
 - **A wall is a result.** Nested `g` is refused. A blank line is a command. We kept a test for each.
 
 Tags: the commands `s`, `g`, `t`, `j`, `d` and `0a` are in POSIX. That a failed `s` inside `g` is silent is **accidentally exploited** knowledge: GNU ed 1.20.1 does it, and its manual does not say so. `#` comments are a GNU extension.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **Unary does not scale.** One million is a million characters.
 - **The program depends on positions.** One extra line between a card and its ledger breaks every total.
@@ -55,13 +55,13 @@ Tags: the commands `s`, `g`, `t`, `j`, `d` and `0a` are in POSIX. That a failed 
 
 Legitimate uses: `ed` and `ex` in scripts for exact, scriptable edits (`ed -s file < commands`), such as a build step that must change one line of a config file.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercise B18](../exercises.md#b18-ed-move-the-stop-rule-and-break-the-cleanup-verified).
 
 ## A program you can edit
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/ex-weird
@@ -69,17 +69,17 @@ sandbox/container/run-image.sh src/ex-weird
 
 A script of about 100 lines, most of it a table of sixty numbered lines. The program itself is **one line of text**.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 - **A mark is a register.** `k t` puts a mark on a line. `'t+17k t` moves it seventeen lines down. That is `t = t + 17`.
 - **The tape is the number line.** Sixty lines, each `total instruction`. Where the mark stands *is* the running total, and the text of the line is that total as digits.
 - **The program writes its own command.** A substitution turns the card `Meetings 7` into the text `'t+17k t`. The program copies that text into a register and runs it with `@d`.
-- **The loop is a register that runs itself.** The program copies the numbered tape line to the end of the buffer, strips the digits and following space with `$s/^[0-9]* //`, and yanks just the instruction into register `n`. Up to 40 it is `@a`, which is the program again. Above 40 it is a quote mark, which is a comment, so nothing runs.
+- **The loop is a register that runs itself.** The program copies the numbered tape line to the end of the buffer, strips the digits and following space with `$s/^[0-9]* //` and yanks just the instruction into register `n`. Up to 40 it is `@a`, which is the program again. Above 40 it is a quote mark, which is a comment, so nothing runs.
 - **Nothing in the program says 40.** The limit is where `@a` stops on the tape.
 
-The [README](../../src/ex-weird/README.md#how-the-stunt-works) has the step table, the comparison with the ed entry, and the five places where nvi and Vim disagree.
+The [README](../../src/ex-weird/README.md#how-the-stunt-works) has the step table, the comparison with the ed entry and the five places where nvi and Vim disagree.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **Code is text, so it can be built.** A program can write a command as a string and run it. That is `eval`.
 - **Editor state is state.** The current line, the marks and the registers are memory, outside the text of the buffer.
@@ -87,9 +87,9 @@ The [README](../../src/ex-weird/README.md#how-the-stunt-works) has the step tabl
 - **There is no one Ex.** nvi and Vim disagree on register order, nested global commands, printing, errors and backward ranges. The program was written around all five.
 - **Batch is not interactive.** The same commands, with no one watching, must be right the first time.
 
-Tags: the commands `@`, `k`, `ya`, `t`, `j`, `s`, the bar and the `"` comment are described for Ex in POSIX (we read it; we did not run a conformance suite). That the program runs the same on nvi 1.81.6 and Vim 9.1 is **implementation-permitted**: we checked two, and did not check conformance.
+Tags: the commands `@`, `k`, `ya`, `t`, `j`, `s`, the bar and the `"` comment are **guaranteed** by POSIX for Ex. The evidence is the specification. That the program runs the same on nvi 1.81.6 and Vim 9.1 is **implementation-permitted**: the check covered those two implementations.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **A register that runs data is `eval`.** If the tape came from a stranger, the stranger would write your program. Here the tape is fixed, and the digits are checked before they get anywhere near a command.
 - **Marks are fragile.** A mark on a deleted line is gone, and so is your counter.
@@ -97,7 +97,7 @@ Tags: the commands `@`, `k`, `ya`, `t`, `j`, `s`, the bar and the `"` comment ar
 
 Legitimate uses: `ex -s` in scripts for exact edits, and registers as a small macro system for repeated edits in `vi`.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercise B19](../exercises.md#b19-ex-move-the-limit-on-the-tape-and-cut-the-loop-verified).
 

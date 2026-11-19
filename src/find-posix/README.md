@@ -72,7 +72,7 @@ flowchart TD
 
 **What this shows:** the loop is a tree walk that keeps growing. find reads a directory's entries *after* it visits the directory, so a directory that `-exec` makes inside the current one is walked next. The path from the start is the history, and the directory name is the state. It is the call stack of a recursion, drawn on the file system.
 
-**Why this mechanism matters:** the stop rule is the absence of a new child: at the end of a card, five `0` hour-digits in the path (or four and a nonzero last digit) mean the total is over 40, and no branch digs. The running total is the number of hour directories in the path, and no arithmetic exists anywhere. This relies on the order in which find reads and visits, which is accidental to find, not promised by POSIX.
+**Why this mechanism matters:** the stop rule is the absence of a new child: at the end of a card, five `0` hour-digits in the path (or four and a non-zero last digit) mean the total is over 40, and no branch digs. The running total is the number of hour directories in the path, and no arithmetic exists anywhere. This relies on the order in which find reads and visits, which is accidental to find, not promised by POSIX.
 
 ## How the stunt works
 
@@ -108,7 +108,7 @@ This is the call stack of a recursive function, drawn on the file system. The pa
 | Loop | the walk, descending into the directory its own `-exec mkdir` just made |
 | Branching | `-o` chains. `-a` binds tighter than `-o`, so `A -a B -o C -a D` is an if/else-if. Each directory matches exactly one branch |
 | Randomness | `mktemp -d {}/XXXXXX` makes the dice. The last character picks the hours (see below) |
-| Hours 10-19 | 60 of mktemp's 62 characters, in ten groups of six. `-path '*/[!/][!/][!/][!/][!/][abcdef]/?'` is "the dice show group 0", so print `10,` and dig `b09` |
+| Hours 10 to 19 | 60 of mktemp's 62 characters, in ten groups of six. `-path '*/[!/][!/][!/][!/][!/][abcdef]/?'` is "the dice show group 0", so print `10,` and dig `b09` |
 | Countdown | `b18` makes `b17`, and so on. The next name is a literal in an `-exec mkdir`. Nothing is subtracted |
 | Running total | the number of hour directories in the path. The last digit is the name of the last hour. The tens digit is how many directories named `0` the path has, because the digits cycle 1 ... 9, 0 |
 | Category order | how many six-character names are in the path: `-path '*/[!/]...*/[!/]...*'` means "at least two cards" |
@@ -136,7 +136,7 @@ Ten lines of shell: `while [ $total -le 40 ]; do hours=$((10 + RANDOM % 10)); to
 
 `check.sh` makes sure the stunt is real. `timecards.sh` may contain exactly one `find`, and no `for`, `while`, `until`, `case` or `if` anywhere. The `find` may use only `-exec`, `-name`, `-o` and `-path`. `-exec` may run only `date`, `mkdir`, `mktemp` and `printf`. The `find` line must be exactly what `build-line.py` prints.
 
-Then, for each find implementation it can see, it runs the demo 25 times. Every run must have hours 10-19, categories in order (the fifth card is Meetings again), correct running totals, `DEMO ONLY` on every row, the ISO week from `date`, and a stop exactly when the total passes 40. The stop-rule error must appear on stderr exactly once and nothing else may. The rows in SQLite must match the printed ones. The scratch folder must be gone afterward, and across the 25 runs at least eight different hour values must show up.
+Then, for each find implementation it can see, it runs the demo 25 times. Every run must have hours 10 to 19, categories in order (the fifth card is Meetings again), correct running totals, `DEMO ONLY` on every row, the ISO week from `date`, and a stop exactly when the total passes 40. The stop-rule error must appear on stderr exactly once and nothing else may. The rows in SQLite must match the printed ones. The scratch folder must be gone afterward, and across the 25 runs at least eight different hour values must show up.
 
 Then it forces the dice. A fake `mktemp`, first on `PATH`, hands out chosen names, so seven scenarios exercise the tables on purpose. They cover every tens digit from 1 to 5, many units digits, a total of exactly 40 (which must continue), and the re-roll paths for a last character of `Y` and for `YZ`. The expected rows are computed with plain bash arithmetic. Last, a non-demo row must be refused by SQLite.
 
@@ -145,7 +145,7 @@ Then it forces the dice. A fake `mktemp`, first on `PATH`, hands out chosen name
 - **Walking into what you just made is *accidentally exploited*.** POSIX does not say what find does when a directory changes during the walk. GNU find 4.9, bfs 3.1.2 and busybox 1.36.1 all visit the new directory, and that is all this entry knows. Nobody promised it.
 - **`*` in `-path` crosses `/`, and it ruined the first version.** The first countdown names were `b9`, `b10`, and the pattern `*/1/b*` matched an *earlier* `1/b...` in the path, so the digit stuck at 2 for the whole card. The fix: patterns end the match with fixed-width names (`b00`, `b18`), so the last segment is always exactly where you think.
 - **A failing `mkdir` is noisy, so there is no mutex.** The first design made several dice and let the first good one win by `mkdir` of a claim directory. The losers printed errors. The design now makes one die per card and re-rolls inside the name.
-- **`{}` inside a bigger word depends on the implementation.** The line uses `mkdir {}/b09` and `mktemp -d {}/XXXXXX`. POSIX leaves `{}` that is part of a longer argument unspecified. GNU find, bfs and busybox replace it in the tested runs. The entry’s overall assurance follows the weakest necessary dependency: the unpromised descent into directories created during traversal.
+- **`{}` inside a bigger word depends on the implementation.** The line uses `mkdir {}/b09` and `mktemp -d {}/XXXXXX`. POSIX leaves `{}` that is part of a longer argument unspecified. GNU find, bfs and busybox replace it in the tested runs. The entry's overall assurance follows the weakest necessary dependency: the unpromised descent into directories created during traversal.
 - **Not run on BSD or macOS.** We have no such machine. The line uses `-path` (POSIX 2008), `-name`, `-o`, `-exec`, and the utilities `printf`, `mkdir` and `date '+%G-W%V'`. `mktemp` is not POSIX but is on every BSD and Linux system. If you try it on a BSD, `./check.sh` will tell you what breaks, and we would like to hear about it.
 - **busybox runs `mktemp` inside itself.** A fake `mktemp` on `PATH` is never called, so the forced-dice scenarios are skipped for busybox. Its 25 random runs still pass.
 - **A tree stays behind until the end.** The walk leaves a path more than a hundred names deep. `timecards.sh` makes it in a scratch folder and removes the folder when it exits, even on Ctrl-C.

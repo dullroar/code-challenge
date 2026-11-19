@@ -1,8 +1,8 @@
-# Portability, abstraction, and cost study guide
+# Portability, abstraction and cost study guide
 
 ## What this guide is for
 
-Every abstraction hides something, and sooner or later the hidden thing shows. A language standard promises some behavior, allows more, and says nothing about the rest. This guide asks: **what is promised, what is host-dependent, and what is a performance cliff?** The book tags every lesson with one of three labels, and this guide teaches you to *choose* the label, by the evidence you can produce.
+Every abstraction hides something, and sooner or later the hidden thing shows. A language standard promises some behavior, allows more and says nothing about the rest. This guide asks: **what is promised, what is host-dependent and what is a performance cliff?** The book tags every lesson with one of three labels, and this guide teaches you to *choose* the label, by the evidence you can produce.
 
 When you finish, you should be able to:
 
@@ -13,7 +13,7 @@ When you finish, you should be able to:
 5. Explain what a reproducibility check can prove, and what it cannot.
 6. Apply Hyrum's law to a feature nobody promised and say what you would write down.
 
-Scope limits. The guide is about *claims*: how to word them and test them. It does not teach compiler internals or complexity theory. Its source chapter is [Abstraction leaks and implementation dependence](../../cs/08-abstraction-leaks-and-implementation-dependence.md).
+**Scope limits.** The guide is about *claims*: how to word them and test them. It does not teach compiler internals or complexity theory. Its source chapter is [Abstraction leaks and implementation dependence](../../cs/08-abstraction-leaks-and-implementation-dependence.md).
 
 ## Before you begin
 
@@ -33,7 +33,7 @@ Scope limits. The guide is about *claims*: how to word them and test them. It do
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
 For a portability reader, the entries have host dependencies hiding in the clock, random source, storage and toolchain. Find which ones your entry actually uses. The fixed LINQ weeks need no random draws, and the C PCRE2 and .NET regex examples need a writable TSV path. The shared checker `lessons/tools/check-demo.sh` tests the numeric report for runs that implement the challenge.
 
@@ -85,7 +85,15 @@ Every row was run in the sandbox or in a scratch folder. Two of them name "Park-
 | **Portability** | Broad | Narrow, and the README says how narrow |
 | **Cost** | Normal | A cliff may be the point |
 
-The `assurance` key of each README records the weakest dependency required by the mechanism. A table can count the declarations, while source, manuals and tests support specific claims. The tally is **17** entries are guaranteed (the ports, the LINQ entries, the JavaScript entries, plain COBOL, Haskell, Forth, Lisp and awk, and `regex-dotnet`), **16** are implementation-permitted (APL, `awk-weird`, `cobol-weird`, `forth-weird`, `haskell-weird`, `lisp-weird`, `m4`, the other regex entries, both tar entries, Tcl, `tcl-weird` and `ex-weird`), and **7** are accidentally exploited (`cmake`, `ed-weird`, `find-gnu`, `find-posix`, `make-gnu`, `regex-sed` and `xaml`). (`tcl-weird` was in the last group until its hours were drawn into a table instead of depending on SQLite's evaluation order.)
+The `assurance` key of each README records the weakest dependency of the mechanism. Source, manuals and tests support the individual claims.
+
+| Assurance tally | Entries |
+| --- | --- |
+| **17** entries are guaranteed | The ports, the LINQ entries, plain COBOL, Haskell, Forth, Lisp and awk, the JavaScript entries and `regex-dotnet`. |
+| **16** are implementation-permitted | APL, `awk-weird`, `cobol-weird`, `forth-weird`, `haskell-weird`, `lisp-weird`, `m4`, `regex-perl`, `regex-pcre2`, `regex-pcre2grep`, both tar entries, Tcl, `tcl-weird` and `ex-weird`. |
+| **7** are accidentally exploited | `cmake`, `ed-weird`, `find-gnu`, `find-posix`, `make-gnu`, `regex-sed` and `xaml`. |
+
+An earlier version of `tcl-weird` depended on SQLite's evaluation order. The current entry draws the hours into a table.
 
 ## What the exercises demonstrate
 
@@ -98,28 +106,28 @@ The `assurance` key of each README records the weakest dependency required by th
 | [B17. tar, weirder: predict the clock](../../exercises.md#b17-tar-weirder-predict-the-clock-verified) | Predict the ticks for `--interval 2`. | `floor(records / K)`. A rule measured on GNU tar, then predicted by a simulation. |
 | [F. Prove a README claim](../../exercises.md#f-prove-a-readme-claim-verified) | Can you make the claim fail? | A negative control separates a claim from an observation. |
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| `Word64` wraps on overflow (Haskell's generator) | **Guaranteed** | Documented. |
-| COBOL's size error leaves the field unchanged | **Guaranteed** | Specified. |
-| COBOL's unhandled overflow drops the leading digit | **Implementation-permitted** | The tested build; the standard promises no usable result. |
-| `ALTER` | **Implementation-permitted** | Deleted from the standard in 2002; GnuCOBOL still runs it. |
-| m4's `eval` is 32-bit | **Implementation-permitted** | GNU m4 1.4.x. `2147483647*4` gives `-4` silently. |
-| GNU tar's checkpoint callbacks and record counting | **Implementation-permitted** | Documented GNU options. The counts were measured on 1.34 and 1.35. |
-| Listing a tar archive gives a different tick count from creating it | **Accidentally exploited** knowledge | Tar skips data it need not read. Nobody promises it. |
-| POSIX `find -exec` substitutes `{}` as a whole argument | **Guaranteed** within POSIX syntax | POSIX leaves substitution inside a longer argument such as `{}/b09` unspecified; GNU find 4.9, bfs 3.1.2 and BusyBox 1.36.1 do it in the tested entry. |
-| `find-posix` visits a directory created while traversal is in progress | **Accidentally exploited** | Observed on those same three implementations. POSIX gives no traversal promise for a change made during the walk. This is the weaker dependency and determines the README label. |
-| .NET balancing groups remove a capture from another group | **Guaranteed** within the documented .NET API | The .NET engine documents it. The guarantee applies to that engine and makes no portability promise for other regex implementations. |
-| The `pcre2grep` callout script feature | **Implementation-permitted** | A build option. Ubuntu's own `pcre2grep` lacks it. |
-| Make's restart used as a loop | **Accidentally exploited** | Hyrum's law: a feature used for what it was not for. |
-| A sed regex used as a clock | **Accidentally exploited** | A performance cliff, and it varies by CPU. |
+| `Word64` wraps on overflow (Haskell's generator) | **guaranteed** | Documented. |
+| COBOL's size error leaves the field unchanged | **guaranteed** | Specified. |
+| COBOL's unhandled overflow drops the leading digit | **implementation-permitted** | The tested build; the standard promises no usable result. |
+| `ALTER` | **implementation-permitted** | Deleted from the standard in 2002; GnuCOBOL still runs it. |
+| m4's `eval` is 32-bit | **implementation-permitted** | GNU m4 1.4.x. `2147483647*4` gives `-4` silently. |
+| GNU tar's checkpoint callbacks and record counting | **implementation-permitted** | Documented GNU options. The counts were measured on 1.34 and 1.35. |
+| Listing a tar archive gives a different tick count from creating it | **accidentally exploited** knowledge | Tar skips data it need not read. Nobody promises it. |
+| POSIX `find -exec` substitutes `{}` as a whole argument | **guaranteed** within POSIX syntax | POSIX leaves substitution inside a longer argument such as `{}/b09` unspecified; GNU find 4.9, bfs 3.1.2 and busybox 1.36.1 do it in the tested entry. |
+| `find-posix` visits a directory created while traversal is in progress | **accidentally exploited** | Observed on those same three implementations. POSIX gives no traversal promise for a change made during the walk. This is the weaker dependency and determines the README label. |
+| .NET balancing groups remove a capture from another group | **guaranteed** within the documented .NET API | The .NET engine documents it. The guarantee applies to that engine and makes no portability promise for other regex implementations. |
+| The `pcre2grep` callout script feature | **implementation-permitted** | A build option. Ubuntu's own `pcre2grep` lacks it. |
+| Make's restart used as a loop | **accidentally exploited** | Hyrum's law: a feature used for what it was not for. |
+| A sed regex used as a clock | **accidentally exploited** | A performance cliff, and it varies by CPU. |
 
 **Costs to state.**
 
 - **Performance cliffs.** A regex that is fast on every test can take a year on one bad input. The sed entry uses a catastrophic pattern as a 50 ms clock. CMake's regex has no counted repetition, so "at most 40" written as forty optional groups would backtrack exponentially on failure. LINQ re-enumeration multiplies effects. m4 copies its growing SQL script at each card. See [Regular-expression denial of service](../../cs/08-abstraction-leaks-and-implementation-dependence.md#regular-expression-denial-of-service) and [Performance cliffs and time complexity](../../cs/08-abstraction-leaks-and-implementation-dependence.md#performance-cliffs-and-time-complexity).
-- **Reproducibility has limits.** A fixed clock and a fixed seed make a run repeatable. They prove nothing about a different host. Make's `NOW`, the JavaScript `NOW` and `SEED`, and `SOURCE_DATE_EPOCH` for the book's build each fix one input. The book's PDF and EPUB are byte-reproducible for the same pandoc and WeasyPrint versions.
+- **Reproducibility has limits.** A fixed clock and a fixed seed make a run repeatable. They prove nothing about a different host. Make's `NOW`, the JavaScript `NOW` and `SEED` and `SOURCE_DATE_EPOCH` for the book's build each fix one input. The book's PDF and EPUB are byte-reproducible for the same pandoc and WeasyPrint versions.
 - **Hyrum's law.** If the README does not say which behavior is promised, users will depend on the observed one. The READMEs name what they measured, and the labels are the discipline.
 - **Where this is legitimate.** Using an implementation's extension is ordinary engineering if you write down that you did. The risk is not the extension, it is the silence.
 
@@ -127,18 +135,18 @@ The `assurance` key of each README records the weakest dependency required by th
 
 - **Language guides.** [COBOL](../languages/cobol.md), [Make and CMake](../languages/make-and-cmake.md), [Regex engines and sed](../languages/regex-engines-and-sed.md), [m4](../languages/m4.md), [tar](../languages/tar.md) and [ed and Ex](../languages/ed-and-ex.md) give the evidence behind each label.
 - **Reading safely.** [Reading adversarial programs](reading-adversarial-programs.md): a missing feature that fails silently is also a security question.
-- **Effects.** [Effects, errors, and commitment](effects-errors-and-commitment.md) asks which failure semantics are promised.
+- **Effects.** [Effects, errors and commitment](effects-errors-and-commitment.md) asks which failure semantics are promised.
 - **The comparison.** [Comparative machine design](comparative-machine-design.md) lists every entry with its label.
 - **In the book.** [Leaky abstractions](../../cs/08-abstraction-leaks-and-implementation-dependence.md#leaky-abstractions), [Undefined, unspecified and implementation-defined behavior](../../cs/08-abstraction-leaks-and-implementation-dependence.md#undefined-unspecified-and-implementation-defined-behavior), [Portability](../../cs/08-abstraction-leaks-and-implementation-dependence.md#portability), [Hyrum's law](../../cs/08-abstraction-leaks-and-implementation-dependence.md#hyrums-law) and [Reproducibility and deterministic builds](../../cs/08-abstraction-leaks-and-implementation-dependence.md#reproducibility-and-deterministic-builds).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** `m4 -Dtc_seed=230` and `SEED=1105 node ...` both give hours 15, 19, 12. Does it follow that the two programs share a generator? *(No. Both use a Park-Miller recurrence, but with different multipliers and different digit extraction. The seeds were found separately. Equal output on one seed is a coincidence of the search.)*
 2. **Explain.** Why is a loud portability failure better than a silent one, and which does mawk give for `awk-weird`? *(A loud failure stops you before you trust a wrong result. mawk gives a silent one: zero cards, exit 0.)*
 3. **Transfer.** You depend on `date +%G-W%V` in a script. Which label do you give that dependency, and what would you write down? *(Implementation-permitted: GNU `date` and compatible. Write down the tool, the minimum version and what the ISO year does near New Year.)*
-4. **Evidence.** A README says "GNU tar counts 21 ticks when creating a 21-block archive." Design a test that could fail and say how you would label it. *(Create archives of several sizes, blocking factors and intervals, and compare tar's tick count with `floor(ceil(blocks / b) / K)`. The negative control is listing the archive, which gives a different count. The claim is implementation-permitted, and the listing behavior is accidentally exploited knowledge.)*
+4. **Evidence.** A README says, "GNU tar counts 21 ticks when creating a 21-block archive." Design a test that could fail. Which label applies to the claim? *(Create archives of several sizes, blocking factors and intervals, and compare tar's tick count with `floor(ceil(blocks / b) / K)`. The negative control is listing the archive, which gives a different count. The claim is implementation-permitted, and the listing behavior is accidentally exploited knowledge.)*
 
 ## Further reading
 

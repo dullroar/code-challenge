@@ -1,6 +1,6 @@
 ---
 name: "LINQ"
-teaches: "LINQ method chains, end to end."
+teaches: "that a chain of LINQ methods can express the entire program."
 kind: weird
 languages: [c-sharp, linq]
 lesson: "languages/csharp-linq-xaml.md#deferred-execution-and-the-void-to-value-trick"
@@ -14,7 +14,7 @@ counterexamples: [event-driven-programming]
 ---
 # LINQ challenge, Variant A: one fluent method-chain statement
 
-**Teaches you:** LINQ method chains, end to end.
+**Teaches you:** that a chain of LINQ methods can express the entire program.
 
 > **Not the shared challenge.** This entry draws no random hours: its work week is five fixed 8-hour days, capped so that the total is exactly 40.0 hours and no card crosses the line. It teaches deferred execution and LINQ method chains, not the stop rule "keep the first card over 40".
 

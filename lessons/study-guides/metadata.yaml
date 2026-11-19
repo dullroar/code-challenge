@@ -11,7 +11,7 @@ lang: en-US
 rights: "Copyright (c) 2026 Jim Lehmer and Ken Astl. MIT License."
 toc: true
 toc-depth: 2
-date: 2026-11-18
+date: 2026-11-19
 # A fixed identifier (a UUIDv5 of the study guides' name under the repository URL), so the EPUB does not get a random one.
 identifier: "urn:uuid:a9ad89cf-a41f-53c0-8fb3-eb7e6cb584bf"
 ---

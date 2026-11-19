@@ -17,7 +17,7 @@ flowchart TB
 The status is one small number. The caller does not learn what went wrong, only which branch to take. In `cmd1 && cmd2` the shell runs `cmd2` after a 0. In `cmd1 || fallback` it runs `fallback` after any other value. A shell `if` reads the same status. A program that needs to say more must also print a message or write a file.
 
 - **Use it when:** scripts and tools that other tools call. Document what each code means.
-- **Avoid:** using it for rich data (it is one small number), and assuming every platform uses the same range.
+- **Avoid it when:** you need to return rich data or preserve a number outside the platform's exit-status range.
 
 **Read more:**
 

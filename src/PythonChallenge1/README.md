@@ -1,6 +1,6 @@
 ---
 name: "Python"
-teaches: "A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`."
+teaches: "that Python can drive a whole program with `iter(step, False)`, which calls `step` until it returns `False`."
 kind: port
 languages: [python]
 lesson: "languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery"

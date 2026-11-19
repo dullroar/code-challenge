@@ -17,7 +17,7 @@ flowchart TB
     end
 ```
 
-On the left the return point is hidden in the caller's stack, and the callee cannot name it. On the right it is a value, `K`, that can be stored, handed on, and used later (or not at all). COBOL's mutable `GO TO` target, Forth's `>in` and Make's restart state are *analogies* for control that is held outside the call stack. None of them captures a first-class continuation, and an ordinary callback or closure is not one either.
+On the left the return point is hidden in the caller's stack, and the callee cannot name it. On the right it is a value, `K`, that can be stored, handed on and used later (or not at all). COBOL's mutable `GO TO` target, Forth's `>in` and Make's restart state are *analogies* for control that is held outside the call stack. None of them captures a first-class continuation, and an ordinary callback or closure is not one either.
 
 - **Use it when:** you write a compiler, an async library or a web framework with callbacks.
 - **Avoid it when:** you write by hand in a language without tail calls. The code becomes callbacks inside callbacks, and the stack grows.

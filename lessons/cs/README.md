@@ -12,16 +12,113 @@ The next two parts read the same material from other directions: [By language](.
 
 ## The chapters
 
-- [How to read an adversarial program](01-reading-an-adversarial-program.md): Threat model, Arbitrary code execution, Sandbox, Principle of least privilege, Code review, Trojan Source: characters you cannot see, Specification versus implementation, Capability and authority
-- [What counts as a machine?](02-what-counts-as-a-machine.md): Models of computation, Transition systems and state machines, Representing state, Invariants, Observability, Stack machines, Register machines and counter machines, Turing machines, Markov algorithms, Turing completeness, Operational semantics, Computation versus orchestration
-- [Control flow and continuations](03-control-flow-and-continuations.md): Control flow, Goto and structured programming, The program counter, Recursion, Fixed-point iteration, Coroutines, Continuations, Self-modifying code, Logical clocks and event ordering
-- [Evaluation and demand](04-evaluation-and-demand.md): Evaluation strategies, Eager evaluation, Lazy evaluation, Short-circuit evaluation, Deferred execution, Iterators and generators, Referential transparency, Array programming, First-class and higher-order functions, Functors and mapping, Monoids and folds, Dataflow programming
-- [Formal languages as computational substrates](05-formal-languages-as-computational-substrates.md): The Chomsky hierarchy, Regular expressions, Parsing, Term and string rewriting, Macros and text expansion, Declarative programming, Domain-specific languages, Markup languages, Build automation, Language-theoretic security, Weird machines, Category theory, Interpreters and virtual machines
-- [State beyond variables](06-state-beyond-variables.md): State, The call stack, The stack as a data structure, Scope and binding, Closures and lexical environments, Homoiconicity: code as data, Reflection and metaprogramming, Dependency graphs, Database triggers, Serialization, deserialization and object pickling
-- [Effects, errors and commitment](07-effects-errors-and-commitment.md): Side effects, Monads and effect systems, Exception handling, Exit status, Integrity constraints, Backtracking, The cut: committing to a choice, Transactions, Idempotence, Thread safety and thread affinity
-- [Abstraction leaks and implementation dependence](08-abstraction-leaks-and-implementation-dependence.md): Leaky abstractions, Undefined, unspecified and implementation-defined behavior, Portability, Optimizers, Hyrum's law, Performance cliffs and time complexity, Regular-expression denial of service, Reproducibility and deterministic builds
-- [Comparative case studies](09-comparative-case-studies.md): An ordinary loop, used in an unusual place, A lazy sequence that someone keeps asking for, Whole-array operations instead of steps, Text that is rewritten and read again, Control flow that rewrites itself, Regex search with side effects and deliberate failure, Regex search that returns captures, Dispatch and triggers: the rule fires the next step, The input is the loop, Document order is the program
-- [Events, callbacks and reactive control flow](10-events-callbacks-and-reactive-control-flow.md): Event-driven programming, Callbacks, Publish and subscribe, The event loop and scheduling turns, Backpressure
+- [How to read an adversarial program](01-reading-an-adversarial-program.md)
+  - Threat model
+  - Arbitrary code execution
+  - Sandbox
+  - Principle of least privilege
+  - Code review
+  - Trojan Source: characters you cannot see
+  - Specification versus implementation
+  - Capability and authority
+- [What counts as a machine?](02-what-counts-as-a-machine.md)
+  - Models of computation
+  - Transition systems and state machines
+  - Representing state
+  - Invariants
+  - Observability
+  - Stack machines
+  - Register machines and counter machines
+  - Turing machines
+  - Markov algorithms
+  - Turing completeness
+  - Operational semantics
+  - Computation versus orchestration
+- [Control flow and continuations](03-control-flow-and-continuations.md)
+  - Control flow
+  - Goto and structured programming
+  - The program counter
+  - Recursion
+  - Fixed-point iteration
+  - Coroutines
+  - Continuations
+  - Self-modifying code
+  - Logical clocks and event ordering
+- [Evaluation and demand](04-evaluation-and-demand.md)
+  - Evaluation strategies
+  - Eager evaluation
+  - Lazy evaluation
+  - Short-circuit evaluation
+  - Deferred execution
+  - Iterators and generators
+  - Referential transparency
+  - Array programming
+  - First-class and higher-order functions
+  - Functors and mapping
+  - Monoids and folds
+  - Dataflow programming
+- [Formal languages as computational substrates](05-formal-languages-as-computational-substrates.md)
+  - The Chomsky hierarchy
+  - Regular expressions
+  - Parsing
+  - Term and string rewriting
+  - Macros and text expansion
+  - Declarative programming
+  - Domain-specific languages
+  - Markup languages
+  - Build automation
+  - Language-theoretic security
+  - Weird machines
+  - Category theory
+  - Interpreters and virtual machines
+- [State beyond variables](06-state-beyond-variables.md)
+  - State
+  - The call stack
+  - The stack as a data structure
+  - Scope and binding
+  - Closures and lexical environments
+  - Homoiconicity: code as data
+  - Reflection and metaprogramming
+  - Dependency graphs
+  - Database triggers
+  - Serialization, deserialization and object pickling
+- [Effects, errors and commitment](07-effects-errors-and-commitment.md)
+  - Side effects
+  - Monads and effect systems
+  - Exception handling
+  - Exit status
+  - Integrity constraints
+  - Backtracking
+  - The cut: committing to a choice
+  - Transactions
+  - Idempotence
+  - Thread safety and thread affinity
+- [Abstraction leaks and implementation dependence](08-abstraction-leaks-and-implementation-dependence.md)
+  - Leaky abstractions
+  - Undefined, unspecified and implementation-defined behavior
+  - Portability
+  - Optimizers
+  - Hyrum's law
+  - Performance cliffs and time complexity
+  - Regular-expression denial of service
+  - Reproducibility and deterministic builds
+- [Comparative case studies](09-comparative-case-studies.md)
+  - An ordinary loop, used in an unusual place
+  - A lazy sequence that someone keeps asking for
+  - Whole-array operations instead of steps
+  - Text that is rewritten and read again
+  - Control flow that rewrites itself
+  - Regex search with side effects and deliberate failure
+  - Regex search that returns captures
+  - Dispatch and triggers: the rule fires the next step
+  - The input is the loop
+  - Document order is the program
+- [Events, callbacks and reactive control flow](10-events-callbacks-and-reactive-control-flow.md)
+  - Event-driven programming
+  - Callbacks
+  - Publish and subscribe
+  - The event loop and scheduling turns
+  - Backpressure
 
 ## Concept index
 

@@ -21,7 +21,7 @@ It has turned into a small, friendly contagion. **Ken caught it too.** What star
 
 **Try this at home!** **Don't tell the boss!**
 
-You've spent years writing clean code: small functions, meaningful names, tests. *Boring.* Over here, there's a `for` loop with an empty body that opens a database, starts a thread, draws a window, and fades it in and out - all before the first semicolon is done being weird.
+You've spent years writing clean code: small functions, meaningful names, tests. *Boring.* Over here, there's a `for` loop with an empty body that opens a database, starts a thread, draws a window and fades it in and out. All before the first semicolon is done being weird.
 
 You know you want to write beautifully wrong code. **You know you do.**
 
@@ -31,7 +31,7 @@ You know you want to write beautifully wrong code. **You know you do.**
 
 ## Ready to play?
 
-The rules, the shared demo, and the do's and don'ts live in **[`CHALLENGE.md`](CHALLENGE.md)**. Pick a language. Pick a constraint. Make something terrible that works. Sending it in? See **[`CONTRIBUTING.md`](CONTRIBUTING.md)**.
+The rules, the shared demo and the do's and don'ts live in **[`CHALLENGE.md`](CHALLENGE.md)**. Pick a language. Pick a constraint. Make something terrible that works. Sending it in? See **[`CONTRIBUTING.md`](CONTRIBUTING.md)**.
 
 ## The results so far
 
@@ -50,30 +50,30 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **APL** | Jim | Five rolls and one take-while: no loop anywhere | That array thinking can replace control flow | [`src/apl`](src/apl/README.md) |
 | **APL, weirder** | Jim | Each timecard is a function that copies its own source with `⎕CR`, rewrites it and defines the copy with `⎕FX`; compress over that source is the stop rule | Self-replicating functions instead of loops and `if` | [`src/apl-weird`](src/apl-weird/README.md) |
 | **AWK** | Jim | One `while` in a `BEGIN` block, written to run unchanged on gawk, mawk, the one-true-awk and busybox awk | Portable POSIX awk, and exactly where the four implementations disagree | [`src/awk`](src/awk/README.md) |
-| **AWK, weirder** | Jim | gawk reads `/dev/urandom` with `RS="[0-9]"`, so each digit (`RT`) is a die roll and each record a card; `t > 40 { exit }` is the stop rule, with no loop, `if` or random call | A regex record separator, `RT`, and awk's implicit main loop | [`src/awk-weird`](src/awk-weird/README.md) |
+| **AWK, weirder** | Jim | gawk reads `/dev/urandom` with `RS="[0-9]"`, so each digit (`RT`) is a die roll and each record a card; `t > 40 { exit }` is the stop rule, with no loop, `if` or random call | A regex record separator, `RT` and awk's implicit main loop | [`src/awk-weird`](src/awk-weird/README.md) |
 | **C# (the original)** | Jim | Empty-body `for`; everything else lives in its three clauses | Runtime XAML, LINQ, EF Core, WPF animation | [`src/ModernChallenge1`](src/ModernChallenge1/README.md) |
 | **COBOL** | Ken | `PERFORM DRAW-CARD UNTIL OVER-FORTY`: the stop rule is declared as data on the total, not coded in the procedure | A stop rule declared as data, and a number's picture doing your rounding | [`src/cobol`](src/cobol/README.md) |
 | **COBOL, weirder** | Ken | No `IF`, `PERFORM` or `UNTIL`: `ALTER` rewires a `GO TO` at run time, and a two-digit field overflowing is the stop rule | Why structured programming won, via self-rewriting control flow | [`src/cobol-weird`](src/cobol-weird/README.md) |
-| **ed, weirder** | Jim | GNU `ed` computes the whole program: line addresses order the categories, a rewrite table turns digits into rows of marks, one global command joins each card to the total above it, and a regex over the marks is the stop rule | Text rewriting, state in unary, and a failed substitution as an `if` | [`src/ed-weird`](src/ed-weird/README.md) |
-| **Ex, weirder** | Jim | A one-line program is copied into a register and run with `@`. Editor marks do the arithmetic, and a tape of numbered lines holds the stop rule. It runs on nvi and Vim | Code as text, state outside the text, and where nvi and Vim disagree | [`src/ex-weird`](src/ex-weird/README.md) |
+| **ed, weirder** | Jim | GNU `ed` computes the whole program: line addresses order the categories, a rewrite table turns digits into rows of marks, one global command joins each card to the total above it, and a regex over the marks is the stop rule | Text rewriting, state in unary and a failed substitution as an `if` | [`src/ed-weird`](src/ed-weird/README.md) |
+| **Ex, weirder** | Jim | A one-line program is copied into a register and run with `@`. Editor marks do the arithmetic, and a tape of numbered lines holds the stop rule. It runs on nvi and Vim | Code as text, state outside the text and where nvi and Vim disagree | [`src/ex-weird`](src/ex-weird/README.md) |
 | **Forth** | Jim | One `begin ... until`, and `outfile-execute` points the output at SQLite | A stack language as a whole program | [`src/forth`](src/forth/README.md) |
 | **Forth, weirder** | Jim | No control-flow word and no variable: the state rides the data stack while the loop moves the text interpreter's own `>in` backwards | The parse position as a program counter | [`src/forth-weird`](src/forth-weird/README.md) |
 | **Go** | Ken | The same challenge, serving a pulsing page in your browser | The same trick, as a one-request web server | [`src/GoChallenge1`](src/GoChallenge1/README.md) |
-| **GNU tar** | Jim | The program is a tar archive: members are instructions, tar walks them, and the operator's `--to-command` gives them meaning. A passive inspector reads the same archive and runs nothing | Serialization versus execution, trust boundaries, and a fail-closed interpreter | [`src/tar-gnu`](src/tar-gnu/README.md) |
-| **GNU tar, weirder** | Jim | tar's checkpoints are the clock: one record written is one hour, and a state machine takes one step per tick. The archive's layout sets the pace | Logical clocks, event-driven control, and implementation-dependent counts | [`src/tar-gnu-weird`](src/tar-gnu-weird/README.md) |
+| **GNU tar** | Jim | The program is a tar archive: members are instructions, tar walks them, and the operator's `--to-command` gives them meaning. A passive inspector reads the same archive and runs nothing | Serialization versus execution, trust boundaries and a fail-closed interpreter | [`src/tar-gnu`](src/tar-gnu/README.md) |
+| **GNU tar, weirder** | Jim | tar's checkpoints are the clock: one record written is one hour, and a state machine takes one step per tick. The archive's layout sets the pace | Logical clocks, event-driven control and implementation-dependent counts | [`src/tar-gnu-weird`](src/tar-gnu-weird/README.md) |
 | **Haskell** | Jim | One pure function: random hours, `scanl1`, `span` | A lazy list and one `span` as the whole stop rule | [`src/haskell`](src/haskell/README.md) |
-| **Haskell on drugs** | Jim | An infinite list of cards whose elements have side effects: each running total is read off the card before it, and forcing a cell writes its row | Lazy IO as control flow, knot-tied with `fix` and `fixIO` | [`src/haskell-weird`](src/haskell-weird/README.md) |
+| **Haskell, weirder** | Jim | An infinite list of cards whose elements have side effects: each running total is read off the card before it, and forcing a cell writes its row | Lazy IO as control flow, knot-tied with `fix` and `fixIO` | [`src/haskell-weird`](src/haskell-weird/README.md) |
 | **Java** | Ken | One bodiless `for`; an anonymous class holds the loop state | The same bodiless-loop trick, Java style | [`src/JavaChallenge1`](src/JavaChallenge1/README.md) |
-| **JavaScript** | Jim | The original's empty-bodied `for`, in Node.js: an object for state, `node:sqlite`, and a timer that pulses the DEMO ONLY line on a terminal | The `for` clauses, the comma operator, and the event loop | [`src/javascript`](src/javascript/README.md) |
-| **JavaScript, weirder** | Jim | No loop statement. Three closures make the cards, and an iterator pipeline pulls them one at a time. `reduce` adds up the finished list, because it cannot stop early | Closures, lazy iteration, and why `reduce` cannot stop | [`src/javascript-weird`](src/javascript-weird/README.md) |
-| **JavaScript, event-driven** | Jim | No loop statement and no pipeline. Ten listeners on one `EventEmitter` are the whole program, and each emits the event that the next one waits for. `setImmediate` gives the event loop a turn between cards, so the call stack never grows | Events, callbacks, the event loop, and why a synchronous `emit()` is not asynchronous | [`src/javascript-events`](src/javascript-events/README.md) |
+| **JavaScript** | Jim | The original's bodiless `for`, in Node.js: an object for state, `node:sqlite` and a timer that pulses the DEMO ONLY line on a terminal | The `for` clauses, the comma operator and the event loop | [`src/javascript`](src/javascript/README.md) |
+| **JavaScript, weirder** | Jim | No loop statement. Three closures make the cards, and an iterator pipeline pulls them one at a time. `reduce` adds up the finished list, because it cannot stop early | Closures, lazy iteration and why `reduce` cannot stop | [`src/javascript-weird`](src/javascript-weird/README.md) |
+| **JavaScript, event-driven** | Jim | No loop statement and no pipeline. Ten listeners on one `EventEmitter` are the whole program, and each emits the event that the next one waits for. `setImmediate` gives the event loop a turn between cards, so the call stack never grows | Events, callbacks, the event loop and why a synchronous `emit()` is not asynchronous | [`src/javascript-events`](src/javascript-events/README.md) |
 | **Kotlin** | Ken | The same challenge, built as a sequence | The same trick, with Kotlin's sequence builders | [`src/KotlinChallenge1`](src/KotlinChallenge1/README.md) |
 | **LINQ, fluent chain** | Jim | One LINQ method chain is the entire program | LINQ method chains, end to end | [`src/LinqChallenge1`](src/LinqChallenge1/README.md) |
 | **LINQ, query expression** | Jim | Nearly every line is `from`/`where`/`let`/`select` | C# query syntax, pushed as far as it goes | [`src/LinqChallenge2`](src/LinqChallenge2/README.md) |
-| **Lisp** | Jim | One `LOOP` form that sums, collects and stops, in Common Lisp | `LOOP` clause order, structs, and hand-written ISO-week arithmetic | [`src/lisp`](src/lisp/README.md) |
+| **Lisp** | Jim | One `LOOP` form that sums, collects and stops, in Common Lisp | `LOOP` clause order, structs and hand-written ISO-week arithmetic | [`src/lisp`](src/lisp/README.md) |
 | **Lisp, weirder** | Jim | Each card is a CLOS method chained through a class hierarchy; the built-in `or` method combination stops at the first true result | Method combination as control flow | [`src/lisp-weird`](src/lisp-weird/README.md) |
 | **m4** | Jim | A macro whose last word is itself: m4 rescans its own output, and a Park-Miller generator is built from 32-bit `eval` | Quoting as lazy evaluation, in a language that is only text | [`src/m4`](src/m4/README.md) |
-| **find, POSIX** | Jim | One `find` with four primaries and no variables: the walk digs the directory tree it is walking, and the path and the names are the counters | A tree walk as a loop, path patterns as lookup tables, and what POSIX leaves unspecified | [`src/find-posix`](src/find-posix/README.md) |
+| **find, POSIX** | Jim | One `find` with four primaries and no variables: the walk digs the directory tree it is walking, and the path and the names are the counters | A tree walk as a loop, path patterns as lookup tables and what POSIX leaves unspecified | [`src/find-posix`](src/find-posix/README.md) |
 | **find, GNU** | Jim | The same digging walk with every GNU extra: `%d` (depth) is the running total, `%T` is the ISO week, `-regex` is the stop rule, `-fprintf` writes the SQL to fd 3, and `-D rates` is find profiling the program | What GNU find's extras replace, and an optimizer that has nothing to reorder | [`src/find-gnu`](src/find-gnu/README.md) |
 | **Make, CMake** | Jim | One bodiless `while()`; its condition is a regex machine | `while()` + regex as a tiny register machine | [`src/cmake`](src/cmake/README.md) |
 | **Make, GNU** | Jim | No `$(shell)`; Make re-executes itself as the loop | Arithmetic and looping in plain Make syntax | [`src/make-gnu`](src/make-gnu/README.md) |
@@ -83,8 +83,8 @@ Every entry builds the same small demo: make up some *Meetings / Coding / Debugg
 | **RegEx, PCRE2** | Jim | Callout strings become opcodes for a bodiless C dispatcher | Regex callouts as a tiny instruction set | [`src/regex-pcre2`](src/regex-pcre2/README.md) |
 | **RegEx, pcre2grep** | Jim | No custom code at all: a stock `pcre2grep`, one command line | Program exit codes as control flow | [`src/regex-pcre2grep`](src/regex-pcre2grep/README.md) |
 | **RegEx, Perl** | Jim | One `=~` match does everything, then deliberately returns false | Executable code inside a live regex match | [`src/regex-perl`](src/regex-perl/README.md) |
-| **Rust** | Jim | No `;`, `let`, or `return` in `main` - a test enforces it | Iterators and closures as control flow | [`src/RustChallenge1`](src/RustChallenge1/README.md) |
-| **Tcl** | Jim | A `while` loop over dicts, SQL parameters bound straight from Tcl variables, and an optional Tk window that is tested headless | Idiomatic Tcl: braces, dicts, `db eval` bindings and Tk | [`src/tcl`](src/tcl/README.md) |
+| **Rust** | Jim | No `;`, `let` or `return` in `main` - a test enforces it | Iterators and closures as control flow | [`src/RustChallenge1`](src/RustChallenge1/README.md) |
+| **Tcl** | Jim | A `while` loop over dicts, SQL parameters bound straight from Tcl variables and an optional Tk window that is tested headless | Idiomatic Tcl: braces, dicts, `db eval` bindings and Tk | [`src/tcl`](src/tcl/README.md) |
 | **Tcl, weirder** | Jim | The program is text in a SQLite table, fetched by an overridden `unknown`; a recursive trigger is the loop and `INSERT ... WHERE` is the stop rule | Code as data, and a database trigger as control flow | [`src/tcl-weird`](src/tcl-weird/README.md) |
 | **XAML** | Jim | The program *is* a `.xaml` file, run by the parser that loads it | XAML as a runtime interpreter, not just markup | [`src/xaml`](src/xaml/README.md) |
 
@@ -147,6 +147,6 @@ src/
 LICENSE
 ```
 
-Ken's COBOL, Java, Kotlin, Python, and Go ports live here too, folded in with full credit intact in each one's README.
+Ken's COBOL, Java, Kotlin, Python and Go ports live here too, folded in with full credit intact in each one's README.
 
 Ready to dig into any of them as a lesson? Start at [Learn Programming the Weird Way!](lessons/README.md).

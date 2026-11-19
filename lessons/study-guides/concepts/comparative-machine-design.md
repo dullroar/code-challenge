@@ -6,14 +6,14 @@ A loop with no body, a regex search, a Makefile that rereads itself, a list whos
 
 When you finish, you should be able to:
 
-1. Fill in the seven-question worksheet for any entry: where is the program, where is the state, what repeats, what advances the next step, what makes a decision, what commits effects, and what evidence proves the claim.
+1. Fill in the seven-question worksheet for any entry: where is the program, where is the state, what repeats, what advances the next step, what makes a decision, what commits effects and what evidence proves the claim.
 2. Say what *role* each piece plays even when it does not look like the usual one: a flag, a file, a capture, a method, a tick.
 3. Group the entries by the answer to "where does the program live?" and say what each group can and cannot do.
 4. Explain why the fixed LINQ work week ends at 40 and why XAML can run out of passes there.
 5. Choose, for a given need (testability, observability, portability), which design suits it, and say what it costs.
-6. Label claims as guaranteed, implementation-permitted, or accidentally exploited.
+6. Label claims as guaranteed, implementation-permitted or accidentally exploited.
 
-Scope limits. The guide compares; it does not re-teach each entry. It uses facts checked in the language guides and the concept guides. Its sources are [Comparative case studies](../../cs/09-comparative-case-studies.md) and [Solution patterns](../../patterns.md).
+**Scope limits.** The guide compares; it does not re-teach each entry. It uses facts checked in the language guides and the concept guides. Its sources are [Comparative case studies](../../cs/09-comparative-case-studies.md) and [Solution patterns](../../patterns.md).
 
 ## Before you begin
 
@@ -43,7 +43,7 @@ What evidence proves the claim?
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
 The book records [where entries differ](../../intro.md#where-entries-differ). The LINQ demos use five fixed 8-hour days, and XAML can run out of passes at 40. The regex entries still follow the numeric rule: the C and .NET examples use TSV, while pcre2grep saves cards in separate SQLite calls. A summary can appear in a terminal or a window. Ask which result the entry demonstrates before comparing the mechanism.
 
@@ -51,7 +51,19 @@ The book records [where entries differ](../../intro.md#where-entries-differ). Th
 
 Compare in two cuts. Start by identifying the roles, then test the decisions and effects against the trace.
 
-**Where is the program?** In source statements (the idiomatic entries and the ports); in a jump target (`cobol-weird`); in a line of source read repeatedly (`forth-weird`); in a Makefile that rewrites its own input; in one pattern (the regex entries); in table rows (`tcl-weird`); in an archive's members (`tar-gnu`) or its size (`tar-gnu-weird`); in an editor register (`ex-weird`); in a class chain (`lisp-weird`); in the text of functions written at run time (`apl-weird`); in a document (`xaml`).
+**Where is the program?** The entries store their programs in different places.
+
+- The idiomatic entries and the ports use source statements.
+- `cobol-weird` uses a jump target.
+- `forth-weird` reads one source line repeatedly.
+- GNU Make rewrites its own input.
+- The regex entries use a pattern.
+- `tcl-weird` uses table rows.
+- `tar-gnu` uses archive members. `tar-gnu-weird` uses the archive size.
+- `ex-weird` uses an editor register.
+- `lisp-weird` uses a class chain.
+- `apl-weird` writes function text at run time.
+- `xaml` uses a document.
 
 **Where state lives.** See the diagram below: it groups the entries by what holds the next step and the remembered state.
 
@@ -135,7 +147,7 @@ The worksheet, filled in for representative entries. The usual witness uses 15, 
 | `ex-weird` | `@n` | the tape line: `@a` or `"` | the launcher | `'tp` printing tape lines 15, 34, 46 |
 | `m4` | rescanning | `ifelse(eval(...))` | `syscmd` | `-t tc_card` trace and `-L` limit |
 
-**Which role is played by what.** Read the *decision* column: it is a size error, a masked distance, a declining rule, a regex match, a predicate, an assignment, a listener's comparison, a returned value, a `WHERE` clause, a compress, a stop member, a flag, a callout's return, a conditional group, an address, a failed substitution, a comment, an `ifelse`. Eighteen entries and eighteen different decision mechanisms. The *role* is the same.
+**Which role is played by what.** The *decision* column shows how each entry performs the same role.
 
 **Exactly 40, and the ceiling.** Here the comparison found something the individual entries did not say. The specification says exactly 40 continues, so a fifth card must be possible. Entries whose supply of categories or cards was a finite list of *four* could not draw it. That was found while writing these guides, and all but one entry is now fixed.
 
@@ -174,16 +186,16 @@ The probability was one run in 10,000, so none of this was visible in ordinary t
 | [D. Port the challenge](../../exercises.md#d-port-the-challenge-verified-reference-answer-in-awk) | Port it to a language of your choice. | A port must decide its stop rule and its category supply. The ceiling is a design decision you now make. |
 | [F. Prove a README claim](../../exercises.md#f-prove-a-readme-claim-verified) | Which claim in a comparison table could you test? | Any row of the worksheet with a verifiable cell. |
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 The README `assurance` key summarizes the weakest dependency the mechanism needs. The table counts those declarations: **17** guaranteed, **16** implementation-permitted, **7** accidentally exploited (`tcl-weird` moved from the last group to the middle one when its evaluation-order dependence was removed).
 
 | Claim | Label | Why |
 | --- | --- | --- |
-| In `tcl-weird`, a total of 40 admits a next insert | **Guaranteed** by the integer comparison in the trigger | The trigger tests `NEW.running_total <= 40`. The trigger chain and its transaction have their own prerequisites. |
-| Three entries share the stop-rule label "accidentally exploited" because of a specific observed behavior (Make's remake, CMake's `AND`, ed's silent `s`) | **Accidentally exploited** | Each is observed, not promised. |
-| The number of names or slots bounds the number of cards | **Guaranteed** by construction, tested | A bound of five is exactly the worst case. With four names (before the fix, and still in `xaml`) it contradicted the shared challenge at exactly 40. |
-| .NET balancing groups subtract captures from a named group | **Guaranteed** within the documented .NET regex engine | The successful match is the return channel. An engine that lacks balancing groups cannot run this pattern. |
+| In `tcl-weird`, a total of 40 admits a next insert | **guaranteed** by the integer comparison in the trigger | The trigger tests `NEW.running_total <= 40`. The trigger chain and its transaction have their own prerequisites. |
+| Three entries share the stop-rule label "accidentally exploited" because of a specific observed behavior (Make's remake, CMake's `AND`, ed's silent `s`) | **accidentally exploited** | Each is observed, not promised. |
+| The number of names or slots bounds the number of cards | **guaranteed** by construction, tested | A bound of five is exactly the worst case. With four names (before the fix, and still in `xaml`) it contradicted the shared challenge at exactly 40. |
+| .NET balancing groups subtract captures from a named group | **guaranteed** within the documented .NET regex engine | The successful match is the return channel. An engine that lacks balancing groups cannot run this pattern. |
 
 **Costs to state.**
 
@@ -194,21 +206,21 @@ The README `assurance` key summarizes the weakest dependency the mechanism needs
 
 ## Connections across the repository
 
-- **Every language guide** is one row of the worksheet: [COBOL](../languages/cobol.md), [Haskell](../languages/haskell.md), [Forth](../languages/forth.md), [Make and CMake](../languages/make-and-cmake.md), [Regex engines and sed](../languages/regex-engines-and-sed.md), [APL](../languages/apl.md), [JavaScript](../languages/javascript.md), [Common Lisp](../languages/common-lisp.md), [m4](../languages/m4.md), [Tcl](../languages/tcl.md), [ed and Ex](../languages/ed-and-ex.md), [tar](../languages/tar.md) and [C#, LINQ, XAML, and ports](../languages/csharp-linq-xaml-and-ports.md).
+- **Every language guide** is one row of the worksheet: [COBOL](../languages/cobol.md), [Haskell](../languages/haskell.md), [Forth](../languages/forth.md), [Make and CMake](../languages/make-and-cmake.md), [Regex engines and sed](../languages/regex-engines-and-sed.md), [APL](../languages/apl.md), [JavaScript](../languages/javascript.md), [Common Lisp](../languages/common-lisp.md), [m4](../languages/m4.md), [Tcl](../languages/tcl.md), [ed and Ex](../languages/ed-and-ex.md), [tar](../languages/tar.md) and [C#, LINQ, XAML and ports](../languages/csharp-linq-xaml-and-ports.md).
 - **Where the next step is stored.** [State and control beyond variables](state-and-control-beyond-variables.md) develops the first diagram.
-- **Who demands work.** [Evaluation, demand, and laziness](evaluation-demand-and-laziness.md) develops the "advances the next step" column.
-- **What commits.** [Effects, errors, and commitment](effects-errors-and-commitment.md) develops the last columns.
-- **What is promised.** [Portability, abstraction, and cost](portability-abstraction-and-cost.md) develops the labels.
+- **Who demands work.** [Evaluation, demand and laziness](evaluation-demand-and-laziness.md) develops the "advances the next step" column.
+- **What commits.** [Effects, errors and commitment](effects-errors-and-commitment.md) develops the last columns.
+- **What is promised.** [Portability, abstraction and cost](portability-abstraction-and-cost.md) develops the labels.
 - **In the book.** [Comparative case studies](../../cs/09-comparative-case-studies.md), including the table of every entry at a glance, and [Solution patterns](../../patterns.md), in particular [Control state outside variables](../../patterns.md#control-state-outside-variables) and [Programs stored as data](../../patterns.md#programs-stored-as-data).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** Fill in the worksheet for `lisp-weird`: where is the program, the state, what repeats, what decides. *(The program is five classes with one `or` method each. The state is the `ledger` object plus the position in the class precedence list. What repeats is the next applicable method, run by the `or` combination. The decision is a method returning true.)*
 2. **Explain.** Why is a total of exactly 40 a test of an entry's *supply* and not only of its stop rule? *(The stop rule says to continue at 40, so a fifth card must be possible. An entry with only four category names has no fifth, so it stops at 40 whatever its rule says. That was true of the regex entries and the `for`-header entries before they were fixed, and is still true of `xaml`.)*
 3. **Transfer.** Pick a program you maintain. Fill in the worksheet for its main loop. Which cell is hardest to answer? *(Often "what makes a decision" is spread over several places, and "what evidence proves the claim" is missing. The hardest cell tells you where your program is hardest to review.)*
-4. **Evidence.** A colleague says "every entry that cycles categories continues at 40." Design a test that could fail. *(Run each with a forced all-10 input (`DICE`, `SEED`, `--hours`, a fixed list), then check for five rows and totals 10, 20, 30, 40, 50. The negative control is a four-name entry, which stops at 40.)*
+4. **Evidence.** A colleague says, "Every entry that cycles categories continues at 40." Design a test that could fail. *(Run each with a forced all-10 input (`DICE`, `SEED`, `--hours`, a fixed list), then check for five rows and totals 10, 20, 30, 40, 50. The negative control is a four-name entry, which stops at 40.)*
 
 ## Further reading
 

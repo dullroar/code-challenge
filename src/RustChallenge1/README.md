@@ -1,6 +1,6 @@
 ---
 name: "Rust"
-teaches: "iterators and closures as control flow."
+teaches: "that iterators and closures can express the control flow of a whole Rust program."
 kind: port
 languages: [rust]
 lesson: "languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery"
@@ -14,7 +14,7 @@ counterexamples: [event-driven-programming]
 ---
 # One Statement, Rust Edition
 
-**Teaches you:** iterators and closures as control flow.
+**Teaches you:** that iterators and closures can express the control flow of a whole Rust program.
 
 A WSL/GTK 4 companion to Jim Lehmer's C# challenge and Ken's [Java](../JavaChallenge1/README.md), [Kotlin](../KotlinChallenge1/README.md), [Python](../PythonChallenge1/README.md), and [Go](../GoChallenge1/README.md) versions. The point is to explore expression mechanics through a deliberately ridiculous constraint, not to offer a production architecture.
 
@@ -81,7 +81,7 @@ Two tricks take the place of the statements Rust would normally use:
 - `match value { name => ... }` is a `let` that is an expression.
 - `(a, b, c).2` is the comma operator: it evaluates `a`, `b`, `c` in order and yields the last.
 
-The loop checks the running total before each record: while it is at most 40 and categories remain, it adds 10-19 hours for the next category. There are five category names (`Meetings` repeats), so a total of exactly 40 after four cards continues to a fifth card. When the batch is finished, a scoped worker thread saves it in one SQLite transaction. The thread borrows the cards, so nothing is cloned. The program joins the thread (waits for it to finish) before the window claims that anything was saved. Errors end the program with a message, and the program never reports success after a failure. The one exception is the GTK draw callback, where Cairo errors are ignored, because a panic there would abort across the C boundary. The calendar year and ISO week match the original's separate fields. Around New Year the ISO week-based year can differ from the calendar year.
+The loop checks the running total before each record: while it is at most 40 and categories remain, it adds 10 to 19 hours for the next category. There are five category names (`Meetings` repeats), so a total of exactly 40 after four cards continues to a fifth card. When the batch is finished, a scoped worker thread saves it in one SQLite transaction. The thread borrows the cards, so nothing is cloned. The program joins the thread (waits for it to finish) before the window claims that anything was saved. Errors end the program with a message, and the program never reports success after a failure. The one exception is the GTK draw callback, where Cairo errors are ignored, because a panic there would abort across the C boundary. The calendar year and ISO week match the original's separate fields. Around New Year the ISO week-based year can differ from the calendar year.
 
 | Original and Ken's ports | Rust companion |
 | --- | --- |

@@ -32,7 +32,7 @@ sequenceDiagram
 `COMMIT` makes both rows visible together, and `ROLLBACK` removes both. Neither reaches past the database. A notification, a printout or a file written outside it has already happened. That is why [[entry:haskell-weird]] had to force its lazy effects *before* the commit, and why this picture is about the boundary of the transaction and not about the cards. Not every entry places its transaction boundaries in the same spot.
 
 - **Use it when:** any multi-step change to stored data.
-- **Avoid:** long transactions that hold locks, and assuming that effects outside the database (an email, a file) can be rolled back. They cannot.
+- **Avoid it when:** the transaction would hold locks for a long time. Effects outside the database, such as an email or file write, remain after rollback.
 
 **Read more:**
 

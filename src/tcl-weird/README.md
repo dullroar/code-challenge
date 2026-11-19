@@ -200,7 +200,7 @@ Why you might get fired: the control flow of a program is hidden in a trigger an
 
 ## What `check.sh` enforces
 
-Everything in the previous section, then a `--gui --seconds 1` run under Xvfb (skipped, and said so, where neither Xvfb nor a `DISPLAY` exists) that must report the window built from 8 rows, then 25 real runs checked for sane records (hours 10-19, categories in order, correct totals, stopping when the total passes 40) with SQLite agreeing with the output.
+Everything in the previous section, then a `--gui --seconds 1` run under Xvfb (skipped, and said so, where neither Xvfb nor a `DISPLAY` exists) that must report the window built from 8 rows, then 25 real runs checked for sane records (hours 10 to 19, categories in order, correct totals, stopping when the total passes 40) with SQLite agreeing with the output.
 
 ## Run it in a container
 

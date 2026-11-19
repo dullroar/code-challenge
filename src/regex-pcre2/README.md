@@ -1,6 +1,6 @@
 ---
 name: "PCRE2"
-teaches: "regex callouts as a tiny instruction set."
+teaches: "that regex callouts can serve as a tiny instruction set."
 kind: weird
 languages: [c, pcre2, regex]
 lesson: "languages/regex.md#pcre2-callouts-as-an-instruction-set"
@@ -14,7 +14,7 @@ tags: [backtracking, callback, compiler-optimization, computation-versus-orchest
 ---
 # Regex challenge, Track 2: PCRE2 callouts as a tiny DSL
 
-**Teaches you:** regex callouts as a tiny instruction set.
+**Teaches you:** that regex callouts can serve as a tiny instruction set.
 
 One `pcre2_match` call runs the whole timecard demo, then reports **no match**. It follows the regex challenge plan (since removed; it lives in git history as `plans/regex.md`). **DEMO ONLY**: the records are fictional and go to a scratch file, with no connection to any real time-reporting system.
 
@@ -90,14 +90,14 @@ The C host (`timecards.c`) compiles it, registers one callout dispatcher, calls 
 | --- | --- | --- |
 | `init` | opens the scratch file, writes the header | 0 (continue) |
 | `gate` | the stop rule | 1 (fail this branch) once the total is over 40, which ends the `*` loop; else 0 |
-| `book` | draws 10-19 hours, adds to the total, writes the record for the category that was just matched (read from capture group 1) | 0 |
+| `book` | draws 10 to 19 hours, adds to the total, writes the record for the category that was just matched (read from capture group 1) | 0 |
 | `commit` | writes the summary line, closes the file | 0 |
 
 PCRE2 supplies the iteration (`*`), the category walk (the subject string and the alternation), and the backtracking. `(*COMMIT)` keeps a failed match from retrying shorter loops, so `commit` runs exactly once. `(*FAIL)` then makes the whole match lose, after everything was written. That is the signature move.
 
 ## The pulse
 
-On a real terminal, the match finishes the records, then pulses a **DEMO ONLY** banner through a gray ramp for about three seconds (60 frames, 50 ms each), then clears it. `pulse` and `settle` are two more opcodes: the host appends 60 `~` characters to the subject, and `[A-Za-z]*(?:~(?C"pulse"))*(*COMMIT)(?C"settle")` draws one frame per tick. The host still has no loop. The second `(*COMMIT)` stops the final `(*FAIL)` from backtracking into shorter tick counts and re-running `settle`. Nothing is appended when stdout is not a terminal, so pipes and `check.sh` skip it.
+On a real terminal, the match finishes the records, then pulses a **DEMO ONLY** banner through a gray ramp for about three seconds (60 frames, 50 ms each), then clears it. `pulse` and `settle` are two more opcodes: the host appends 60 `~` characters to the subject, and `[A-Za-z]*(?:~(?C"pulse"))*(*COMMIT)(?C"settle")` draws one frame per tick. The host still has no loop. The second `(*COMMIT)` stops the final `(*FAIL)` from backtracking into shorter tick counts and rerunning `settle`. Nothing is appended when stdout is not a terminal, so pipes and `check.sh` skip it.
 
 ## The optimizer caveat, as the plan asks
 

@@ -33,7 +33,12 @@ CSSRC = os.path.join(LESSONS, "cs-source")
 CSOUT = os.path.join(LESSONS, "cs")
 
 KINDS = ("idiomatic", "weird", "port")
-ASSURANCE = ("guaranteed", "implementation-permitted", "accidentally-exploited")
+ASSURANCE_LABELS = {
+    "guaranteed": "guaranteed",
+    "implementation-permitted": "implementation-permitted",
+    "accidentally-exploited": "accidentally exploited",
+}
+ASSURANCE = tuple(ASSURANCE_LABELS)
 EVALUATION = ("eager", "lazy", "deferred", "rewriting", "search", "declarative")
 # field -> (type, required)   type: str | list
 ENTRY_FIELDS = {
@@ -243,6 +248,9 @@ class Model:
         p = self.problems
         for d, e in sorted(self.entries.items()):
             w = f"src/{d}/README.md"
+            teaches = e.get("teaches")
+            if isinstance(teaches, str) and not teaches.startswith("that "):
+                p.add(w, "'teaches' must start with a lowercase 'that' clause")
             if e.get("kind") not in KINDS and "kind" in e:
                 p.add(w, f"kind must be one of {KINDS}")
             if e.get("assurance") not in ASSURANCE and "assurance" in e:
@@ -426,7 +434,7 @@ def tbl_glance(model, L):
     rows = []
     for e in sorted_entries(model):
         rows.append((L.entry(e["dir"]), model.lang_names(e), e["kind"], L.role(e["loop-by"], model.roles[e["loop-by"]]["title"]), e["evaluation"],
-                     e["assurance"], L.entry(e["pairs-with"]) if "pairs-with" in e else ""))
+                     ASSURANCE_LABELS[e["assurance"]], L.entry(e["pairs-with"]) if "pairs-with" in e else ""))
     return table(["Entry", "Languages", "Kind", "What plays the loop", "Evaluation", "Assurance", "Pairs with"], rows)
 
 def cap(text):
@@ -479,7 +487,7 @@ def users_of(model, cid, fmt=lambda d: f"`{d}`"):
 def blk_roles(model, L, expand):
     parts = []
     for rid, r in sorted(model.roles.items(), key=lambda kv: kv[1]["order"]):
-        rows = [(L.entry(e["dir"]), model.lang_names(e), e.get("machine", ""), e.get("state", ""), e["evaluation"], e["assurance"])
+        rows = [(L.entry(e["dir"]), model.lang_names(e), e.get("machine", ""), e.get("state", ""), e["evaluation"], ASSURANCE_LABELS[e["assurance"]])
                 for e in sorted_entries(model, lambda e: e["loop-by"] == rid)]
         body = expand(r["body"])
         if rows:
@@ -582,7 +590,7 @@ def generate_cs(model):
         ids = [c["title"] for _, c in sorted(((i, c) for i, c in model.concepts.items() if c["chapter"] == n), key=lambda kv: kv[1]["order"])]
         if n == 9:
             ids = [r["title"] for r in sorted(model.roles.values(), key=lambda r: r["order"])]
-        chapters.append(f"- [{title}]({fn})" + (f": {', '.join(ids)}" if ids else ""))
+        chapters.append(f"- [{title}]({fn})" + "".join(f"\n  - {item}" for item in ids))
     idx = table(["Concept", "Chapter", "Entries that use it"], [
         (L.concept(cid), model.chapters[model.chapter_files[c["chapter"]][:-3]]["title"], ", ".join(users_of(model, cid)))
         for cid, c in sorted(model.concepts.items(), key=lambda kv: kv[1]["title"].casefold())])

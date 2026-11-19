@@ -51,7 +51,7 @@ The linter derives Letter size and its content rectangle from `book.css`. It che
 | PDF-006 | Advisory vector overrun, using path bounds and enclosing clip bounds. |
 | PDF-007 | Empty publication page when no body or drawing objects are detected. Ambiguous cases and generic Letter fixtures are advisory. |
 | PDF-008 and PDF-009 | Advisory overlap by relative box area, a sparse page, caption with no nearby figure evidence, or matching table grids with an open edge across a page break. |
-| PDF-010 | Named selectable-text sentinels for Mermaid comparisons and Forth labels, APL glyphs, regex/sed literals and selected wraps. The fixture renders literal comparisons and Mermaid's `#gt;` through the pinned SVG route. Its wrap comparison removes only adjacent paired arrows from a deliberately mid-token break, where no source space was lost. |
+| PDF-010 | Named selectable-text sentinels for Mermaid comparisons and Forth labels, APL glyphs, regex/sed literals and selected Forth and Make wraps. The fixture renders literal comparisons and Mermaid's `#gt;` through the pinned SVG route. Its wrap comparison removes only adjacent paired arrows from a deliberately mid-token break, where no source space was lost. |
 | PDF-011 | Release rasterization and diagnostic preview failures. |
 
 Path bounds approximate visible ink. Clip boxes approximate clipping, and content discarded before PDF serialization may be undetectable. Raster measurements describe placement even when masking affects the visible pixels. The selectable-text checks cover the named strings in [the sentinel list](pdf_sentinels.py). Outlined glyphs and semantic row boundaries require visual inspection or evidence from the source. Figure scale remains the responsibility of `--check-diagrams`. A separate `qpdf` structural check is optional and outside this gate.
@@ -144,3 +144,21 @@ python lessons/book/guide_impact.py master --check-review review.json
 ```
 
 Once you've checked a guide's traces, exercises, boundaries and source citations, record its printed token in a JSON object keyed by guide path, such as `languages/apl.md`. The check rejects missing tokens and tokens made stale by an edit to the guide or the relevant sources. Record the supporting run or source evidence in the review. Rebuild the book and the separate study guides together.
+
+## Building the study guides
+
+The guides build as their own HTML, PDF and EPUB set, separate from the book. The book's PDF and EPUB do not contain them.
+
+```bash
+python lessons/study-guides/build.py --check   # lint the guides, build the HTML, verify every internal link
+python lessons/study-guides/build.py           # write the PDF and EPUB next to the book's, in the repository root
+python lessons/book/test_study_guides.py       # the tests: template, diagrams, links, index
+```
+
+The outputs are `learn-programming-the-weird-way-study-guides.pdf` and `.epub`. The reading order is [`chapters.txt`](../study-guides/chapters.txt). The build reuses the book's own pipeline ([`lessons/book/build.py`](build.py)) for link rewriting, diagrams, Pandoc and reproducibility. [`lessons/book/study_guides.py`](study_guides.py) checks each guide for the template, for placeholder text, for diagrams that match their source, and for links.
+
+The [PDF release gate](README.md#pdf-release-gate) checks the guide PDF after each full build. Pass `--release` to make the PDF and its lint scan required.
+
+**Diagrams.** A Program Flow diagram in a guide is copied verbatim from `src/<entry>/README.md` and marked with `<!-- diagram-source: src/<entry>/README.md#program-flow -->`. The build fails if a copy has drifted. A new diagram is allowed only when it shows a relationship no source diagram shows (cross-language state placement, a lazy-demand trace, a transaction boundary or an authority boundary), and is marked `<!-- diagram-new: kind - why -->`.
+
+**External links.** A guide may link only to the hosts in [`lessons/book/link-hosts.txt`](link-hosts.txt). Wikipedia comes first. The GNU Project manuals (`www.gnu.org/software/`) were added for the guides, because a claim about an implementation needs its manual.

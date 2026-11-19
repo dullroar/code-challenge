@@ -1,6 +1,6 @@
 ---
 name: "Java"
-teaches: "A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`."
+teaches: "that a Java `for (init; condition; update) { }` can preserve the shape of the original C# program."
 kind: port
 languages: [java]
 lesson: "languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery"
@@ -23,7 +23,7 @@ All four ports do the same thing, in the same order:
 
 1. Open a local SQLite database (`demo-timecards.db`) and create a `time_cards` table if it is missing.
 2. Loop. Each pass adds 10 to 19 random hours, stages a made-up time card with the next category (Meetings, Coding, Debugging, Learning), and starts a background thread that saves the staged cards.
-3. Stop when the hours total more than 40 or the categories run out. There are five category names (Meetings repeats), so a total of exactly 40 after four cards continues to a fifth. That is three to five passes.
+3. Stop when the total passes 40 or the categories run out. There are five category names (Meetings repeats), so a total of exactly 40 after four cards continues to a fifth. That is three to five passes.
 4. Show a window that says **DEMO ONLY** with the total simulated hours. It pulses (fades in and out) until you close it.
 5. Wait for the saves to finish, then exit.
 

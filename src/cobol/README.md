@@ -16,7 +16,7 @@ tags: [control-flow, declarative-programming, integrity-constraint, state-encodi
 
 > **DEMO ONLY.** Fictional timecards in a scratch SQLite file. No connection to any real time-reporting system.
 
-COBOL (1959) was built for exactly this kind of program: records, totals and a report. The challenge ("add 10-19 hour cards until the total passes 40") is one statement in the `PROCEDURE DIVISION`, `PERFORM DRAW-CARD UNTIL OVER-FORTY`. The rule itself isn't in the procedure code at all. `OVER-FORTY` is declared in the `DATA DIVISION`, on the total.
+COBOL (1959) was built for exactly this kind of program: records, totals and a report. The challenge ("add 10 to 19 hour cards until the total passes 40") is one statement in the `PROCEDURE DIVISION`, `PERFORM DRAW-CARD UNTIL OVER-FORTY`. The rule itself isn't in the procedure code at all. `OVER-FORTY` is declared in the `DATA DIVISION`, on the total.
 
 ## Run it
 
@@ -70,7 +70,7 @@ A COBOL program has four *divisions*, always in the same order: `IDENTIFICATION`
    ```
 
    `PIC 99` ("picture") says the total is exactly two decimal digits. The `88` line under it is a *condition name*. It doesn't store anything. It names a range of `WS-TOTAL`'s values, and using `OVER-FORTY` anywhere asks whether the total is currently in that range. So the loop, `PERFORM DRAW-CARD UNTIL OVER-FORTY`, holds no comparison. Change the rule and you edit the data description, not the code.
-2. **The picture does the rounding.** `COMPUTE WS-HOURS = 10 + FUNCTION RANDOM * 10` produces something from 10.0 to 19.99. `WS-HOURS` is `PIC 99`, two digits with no decimal places, so storing into it simply drops the fraction. Nothing calls a floor function: the field's shape gives 10..19. COBOL arithmetic is decimal, not binary floating point, which is why money still runs on it.
+2. **The picture does the rounding.** `COMPUTE WS-HOURS = 10 + FUNCTION RANDOM * 10` produces something from 10.0 to 19.99. `WS-HOURS` is `PIC 99`, two digits with no decimal places, so storing into it simply drops the fraction. Nothing calls a floor function: the field's shape gives 10 to 19. COBOL arithmetic is decimal, not binary floating point, which is why money still runs on it.
 3. **One string, seen twice.** The four category names are four 9-character `FILLER`s in `CATEGORY-NAMES`. `CATEGORY-TABLE REDEFINES CATEGORY-NAMES` lays a second description over the same 36 bytes: `CATEGORY ... OCCURS 4 TIMES`, an array. `DRAW-CARD` picks `CATEGORY(MOD(entries, 4) + 1)`. COBOL subscripts start at 1.
 4. **The SQL is a record file.** `SELECT SQL-SCRIPT ASSIGN TO WS-SQL-PATH ORGANIZATION IS LINE SEQUENTIAL` declares a file whose name is in a variable, and `FD SQL-SCRIPT` describes its record: one 400-character line. The program `WRITE`s a `CREATE TABLE`, a `BEGIN`, one `INSERT` per card and a `COMMIT` to it, `CLOSE`s it, and only then hands the whole script to `sqlite3`. So every run lands in one transaction, or not at all.
 5. **The ISO week is arithmetic.** COBOL has date functions but no ISO week. `FUNCTION INTEGER-OF-DATE` counts days from 1601-01-01, which was a Monday, so `MOD(day - 1, 7)` is 0 on Mondays. An ISO week belongs to the year its Thursday falls in, and week 1 is the one holding that year's first Thursday. `WORK-OUT-WEEK` is those two facts in four `COMPUTE`s. It was checked against `date +%G-W%V` for every day from 2020 to 2030, including the week-53 years, and `check.sh` compares it again on every run.

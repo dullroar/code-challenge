@@ -1,6 +1,6 @@
 ---
 name: "XAML"
-teaches: "how far a markup parser can be pushed before it stops describing a UI and starts *running* a program."
+teaches: "that a markup parser can run a program while it describes a UI."
 kind: weird
 languages: [xaml, c-sharp]
 lesson: "languages/csharp-linq-xaml.md#xaml"
@@ -15,7 +15,7 @@ counterexamples: [event-driven-programming]
 ---
 # XAML challenge: the program isn't even C# code
 
-**Teaches you:** how far a markup parser can be pushed before it stops describing a UI and starts *running* a program.
+**Teaches you:** that a markup parser can run a program while it describes a UI.
 
 XAML is supposed to describe a user interface: a tree of objects, declared, not executed. This entry treats that promise as a dare. The C# in this folder is a single expression that hands a `.xaml` file to the XAML parser:
 
@@ -73,7 +73,7 @@ A markup language has no `for`, no `if`, and no assignment - in theory. In pract
 
 - **`XamlReader.Load` is the interpreter.** The `.xaml` file is the program; parsing it *is* running it.
 - **`ObjectDataProvider` is the instruction.** It can construct any object and call any method, and it fires the moment it is parsed. Document order becomes the program counter.
-- **`Refresh` is the goto.** One provider can re-run another one. The call is passed through an `x:Array` so that XAML does not try to unwrap it first.
+- **`Refresh` is the goto.** One provider can rerun another one. The call is passed through an `x:Array` so that XAML does not try to unwrap it first.
 - **"Carrier" arrays are the variables.** One `ObjectDataProvider` call fills a `char[]` or `byte[]` in place; the next one reads it back. That is how a random number travels from `Random.Next` into a SQL parameter, an XML element, or an EF Core entity.
 - **Expression engines are the ALU.** `DataTable.Compute("Sum(h)")`, `DataView.RowFilter`, and SQL itself do the arithmetic and the conditionals. A SQL string inside a XAML attribute is still XAML.
 - **A `Thread` is built entirely in markup**, using `Delegate.CreateDelegate`, then started and joined - all as `ObjectDataProvider` calls. The window's fade is an ordinary WPF `Storyboard`.

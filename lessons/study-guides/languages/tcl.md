@@ -7,13 +7,13 @@ This guide reads two Tcl programs: [`src/tcl`](../../../src/tcl/README.md), an o
 When you finish, you should be able to:
 
 1. Explain Tcl's command model: everything is a command whose arguments are strings, and an unknown command goes to `unknown`.
-2. Explain how `tcl-weird`'s three hooks work together: an SQL function that calls Tcl, an `unknown` handler that defines procedures from table rows, and a trigger that inserts the next card.
+2. Explain how `tcl-weird`'s three hooks work together: an SQL function that calls Tcl, an `unknown` handler that defines procedures from table rows and a trigger that inserts the next card.
 3. Trace both programs through the same three cards, naming which engine acts at each step.
 4. Explain why `PRAGMA recursive_triggers = ON` is the loop, and what the `WHERE` in the trigger is.
 5. Name the trust boundary in this design and explain why it holds here.
-6. Label each behavior as guaranteed, implementation-permitted, or accidentally exploited.
+6. Label each behavior as guaranteed, implementation-permitted or accidentally exploited.
 
-Scope limits. You need to read Tcl (braces group, brackets substitute, `$` reads a variable) and basic SQL. The guide does not teach Tk (the optional window is also built from table rows) or SQLite's query planner. It uses Tcl 8.6 with the `sqlite3` package. The book's page is [Tcl](../../languages/tcl.md). For ideas, see [Database triggers](../../cs/06-state-beyond-variables.md#database-triggers), [Arbitrary code execution](../../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution) and [Homoiconicity: code as data](../../cs/06-state-beyond-variables.md#homoiconicity-code-as-data).
+**Scope limits.** You need to read Tcl (braces group, brackets substitute, `$` reads a variable) and basic SQL. The guide does not teach Tk (the optional window is also built from table rows) or SQLite's query planner. It uses Tcl 8.6 with the `sqlite3` package. The book's page is [Tcl](../../languages/tcl.md). For ideas, see [Database triggers](../../cs/06-state-beyond-variables.md#database-triggers), [Arbitrary code execution](../../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution) and [Homoiconicity: code as data](../../cs/06-state-beyond-variables.md#homoiconicity-code-as-data).
 
 ## Before you begin
 
@@ -40,9 +40,9 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
-Both Tcl entries save the cards in one SQLite transaction and print a summary. Tcl writes the boundary two ways. In `tcl`, `while {$total <= $limit}` ([L40](../../../src/tcl/timecards.tcl#L40)): true for 40, so the loop goes round. In `tcl-weird`, the trigger inserts the next card `WHERE NEW.running_total <= 40` ([L113](../../../src/tcl-weird/timecards.tcl#L113)). A card is inserted only if the *previous* card's total was at most 40, so the crossing card is the last one inserted.
+Both Tcl entries save the cards in one SQLite transaction and print a summary. Tcl writes the boundary two ways. In `tcl`, `while {$total <= $limit}` ([L40](../../../src/tcl/timecards.tcl#L40)): true for 40, so the loop repeats. In `tcl-weird`, the trigger inserts the next card `WHERE NEW.running_total <= 40` ([L113](../../../src/tcl-weird/timecards.tcl#L113)). A card is inserted only if the *previous* card's total was at most 40, so the crossing card is the last one inserted.
 
 ## The machine to identify
 
@@ -114,7 +114,7 @@ flowchart TD
 
 ## Trace one run
 
-The programs draw random hours. Use hours **15, 19, 12**. To check it, a scratch copy of `tcl-weird` was run in the sandbox with the `hours` row's body replaced by a lookup in a fixed list (an edit to the text inside the SQL string), and with two lines of logging added to the `hours` and `born` rows. The output, with the log lines (printed to standard error) shown first, was:
+The programs draw random hours. For this trace, use hours **15, 19, 12**. The trace comes from a scratch copy of `tcl-weird` that ran in the sandbox. In the copy, the SQL string for the `hours` row contained a lookup in a fixed list. The `hours` and `born` rows each logged to standard error. The log lines appear first in this output.
 
 ```text
 # DEMO ONLY run <id>
@@ -146,13 +146,13 @@ The procedures fetched from the table were `born`, `category`, `hours`, `init`, 
 
 **Plain `tcl`.** The loop runs `randomHours`, adds to `total`, appends a dict and tests `$total <= $limit`. The test is after the draw in program order and before the next draw, which is why the crossing card is kept ([L32-34](../../../src/tcl/timecards.tcl#L32-L34)). With 15, 19, 12 the totals are 15, 34 and 46, and the loop exits.
 
-**Exactly 40.** With four 10-hour cards, the fourth card has total 40, `40 <= 40` is true, and the trigger inserts a fifth. Exercise B12 step 2 shows five rows at 10, 20, 30, 40, 50.
+**Exactly 40.** With four 10-hour cards, the fourth card has total 40, `40 <= 40` is true and the trigger inserts a fifth. Exercise B12 step 2 shows five rows at 10, 20, 30, 40, 50.
 
 ## Compare the ordinary and weird designs
 
 | Dimension | `tcl` | `tcl-weird` |
 | --- | --- | --- |
-| **Representation** | A procedure with a loop and a list of dicts. | Rows. The program is data in `tcl_code`, the loop is a trigger, and the window (with `--gui`) is also rows. |
+| **Representation** | A procedure with a loop and a list of dicts. | Rows. The program is data in `tcl_code`, the loop is a trigger and the window (with `--gui`) is also rows. |
 | **Observability** | Print `$cards`. | You must read the table and the trigger. The procedures that deal and print cards do not exist until something calls them. |
 | **Tests** | Call `timecards::draw`. | Run the whole thing. The stop rule is a `WHERE` inside a trigger, not testable alone. |
 | **Debugging** | Standard Tcl stack traces. | A Tcl error inside an SQL function is reported through SQLite, and the stack mixes `unknown`, `uplevel` and `db eval`. |
@@ -167,24 +167,24 @@ The difference to remember: `tcl` has *one* engine and `tcl-weird` has *two*, SQ
 | --- | --- | --- |
 | [B12. Tcl: edit the program in the database](../../exercises.md#b12-tcl-edit-the-program-in-the-database-verified), step 1 | Set `recursive_triggers` to `OFF`. How many rows print? How many does the summary count? | One row prints and the summary says `entries=2`. The trigger fired once, card 2 was inserted and counted, but an insert made by a trigger does not fire the trigger again unless recursion is enabled. The pragma *is* the loop. |
 | B12, step 2 | Change the `hours` row's body to `expr {10}`. | Exactly five rows, totals 10, 20, 30, 40, 50, and the shared checker passes. The run does not stop at 40, because exactly 40 continues. You edited text inside an SQL string, not a Tcl procedure. |
-| B12, the three hooks | Name them. Which did you change in step 2? | An SQL function that calls Tcl, the `unknown` handler, and the trigger. Step 2 changed the *data that `unknown` serves*. |
+| B12, the three hooks | Name them. Which did you change in step 2? | An SQL function that calls Tcl, the `unknown` handler and the trigger. Step 2 changed the *data that `unknown` serves*. |
 | [C1. Weird next to boring](../../exercises.md#c1-weird-next-to-boring-verified) | In which program can you see the rule in one place? | `tcl`: the `while` condition. `tcl-weird`: the `WHERE` in a trigger, three layers deep. |
 | [F. Prove a README claim](../../exercises.md#f-prove-a-readme-claim-verified) | The README says each card's hours are drawn once. Can you test it? | Yes: count the calls of the `hours` procedure (the entry's `check.sh` does) and compare with the number of cards. The negative control is a variant that calls `tcl('hours')` in both places, which makes the count twice the card count and fails the check. This replaced an earlier dependence on SQLite's evaluation order. |
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| Tcl calls `unknown` for a command that does not exist | **Guaranteed** | A documented Tcl hook. |
-| A command's arguments are strings, and code can be built and run as text | **Guaranteed** | Tcl's core model. |
-| An SQLite trigger fires for each inserted row, and a trigger's own inserts fire triggers only with `recursive_triggers` on | **Guaranteed** | Documented SQLite behavior. Verified by B12 step 1. |
-| The trigger chain must fit the configured SQLite depth limit | **Implementation-permitted** | SQLite documents a default maximum of 1,000. A particular build or connection can set a different limit. This entry needs only 3 to 5 steps. |
-| The same hours appear as `h` and inside `NEW.running_total + h` | **Guaranteed** by design (after the fix) | The hours are written into the one-row TEMP table `draw` and read from it twice. Before the fix they came from a subquery whose function SQLite happened to evaluate once per row, which it does not promise for non-deterministic functions (**accidentally exploited**). The entry's `check.sh` now counts the calls of the `hours` procedure: one per card. |
-| `TEMP` tables and triggers disappear with the connection | **Guaranteed** | Documented. It keeps the program out of the file on disk. |
-| `INSERT INTO main.demo_timecards` is rejected inside a trigger, so the trigger body uses the bare name | **Implementation-permitted** | SQLite's rule about qualified names in triggers. The `TEMP` trigger resolves the bare name to the one table in `main`. |
-| Tk keeps `tclsh` alive after the script ends | **Implementation-permitted** | Why the script ends with `destroy .`. |
+| Tcl calls `unknown` for a command that does not exist | **guaranteed** | A documented Tcl hook. |
+| A command's arguments are strings, and code can be built and run as text | **guaranteed** | Tcl's core model. |
+| An SQLite trigger fires for each inserted row, and a trigger's own inserts fire triggers only with `recursive_triggers` on | **guaranteed** | Documented SQLite behavior. Verified by B12 step 1. |
+| The trigger chain must fit the configured SQLite depth limit | **implementation-permitted** | SQLite documents a default maximum of 1,000. A particular build or connection can set a different limit. This entry needs only 3 to 5 steps. |
+| The same hours appear as `h` and inside `NEW.running_total + h` | **guaranteed** by design (after the fix) | The hours are written into the one-row TEMP table `draw` and read from it twice. Before the fix they came from a subquery whose function SQLite happened to evaluate once per row, which it does not promise for non-deterministic functions (**accidentally exploited**). The entry's `check.sh` now counts the calls of the `hours` procedure: one per card. |
+| `TEMP` tables and triggers disappear with the connection | **guaranteed** | Documented. It keeps the program out of the file on disk. |
+| `INSERT INTO main.demo_timecards` is rejected inside a trigger, so the trigger body uses the bare name | **implementation-permitted** | SQLite's rule about qualified names in triggers. The `TEMP` trigger resolves the bare name to the one table in `main`. |
+| Tk keeps `tclsh` alive after the script ends | **implementation-permitted** | Why the script ends with `destroy .`. |
 
-**The trust boundary.** `unknown` runs whatever text is in the table. In `tcl-weird` the table is built by the program itself, in memory, in a `TEMP` table, and filled from literals in the script. Nobody else can write to it. That is the entire defense. If the table were a normal table in the file on disk, anyone able to edit the database could make the program run their Tcl. This is the same lesson as the book's threat-model examples: treat anything that is read as code as code. See [Arbitrary code execution](../../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution).
+**The trust boundary.** `unknown` runs whatever text is in the table. In `tcl-weird` the table is built by the program itself, in memory, in a `TEMP` table and filled from literals in the script. Nobody else can write to it. That is the entire defense. If the table were a normal table in the file on disk, anyone able to edit the database could make the program run their Tcl. This is the same lesson as the book's threat-model examples: treat anything that is read as code as code. See [Arbitrary code execution](../../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution).
 
 **Costs to state.**
 
@@ -198,17 +198,17 @@ The difference to remember: `tcl` has *one* engine and `tcl-weird` has *two*, SQ
 - **A rule that fires the next step.** The trigger is the same idea as the `88`-level condition in [COBOL](cobol.md) and the `or` combination in [Common Lisp](common-lisp.md): the next step comes from a *declared rule*, not from a statement you can see in order. The concept guide [State and control beyond variables](../concepts/state-and-control-beyond-variables.md) compares them.
 - **Code as data, in other languages.** [APL](apl.md) writes its own functions as text with `⎕FX`. Tcl fetches them from a table. [XAML in the C# guide](csharp-linq-xaml-and-ports.md) runs methods while it parses markup.
 - **A boundary you must defend.** [Reading adversarial programs](../concepts/reading-adversarial-programs.md) uses this entry and the XAML and tar entries as its main examples of "data that is also code".
-- **Transactions and commit.** The whole trigger chain runs in one `db transaction`, as in [Effects, errors, and commitment](../concepts/effects-errors-and-commitment.md), while the printing does not roll back.
+- **Transactions and commit.** The whole trigger chain runs in one `db transaction`, as in [Effects, errors and commitment](../concepts/effects-errors-and-commitment.md), while the printing does not roll back.
 - **In the book.** [Tcl](../../languages/tcl.md), [Database triggers](../../cs/06-state-beyond-variables.md#database-triggers) and [Arbitrary code execution](../../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** In `tcl-weird`, hours are 12, 14, 13, 11 (totals 12, 26, 39, 50). For each card, say whether the trigger inserts a next card. *(After card 1 (total 12): yes. After card 2 (26): yes. After card 3 (39): yes. After card 4 (50): no, because `50 <= 40` is false. Four cards, the fourth is the crossing card.)*
 2. **Explain.** Why does `PRAGMA recursive_triggers = OFF` give exactly one printed row and `entries=2`? *(The starting `INSERT` fires the trigger once. The trigger prints card 1 and inserts card 2, but a trigger's own insert does not fire the trigger again, so card 2 is never printed. The summary counts both rows.)*
 3. **Transfer.** In a relational database you use, which feature would play the part of the trigger-as-loop, and what would limit the depth? *(A recursive trigger or a recursive common table expression. In both cases the engine caps the recursion depth.)*
-4. **Evidence.** A reviewer says "every procedure `tcl-weird` runs comes from the table." Design a test that could fail. *(Check that the list of fetched procedures printed at the end contains `born`, `category`, `hours`, `init`, `runid` and `week`, and that none of them is defined by a `proc` in the script. The negative control is to define one of them in the script: it should then be missing from the fetched list, because `unknown` is never called for it.)*
+4. **Evidence.** A reviewer says, "Every procedure `tcl-weird` runs comes from the table." Design a test that could fail. *(Check that the list of fetched procedures printed at the end contains `born`, `category`, `hours`, `init`, `runid` and `week`, and that none of them is defined by a `proc` in the script. The negative control is to define one of them in the script: it should then be missing from the fetched list, because `unknown` is never called for it.)*
 
 ## Further reading
 

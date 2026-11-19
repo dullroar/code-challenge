@@ -16,7 +16,7 @@ tags: [array-programming, eager-evaluation, referential-transparency]
 
 > **DEMO ONLY.** Fictional timecards in a scratch SQLite file. No connection to any real time-reporting system.
 
-The challenge’s card selection takes four named array assignments. `Drawn` holds the five rolls, and `Hours`, `Totals` and `Kinds` derive the kept rows from them. There is no loop and no `if`. The rest of [`timecards.apl`](timecards.apl) is plumbing: seeding, a pipe to `sqlite3`, and printing.
+The challenge's card selection takes four named array assignments. `Drawn` holds the five rolls, and `Hours`, `Totals` and `Kinds` derive the kept rows from them. There is no loop and no `if`. The rest of [`timecards.apl`](timecards.apl) is plumbing: seeding, a pipe to `sqlite3`, and printing.
 
 ## Run it
 
@@ -60,7 +60,7 @@ flowchart TD
 
 Read the four assignments under "The challenge" in the source with this walk-through beside them.
 
-1. **Draw everything up front.** `Drawn←(10-⎕IO)+?5⍴10`. `5⍴10` is five tens, `?` rolls each one (`?10` gives a number from the first ten integers), and the `10-⎕IO` shift turns those into 10..19. Why five? Every card is at least 10 hours, so five cards always total at least 50. Five is a *bound that can never be too small*, not a loop count.
+1. **Draw everything up front.** `Drawn←(10-⎕IO)+?5⍴10`. `5⍴10` is five tens, `?` rolls each one (`?10` gives a number from the first ten integers), and the `10-⎕IO` shift turns those into 10 to 19. Why five? Every card is at least 10 hours, so five cards always total at least 50. Five is a *bound that can never be too small*, not a loop count.
 2. **Apply the stop rule as data.** `Hours←Drawn↑⍨1++/40≥+\Drawn`. Read it right to left:
    - `+\Drawn` is the running total after each card, for example `15 26 41 51 …`;
    - `40≥` turns that into 1s and 0s: `1 1 0 0 …`. Totals only ever grow, so the 1s are always a prefix;
@@ -113,7 +113,7 @@ To test, paste `⍳ ⍴ ⍵ ⎕ ∇ ⍝ ⍣ ⍸ ⌽` somewhere. You should see e
 
 ## Gotchas worth knowing
 
-- **Origin.** `⎕IO` is the index origin (1 by default in GNU APL, 0 in some code). The file never assumes it: `?` is the only primitive whose results depend on it, and the draw subtracts `⎕IO` back out. `check.sh` runs with the default; try putting `⎕IO←0` on the first line and see that the cards are still 10-19.
+- **Origin.** `⎕IO` is the index origin (1 by default in GNU APL, 0 in some code). The file never assumes it: `?` is the only primitive whose results depend on it, and the draw subtracts `⎕IO` back out. `check.sh` runs with the default; try putting `⎕IO←0` on the first line and see that the cards are still 10 to 19.
 - **`⊃` is not "first".** In APL2-family interpreters (GNU APL, APL2) `⊃` *discloses* (it is "mix") and `↑` is "first". Dyalog reverses that: `⊃` is first/pick. `⊃Kinds[⍵]` here is a disclose of one selected string back to a plain character vector.
 - **`_←` is a throwaway.** Primitives such as `⎕FIO` return a value; a bare expression would print it. Assigning to `_` swallows it.
 - **No formatter exists.** There is no `gofmt` for GNU APL source. The layout rules applied by hand are: one statement per line (`⋄` is for the REPL), CamelCase names for things you define, and comments aligned in a column.

@@ -3,9 +3,9 @@ title: "Evaluation and demand"
 ---
 For an advanced reading path with traces and experiments, see the [evaluation, demand and laziness study guide](../study-guides/concepts/evaluation-demand-and-laziness.md).
 
-Is a value computed when you write it, when you first need it, or each time you ask? That is the question of **evaluation strategy**, and the same-looking code answers it differently in different languages.
+Is a value computed when you write it, when you first need it or each time you ask? That is the question of **evaluation strategy**, and the same-looking code answers it differently in different languages.
 
-Haskell is lazy: one `span` over an infinite list is the stop rule, because only the needed part is ever computed. LINQ is deferred: a pipeline does nothing until someone enumerates it. APL is eager and works on whole arrays at once, so it draws more numbers than it needs and trims the result. When effects are involved, the choice stops being a detail. If a lazy list performs input and output, then *reading the list* is what does the work. This chapter explains the vocabulary: strategies and short circuits, iterators and generators, first-class and higher-order functions, functors and `map`, monoids and folds (and why `reduce` cannot stop early), and dataflow. The table at the end shows every entry's strategy in one place.
+Haskell is lazy: one `span` over an infinite list is the stop rule, because only the needed part is ever computed. LINQ is deferred: a pipeline does nothing until someone enumerates it. APL is eager and works on whole arrays at once, so it draws more numbers than it needs and trims the result. When effects are involved, the choice stops being a detail. If a lazy list performs input and output, then *reading the list* is what does the work. This chapter explains the vocabulary: strategies and short circuits, iterators and generators, first-class and higher-order functions, functors and `map`, monoids and folds (and why `reduce` cannot stop early) and dataflow. The table at the end shows every entry's strategy in one place.
 
 ```mermaid
 flowchart TB
