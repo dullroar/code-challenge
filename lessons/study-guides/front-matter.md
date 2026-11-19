@@ -1,6 +1,6 @@
 <!--
   Title page and copyright page of the study guides. Plain HTML on purpose, like lessons/front-matter.md: the build inserts it
-  verbatim before the table of contents (pandoc --include-before-body), and the book's CSS (book/book.css) gives each page
+  verbatim before the table of contents (Pandoc front matter), and the book's CSS (book/book.css) gives each page
   its own sheet. It is not a chapter and is not in chapters.txt.
 -->
 <section class="titlepage">

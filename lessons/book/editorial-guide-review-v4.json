@@ -1,0 +1,23 @@
+{
+  "concepts/comparative-machine-design.md": "153248acf8c309d4af17617be35ae82c9080f2f5a2e5f9e908bb4c4d4f48b271",
+  "concepts/effects-errors-and-commitment.md": "b57d2a66754f1e33226898d6ac4bcf151caa4817cbadabdfb7a109f6995653bd",
+  "concepts/evaluation-demand-and-laziness.md": "6b14206f7098d0dbb4fc158844eef890077a4ee9eb9c4f3c51343c637010f4aa",
+  "concepts/events-callbacks-and-reactive-control.md": "48d532b0940d7d12be9812450a9f4c96f9db36f80c78d0e497613fd1561ad91d",
+  "concepts/formal-languages-and-weird-machines.md": "81960bd5a40a9e8f77f454c2a4f4241b90ba3796903f4054b64adc699de58c51",
+  "concepts/portability-abstraction-and-cost.md": "50e3101f067f137b18e4dafcd35752693e80ffe67fe89fecff1567bdc85cf4bf",
+  "concepts/reading-adversarial-programs.md": "f6df5296f2d9c56b28c84599058dce30306aa5e4afbb6109e2457ff381a412cf",
+  "concepts/state-and-control-beyond-variables.md": "13c34b65e6735d581d832e6f58150ad931aa5401fd81c7efa335d2752c821eec",
+  "languages/apl.md": "cafe5f89ab556ab6302b3679c384a7e2638174cea61e986cd4ce1cc43bb0ef2e",
+  "languages/cobol.md": "9cb7fb37f8884ea35edbaa6aa63401582f099f3c210d724554f701ece5eea879",
+  "languages/common-lisp.md": "6d0d59d65630fedd7df9fc0753c456d5d92fe2c77ca4c1884f47f46d59d383d2",
+  "languages/csharp-linq-xaml-and-ports.md": "0af1366aaff0fa8d1d820e6434a8904ec30447a2ec02d741e207236e762867a8",
+  "languages/ed-and-ex.md": "2f9f7e3857c5181c778dc76bd32095b0aaded6a422961d2f9364887319e0a794",
+  "languages/forth.md": "e02097418cb2a4858d788ba8bef3a8733ae884ac99b907a235234ff36f3ad5ea",
+  "languages/haskell.md": "68751a3f2b8886022e72271a2d8c9b59254d8ff7e35e310786b0b7be781a47f6",
+  "languages/javascript.md": "13cabeb5890f22830408cd8272137dbcd7792c0f3796eb5816a391172df8e62d",
+  "languages/m4.md": "6420fe996796e062da2f00983de974f9f9f2db4e458cf26d96d5e29fac42b085",
+  "languages/make-and-cmake.md": "7831b8aaae6355ff864add181bc8047da8cae246bbcad724ddf6c8bff451fec8",
+  "languages/regex-engines-and-sed.md": "889fc51272c3fed6578f1df83595529ffc56cd48ecf9e7f739cbeb3c2cdb9152",
+  "languages/tar.md": "f2a05d554e8b673fbce96476e708a55f18049962b05f9cfe2f8c0892e60fa5b6",
+  "languages/tcl.md": "bb2c6d581457fd0ce1c2ecfcf84ce118a627df65e1729573650855aedf6160ff"
+}

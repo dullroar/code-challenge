@@ -71,7 +71,7 @@ A sandbox is a restricted place where untrusted code can run without being trust
 
 **In this repo:**
 
-**Applies to every entry** (40). Every entry ships a Dockerfile for the locked-down Linux container, or a Windows Sandbox command, and its check script runs inside one of them.
+**Applies to every entry** (40). Every entry documents a Linux container or Windows Sandbox command. Where an entry supplies a check script, see its README for how to run the checks.
 
 ## Principle of least privilege
 

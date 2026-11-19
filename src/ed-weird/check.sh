@@ -102,8 +102,10 @@ echo "ok: a failed address is an error, unlike a failed s: exit status 1"
 # ---- 6. Another ed: busybox ed cannot run the program. Measured, and asserted when busybox is there.
 if command -v busybox >/dev/null && busybox --list | grep -qx ed; then
     printf '7\n3\n9\n0\n5\n' > "$work/bb.txt"
-    bbout=$(busybox ed "$work/bb.txt" < timecards.ed 2>&1 | head -3 | tr '\n' '|')
-    [[ $(busybox ed "$work/bb.txt" < timecards.ed 2>/dev/null | grep -c '^Meetings 17 17$') -eq 0 ]] || fail "busybox ed ran the program; update the README"
+    # Capture the finite diagnostic before shortening it so head cannot give ed SIGPIPE.
+    bbout=$(busybox ed "$work/bb.txt" < timecards.ed 2>&1 || true)
+    if grep -qx 'Meetings 17 17' <<<"$bbout"; then fail "busybox ed ran the program; update the README"; fi
+    bbout=$(head -3 <<<"$bbout" | tr '\n' '|')
     echo "ok: busybox ed cannot run it (no # comments, t, j, g, Q; no empty match in s). First lines: $bbout"
 else
     echo "note: busybox ed not installed; skipped the dialect check"

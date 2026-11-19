@@ -4,7 +4,7 @@ teaches: "a regex as a stack-based counter."
 kind: weird
 languages: [c-sharp, regex]
 lesson: "languages/regex.md#net-balancing-groups"
-loop-by: backtracking-search
+loop-by: capture-search
 evaluation: search
 assurance: guaranteed
 pairs-with: regex-perl
@@ -66,7 +66,7 @@ flowchart TD
     G --> H["Host reads the captures: categories, hours and the size of s"]
 ```
 
-**What this shows:** the regex engine is a machine with stacks. A balancing group pops one stack and pushes another in the same step, so a single `a` can spend one unit of budget and add one hour to the total. The budget stack is the stop rule: when it is empty, the next pass cannot start.
+**What this shows:** the regex engine is a machine with stacks. Each `a` pushes one capture onto the total stack `s`. The balancing group also pops one budget token from `b` while any remain. The budget stack is the stop rule: when it is empty, the next pass cannot start.
 
 **Why this mechanism matters:** the state is stack *depth*. Nothing counts and nothing adds. The match succeeds, and the program's answer is what the engine captured. An entry may push the total over 40 mid-way, because the budget runs dry partway through its hours and the extra `a`s pop nothing.
 
@@ -79,7 +79,7 @@ The host draws five random hour counts and builds a *unary tape*: `Meetings:aaaa
 | `\A(?:(?<b>)){41}` | The **budget**: 41 empty captures pushed on group `b`'s stack. 41 because the stop rule is "total *exceeds* 40" |
 | `(?: ... )*` | The loop: each pass is one timecard entry |
 | `(?(b) ... \|(?!))` | The **stop rule**. While the budget stack is non-empty, take another entry; once it is empty, `(?!)` fails the pass and the `*` ends |
-| `(?(fm)(?(fc)(?(fd)(?(fl)(?!)\|(?<fl>)Learning)\|(?<fd>)Debugging)\|(?<fc>)Coding)\|(?<fm>)Meetings)` | The **category picker**: four flag groups are a little state machine. The first pass finds `fm` unset, so it takes Meetings and sets it; the next sees `fm` and takes Coding; and so on. After the second `Meetings`, the last `(?!)` stops a sixth pass |
+| `(?(fm)(?(fc)(?(fd)(?(fl)(?(f5)(?!)\|(?<f5>)Meetings)\|(?<fl>)Learning)\|(?<fd>)Debugging)\|(?<fc>)Coding)\|(?<fm>)Meetings)` | The **category picker**: five flag groups are a little state machine. The first pass finds `fm` unset, so it takes Meetings and sets it; the next sees `fm` and takes Coding; and so on. After the second `Meetings`, the last `(?!)` stops a sixth pass |
 | `(?<hrs>(?:(?(b)(?<-b>))(?<s>)a){10,19});` | The entry's hours. Each `a` pops one budget token if any are left (a **balancing group**), pushes one onto the running-total stack `s`, and the `{10,19}` enforces the demo's range |
 
 An entry can push the total over 40 from anywhere in its 10-19 hours; the budget simply runs dry partway through it and the extra `a`s pop nothing. After the entry the stop rule sees an empty stack. The captured state is then: `cat` and `hrs` capture lists (the records), and `s`'s capture count (the total).
@@ -88,13 +88,13 @@ I checked the edges with a throwaway prototype (not in the repo, because the rea
 
 ## What `check.sh` enforces
 
-`check.sh` makes sure the host stays honest. `Program.cs` may have no loop keyword and none of `MatchEvaluator`, `Replace`, `NextMatch` or `Matches`, and it must contain exactly one `Regex.Match` call. Then it runs the program 25 times. Each run must report that the match returned `true` (this track cannot fail on purpose). Each run must print as many rows as it has entries, the hours must sum to the total, and every hour count must be from 10 to 19. The stop rule must be right: the total before the last card is at most 40 (exactly 40 continues) and the total after it is over 40, with three to five entries. The total can never be more than 59. Last, a copy of the host with every card worth 10 hours must deal five rows, the fourth `Learning` and the fifth `Meetings`, with a total of 50.
+`check.sh` makes sure the host stays honest. `Program.cs` may have no loop keyword and none of `MatchEvaluator`, `Replace`, `NextMatch` or `Matches`, and it must contain exactly one `Regex.Match` call. Then it runs the program 25 times. Each run must report that the match returned `true` (this track cannot fail on purpose). Each run must print as many rows as it has entries, the hours must sum to the total, and every hour count must be from 10 to 19. The stop rule must be right: the total before the last card is at most 40 (exactly 40 continues) and the total after it is over 40, with three to five entries. The total can never be more than 59. Last, a copy of the host with every card worth 10 hours must deal five rows, the fourth `Learning` and the fifth `Meetings`, with a total of 50. The same tape with `(?!)` appended to the pattern must report a failed match, zero captures and exit status 1. Its TSV still contains the empty report because the host appends it before returning.
 
 ## Gotchas worth knowing
 
 1. **A regex cannot draw random numbers.** The random 10-19 draws had to be seeded by the host, as five unary strings. The plan allows the host to "seed the initial data", so this is within the rules, but the regex does not choose the hours. It only bounds them (`{10,19}`) and accumulates them.
-2. **A regex cannot write anything.** There are no side effects in this track. The pattern's whole output is its captures; the host formats them and does the one `File.AppendAllText`. That makes the "persist as a side effect of matching" idea of the other two tracks impossible here.
-3. **The signature move is impossible.** I tested it: append `(?!)` to the pattern and the match fails, and a failed `Match` exposes nothing, so every capture, including the hours already accumulated, is gone (`Success` false, 0 captures). The other tracks do their work in side effects that survive the failure; here the only output is the captures, which die with it. So this track *must* return true.
+2. **The host writes after matching.** The pattern supplies captures. The host formats them and calls `File.AppendAllText` once, so the output depends on the capture lists it gets back.
+3. **The match must succeed to yield any cards.** Append `(?!)` to force failure and `Match.Success` is false with zero returned captures. The fixed-tape test checks both outcomes on the real pattern. The guarantee here is the [documented behavior of .NET regex balancing groups and captures](https://learn.microsoft.com/en-us/dotnet/standard/base-types/grouping-constructs-in-regular-expressions#balancing-group-definitions). An engine that lacks that API needs a different mechanism.
 4. **No pulse.** The terminal pulse needs side effects during the match. This track has none, and a host loop to animate it would break the rules.
 5. **Unrolled randomness, not a random loop.** The tape always holds five draws even when only three are needed (any draw left over once the budget runs dry is ignored). The `*` loop is real, but the draws are fixed up front.
 

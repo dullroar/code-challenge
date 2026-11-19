@@ -2,14 +2,14 @@
 
 ## What this guide is for
 
-The same job, adding cards until the total passes 40, is done by a loop with no body, a regex that fails on purpose, a Makefile that rereads itself, a list whose elements write to a database, an editor buffer and an archive. This guide puts them side by side with one worksheet. The core question is: **what plays loop, state, clock, decision and commit in each, and what evidence proves it?**
+A loop with no body, a regex search, a Makefile that rereads itself, a list whose elements write to a database, an editor buffer and an archive all take on the time-card task. Some searches finish by failing after their side effects; the .NET search succeeds so the host can read its captures. This guide puts them side by side with one worksheet. The core question is: **what plays loop, state, clock, decision and commit in each, and what evidence proves it?**
 
 When you finish, you should be able to:
 
 1. Fill in the seven-question worksheet for any entry: where is the program, where is the state, what repeats, what advances the next step, what makes a decision, what commits effects, and what evidence proves the claim.
 2. Say what *role* each piece plays even when it does not look like the usual one: a flag, a file, a capture, a method, a tick.
 3. Group the entries by the answer to "where does the program live?" and say what each group can and cannot do.
-4. Identify the entries that cannot honor "a total of exactly 40 continues", and say why a finite supply is the cause.
+4. Explain why the fixed LINQ work week ends at 40 and why XAML can run out of passes there.
 5. Choose, for a given need (testability, observability, portability), which design suits it, and say what it costs.
 6. Label claims as guaranteed, implementation-permitted, or accidentally exploited.
 
@@ -17,7 +17,7 @@ Scope limits. The guide compares; it does not re-teach each entry. It uses facts
 
 ## Before you begin
 
-**Safety model.** Every entry writes fictional **DEMO ONLY** data to a local scratch file or database, and the programs start processes. Read the source first and run it in the sandbox first. Work on copies ([Running things safely](../../exercises.md#running-things-safely)). Comparing entries means running several: run them one at a time, and use a scratch data folder.
+**Safety model.** The cards are fictional **DEMO ONLY** data. Programs can write to local scratch files or databases and can start processes. Read the source first and run it in the sandbox first. Work on copies ([Running things safely](../../exercises.md#running-things-safely)). Comparing entries means running several: run them one at a time, and use a scratch data folder.
 
 **Prediction rule.** For each entry you compare, fill in the worksheet *before* reading the README's answer. Then check the evidence. A worksheet cell you cannot support with a run or a line of source is a guess.
 
@@ -43,13 +43,13 @@ What evidence proves the claim?
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19; categories cycle through Meetings, Coding, Debugging and Learning; the running total rises until it passes 40; the run **retains the first card that takes the total above 40**; a total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Final totals are 41 to 59, with 3 to 5 cards. Every run saves its rows as `DEMO ONLY` in SQLite and prints a summary.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-This is a *specification*, and the comparison has a use for it: it is the one fact all entries share, so any difference between entries is a difference in *how*. That includes the places where an entry does not meet the specification (see the ceiling table below).
+The book records [where entries differ](../../intro.md#where-entries-differ). The LINQ demos use five fixed 8-hour days, and XAML can run out of passes at 40. The regex entries still follow the numeric rule: the C and .NET examples use TSV, while pcre2grep saves cards in separate SQLite calls. A summary can appear in a terminal or a window. Ask which result the entry demonstrates before comparing the mechanism.
 
 ## The machine to identify
 
-Compare in two cuts. The first answers the five role questions; the next three questions of the worksheet (decision, evidence) follow in the trace.
+Compare in two cuts. Start by identifying the roles, then test the decisions and effects against the trace.
 
 **Where is the program?** In source statements (the idiomatic entries and the ports); in a jump target (`cobol-weird`); in a line of source read repeatedly (`forth-weird`); in a Makefile that rewrites its own input; in one pattern (the regex entries); in table rows (`tcl-weird`); in an archive's members (`tar-gnu`) or its size (`tar-gnu-weird`); in an editor register (`ex-weird`); in a class chain (`lisp-weird`); in the text of functions written at run time (`apl-weird`); in a document (`xaml`).
 
@@ -61,7 +61,7 @@ Compare in two cuts. The first answers the five role questions; the next three q
 
 **What stops it.** A flag, an absence (no file, no input left), a literal's length, a comment, an empty compression, a failed match. The stop rule is a value or a structure, rarely a visible `if`.
 
-**What commits.** SQLite, after the machine ends, in nearly every entry. The exceptions are those whose notation cannot write (.NET), and those with no outer transaction (pcre2grep).
+**What commits.** Some entries commit all cards together, while others save at each step. PCRE2 callouts write the TSV during the match; the .NET host writes its TSV from the returned captures. pcre2grep uses separate SQLite processes. The regex verb `(*COMMIT)` rules out backtracking retries. SQLite transactions belong to the helper.
 
 <!-- diagram-new: cross-language-state - groups every entry by what holds its next step and its remembered state, a relationship no single entry's diagram shows -->
 
@@ -91,7 +91,7 @@ flowchart LR
 
 ## Trace one run
 
-The worksheet, filled in for representative entries. Hours are 15, 19, 12 throughout. Every "evidence" cell is a run or a source line verified in the language guides.
+The worksheet, filled in for representative entries. The usual witness uses 15, 19, 12. The sed row names its alternate seed trace. Every "evidence" cell is a run or a source line verified in the language guides.
 
 | Entry | Where is the program | Where is the state | What repeats |
 | --- | --- | --- | --- |
@@ -129,8 +129,8 @@ The worksheet, filled in for representative entries. Hours are 15, 19, 12 throug
 | `tar-gnu` | tar's walk | a `stop-over` member | the dispatcher's SQL | the inspector's decoded members, and the run |
 | `tar-gnu-weird` | a checkpoint | `done = total > 40` | per-tick transaction | closing line: last tick 64, 18 idle |
 | `regex-pcre2` | the engine's next pass | `gate` returns 1 | callouts write | callout log (gate 0, 0, 0, then 1) |
-| `regex-dotnet` | the engine | `(?(b)...\|(?!))` | the host | draws `15 19 12 17`: three rows, the fourth ignored |
-| `regex-sed` | `b` jumps | `/ tot:#{41}/` | `fd 3` into `sqlite3` | `TRACE=1` state lines: 15, 29, 43 marks |
+| `regex-dotnet` | the engine | `(?(b)...\|(?!))` vetoes the next pass, the match succeeds | host appends TSV from captures | draws `15 19 12 17 11`: three rows, the last two unused |
+| `regex-sed` | `b` jumps | `/ tot:#{41}/` | `fd 3` into `sqlite3` | alternate witness: the documented seed gives `TRACE=1` totals of 15, 29, 43 marks |
 | `ed-weird` | the global command | which `s` matches | the launcher | buffer printed after each stage |
 | `ex-weird` | `@n` | the tape line: `@a` or `"` | the launcher | `'tp` printing tape lines 15, 34, 46 |
 | `m4` | rescanning | `ifelse(eval(...))` | `syscmd` | `-t tc_card` trace and `-L` limit |
@@ -143,6 +143,7 @@ The worksheet, filled in for representative entries. Hours are 15, 19, 12 throug
 | --- | --- | --- | --- |
 | Was four names, now five | `regex-perl`, `regex-pcre2`, `regex-pcre2grep`, `regex-dotnet`, `regex-sed` | a subject, scaffold, tape or `cats:` list, now with `Meetings` repeated | **run**: before the fix, four 10-hour draws gave `total=40 entries=4` (PCRE2 and .NET, and the shared checker said `FAIL: final total 40 does not pass 40`). Each `check.sh` now forces all-10 cards and requires five rows ending at 50, and each new check fails on the old code |
 | Was four names, now five | `ModernChallenge1` and the Java, Go, Kotlin, Python and Rust ports | a one-pass category iterator or list, now with `Meetings` repeated | **run for the C# header** (a reduction): `stop: total 50 after 5 cards`. Rust's unit tests assert it. Go, Java and Kotlin compile. Python's list change was checked with a reduction of its condition |
+| Fixed work week | `LinqChallenge1`, `LinqChallenge2` | five 8-hour days | source read: 40.0 hours across five rows, outside the random challenge |
 | Still four passes | `xaml` | four copied passes in markup | read from the README, not run (Windows only). With the shipped seed it always deals four cards totalling 53, so the case never arises |
 | Five slots | `tar-gnu`, `ed-weird`, `ex-weird`, `lisp-weird`, `apl` | exactly the worst case (five cards of at least 10 hours reach 50) | the five slots cover the worst case, read from the source. **Run** for `ed-weird` (B18: all-10 dice give five cards, totals 10 to 50) |
 | Cycling | `cobol`, `cobol-weird`, `haskell`, `forth`, `make-gnu`, `cmake`, `javascript` family, `m4`, `tcl` | the category is computed from a count | **run** for `cobol-weird` (a scratch run with all-10 hours), `m4` (seed 4020, now also in its `check.sh`) and `tcl-weird` (B12 step 2). Read from the source for the rest |
@@ -155,7 +156,7 @@ The probability was one run in 10,000, so none of this was visible in ordinary t
 | --- | --- | --- | --- |
 | **Representation** | Variables, loops, functions | A jump, a position, files, captures, rows, text | Same machine, different substance |
 | **Observability** | Print variables | Print the *control* state (`>in`, the jump target, the files) | Choose the design for how you must observe it |
-| **Tests** | Unit tests | Drive with a controlled input (`DICE`, `SEED`, `--hours`, `NOW`) and compare | Every entry has one pinned input |
+| **Tests** | Unit tests | Drive with a controlled input (`DICE`, `SEED`, `--hours`, `NOW`) and compare | Record the input and label source-only evidence when a runtime is unavailable |
 | **Debugging** | Standard tools | Instrument without disturbing (CMake's registers, ed's buffer) | The act of looking can change the machine |
 | **Portability** | Broad | Narrow, with a stated label | See the label column below |
 | **Cost** | Normal | Reviewability, reentrancy, a finite supply | The ceiling is a cost nobody advertised |
@@ -175,15 +176,14 @@ The probability was one run in 10,000, so none of this was visible in ordinary t
 
 ## Failure modes, costs, and boundaries
 
-The book's table of every entry's promise has three labels. Here is the distribution, from the READMEs' `assurance` key: **17** guaranteed, **16** implementation-permitted, **7** accidentally exploited (`tcl-weird` moved from the last group to the middle one when its evaluation-order dependence was removed).
+The README `assurance` key summarizes the weakest dependency the mechanism needs. The table counts those declarations: **17** guaranteed, **16** implementation-permitted, **7** accidentally exploited (`tcl-weird` moved from the last group to the middle one when its evaluation-order dependence was removed).
 
 | Claim | Label | Why |
 | --- | --- | --- |
-| The worksheet's roles exist in every entry | **Guaranteed** | They follow from the challenge. |
-| A decision mechanism's *name* (a flag, a mask, a `WHERE`) describes what it does | **Guaranteed** by the language, per entry | Documented semantics in each. |
+| In `tcl-weird`, a total of 40 admits a next insert | **Guaranteed** by the integer comparison in the trigger | The trigger tests `NEW.running_total <= 40`. The trigger chain and its transaction have their own prerequisites. |
 | Three entries share the stop-rule label "accidentally exploited" because of a specific observed behavior (Make's remake, CMake's `AND`, ed's silent `s`) | **Accidentally exploited** | Each is observed, not promised. |
 | The number of names or slots bounds the number of cards | **Guaranteed** by construction, tested | A bound of five is exactly the worst case. With four names (before the fix, and still in `xaml`) it contradicted the shared challenge at exactly 40. |
-| The assurance tally above | **Guaranteed** as a count | It is read from the READMEs. The labels themselves are the authors' judgment. |
+| .NET balancing groups subtract captures from a named group | **Guaranteed** within the documented .NET regex engine | The successful match is the return channel. An engine that lacks balancing groups cannot run this pattern. |
 
 **Costs to state.**
 

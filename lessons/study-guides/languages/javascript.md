@@ -41,13 +41,15 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn, with the category wrapping to Meetings. Final totals are 41 to 59, with 3 to 5 cards. Rows go into a SQLite table and the program prints a summary.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn, with the category wrapping to Meetings. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-Each style writes the boundary differently. In the `for`, the condition is `reduce(...) <= 40 ? true : (...show the result..., false)`: `<= 40` is true for 40, so the loop goes round ([L54](../../../src/javascript/timecards.mjs#L54)). In the weird program, `over = total > 40` is false for 40, so the machine keeps answering ([core.mjs L14](../../../src/javascript-weird/core.mjs#L14)). In the events program, `total > limit` is false for 40, so the next card is scheduled ([L115](../../../src/javascript-events/timecards.mjs#L115)).
+All three stop on the first crossing and print a summary, but their SQLite write boundaries differ. The first two insert as they go. The events version wraps the run in one transaction. Each style writes the stop test differently. In the `for`, the condition is `reduce(...) <= 40 ? true : (...show the result..., false)`: `<= 40` is true for 40, so the loop goes round ([L54](../../../src/javascript/timecards.mjs#L54)). In the weird program, `over = total > 40` is false for 40, so the machine keeps answering ([core.mjs L14](../../../src/javascript-weird/core.mjs#L14)). In the events program, `total > limit` is false for 40, so the next card is scheduled ([L115](../../../src/javascript-events/timecards.mjs#L115)).
 
 ## The machine to identify
 
 **What repeats.** In `javascript`, a `for` statement with an empty body: the *header's* three clauses repeat ([L10-67](../../../src/javascript/timecards.mjs#L10-L67)). In `javascript-weird`, a consumer asking an iterator for the next card, over and over: `.toArray()` ([L30](../../../src/javascript-weird/timecards.mjs#L30)). In `javascript-events`, a cycle of events: `generate` leads to `card-created`, `card-saved` and `total-updated`, and `total-updated` schedules the next `generate`.
+
+**Evaluation.** The three original entries seed via the global Web Crypto `crypto.getRandomValues` when `SEED` is absent. In the bodiless `for`, `reduce` sums the array immediately on every condition check. The [C# header](csharp-linq-xaml-and-ports.md) does the same work with `Sum()`, even though its inner LINQ projection is deferred until `Sum()` enumerates it. The pull iterator below uses a different driver.
 
 **Where state lives.** In `javascript`, the properties of one object literal that the `for` initializer builds: hours so far, the database, the random closure and the clock. In `javascript-weird`, three closures: a source of hours over one number, a card machine over `n`, `total` and `over`, and an iterator wrapper. None of that state can be reached except by calling the function ([core.mjs](../../../src/javascript-weird/core.mjs)). In `javascript-events`, an object `s` (`n`, `total`, `db`, ...) shared by the listeners, plus the registrations on the emitter itself.
 
@@ -130,7 +132,7 @@ The third distinguishes two kinds of arrow: a plain `emit` that returns after th
 
 ## Trace one run
 
-With `SEED=1105` all three programs draw hours 15, 19, 12. The traces below were produced by running scratch copies of the entries in a scratch data folder, with a few lines of logging added around the entry's own functions.
+With `SEED=1105` all three programs draw hours 15, 19, 12. The traces use scratch copies with logging around the entry's own functions. On Node 24.15.0, running the original `timecards.mjs` of each entry with that seed and a fresh `XDG_DATA_HOME` reproduced the reported rows and the persisted totals 15, 34 and 46.
 
 **`javascript`: the `for` clauses.** Total starts at 0 with no cards.
 
@@ -216,7 +218,7 @@ B22 step 4 is the most instructive failure in this family: the program is *corre
 | Behavior | Label | Why |
 | --- | --- | --- |
 | A closure keeps its captured variables alive and private | **Guaranteed** | Language semantics. |
-| `reduce` cannot stop early | **Guaranteed** | It visits every element. The `for` condition re-sums the list on every pass; the weird program folds only after the list is complete. |
+| On the dense hours array, the reducer visits every card on each call | **Guaranteed** | `Array.prototype.reduce` runs the callback for every present element unless evaluation throws. The plain entry calls it during every condition check. The weird entry folds once after collection. |
 | `emit()` calls listeners synchronously, in registration order, before it returns | **Guaranteed** | Documented Node.js behavior (see [`emitter.emit`](https://nodejs.org/api/events.html)). |
 | `emit('error', e)` with no `error` listener throws `e` | **Guaranteed** | Documented. The program registers an `error` listener to turn a stray error into `failed`. |
 | `setImmediate` runs its callback after the current code finishes and before timers of a later phase | **Guaranteed** | Documented Node.js scheduling. |

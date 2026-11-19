@@ -17,7 +17,7 @@ Scope limits. This guide is about *reading and running safely*. It is not a secu
 
 ## Before you begin
 
-**Safety model.** Every entry writes fictional **DEMO ONLY** data to a local scratch file or database, and nothing connects to a real time-reporting system. That is a promise about the *data*. It is not a promise about the *code*, which starts processes, runs shells and parses its own input. So every entry is treated as untrusted until someone has read and understood it, and it is run in the sandbox first. From the repository root, with [`SANDBOX-SETUP.md`](../../../SANDBOX-SETUP.md) done:
+**Safety model.** The cards are fictional **DEMO ONLY** data. The examples use local scratch storage and have no connection to a real time-reporting system. That is a promise about the *data*. It is not a promise about the *code*, which starts processes, runs shells and parses its own input. So every entry is treated as untrusted until someone has read and understood it, and it is run in the sandbox first. From the repository root, with [`SANDBOX-SETUP.md`](../../../SANDBOX-SETUP.md) done:
 
 ```bash
 sandbox/container/run-image.sh src/tar-gnu
@@ -40,9 +40,9 @@ Work on a copy for any experiment. Output is random, so compare properties, not 
 
 ## The shared challenge
 
-Every entry builds the same fictional data. A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40, and the run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it. Final totals are 41 to 59, with 3 to 5 cards, saved in one local SQLite transaction.
+The [challenge specification](../../intro.md#what-the-challenge-does) gives the reader an expected result: 10 to 19 hours per card, categories cycling, and the first card over 40 kept. A total of exactly 40 continues. For a conforming run, expect 3 to 5 cards and 41 to 59 hours. The two LINQ demos use a fixed work week, and XAML can reach 40 with no remaining pass. Storage and summaries differ by entry.
 
-That shared, harmless outcome is what makes the hostile mechanisms safe to *study*: you always know what a correct run looks like (the shared checker `lessons/tools/check-demo.sh` tests it), so a run that does anything else is evidence. The entries' own checks add a second kind of evidence: they refuse unexpected files, processes and unknown records.
+The small expected result gives you a way to test your reading. The shared checker `lessons/tools/check-demo.sh` tests the shape of a conforming report. Individual checks can give evidence about effects beyond the report, such as which records the tar interpreter accepts.
 
 ## The machine to identify
 
@@ -56,7 +56,7 @@ Here the machine is not one program but a *reader*, and you identify it with the
 
 **What stops it.** Ask what limits the damage. `tar-gnu`'s dispatcher refuses unknown record types and runs exactly one SQL statement per member. `tcl-weird` is safe only because its table is private to one connection. The sandbox adds an outer limit: no network, a read-only root and an unprivileged user.
 
-**What commits.** Ask which effects are real and which are not. All entries write to a scratch database inside a transaction. The `DEMO ONLY` rule is enforced by a `CHECK(demo_only=1)` constraint, so a non-demo row cannot be stored even by a program that tries. That is data-level authority: the *database* refuses.
+**What commits.** Find the component with write authority and the point at which it exercises it. In the .NET regex example the pattern delivers captures, and the host appends a TSV report. In SQLite entries, look for the transaction boundary and the schema. A `NOT NULL` column with `CHECK(demo_only=1)` can refuse a normal insert of a non-demo row.
 
 ## Trace one run
 
@@ -75,7 +75,7 @@ The tar column of the verified run: the inspector decoded 12 members (`# 12 memb
 
 **A trace of a mistake.** While this guide was prepared, a test harness ran the `regex-sed` script directly, from a checkout, without the wrapper that connects file descriptor 3. The script writes its SQL with `w /dev/fd/3`. With fd 3 closed, sed's own script file had taken that descriptor, so `w` opened the script file and overwrote it with SQL. The program's author had read the source and tested it through its wrapper. The failure came from running it a way the author did not intend. The script was restored from Git, and the sed README now carries a warning to run it only through its wrapper or with an explicit `3>` target. That is the whole subject in one incident: authority comes from how you run the program.
 
-**Exactly 40.** For reading, the boundary is another test of understanding. If a program claims "a total of exactly 40 continues", the *evidence* is a run in which it does. The regex and `for`-header entries cannot make one: they stop at four cards (see the [comparative guide](comparative-machine-design.md)). A claim you cannot demonstrate is a claim you have only read.
+**Exactly 40.** For reading, the boundary is another test of understanding. If a program claims "a total of exactly 40 continues", the *evidence* is a run in which it does. The former four-name regex and `for`-header implementations stopped too early. The repaired entries have a fifth name, with forced draws or a pinned source-level check for the boundary. XAML still has four passes (see the [comparative guide](comparative-machine-design.md)). A claim you cannot demonstrate is a claim you have only read.
 
 ## Compare the ordinary and weird designs
 

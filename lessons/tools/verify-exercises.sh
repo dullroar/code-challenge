@@ -113,8 +113,21 @@ if selected B7; then echo "B7 LINQ enumerate twice (and Random(42))"
 fi
 
 if selected B8; then echo "B8 regex failure modes"
-  d=$(copy src/regex-dotnet b8); mutate "$d/Program.cs" ')*");' ')*(?!)");'
-  img "$d" "$W/b8a.txt"; if contains "$W/b8a.txt" "match returned: false" && contains "$W/b8a.txt" "total=0 entries=0"; then ok "B8 .NET (?!): false, zero captures"; else bad B8a "unexpected output"; fi
+  d=$(copy src/regex-dotnet b8)
+  mutate "$d/Program.cs" 'Random.Shared.Next(10, 20)' '10'
+  if img "$d" "$W/b8-control.txt" && contains "$W/b8-control.txt" "match returned: true" && contains "$W/b8-control.txt" "total=50 entries=5"; then
+    ok "B8 .NET all-10 tape: true, five rows"
+  else
+    bad B8-control "expected exit 0 and five rows"
+  fi
+  mutate "$d/Program.cs" ')*");' ')*(?!)");'
+  b8_rc=0
+  img "$d" "$W/b8a.txt" || b8_rc=$?
+  if [[ $b8_rc -eq 1 ]] && contains "$W/b8a.txt" "match returned: false" && contains "$W/b8a.txt" "total=0 entries=0"; then
+    ok "B8 .NET (?!): false, zero captures, exit 1"
+  else
+    bad B8a "expected exit 1 and zero captures, got exit $b8_rc"
+  fi
   expectnot "B8 ...entry's check.sh fails" sandbox/run.sh "$d"
   d=$(copy src/regex-pcre2grep b8b); mutate "$d/timecards.sh" '(?C{/usr/bin/sqlite3' '(?C{sqlite3'
   img "$d" "$W/b8b.txt"; expectnot "B8 pcre2grep relative path: no rows" "$chk" "$W/b8b.txt"

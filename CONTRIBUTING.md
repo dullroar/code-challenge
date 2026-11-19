@@ -49,8 +49,8 @@ tags: [control-flow, stack-data-structure, stack-machine, transaction]
 | `languages` | yes | A list of language ids, in lowercase, from [`lessons/cs-source/languages.txt`](lessons/cs-source/languages.txt): `[forth]`, `[c-sharp, linq]`. List every language the entry is written in or runs on (the host language, the query language, the regex flavor). The book's language index and tables are built from this. If yours is missing, use the nearest id and say so in your pull request. |
 | `lesson` | yes | The lesson page that covers it, relative to `lessons/`, with an optional `#anchor`: `"languages/forth.md"`. If there is no page for your language yet, use the closest one. A maintainer fixes it when they add yours. |
 | `loop-by` | yes | What plays the loop in your entry. Pick one file name from [`lessons/cs-source/roles/`](lessons/cs-source/roles/): for example `loop-statement`, `lazy-demand`, `rewrite-and-rescan`, `self-modifying-control`, `backtracking-search`, `dispatch-and-triggers`, `input-driven`, `document-order`, `bulk-array`. The [comparative chapter](lessons/cs/09-comparative-case-studies.md) shows what each one means. |
-| `evaluation` | yes | `eager`, `lazy`, `deferred`, `rewriting`, `search` or `declarative`. |
-| `assurance` | yes | The *weakest* promise your trick leans on: `guaranteed` (the specification promises it), `implementation-permitted` (one compiler or platform allows it) or `accidentally-exploited` (it works, but nobody promised it). The [intro](lessons/intro.md#three-kinds-of-knowledge) explains the three. |
+| `evaluation` | yes | The strategy that drives the main computation: `eager`, `lazy`, `deferred`, `rewriting`, `search` or `declarative`. Describe embedded operations separately. |
+| `assurance` | yes | The *weakest necessary dependency* of the trick: `guaranteed` (a named specification or API documents the behavior), `implementation-permitted` (a particular implementation allows it) or `accidentally-exploited` (the trick requires an unpromised behavior). Explain what supports each individual claim, including the scope of a documented API guarantee. The [intro](lessons/intro.md#three-kinds-of-knowledge) explains the three. |
 | `tags` | yes | A list of computer-science concepts. See below. |
 | `pairs-with` | no | Your closest sibling entry: the ordinary version of a weird one, or the other way round. |
 | `analogies`, `counterexamples` | no | Concept ids (the same vocabulary as `tags`). Use `tags` only for ideas your entry **demonstrates**. Use `analogies` for an idea your entry *resembles* without being an instance of it (a Kotlin `generateSequence` is not a coroutine, but it is a cousin). Use `counterexamples` for an idea your entry shows by *not* being it (a closure is not a continuation). An entry can relate to a concept in only one of the three ways. The concept's "In this repo" table says which. |
@@ -89,7 +89,7 @@ The order above is the recommended order, but it is not enforced. `sandbox/scope
 
 ### Program Flow: a picture of the machine
 
-Every README has exactly one `## Program Flow` section. It answers **"what is the runtime, interpreter, compiler, scheduler or language feature actually doing that makes this program work?"** It is not a picture of the task (the book's intro has that, once, for every entry). If your diagram could be pasted unchanged into ten other READMEs, it is not teaching your entry's point.
+Every README has exactly one `## Program Flow` section. It answers **"what is the runtime, interpreter, compiler, scheduler or language feature actually doing that makes this program work?"** It is not a picture of the task (the book’s intro shows the task and lists implementation differences). If your diagram could be pasted unchanged into ten other READMEs, it is not teaching your entry's point.
 
 The section is exactly this, and nothing else (no sub-headings):
 

@@ -42,13 +42,13 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, so a fifth is drawn. Final totals are 41 to 59, with 3 to 5 cards.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, so a fifth is drawn. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-This family once could not obey that last sentence, and the way it was found is instructive. Each regex entry walked a *finite list of four category names* (the subject string, the scaffold, or sed's `cats:` list). When the four names ran out the loop ended, whatever the total was, so a run of four 10-hour cards ended at exactly 40 with four rows. That has probability one in 10,000 per run, so the entries passed their own checks, which accepted "four entries" as a legitimate stop. The shared checker `lessons/tools/check-demo.sh` rejects such a run, and running it with forced draws while writing this guide showed the problem (see Trace). It is now fixed: each entry has **five** names (`Meetings` repeats), and each `check.sh` builds a copy of the program whose every card is worth 10 hours and requires a fifth card, `Meetings`, ending at 50.
+All five entries follow the numeric rule, with three storage paths worth distinguishing: the C and .NET tracks write TSV, pcre2grep saves through separate SQLite calls, and Perl and sed send a transaction to SQLite. This family once could not obey the numeric rule, and the way it was found is instructive. Each regex entry walked a *finite list of four category names* (the subject string, the scaffold, or sed's `cats:` list). When the four names ran out the loop ended, whatever the total was, so a run of four 10-hour cards ended at exactly 40 with four rows. That has probability one in 10,000 per run, so the entries passed their own checks, which accepted "four entries" as a legitimate stop. The shared checker `lessons/tools/check-demo.sh` rejects such a run, and running it with forced draws while writing this guide showed the problem (see Trace). It is now fixed: each entry has **five** names (`Meetings` repeats), and each `check.sh` builds a copy of the program whose every card is worth 10 hours and requires a fifth card, `Meetings`, ending at 50.
 
 ## The machine to identify
 
-The five entries split into two models of computation. *Searching:* Perl, PCRE2, pcre2grep and .NET are one match, and the work happens along the paths the engine explores. *Rewriting:* sed is a loop of substitutions, and the program is a sequence of find-and-replace steps over one line.
+Perl, PCRE2 and pcre2grep search and deliberately fail after doing work through side effects. The .NET search fails the final *pass* and succeeds overall, returning its captures. Sed uses a loop of substitutions over one line. The final status tells you where to look for results.
 
 **What repeats.** In Perl, a greedy quantifier, `(?: ... )*`, whose body is a code block ([L7](../../../src/regex-perl/timecards.pl#L7)). In PCRE2, the same shape with callouts: `(?:(?C"gate")(Meetings|Coding|Debugging|Learning)(?C"book"))*` ([L24-26](../../../src/regex-pcre2/timecards.c#L24-L26)). In pcre2grep, the same, with callouts that run `sqlite3` ([L14-20](../../../src/regex-pcre2grep/timecards.sh#L14-L20)). In .NET, `(?: ... )*` over a pattern of balancing groups only ([L13](../../../src/regex-dotnet/Program.cs#L13)). In sed, a jump back to the label `:entry`, taken by `b` and `t` behind regex addresses ([timecards.sed](../../../src/regex-sed/timecards.sed)).
 
@@ -58,7 +58,7 @@ The five entries split into two models of computation. *Searching:* Perl, PCRE2,
 
 **What stops it.** Perl: a postponed block that returns the next category as a *pattern*, or `(*FAIL)` once the total passes 40 or the names run out. PCRE2: `gate` returns 1 when the total is over 40. pcre2grep: SQLite refuses to insert "total is at most 40" into a `CHECK(ok=1)` column, so `sqlite3` exits non-zero, which vetoes the branch. .NET: when the budget stack is empty the pass hits `(?!)`. sed: `/ tot:#{41}/b done`, which asks whether 41 tally marks occur.
 
-**What commits.** In Perl and PCRE2, the work is done by side effects that survive the failed match: the transaction really commits, and the match then returns false. In pcre2grep, each callout is its own `sqlite3` process, so each statement commits at once. There is no outer transaction. In .NET, *nothing commits inside the match*: a regex cannot write. The host reads the captures after the match and writes the file. In sed, the SQL goes to fd 3 for `sqlite3` to read, with `BEGIN` and `COMMIT` in the stream.
+**What commits.** In Perl the transaction commits before the match returns false. In the C PCRE2 program a callout writes the TSV summary and closes the file before the same deliberate failure. In pcre2grep, each callout is its own `sqlite3` process, so each statement commits at once. There is no outer transaction. In .NET, *nothing commits inside the match*: a regex cannot write. After a successful match the host reads the captures and appends a TSV report. A failed match yields no cards, but the host still writes a zero-entry report and exits 1. In sed, the SQL goes to fd 3 for `sqlite3` to read, with `BEGIN` and `COMMIT` in the stream.
 
 <!-- diagram-source: src/regex-pcre2/README.md#program-flow -->
 
@@ -169,7 +169,7 @@ The scratch copy drew from the command line instead of `Random`. With draws `15 
 | Pass 3: Debugging | 7, then 0 | 46 | 12 letters: the first 7 pop a token and the last 5 pop nothing, because the conditional `(?(b)...)` finds the stack empty |
 | Pass 4 test | 0 | 46 | `(?(b)...|(?!))` finds `b` empty and takes `(?!)`, which fails the pass. The `*` ends and the match *succeeds* |
 
-The crossing card can overshoot the budget in the middle of its hours. Only the next pass is refused.
+The crossing card can overshoot the budget in the middle of its hours. Only the next pass is refused. The [fixed-tape check](../../../src/regex-dotnet/check.sh) runs five tens through the original pattern and then the same tape through the pattern with `(?!)` appended. On .NET SDK 10.0.401 the first reports 50 hours across five rows with exit 0; the failure reports zero hours and rows with exit 1. Both reports are appended to TSV.
 
 **The boundary: before and after the fix.** Before the fix, scratch copies of PCRE2 and .NET were run with four 10-hour draws. Both stopped with `total=40 entries=4`: after `Learning` there was no fifth category name, so no fifth pass could start, although 40 is not over 40. For PCRE2 the shared checker confirmed it:
 
@@ -182,7 +182,7 @@ The same held for the Perl entry (its postponed block returns `$::c[$::n] // '(*
 
 ### sed: one line, rewritten
 
-`TRACE=1` prints sed's state line at every loop head. With the README's seed, the state at each `:entry`, without its unchanging prefix, was:
+A tape with `trace:1` enables a state print at each head and at intervening rewrites. GNU sed 4.9 reproduced the trace below using the README's fixed tape with `trace:1` and fd 3 redirected to a separate SQL file. Running that SQL in SQLite 3.45.1 reproduced the three card rows. Here are the `:entry` states without their common prefix:
 
 ```text
 rng:1011001110100101 cats:Meetings,Coding,Debugging,Learning,Meetings, tot: n:
@@ -209,7 +209,7 @@ There is no ordinary version of this family in the repository: the "ordinary" wa
 | **Representation** | Code blocks in the pattern | Callout names as opcodes | Callout scripts that name programs | Balancing groups as stacks | Substitutions on one line |
 | **State** | `local` variables | C struct | SQLite | stack depth | the line |
 | **Observability** | Hidden in package variables | `gdb`, or printing in the dispatcher | `sqlite3` log | Only the final captures | The whole machine is one printable line (`TRACE=1`) |
-| **Tests** | Run it and read the database | Same, plus the host is ordinary C | Black box: the pattern and the exit codes | Fix the draws and read the captures | Same seed gives same cards, so the output is testable |
+| **Tests** | Run it and read the database | Compare the callout log with the TSV file | Black box: the pattern and the exit codes | Fix the draws and read the captures | Same seed gives same cards, so the output is testable |
 | **Portability** | Perl 5 code-block features | Needs a PCRE2 built with callouts; no JIT | Needs an upstream build with callout scripts | Any .NET | GNU sed only (`T`, `Q`, `--debug`, `-E` intervals) |
 | **Cost** | Cheap | Optimizer switched off to keep callouts honest | One process per callout | No side effects possible | about 137 commands per card; a deliberately slow regex as a clock |
 
@@ -219,13 +219,13 @@ Searching and rewriting differ in a way worth stating. A single match always fin
 
 | Exercise | Predict first | What the evidence shows |
 | --- | --- | --- |
-| [B8. Regex: what survives a failed match](../../exercises.md#b8-regex-what-survives-a-failed-match-verified), .NET | Append `(?!)` to the pattern. What can the host still read? | `match returned: false` and `total=0 entries=0`. A failed .NET `Match` exposes no captures. The "return no match on purpose" move is impossible here, so this track must return true. |
+| [B8. Regex: what survives a failed match](../../exercises.md#b8-regex-what-survives-a-failed-match-verified), .NET | Append `(?!)` to the pattern. What can the host still read? | `match returned: false` and `total=0 entries=0`. A failed .NET `Match` exposes no captures. The host appends a report with no card rows and exits 1. A successful match is required to return the cards. |
 | B8, pcre2grep | Change the first `(?C{/usr/bin/sqlite3` to `(?C{sqlite3`. What happens? | No output at all and exit code 0. `pcre2grep` uses `fork` and `execv`, which do not search `PATH`, so a callout that cannot start looks the same as a vetoed branch. |
 | [B9. sed: watch a computation](../../exercises.md#b9-sed-watch-a-computation-verified) | Roughly how many state lines per card? | Many, and not a constant number, because rejected draws repeat a step. The last `tot:` has 41 or more `#`. |
 | [C1. Weird next to boring](../../exercises.md#c1-weird-next-to-boring-verified) | Which entry would you debug first? | The one whose whole state you can print: sed. |
 | [A1. Read the rows](../../exercises.md#a1-read-the-rows-verified) | Run `src/regex-dotnet`, whose rows have no running-total column. How many cards? | You must sum the hours yourself. This is also where the old four-card ceiling was invisible, because the rarest case, exactly 40, almost never appears. The `check.sh` of every regex entry now forces it. |
 
-The B8 exercise asks for three sentences contrasting what survives a failed match. The version that shows you understood: Perl's `local` values are restored when the engine backtracks, but the prints and inserts stay done. PCRE2's C struct is never rewound. In .NET nothing survives, because the only output was the captures.
+The B8 exercise asks for three sentences contrasting what survives a failed match. The version that shows you understood: Perl's `local` values are restored when the engine backtracks, but the prints and inserts stay done. PCRE2's C struct is never rewound. In .NET no card captures survive a failed match. The host can still append its empty report.
 
 ## Failure modes, costs, and boundaries
 
@@ -235,7 +235,7 @@ The B8 exercise asks for three sentences contrasting what survives a failed matc
 | PCRE2 calls the callout function at each callout point, and a positive return fails the path | **Guaranteed** | Documented API. |
 | The optimizer would not skip or reorder callouts, given `PCRE2_NO_AUTO_POSSESS`, `PCRE2_NO_START_OPTIMIZE` and `PCRE2_NO_DOTSTAR_ANCHOR`, and no JIT | **Implementation-permitted** | The README tested the system PCRE2 with those flags and did not test what the optimizer would elide without them. |
 | `pcre2grep` callout scripts run programs, and their exit codes steer the match | **Implementation-permitted** | A build option. Ubuntu's own `pcre2grep` is built without it, so the sandbox pins an upstream build. |
-| .NET balancing groups pop one capture stack and push another | **Guaranteed** | Documented .NET regex behavior. |
+| .NET balancing groups subtract one capture from a named group and can add a capture to another | **Guaranteed** within the .NET regex API | These are documented grouping constructs in the .NET backtracking engine. The pattern requires that engine feature. |
 | A failed .NET `Match` exposes no captures | **Guaranteed** | Verified in exercise B8. |
 | sed's `T`, `Q`, `--debug`, `\x1b` and `-E` intervals | **Implementation-permitted** | GNU extensions. BSD and macOS sed will not run the script. |
 | The sed pulse takes about 50 ms per frame because a regex backtracks catastrophically | **Accidentally exploited** | The cost of a failing pattern is a performance cliff nobody promised, and it varies with the CPU. The pulse is skipped in pipes and in `check.sh`. |
@@ -263,7 +263,7 @@ Answer before you read the italic text after each question.
 
 1. **Trace.** In the PCRE2 entry, hours are 13, 12, 14, 15. List the `gate` returns and the number of rows. *(The gate sees totals 0, 13, 25 and 39 and returns 0 each time, so four cards are booked. A fifth gate sees 54 and returns 1, which ends the loop. Four rows, total 54, and the crossing card is the fourth. Had the total been exactly 40 after four cards, the fifth gate would return 0, and the fifth name in the subject, `Meetings`, would be matched and booked: the fix described above. Before it, the subject had no fifth name, and the loop ended at 40.)*
 2. **Explain.** Why does PCRE2 need `(*COMMIT)` before the `commit` callout? *(The final `(*FAIL)` makes the engine backtrack. Without `(*COMMIT)` it would retry shorter loops, and `commit` would run more than once.)*
-3. **Transfer.** The .NET entry cannot "return false on purpose" and the PCRE2 entry can. What is the difference in where each keeps its output? *(PCRE2 writes to a file in side effects that survive the failure. .NET's only output is its captures, and a failed `Match` discards them.)*
+3. **Transfer.** Why must the .NET match succeed to report its cards when the C PCRE2 match can deliberately fail? What is the difference in where each keeps its output? *(The PCRE2 callouts write the TSV before the final failure. The .NET pattern supplies card data via captures, and a failed `Match` supplies none.)*
 4. **Evidence.** A reviewer claims: "A total of exactly 40 continues to a fifth card in every regex entry." Design a test that could fail, and say what the negative control is. *(Run each entry, or a copy with every card worth 10 hours, and check for five rows ending at 50. The `check.sh` files now do exactly that. The negative control is the entry as it was before the fix, which stops at four rows and a total of 40. Run the new checks against the old code to see them fail.)*
 
 ## Further reading

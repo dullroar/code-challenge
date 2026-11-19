@@ -2,7 +2,7 @@
 
 ## What this guide is for
 
-This guide reads two GNU APL programs: [`src/apl`](../../../src/apl/README.md), whose whole challenge is three array expressions, and [`src/apl-weird`](../../../src/apl-weird/README.md), where each card is a function *written as text by the previous card* and then run. The question is: **when the program works on whole arrays, or on its own source text, what replaces the loop and what holds the state?**
+This guide reads two GNU APL programs: [`src/apl`](../../../src/apl/README.md), whose card calculation uses four named array assignments, and [`src/apl-weird`](../../../src/apl-weird/README.md), where each card is a function *written as text by the previous card* and then run. The question is: **when the program works on whole arrays, or on its own source text, what replaces the loop and what holds the state?**
 
 When you finish, you should be able to:
 
@@ -41,13 +41,13 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Keep a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn. Final totals are 41 to 59, with 3 to 5 cards. Rows go into SQLite as one transaction and a summary is printed.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Keep a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
 APL expresses the boundary in one comparison, `40≥`, "is the total at most 40?". It is true for 40. The program counts the cards for which it is true and then adds one, to include the card that crosses.
 
 ## The machine to identify
 
-**What repeats.** In `apl`, nothing repeats in the code: the array primitives apply to every element. There are three expressions ([L30](../../../src/apl/timecards.apl#L30), [L35](../../../src/apl/timecards.apl#L35) and [L38](../../../src/apl/timecards.apl#L38)). In `apl-weird`, a *chain of calls*: `Card0` calls `Card1`, which `Card0` wrote, which calls `Card2`, and so on ([L43-55](../../../src/apl-weird/timecards.apl#L43-L55)). The chain is recursion-shaped, but each link is a *different function*.
+**What repeats.** In `apl`, nothing repeats in the code: the array primitives apply to every element. [Four named assignments](../../../src/apl/timecards.apl#L30-L39) hold the calculation: five draws in `Drawn`, then three results derived from it in `Hours`, `Totals` and `Kinds`. In `apl-weird`, a *chain of calls*: `Card0` calls `Card1`, which `Card0` wrote, which calls `Card2`, and so on ([L43-55](../../../src/apl-weird/timecards.apl#L43-L55)). The chain is recursion-shaped, but each link is a *different function*.
 
 **Where state lives.** In `apl`, in arrays: `Drawn`, `Hours`, `Totals`, `Kinds`. All five values are drawn at once, so the state is *the whole vector*. In `apl-weird`, in the **source text** of each function. Lines 1 to 4 of every card are four "gene" lines: `N←` (card number), `C←` (category), `H←` (hours) and `T←` (running total). Each child gets new gene lines.
 
@@ -81,7 +81,7 @@ flowchart TD
     accDescr: A flowchart. The function Card0 runs with its genes: the card number, category, hours and running total. It prints its row and inserts it into SQLite. It draws the next hours and builds the four gene lines for the next card as text. A boolean Alive is 1 while the total is 40 or less. The function then takes its own source with the quad-CR function, replaces the header and genes, and compresses the whole child away with Alive. The quad-FX function defines a new function, Card1, from what is left, or defines nothing. Executing the name, also compressed by Alive, then calls Card1, which does the same steps. When Alive is 0, nothing is written or called, and the chain of calls returns.
     A["CardN runs with its genes: number, category, hours, total"] --> B["Print the row and INSERT it"]
     B --> C["Draw the next hours; build four new gene lines as text"]
-    C --> D{{"Alive is 40 >= total?"}}
+    C --> D{{"Alive: total ≤ 40?"}}
     D -->|"1: keep the child"| E["Quad-CR reads this function's own source; quad-FX defines Card N+1 from it with the new genes"]
     E --> F["Execute the name Card N+1: it is a different function with the same body"]
     F --> A
@@ -94,7 +94,7 @@ The second diagram has a cycle, but each trip around it goes through a function 
 
 The programs draw random numbers. Use hours **15, 19, 12** for the trace. To check it against real behavior, scratch copies were run in the sandbox with the draws replaced by fixed values (and, for `apl`, a few lines added to print the intermediate arrays).
 
-**`apl`: the three expressions.** The scratch copy used `Drawn←15 19 12 10 10`. It printed:
+**`apl`: four named arrays.** The original GNU APL scratch run used `Drawn←15 19 12 10 10`. The values below were re-derived from the four assignments in source order. It printed:
 
 ```text
 Drawn         15 19 12 10 10
@@ -113,7 +113,7 @@ Drawn         15 19 12 10 10
 | 5 | `1+` | `3` | Add the one card that crosses. |
 | 6 | `Drawn↑⍨3` | `15 19 12` | Take that many. |
 
-The output was `Meetings 15 15`, `Coding 19 34`, `Debugging 12 46` and `# committed total=46 entries=3 DEMO ONLY`. Cards 4 and 5 (10 and 10 here) were drawn, scanned and thrown away. That waste is the price of eager evaluation.
+The output was `Meetings 15 15`, `Coding 19 34`, `Debugging 12 46` and `# committed total=46 entries=3 DEMO ONLY`. `Totals` was `15 34 46`. `Kinds` reshapes the four category names to the length of `Hours`, filling three slots in this run and up to five in any conforming run. Draws 4 and 5 (10 and 10 here) were scanned and discarded. That waste is the price of eager evaluation.
 
 **`apl-weird`: the chain of functions.** The scratch copy gave `Card0` the hours 15 and let each card take the next card's hours from the list 19, 12, 10, ... The generated source of `Card2`, printed with `⎕CR`, was:
 
@@ -191,7 +191,7 @@ The honest summary: the first program wastes data to avoid a decision, and the s
 ## Connections across the repository
 
 - **Code as data in other languages.** [Tcl](tcl.md) stores program text in a database row and defines it when needed. [Common Lisp](common-lisp.md) can build and run forms. [COBOL](cobol.md) patches a jump instead of text.
-- **Eager versus lazy.** `apl` computes five values and discards two. [Haskell](haskell.md) reads only as much of an infinite list as it needs. [C#, LINQ, XAML, and ports](csharp-linq-xaml-and-ports.md) defer the work until someone enumerates. The concept guide [Evaluation, demand, and laziness](../concepts/evaluation-demand-and-laziness.md) sets these three side by side.
+- **Eager versus lazy.** `apl` computes five values and discards two. [Haskell](haskell.md) reads only as much of an infinite list as it needs. The deferred LINQ pipelines in [C#, LINQ, XAML, and ports](csharp-linq-xaml-and-ports.md) wait for enumeration. The separate C# `for` header enumerates eagerly with `Sum()` each time it tests the condition. The concept guide [Evaluation, demand, and laziness](../concepts/evaluation-demand-and-laziness.md) sets these three side by side.
 - **State outside variables.** `apl-weird` keeps its state in source lines, as [Make](make-and-cmake.md) keeps it in files and [Forth](forth.md) in a parse position. See [State and control beyond variables](../concepts/state-and-control-beyond-variables.md).
 - **Reproducibility of "random".** The APL entries reseed from the clock; the sed entry in [Regex engines and sed](regex-engines-and-sed.md) uses a seeded shift register and gives the same cards for the same seed.
 - **In the book.** [APL](../../languages/apl.md), [Array programming](../../cs/04-evaluation-and-demand.md#array-programming), [Eager evaluation](../../cs/04-evaluation-and-demand.md#eager-evaluation) and [Homoiconicity: code as data](../../cs/06-state-beyond-variables.md#homoiconicity-code-as-data).

@@ -522,8 +522,7 @@ def blk_program_flow(model, L, lesson_file):
     parts = ["## How each program runs",
              "Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how "
              "that program makes the work happen: what the language, runtime or tool really does. "
-             f"[The introduction]({L.lessons('intro.md')}#what-the-challenge-does) has the one picture of what the challenge asks for, "
-             "which is the same for every entry."]
+             f"[The introduction]({L.lessons('intro.md')}#what-the-challenge-does) shows what the challenge asks for and where entries differ."]
     for e in es:
         parts.append(f"### Program flow of `{e['dir']}`\n\nFrom {L.entry(e['dir'])}"
                      f" ([source section]({L.repo('src/' + e['dir'] + '/README.md')}#program-flow)).\n\n{rebase_links(e['_flow'], e['dir'], L, model.problems)}")

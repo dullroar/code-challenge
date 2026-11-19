@@ -62,7 +62,7 @@ flowchart TD
     A["BEGIN: RS is [0-9], /dev/urandom added to ARGV, sqlite3 pipe opened"] --> B["awk reads a record: the bytes up to the next digit, and RT is that digit"]
     B --> C["Rules 1 to 3: skip empty RT; hours = 10 + RT, add to total; build the card in the fields"]
     C --> D["Rules 4 and 5: print the INSERT to the pipe, print the row"]
-    D --> E{{"Last rule: t > 40?"}}
+    D --> E{{"Last rule: t ≥ 41?"}}
     E -->|no| B
     E -->|yes| F["exit: END commits, closes the pipe, prints the summary"]
 ```

@@ -40,9 +40,9 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn. Final totals are 41 to 59, with 3 to 5 cards. Rows are stored in SQLite and the program prints a summary.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-Tcl writes the boundary two ways. In `tcl`, `while {$total <= $limit}` ([L40](../../../src/tcl/timecards.tcl#L40)): true for 40, so the loop goes round. In `tcl-weird`, the trigger inserts the next card `WHERE NEW.running_total <= 40` ([L113](../../../src/tcl-weird/timecards.tcl#L113)). A card is inserted only if the *previous* card's total was at most 40, so the crossing card is the last one inserted.
+Both Tcl entries save the cards in one SQLite transaction and print a summary. Tcl writes the boundary two ways. In `tcl`, `while {$total <= $limit}` ([L40](../../../src/tcl/timecards.tcl#L40)): true for 40, so the loop goes round. In `tcl-weird`, the trigger inserts the next card `WHERE NEW.running_total <= 40` ([L113](../../../src/tcl-weird/timecards.tcl#L113)). A card is inserted only if the *previous* card's total was at most 40, so the crossing card is the last one inserted.
 
 ## The machine to identify
 
@@ -178,7 +178,7 @@ The difference to remember: `tcl` has *one* engine and `tcl-weird` has *two*, SQ
 | Tcl calls `unknown` for a command that does not exist | **Guaranteed** | A documented Tcl hook. |
 | A command's arguments are strings, and code can be built and run as text | **Guaranteed** | Tcl's core model. |
 | An SQLite trigger fires for each inserted row, and a trigger's own inserts fire triggers only with `recursive_triggers` on | **Guaranteed** | Documented SQLite behavior. Verified by B12 step 1. |
-| SQLite limits trigger recursion (1000 by default) | **Guaranteed** | The challenge needs 3 to 5. |
+| The trigger chain must fit the configured SQLite depth limit | **Implementation-permitted** | SQLite documents a default maximum of 1,000. A particular build or connection can set a different limit. This entry needs only 3 to 5 steps. |
 | The same hours appear as `h` and inside `NEW.running_total + h` | **Guaranteed** by design (after the fix) | The hours are written into the one-row TEMP table `draw` and read from it twice. Before the fix they came from a subquery whose function SQLite happened to evaluate once per row, which it does not promise for non-deterministic functions (**accidentally exploited**). The entry's `check.sh` now counts the calls of the `hours` procedure: one per card. |
 | `TEMP` tables and triggers disappear with the connection | **Guaranteed** | Documented. It keeps the program out of the file on disk. |
 | `INSERT INTO main.demo_timecards` is rejected inside a trigger, so the trigger body uses the bare name | **Implementation-permitted** | SQLite's rule about qualified names in triggers. The `TEMP` trigger resolves the bare name to the one table in `main`. |

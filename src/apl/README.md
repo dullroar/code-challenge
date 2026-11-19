@@ -16,7 +16,7 @@ tags: [array-programming, eager-evaluation, referential-transparency]
 
 > **DEMO ONLY.** Fictional timecards in a scratch SQLite file. No connection to any real time-reporting system.
 
-The whole challenge ("add 10-19 hour cards until the total passes 40") is three array expressions. There is no loop and no `if`. The rest of [`timecards.apl`](timecards.apl) is plumbing: seeding, a pipe to `sqlite3`, and printing.
+The challenge’s card selection takes four named array assignments. `Drawn` holds the five rolls, and `Hours`, `Totals` and `Kinds` derive the kept rows from them. There is no loop and no `if`. The rest of [`timecards.apl`](timecards.apl) is plumbing: seeding, a pipe to `sqlite3`, and printing.
 
 ## Run it
 
@@ -58,7 +58,7 @@ flowchart TD
 
 ## How the stunt works
 
-Read the three lines under "The challenge" in the source with this walk-through beside them.
+Read the four assignments under "The challenge" in the source with this walk-through beside them.
 
 1. **Draw everything up front.** `Drawn←(10-⎕IO)+?5⍴10`. `5⍴10` is five tens, `?` rolls each one (`?10` gives a number from the first ten integers), and the `10-⎕IO` shift turns those into 10..19. Why five? Every card is at least 10 hours, so five cards always total at least 50. Five is a *bound that can never be too small*, not a loop count.
 2. **Apply the stop rule as data.** `Hours←Drawn↑⍨1++/40≥+\Drawn`. Read it right to left:
@@ -66,7 +66,7 @@ Read the three lines under "The challenge" in the source with this walk-through 
    - `40≥` turns that into 1s and 0s: `1 1 0 0 …`. Totals only ever grow, so the 1s are always a prefix;
    - `+/` counts the 1s, which is how many cards fit under the line;
    - `1+` adds the one card that crosses it, and `↑⍨` ("take, arguments swapped") keeps that many.
-3. **Derive the rest.** `Totals←+\Hours` is the running total again. `Kinds←(≢Hours)⍴Categories` uses a quiet property of reshape: `⍴` *recycles* its right argument when it is shorter than the target, so four category names reshaped to seven slots come out `Meetings Coding Debugging Learning Meetings Coding Debugging`. No modulo needed.
+3. **Derive the rest.** `Totals←+\Hours` is the running total again. `Kinds←(≢Hours)⍴Categories` uses a quiet property of reshape: `⍴` *recycles* its right argument when it is shorter than the target, so four category names fill as many slots as there are kept cards, up to five. If a fifth card is kept, its name is `Meetings` again. No modulo needed.
 
 After that, `SaveRow¨⍳≢Hours` and `ShowRow¨⍳≢Hours` apply a small function (a *dfn*, `{ … }`) to each row number (`¨` is "each"). That is APL's `for`, and it is not the stop rule: it just visits the rows that are already decided.
 

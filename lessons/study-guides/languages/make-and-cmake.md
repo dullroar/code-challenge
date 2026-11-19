@@ -41,9 +41,9 @@ Work on a copy for any edit ([Running things safely](../../exercises.md#running-
 
 ## The shared challenge
 
-A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when the total passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards make exactly 40, so a fifth card is drawn, and since there are only four categories it reuses Meetings. Final totals are 41 to 59, with 3 to 5 cards. The rows go into SQLite and the program prints a summary.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when the total passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards make exactly 40, so a fifth card is drawn, and since there are only four categories it reuses Meetings. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
 
-Both programs write numbers in unary, so the stop rule becomes a question about length, and the boundary is easy to get wrong by one. In Make the test is *"does a 41st word exist?"* (`$(word 41, ...)`, [L111](../../../src/make-gnu/Makefile#L111)). In CMake it is *"does the total match 41 `x` characters?"* ([L41](../../../src/cmake/timecards.cmake#L41)). A total of 40 has no 41st word and does not match 41 characters, so both continue.
+Both programs report a result from SQLite after the draw. The stop-rule probe is its own statement: its expected failure leaves the card rows in place. Both programs write numbers in unary, so the stop rule becomes a question about length, and the boundary is easy to get wrong by one. In Make the test is *"does a 41st word exist?"* (`$(word 41, ...)`, [L111](../../../src/make-gnu/Makefile#L111)). In CMake it is *"does the total match 41 `x` characters?"* ([L41](../../../src/cmake/timecards.cmake#L41)). A total of 40 has no 41st word and does not match 41 characters, so both continue.
 
 ## The machine to identify
 

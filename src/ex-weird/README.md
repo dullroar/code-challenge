@@ -111,7 +111,7 @@ The program is one line of text. The script adds it to the buffer after the tape
 | `1s/ \([0-9]\)$/ 1\1/` | Turn the digit of the card into hours: `Meetings 17` |
 | `@d` | **Run register `d`.** Mark `t` moves 17 lines down the tape. This is the addition |
 | `1t$`, `'tt$`, `$s/ .*$//`, `$-1,$j`, `$p` | Copy the card. Copy the tape line under mark `t`. Keep only its total. Join the two (Ex's join puts a space between them). Print the row: `Meetings 17 17` |
-| `'tt$`, `$s/^[0-9]* //`, `$ya n`, `$d` | Copy the tape line again. Keep only its *instruction*. Copy it into register `n` |
+| `'tt$`, `$s/^[0-9]* //`, `$ya n`, `$d` | Copy the tape line to the end of the buffer again. Strip the leading total and its space, yank the remaining instruction into register `n`, then delete the temporary line |
 | `1d` | The card is used up. The next card is now line 1 |
 | `@n` | **Run register `n`.** On the tape it says `@a`, so the program runs again. Above 40 it says `"`, and nothing runs |
 

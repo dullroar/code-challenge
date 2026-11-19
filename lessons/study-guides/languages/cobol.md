@@ -41,11 +41,11 @@ Work on a copy when an exercise asks you to edit (see [Running things safely](..
 
 ## The shared challenge
 
-Every entry in the book builds the same fictional data set. A *card* is one time-card row: a category and a whole number of hours from 10 through 19. Categories cycle through Meetings, Coding, Debugging and Learning. The program keeps a running total and adds cards until the total passes 40.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for one time-card row per card, with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The program keeps a running total and adds cards until the total passes 40.
 
 Be exact about the boundary. The run retains **the first card that takes the total above 40**. A total of exactly 40 does *not* stop it. Four 10-hour cards total exactly 40, so a fifth card is drawn, and the category wraps back to Meetings. The final total is therefore always 41 to 59, and the card count is 3 to 5. (Two cards reach at most 38, so a run cannot end in two.)
 
-Every run saves its rows as a single transaction in a SQLite file and prints a summary. The shared checker, [`lessons/tools/check-demo.sh`](../../tools/check-demo.sh), verifies the *shape* of the output: the `DEMO ONLY` marker, hours in range, correct running sums, a stop on the first crossing, and a summary that agrees with the rows.
+Both COBOL entries save a completed run as a single transaction in a SQLite file and print a summary. The shared checker, [`lessons/tools/check-demo.sh`](../../tools/check-demo.sh), verifies the *shape* of the output: the `DEMO ONLY` marker, hours in range, correct running sums, a stop on the first crossing, and a summary that agrees with the rows.
 
 For a stop rule of exactly this shape, notice how COBOL says it. In the idiomatic program the rule is `88 OVER-FORTY VALUE 41 THRU 99`: the first total *above* 40. There is no `<=` or `>` anywhere to get wrong.
 

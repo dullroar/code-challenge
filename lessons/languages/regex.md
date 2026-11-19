@@ -65,7 +65,7 @@ The "host" is a stock `pcre2grep` and one command line. Callout strings name pro
 
 - **Callouts need absolute paths.** `pcre2grep` uses `fork` and `execv`, which do not search `PATH`. A bare `true` or `sleep` is silently a failed callout, indistinguishable from a vetoed branch.
 - **No state in the pattern.** The running total lives in SQLite and each callout re-reads it.
-- **No transaction.** Each helper is its own process, so each statement commits immediately; "abandoned branch, side effects stay" is literal.
+- **Each write commits separately.** The helpers run independent SQLite commands in autocommit mode. The regex’s `(*COMMIT)` prunes backtracking paths. The final match failure leaves earlier database writes in place.
 - **Ubuntu's own `pcre2grep` is built without callout scripts.** It needs an upstream build (the sandbox image pins 10.49). A textbook **implementation-permitted** case.
 - **Security**: callouts that run programs are a command-execution feature. `check.sh` allows only `/usr/bin/sqlite3`, `/usr/bin/test` and `/bin/sleep`.
 
@@ -76,8 +76,8 @@ The "host" is a stock `pcre2grep` and one command line. Callout strings name pro
 This entry is the repo's best **honest failure**, and it is the one that most clearly marks where regex alone stops. See [blocking problems](../blocking-problems.md#regexdotnet):
 
 - A regex cannot draw random numbers, so the host seeds five unary strings.
-- A regex cannot write anything.
-- **The signature move is impossible**: append `(?!)` and the match fails, and a failed .NET `Match` exposes no captures, so everything accumulated is gone. This track *must* return true.
+- The host reads the successful match’s captures and appends a TSV report.
+- **Failure yields zero card rows.** Append `(?!)` to fail the entire match. On the fixed all-10 tape, the normal pattern succeeds with five cards and a total of 50. The forced failure exposes zero captures, leaves an empty TSV report and exits 1. See the [entry check](../../src/regex-dotnet/check.sh).
 
 ## GNU sed
 
@@ -117,7 +117,7 @@ Never as an application design. But callouts and code blocks are legitimate in *
 <!-- BEGIN GENERATED program-flow:languages/regex.md -->
 ## How each program runs
 
-Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) shows what the challenge asks for and where entries differ.
 
 ### Program flow of `regex-dotnet`
 
@@ -137,7 +137,7 @@ flowchart TD
     G --> H["Host reads the captures: categories, hours and the size of s"]
 ```
 
-**What this shows:** the regex engine is a machine with stacks. A balancing group pops one stack and pushes another in the same step, so a single `a` can spend one unit of budget and add one hour to the total. The budget stack is the stop rule: when it is empty, the next pass cannot start.
+**What this shows:** the regex engine is a machine with stacks. Each `a` pushes one capture onto the total stack `s`. The balancing group also pops one budget token from `b` while any remain. The budget stack is the stop rule: when it is empty, the next pass cannot start.
 
 **Why this mechanism matters:** the state is stack *depth*. Nothing counts and nothing adds. The match succeeds, and the program's answer is what the engine captured. An entry may push the total over 40 mid-way, because the budget runs dry partway through its hours and the extra `a`s pop nothing.
 

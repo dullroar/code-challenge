@@ -55,7 +55,7 @@ flowchart TD
     B --> C["for hours = a fresh random 10 to 19"]
     C --> D["sum hours into total"]
     D --> E["collect a card: number, category, hours, total"]
-    E --> F{{"until total > 40?"}}
+    E --> F{{"until total ≥ 41?"}}
     F -->|no| B
     F -->|yes| G["Build the SQL script as a string, run sqlite3 with run-program, print the rows"]
 ```

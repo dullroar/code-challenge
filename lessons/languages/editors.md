@@ -28,6 +28,7 @@ Seventy lines of ed commands. A launcher that supplies five random digits and st
 
 - **The category order is addressing.** `1s/^/Meetings /` puts a name on line 1, `2s/^/Coding /` on line 2.
 - **A rewrite table does the lookup.** There are ten rules, `g/x7$/s/7$/xxxxxxx/` and nine more. A digit becomes that many marks.
+- **A marker seeds the ledger.** `Start 0|` supplies the zero total above the first card. After the pass, `g/^Start /d` removes that marker from the output.
 - **Adding is writing marks side by side.** `-t.` copies the line above (the total so far), `-,.j` joins it to the card, and one `s` puts the two sets of marks together.
 - **A failed `s` is an `if`.** Inside a global command it does nothing, and does not stop the list. So each substitution means "if the line looks like this, rewrite it".
 - **The stop rule is a regular expression.** `x\{41,\}` is "41 or more marks". The bar before the marks becomes a bang, and the next card sees the bang and turns into a `Dead` line.
@@ -73,7 +74,7 @@ A script of about 100 lines, most of it a table of sixty numbered lines. The pro
 - **A mark is a register.** `k t` puts a mark on a line. `'t+17k t` moves it seventeen lines down. That is `t = t + 17`.
 - **The tape is the number line.** Sixty lines, each `total instruction`. Where the mark stands *is* the running total, and the text of the line is that total as digits.
 - **The program writes its own command.** A substitution turns the card `Meetings 7` into the text `'t+17k t`. The program copies that text into a register and runs it with `@d`.
-- **The loop is a register that runs itself.** The program copies the *instruction* from the tape line into register `n` and runs it. Up to 40 it is `@a`, which is the program again. Above 40 it is a quote mark, which is a comment, so nothing runs.
+- **The loop is a register that runs itself.** The program copies the numbered tape line to the end of the buffer, strips the digits and following space with `$s/^[0-9]* //`, and yanks just the instruction into register `n`. Up to 40 it is `@a`, which is the program again. Above 40 it is a quote mark, which is a comment, so nothing runs.
 - **Nothing in the program says 40.** The limit is where `@a` stops on the tape.
 
 The [README](../../src/ex-weird/README.md#how-the-stunt-works) has the step table, the comparison with the ed entry, and the five places where nvi and Vim disagree.
@@ -103,7 +104,7 @@ See [exercise B19](../exercises.md#b19-ex-move-the-limit-on-the-tape-and-cut-the
 <!-- BEGIN GENERATED program-flow:languages/editors.md -->
 ## How each program runs
 
-Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) has the one picture of what the challenge asks for, which is the same for every entry.
+Each picture below is the `## Program Flow` section of an entry's README, copied here by the build. It shows how that program makes the work happen: what the language, runtime or tool really does. [The introduction](../intro.md#what-the-challenge-does) shows what the challenge asks for and where entries differ.
 
 ### Program flow of `ed-weird`
 

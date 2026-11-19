@@ -13,7 +13,7 @@ or `pipx install weasyprint`). Without it, use the EPUB or HTML.
 
 The chapters are ordinary Markdown files that link to each other and to the repo with relative
 links, which is what you want on GitHub and is wrong in a single document. This script reads the
-chapters in chapters.txt order and rewrites each relative link before pandoc sees it:
+chapters in chapters.txt order and rewrites relative links in Pandoc's parsed document:
   * to another chapter           -> an in-book anchor (#heading-id)
   * to lessons/README.md         -> plain text (the web index is not part of the book)
   * to anything else in the repo -> its GitHub URL
@@ -30,7 +30,7 @@ WeasyPrint versions).
 The title page and copyright page live in lessons/front-matter.md (plain HTML, inserted before the
 table of contents). The PDF and EPUB are written to the repo root as learn-programming-the-weird-way.*.
 """
-import calendar, os, re, shutil, subprocess, sys, time
+import calendar, json, os, re, shutil, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cs, diagrams
 from pathlib import PurePosixPath
@@ -61,29 +61,21 @@ def h1(text):
     raise SystemExit("chapter has no H1")
 
 def normalize(chapter, target):
-    """Repo-root-relative path (posix) of a relative link target found in `chapter`."""
+    """Repo-root-relative path (posix) of a relative link target, or None if outside the repo."""
     base = PurePosixPath("lessons") / PurePosixPath(chapter).parent
     parts = []
     for p in (base / target).parts:
         if p == "..":
+            if not parts:
+                return None
             parts.pop()
         elif p != ".":
             parts.append(p)
     return "/".join(parts)
 
-LINK = re.compile(r"(?<!!)\[([^\]]*)\]\(([^)\s]+)\)")
-HEADING = re.compile(r"^(#{1,6})[ \t]+(.+?)[ \t]*#*[ \t]*$")
-
 def headings(text):
     """Heading texts of a Markdown file, in order, skipping fenced code."""
-    fenced = False
-    for line in text.splitlines():
-        if line.lstrip().startswith(("```", "~~~")):
-            fenced = not fenced
-        elif not fenced:
-            m = HEADING.match(line)
-            if m:
-                yield m.group(2)
+    return (item[2] for item in diagrams.scan(text) if item[0] == "heading")
 
 def id_maps(texts):
     """Different chapters repeat heading titles ("Run it", "Gotchas worth knowing", "What did we just learn?").
@@ -101,28 +93,43 @@ def id_maps(texts):
         maps[chapter] = m
     return maps
 
-def rewrite(text, chapter, ids, maps):
+def link_target(target, chapter, ids, maps):
+    """Resolve a parsed link. Return None to keep just its label."""
     def book_id(ch, frag):
         return maps[ch].get(frag, frag)    # an unknown fragment is left alone; --check reports it
-    def sub(m):
-        label, target = m.group(1), m.group(2)
-        if re.match(r"[a-z]+:", target):
-            return m.group(0)
-        if target.startswith("#"):                       # a link inside this chapter
-            return f"[{label}](#{book_id(chapter, target[1:])})"
-        path, _, frag = target.partition("#")
-        full = normalize(chapter, path.replace("%20", " ")) if path else None
-        if full is None:
-            return m.group(0)
-        if full == "lessons/README.md":
-            return label
-        rel = full[len("lessons/"):] if full.startswith("lessons/") else None
-        if rel in ids:
-            return f"[{label}](#{book_id(rel, frag) if frag else ids[rel]})"
-        if full.endswith("/") or os.path.isdir(os.path.join(REPO, full)):
-            return f"[{label}]({GITHUB.replace('/blob/', '/tree/')}{full})"
-        return f"[{label}]({GITHUB}{full}{'#' + frag if frag else ''})"
-    return LINK.sub(sub, text)
+    if not target or re.match(r"[a-z][a-z0-9+.-]*:", target, re.I) or target.startswith("/"):
+        return target
+    if target.startswith("#"):
+        return "#" + book_id(chapter, target[1:])
+    path, _, frag = target.partition("#")
+    full = normalize(chapter, path.replace("%20", " "))
+    if full is None:
+        return target
+    if full == "lessons/README.md":
+        return None
+    rel = full.removeprefix("lessons/") if full.startswith("lessons/") else None
+    if rel in ids:
+        return "#" + (book_id(rel, frag) if frag else ids[rel])
+    if full.endswith("/") or os.path.isdir(os.path.join(REPO, full)):
+        return GITHUB.replace("/blob/", "/tree/") + full.replace(" ", "%20")
+    return GITHUB + full.replace(" ", "%20") + ("#" + frag if frag else "")
+
+def rewrite_links(nodes, chapter, ids, maps):
+    """Walk Pandoc's nested inlines and blocks. Code nodes hold plain strings."""
+    rewritten = []
+    for node in nodes:
+        if isinstance(node, list):
+            node = rewrite_links(node, chapter, ids, maps)
+        elif isinstance(node, dict) and isinstance(node.get("c"), list):
+            node["c"] = rewrite_links(node["c"], chapter, ids, maps)
+            if node["t"] == "Link":
+                _, label, destination = node["c"]
+                destination[0] = link_target(destination[0], chapter, ids, maps)
+                if destination[0] is None:
+                    rewritten.extend(label)
+                    continue
+        rewritten.append(node)
+    return rewritten
 
 def chapter_texts():
     return {c: read(c) for c in chapters()}
@@ -174,21 +181,48 @@ def render_figures(texts, required, prune_cache=True):
         print(f"diagrams: removed {len(gone)} stale cached file(s)")
     return figs
 
-def build_markdown(texts=None, figs=None, fmt="svg", name="book.md"):
-    """The whole book as one Markdown file. `figs` (from render_figures) turns each mermaid fence into a figure: `fmt` 'svg' for the
-    HTML and PDF, 'png' for the EPUB. Without `figs` the fences stay code blocks (a --check run with no renderer)."""
+MARKDOWN_READER = "gfm+gfm_auto_identifiers+yaml_metadata_block"
+CHAPTER_BOUNDARY = "<!-- publication chapter boundary -->"
+
+def prepare_document(texts, figs, fmt, name, front=None):
+    """Write the assembled Markdown and the parsed, link-resolved document for Pandoc's writers."""
     global ID_MAPS
-    names = chapters()
-    texts = texts or chapter_texts()
     ID_MAPS = id_maps(texts)
     ids = {c: next(iter(ID_MAPS[c].values())) for c in texts}     # a chapter's id is its first heading's, the H1
     counter = [1]
-    parts = [rewrite(diagrams.embed(t, figs, fmt, counter) if figs else t, c, ids, ID_MAPS) for c, t in texts.items()]
+    parts = [diagrams.embed(t, figs, fmt, counter) if figs else t for t in texts.values()]
     os.makedirs(OUT, exist_ok=True)
-    md = os.path.join(OUT, name)
-    with open(md, "w", encoding="utf-8", newline="\n") as f:
+    stem = os.path.join(OUT, name)
+    with open(stem + ".md", "w", encoding="utf-8", newline="\n") as f:
         f.write("\n\n".join(parts))
-    return md
+
+    # Parse as one document so Pandoc assigns repeated heading IDs globally.
+    # Remove the boundary comments after using them to find each link's source chapter.
+    source = "\n\n".join(f"{CHAPTER_BOUNDARY}\n\n{part}" for part in parts)
+    parsed = subprocess.run(["pandoc", "-f", MARKDOWN_READER, "-t", "json"],
+                            input=source, encoding="utf-8", stdout=subprocess.PIPE, check=True)
+    document = json.loads(parsed.stdout)
+    chapter_names = iter(texts)
+    chapter = None
+    blocks = []
+    for block in document["blocks"]:
+        if block["t"] == "RawBlock" and block["c"][1].strip() == CHAPTER_BOUNDARY:
+            chapter = next(chapter_names, None)
+            if chapter is None:
+                raise SystemExit("unexpected publication chapter boundary")
+        elif chapter is not None:
+            blocks.extend(rewrite_links([block], chapter, ids, ID_MAPS))
+        else:
+            raise SystemExit("document content appeared before the first publication chapter boundary")
+    if (missing := next(chapter_names, None)) is not None:
+        raise SystemExit(f"missing publication chapter boundary for {missing}")
+    if front is not None:
+        # EPUB applies the include-before-body template to every chapter. A
+        # leading raw block instead gives the front matter its own opening page.
+        with open(front, encoding="utf-8") as f:
+            blocks.insert(0, {"t": "RawBlock", "c": ["html", f.read()]})
+    document["blocks"] = blocks
+    return json.dumps(document, ensure_ascii=False)
 
 ID_MAPS = {}
 
@@ -358,24 +392,23 @@ def build_documents(texts, stem, metadata, front, html_name, md_stem, checking, 
     so they share one Pandoc command line, one stylesheet, one diagram renderer and one reproducibility rule. Returns the HTML path."""
     os.environ["SOURCE_DATE_EPOCH"] = source_date_epoch(metadata)
     figs = render_figures(texts, required=not checking, prune_cache=prune_cache)     # a full build needs the renderer; --check only notes its absence
-    md = build_markdown(texts, figs, "svg", md_stem + ".md")
-    base = lambda src: ["pandoc", "-f", "gfm+gfm_auto_identifiers+yaml_metadata_block", "--metadata-file", metadata,
-            "--wrap=none", "--toc", "--toc-depth=2", "--number-sections", "--include-before-body", front, src]
-    # Pandoc's gfm reader does not read a YAML block from --metadata-file as document metadata
-    # for every writer, so pass it explicitly too.
-    outs = [("html", md, ["-s", "--embed-resources", "--css", CSS, "-o", os.path.join(OUT, html_name)])]
+    document = prepare_document(texts, figs, "svg", md_stem)
+    base = ["pandoc", "-f", "json", "--metadata-file", metadata, "--wrap=none", "--toc", "--toc-depth=2",
+            "--number-sections"]
+    front_option = ["--include-before-body", front]
+    outs = [("html", document, front_option + ["-s", "--embed-resources", "--css", CSS, "-o", os.path.join(OUT, html_name)])]
     if not checking:
         # The EPUB gets PNGs (every e-reader draws them); the PDF and HTML get SVG, which is sharper and scales to the page.
-        epub_md = build_markdown(texts, figs, "png", md_stem + "-epub.md") if figs else md
-        outs.append(("epub", epub_md, ["--epub-title-page=false", "--css", CSS, "-o", os.path.join(artifacts_dir(), stem + ".epub")]))
+        epub_document = prepare_document(texts, figs, "png", md_stem + "-epub", front=front)
+        outs.append(("epub", epub_document, ["--epub-title-page=false", "--css", CSS, "-o", os.path.join(artifacts_dir(), stem + ".epub")]))
         engine = pdf_engine()
         if engine:
-            outs.append(("pdf", md, ["--pdf-engine=" + engine, "--css", CSS, "--lua-filter", os.path.join(HERE, "wrap-code.lua"),
+            outs.append(("pdf", document, front_option + ["--pdf-engine=" + engine, "--css", CSS, "--lua-filter", os.path.join(HERE, "wrap-code.lua"),
                                      "--metadata", "toc-title=Contents", "-o", os.path.join(artifacts_dir(), stem + ".pdf")]))
         else:
             print("note: weasyprint not found (uv tool install weasyprint); skipping PDF")
     for name, src, extra in outs:
-        subprocess.run(base(src) + extra, check=True)
+        subprocess.run(base + extra, input=src, encoding="utf-8", check=True)
         print("wrote", extra[-1])
     return os.path.join(OUT, html_name)
 

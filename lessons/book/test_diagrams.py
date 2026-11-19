@@ -214,6 +214,24 @@ class RealRender(unittest.TestCase):
                 self.assertEqual(len(re.findall(rb"/S /Transparency", data)), 0, fig.family + ": the PDF has transparency groups")
                 self.assertEqual(len(re.findall(rb"/PatternType", data)), 0, fig.family + ": the PDF has gradient patterns")
 
+    def test_comparison_glyphs_survive_the_svg_and_flattening(self):
+        import xml.etree.ElementTree as ET
+
+        source = """flowchart TD
+    A["total #gt; 40?"] --> B["total < 40?"]
+    B --> C["total ≥ 41?"] --> D["total ≤ 40?"]
+"""
+        expected = {"total > 40?", "total < 40?", "total ≥ 41?", "total ≤ 40?"}
+        path = os.path.join(diagrams.CACHE, "comparators.svg")
+        self.r.run(source, path)
+
+        def labels():
+            return {"".join(node.itertext()) for node in ET.parse(path).iter("{http://www.w3.org/2000/svg}text")}
+
+        self.assertEqual(labels(), expected)
+        self.r.flatten(path)
+        self.assertEqual(labels(), expected)
+
     def test_the_output_is_the_same_twice(self):
         a, _ = diagrams.render_all(self.r, {self.GOOD: "a"})
         first = read(a[self.GOOD].svg)
