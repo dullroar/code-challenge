@@ -136,3 +136,64 @@ def text_placements(lines, number, geometry, physical):
                     yield placement(rule, number, label, measured, allowed,
                                     overflow(measured, allowed, tolerance), item=line["text"])
                     group.clear()
+
+
+def area(box):
+    return max(0, box[2] - box[0]) * max(0, box[3] - box[1])
+
+
+def intersection(a, b):
+    return max(a[0], b[0]), max(a[1], b[1]), min(a[2], b[2]), min(a[3], b[3])
+
+
+def overlap_warning(lines, images, number):
+    """Sweep in vertical order. Report the strongest candidate once per page."""
+    objects = [(line["box"], line["text"]) for line in lines]
+    objects.extend((box, None) for box in images)
+    active = []
+    best = None
+    for box, text in sorted(objects, key=lambda item: item[0][1]):
+        active = [(b, t) for b, t in active if b[3] > box[1]]
+        for other, other_text in active:
+            if text is None and other_text is None:
+                continue
+            common = intersection(box, other)
+            height = common[3] - common[1]
+            smaller = min(area(box), area(other))
+            if height < 2 or smaller == 0:
+                continue
+            ratio = area(common) / smaller
+            if ratio < (.45 if text is not None and other_text is not None else .65):
+                continue
+            if best is None or ratio > best[0]:
+                best = ratio, box, other, text, other_text
+        active.append((box, text))
+    if best:
+        ratio, box, other, text, other_text = best
+        yield finding("PDF-008", number, f"possible overlap ({ratio:.0%} of smaller box)",
+                      severity="warning", item=f"{text or '[image]'} / {other_text or '[image]'}",
+                      box=box, allowed=other)
+
+
+def table_edges(segments, geometry):
+    """Find likely open table edges near page breaks using vertical strokes and closing rules."""
+    vertical = [b for b in segments if b[2] - b[0] < .1 and b[3] - b[1] >= 7]
+    horizontal = [b for b in segments if b[3] - b[1] < .1 and b[2] - b[0] >= 6]
+    for top in (True, False):
+        end = 1 if top else 3
+        border = geometry.content[end]
+        sample = [b for b in vertical if abs(b[end] - border) < 16]
+        if not sample:
+            yield None
+            continue
+        edge = min(b[end] for b in sample) if top else max(b[end] for b in sample)
+        xs = tuple(sorted({round(b[0], 1) for b in sample if abs(b[end] - edge) < 1}))
+        joining = [b for b in horizontal if abs(b[1] - edge) < 1]
+        if len(xs) >= 3 and xs[-1] - xs[0] >= 100:
+            # A repeated column grid at a break suggests a continuation. Demand at
+            # least one open span before flagging a possible split row.
+            closed = all(any(b[0] <= left + 1 and b[2] >= right - 1 for b in joining)
+                         for left, right in zip(xs, xs[1:]))
+            yield xs, edge, closed
+        else:
+            yield None
