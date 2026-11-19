@@ -45,11 +45,13 @@ jobs:
         run: |
           python lessons/book/build.py --check
           python lessons/study-guides/build.py --check
+          python lessons/curriculum/build.py --check
 
       - name: Run editorial regression checks
         run: |
           python lessons/book/test_cs.py
           python lessons/book/test_study_guides.py
+          python lessons/book/test_curriculum.py
           python lessons/book/test_editorial.py
 
       - name: Run the full Mermaid render gate
@@ -64,6 +66,7 @@ jobs:
           status=0
           python lessons/book/build.py --release --artifacts-dir "$artifacts" || status=1
           python lessons/study-guides/build.py --release --artifacts-dir "$artifacts" || status=1
+          python lessons/curriculum/build.py --release --artifacts-dir "$artifacts" || status=1
           exit "$status"
 
       - name: Upload PDF lint findings
