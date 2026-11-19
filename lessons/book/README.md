@@ -162,3 +162,15 @@ The [PDF release gate](README.md#pdf-release-gate) checks the guide PDF after ea
 **Diagrams.** A Program Flow diagram in a guide is copied verbatim from `src/<entry>/README.md` and marked with `<!-- diagram-source: src/<entry>/README.md#program-flow -->`. The build fails if a copy has drifted. A new diagram is allowed only when it shows a relationship no source diagram shows (cross-language state placement, a lazy-demand trace, a transaction boundary or an authority boundary), and is marked `<!-- diagram-new: kind - why -->`.
 
 **External links.** A guide may link only to the hosts in [`lessons/book/link-hosts.txt`](link-hosts.txt). Wikipedia comes first. The GNU Project manuals (`www.gnu.org/software/`) were added for the guides, because a claim about an implementation needs its manual.
+
+## Building the curriculum
+
+The curriculum is one hand-written file, [`docs/curriculum.md`](../../docs/curriculum.md): a 16-week course plan that points at the book chapters, the study guides and the exercises without changing them. It builds as its own HTML, PDF and EPUB, separate from the book and the study guides.
+
+```bash
+python lessons/curriculum/build.py --check   # lint the curriculum, build the HTML, verify every internal link
+python lessons/curriculum/build.py           # write curriculum.pdf and curriculum.epub in the repository root
+python lessons/book/test_curriculum.py       # the tests: plan, diagram, links, house style, page limit
+```
+
+[`lessons/curriculum/build.py`](../curriculum/build.py) imports this build's `build_documents`, as the study-guide build does, so the link rewriting, Mermaid rendering, Pandoc call, stylesheet, reproducibility rule and PDF lint are shared. Its own checks cover weeks 1 to 16 once each, the one diagram with `accTitle` and `accDescr`, links and hosts, house style (25 words at most in a prose sentence, no contractions, no dashes) and a limit of 10 PDF pages. The title page and metadata are in [`lessons/curriculum/`](../curriculum/). When the book's edition changes, `companion-to` in `metadata.yaml` must change too, after someone reviews the curriculum.
