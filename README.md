@@ -29,6 +29,8 @@ You know you want to write beautifully wrong code. **You know you do.**
 
 **[Learn Programming the Weird Way!](lessons/README.md)** *Programs you shouldn't write. Language features you should understand.* Lessons by [goals](lessons/goals.md), by [computer science concept](lessons/cs/README.md), by [language](lessons/languages/README.md) (including [COBOL's `ALTER`](lessons/languages/cobol.md#alter) and [APL on the whiteboard](lessons/languages/apl.md)) and by [solution pattern](lessons/patterns.md), plus [problems overcome](lessons/problems-overcome.md), [blocking problems](lessons/blocking-problems.md) and [exercises](lessons/exercises.md) you can run in a container.
 
+Want a plan for a whole semester? The **[16-week curriculum](docs/curriculum.md)** ([PDF](curriculum.pdf), [EPUB](curriculum.epub)) sequences the book chapters, study guides and exercises for senior undergraduates, graduate students and self-taught programmers.
+
 ## Ready to play?
 
 The rules, the shared demo and the do's and don'ts live in **[`CHALLENGE.md`](CHALLENGE.md)**. Pick a language. Pick a constraint. Make something terrible that works. Sending it in? See **[`CONTRIBUTING.md`](CONTRIBUTING.md)**.
@@ -100,6 +102,7 @@ lessons/                      # Learn Programming the Weird Way!: lessons, patte
 sandbox/                      # where entries get run safely: Docker images, Windows Sandbox, the Actions gate
 build.gradle, gradlew*        # root Gradle wrapper: runs the Java, Kotlin, Python, and Go ports
 docs/
+  curriculum.md               # the 16-week course plan (builds curriculum.pdf and .epub in the root)
   My Code Challenge.pdf       # anonymized source presentation
   stacked-bar-charts.md       # the 2013 no-code-behind blog post that inspired the XAML entry
   images/                     # screenshots used in the subfolder READMEs
