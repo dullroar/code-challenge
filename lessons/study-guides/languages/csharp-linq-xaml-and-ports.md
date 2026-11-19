@@ -1,19 +1,19 @@
-# C#, LINQ, XAML, and ports study guide
+# C#, LINQ, XAML and ports study guide
 
 ## What this guide is for
 
-This guide reads the repository's C# family and its one-statement ports as one study: the original [`ModernChallenge1`](../../../src/ModernChallenge1/README.md) (a `for` statement with an empty body), the two LINQ entries [`LinqChallenge1`](../../../src/LinqChallenge1/README.md) and [`LinqChallenge2`](../../../src/LinqChallenge2/README.md), the markup interpreter [`xaml`](../../../src/xaml/README.md), and the ports to [Java](../../../src/JavaChallenge1/README.md), [Go](../../../src/GoChallenge1/README.md), [Kotlin](../../../src/KotlinChallenge1/README.md), [Python](../../../src/PythonChallenge1/README.md) and [Rust](../../../src/RustChallenge1/README.md). The question is: **when one statement, one expression or one document is the whole program, what is each slot of the construct for, when does each part run, and who owns the thread it runs on?**
+This guide reads the repository's C# family and its one-statement ports as one study: the original [`ModernChallenge1`](../../../src/ModernChallenge1/README.md) (a `for` statement with an empty body), the two LINQ entries [`LinqChallenge1`](../../../src/LinqChallenge1/README.md) and [`LinqChallenge2`](../../../src/LinqChallenge2/README.md), the markup interpreter [`xaml`](../../../src/xaml/README.md) and the ports to [Java](../../../src/JavaChallenge1/README.md), [Go](../../../src/GoChallenge1/README.md), [Kotlin](../../../src/KotlinChallenge1/README.md), [Python](../../../src/PythonChallenge1/README.md) and [Rust](../../../src/RustChallenge1/README.md). The question is: **when one statement, one expression or one document is the whole program, what is each slot of the construct for, when does each part run and who owns the thread it runs on?**
 
 When you finish, you should be able to:
 
 1. Name the three slots of the `for` header (initializer, condition, iterator) and say what each carries in the original and in each port.
-2. Explain deferred execution: what a LINQ query holds, when it runs, and why enumerating twice runs it twice.
+2. Explain deferred execution: what a LINQ query holds, when it runs and why enumerating twice runs it twice.
 3. Explain where a provider boundary is (`IQueryable` to `IEnumerable`) and why the position of `AsEnumerable()` matters.
 4. Explain how a markup parser can run a program, and why the loop in the XAML files had to be unrolled.
 5. Explain thread affinity: why WPF needs an STA thread and a dispatcher, and why the original guards EF Core's context with a mutex.
-6. Label each behavior as guaranteed, implementation-permitted, or accidentally exploited, and say which claims were run and which were only read.
+6. Label each behavior as guaranteed, implementation-permitted or accidentally exploited, and say which claims were run and which were only read.
 
-Scope limits. You need to read C# 9 or later and know what LINQ is. The guide does not teach WPF layout, EF Core mapping, Swing or Tk. It uses .NET 10. The book's page is [C#, LINQ and XAML (plus the one-statement ports)](../../languages/csharp-linq-xaml.md). For ideas, see [Deferred execution](../../cs/04-evaluation-and-demand.md#deferred-execution), [Thread safety and thread affinity](../../cs/07-effects-errors-and-commitment.md#thread-safety-and-thread-affinity) and [Reading an adversarial program](../../cs/01-reading-an-adversarial-program.md).
+**Scope limits.** You need to read C# 9 or later and know what LINQ is. The guide does not teach WPF layout, EF Core mapping, Swing or Tk. It uses .NET 10. The book's page is [C#, LINQ and XAML (plus the one-statement ports)](../../languages/csharp-linq-xaml.md). For ideas, see [Deferred execution](../../cs/04-evaluation-and-demand.md#deferred-execution), [Thread safety and thread affinity](../../cs/07-effects-errors-and-commitment.md#thread-safety-and-thread-affinity) and [Reading an adversarial program](../../cs/01-reading-an-adversarial-program.md).
 
 **What was run for this guide.** The WPF, EF Core, XAML, Swing, Tk and GTK parts need Windows or a display and were **not run here**. Their traces are read from the source and marked "read". Two things *were* run: a console reduction of the `for` header (WPF and EF removed, .NET 10), and the exercise-B7 deferred-execution experiment. Everything else is labeled.
 
@@ -28,7 +28,7 @@ sandbox\windows\run.ps1 src\xaml -RunArgs strict.xaml
 
 The ports for Go, Java, Kotlin, Python and Rust run in the Linux sandbox with `sandbox/container/run-image.sh src/<entry>`. Edit only copies ([Running things safely](../../exercises.md#running-things-safely)).
 
-**Prediction rule.** Before each run, write down what runs *first*, what is deferred, and on which thread. In this family the order of evaluation is the program.
+**Prediction rule.** Before each run, write down what runs *first*, what is deferred and on which thread. In this family the order of evaluation is the program.
 
 **Vocabulary.**
 
@@ -41,17 +41,17 @@ The ports for Go, Java, Kotlin, Python and Rust run in the Linux sandbox with `s
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for this: a *card* is a category and a whole number of hours from 10 to 19; categories cycle through Meetings, Coding, Debugging and Learning; keep a running total and stop when it passes 40; **retain the first card that takes the total above 40**; a total of exactly 40 does *not* stop the run. Final totals are 41 to 59, with 3 to 5 cards.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
 The two LINQ demos and XAML depart from that contract. The older four-name headers explain how the same edge case used to affect the ports.
 
-1. **`LinqChallenge1` and `LinqChallenge2` do not draw random hours.** Their work week is five fixed 8-hour days, and they refuse any day that would push the total past 40. The result is exactly 40.0 hours over five rows, every run. They teach deferred execution, not the stop rule. Exercise E1 states this.
-2. **The `for`-header entries used to stop after four cards, and `xaml` still does.** The original and the Java, Go, Kotlin, Python and Rust ports test `total <= 40 && a category remains` and take each category once. In `ModernChallenge1` the condition is `Sum() <= 40d && i.categories.MoveNext()`, where `categories` is a one-pass enumerator. With four category names, a reduction of that header run in a console project with every card worth 10 hours stopped with `stop: total 40 after 4 cards`: one run in 10,000 for random hours, and a contradiction of "exactly 40 continues". The 2008 original had four names, and the entry READMEs described that faithfully. It is now fixed in `ModernChallenge1` and in all five ports by a fifth name (`Meetings` repeats). After the fix, the same reduction stops with `stop: total 50 after 5 cards`, the C# project builds, Rust's unit tests pass (they now assert that exactly 40 continues), and Go, Java and Kotlin compile. The XAML entry's four unrolled passes still have the ceiling: a fifth pass could not be tested without Windows, so it was not added. With the shipped seed (`Random(42)`: 16, 11, 11, 15) it deals four cards and ends at 53, so the case never arises unless you change the seed (exercise E2).
-3. **Storage depends on the XAML variant.** The EF Core variant has a SQLite trigger that deletes a row if the earlier rows already total more than 40. The direct SQLite variant puts the equivalent test in the insert statement. Both keep the crossing card. The strict variant writes XML. See [where entries differ](../../intro.md#where-entries-differ).
+1. **`LinqChallenge1` and `LinqChallenge2` do not draw random hours.** Their work week is five fixed 8-hour days, and they refuse any day that would push the total over 40. The result is exactly 40.0 hours over five rows, every run. They teach deferred execution, not the stop rule. Exercise E1 states this.
+2. **The `for`-header entries used to stop after four cards, and `xaml` still does.** The original and the Java, Go, Kotlin, Python and Rust ports test `total <= 40 && a category remains` and take each category once. In `ModernChallenge1` the condition is `Sum() <= 40d && i.categories.MoveNext()`, where `categories` is a one-pass enumerator. With four category names, a reduction of that header run in a console project with every card worth 10 hours stopped with `stop: total 40 after 4 cards`: one run in 10,000 for random hours, and a contradiction of "exactly 40 continues". The 2008 original had four names, and the entry READMEs described that faithfully. It is now fixed in `ModernChallenge1` and in all five ports by a fifth name (`Meetings` repeats). After the fix, the same reduction stops with `stop: total 50 after 5 cards`, the C# project builds, Rust's unit tests pass (they now assert that exactly 40 continues) and Go, Java and Kotlin compile. The XAML entry's four unrolled passes still have the ceiling: a fifth pass could not be tested without Windows, so it was not added. With the shipped seed (`Random(42)`: 16, 11, 11, 15) it deals four cards and ends at 53, so the case never arises unless you change the seed (exercise E2).
+3. **Storage depends on the XAML variant.** The EF Core variant has a SQLite trigger that deletes a row if the earlier rows already total over 40. The direct SQLite variant puts the equivalent test in the insert statement. Both keep the crossing card. The strict variant writes XML. See [where entries differ](../../intro.md#where-entries-differ).
 
 ## The machine to identify
 
-**What repeats.** In `ModernChallenge1`, the `for` header: one statement, an empty body, and three slots that do all the work. In `LinqChallenge1`, nothing repeats: one expression is a chain of LINQ operators, and `Aggregate` folds. In `LinqChallenge2`, the same, in query syntax. In `xaml`, *nothing*: four copied passes, in document order. In the ports: a three-clause `for` (Java, Go), `generateSequence` (Kotlin), `iter(step, False)` (Python), `std::iter::successors` (Rust).
+**What repeats.** In `ModernChallenge1`, the `for` header: one statement, an empty body and three slots that do all the work. In `LinqChallenge1`, nothing repeats: one expression is a chain of LINQ operators, and `Aggregate` folds. In `LinqChallenge2`, the same, in query syntax. In `xaml`, *nothing*: four copied passes, in document order. In the ports: a three-clause `for` (Java, Go), `generateSequence` (Kotlin), `iter(step, False)` (Python), `std::iter::successors` (Rust).
 
 **Where state lives.** In `ModernChallenge1`, in one anonymous object in the initializer slot (hours list, category enumerator, database context, random source, WPF application, mutex). A `for` initializer allows one declaration, and an anonymous object is the one declaration that holds many kinds of state. In the LINQ entries, in `Aggregate` accumulators and in EF Core's change tracker. In `xaml`, in "carrier" arrays: one provider fills a `char[]` or `byte[]`, the next reads it. In Rust, in an immutable batch: "adding" a card returns a new batch.
 
@@ -167,7 +167,7 @@ Running the [B7 console fixture](../../solutions/b7-linq/Program.cs) with .NET S
 
 **`LinqChallenge1`: eager first, lazy second (read).** The innermost `Aggregate` folds the five fixed days into tracked entities and runs first, because it is the innermost argument. The tuple `(..., ctx.SaveChanges())` evaluates left to right, so `SaveChanges()` runs after every entity is tracked. Then a chain of `Select` and `SelectMany` stages does nothing until the final `Aggregate` pulls: query, fold, build the window, pulse and `Application.Run`. The reported total is 40.0 for five rows.
 
-**`xaml`: document order (read).** With hours 15, 19, 12 and a fourth draw of 14: pass 1 inserts 15 (total 15), pass 2 inserts 19, pass 3 inserts 12, pass 4 inserts 14. A trigger on insert deletes any row whose earlier rows already total more than 40. Rows 1 to 3 have earlier totals of 0, 15 and 34, so they stay. Row 4's earlier rows total 46, so it is deleted. Three cards remain. The parser then returns the window.
+**`xaml`: document order (read).** With hours 15, 19, 12 and a fourth draw of 14: pass 1 inserts 15 (total 15), pass 2 inserts 19, pass 3 inserts 12, pass 4 inserts 14. A trigger on insert deletes any row whose earlier rows already total over 40. Rows 1 to 3 have earlier totals of 0, 15 and 34, so they stay. Row 4's earlier rows total 46, so it is deleted. Three cards remain. The parser then returns the window.
 
 ## Compare the ordinary and weird designs
 
@@ -192,7 +192,7 @@ All five ports keep "one statement, empty body". Each finds its own three clause
 | Python | `for _ in iter(<lambda>, False):` | an object holding a `deque` of categories | `sum(...) <= 40 and categories` |
 | Rust | `for _ in std::iter::successors(...) {}` | an immutable `DemoBatch`; adding a card returns a new batch | `extended` returns `None` |
 
-The ports show that the "bodiless loop" is a *shape*, not a C# feature. What carries the weight differs: an anonymous object, a struct plus hidden helpers, a lazy sequence, a function called until it returns `False`, or an iterator of values. Go needed helpers because it is statement-oriented, and its README says so as the cost of the port.
+The ports show that the "bodiless loop" is a *shape*, not a C# feature. What carries the weight differs: an anonymous object, a struct plus hidden helpers, a lazy sequence, a function called until it returns `False` or an iterator of values. Go needed helpers because it is statement-oriented, and its README says so as the cost of the port.
 
 ## What the exercises demonstrate
 
@@ -205,21 +205,21 @@ The ports show that the "bodiless loop" is a *shape*, not a C# feature. What car
 | [E2. Change the XAML interpreter's seed](../../exercises.md#e2-change-the-xaml-interpreters-seed) (Windows) | Change `42` to `7` in `strict.xaml`. Do the hours change? | Yes, and the same sequence every run of the same seed. The loop was unrolled four times because XAML has no loop (and a fifth pass has not been added, so `xaml` is the one entry that cannot deal a fifth card), and the `x:Array` carriers play the part of variables. |
 | [C1. Weird next to boring](../../exercises.md#c1-weird-next-to-boring-verified) | Compare `ModernChallenge1` with an ordinary C# loop. | Same output contract; the original exposes its state in one anonymous object. |
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| The B7 `Enumerable.Select` projection runs on enumeration, and the effect runs again on a second enumeration of that pipeline | **Guaranteed** | The LINQ-to-Objects `Select` contract; verified by B7. In the header, `Sum()` enumerates the projection during every check. |
-| `Aggregate` is eager | **Guaranteed** | By definition: it consumes the sequence. |
-| Tuple elements evaluate left to right | **Guaranteed** | C# language rule. It is why `SaveChanges()` runs after the entities are tracked. |
-| `&&` short-circuits | **Guaranteed** | C# language rule. It is why the category enumerator advances once per card. |
-| `IQueryable` operators translate to SQL until `AsEnumerable()`, then run in memory | **Implementation-permitted** | Provider behavior: what EF Core can translate is its own business, and a boundary in the wrong place changes where work runs. |
-| `XamlReader.Load` runs `ObjectDataProvider` methods at parse time | **Accidentally exploited** | The XAML README classifies it so. WPF documents a declarative UI. Running a program is a side effect of how the parser constructs objects. |
-| `Refresh` re-runs a provider, and an `x:Array` stops the parser unwrapping the call | **Accidentally exploited** | Observed behavior the entry relies on. |
-| A `for` initializer takes one declaration, so state goes in one anonymous object | **Guaranteed** | A C# grammar rule. |
-| `Random.Shared` is safe to use from several threads | **Guaranteed** | Documented. |
-| WPF objects belong to the thread that created them, and `Application.Run` pumps the dispatcher | **Guaranteed** | WPF's threading model. `[STAThread]` is required. |
-| A named `Mutex` can guard EF Core's non-thread-safe context | **Implementation-permitted** | It works as a cross-thread lock. The original keeps a background thread only as "a historic contrast". |
+| The B7 `Enumerable.Select` projection runs on enumeration, and the effect runs again on a second enumeration of that pipeline | **guaranteed** | The LINQ-to-Objects `Select` contract; verified by B7. In the header, `Sum()` enumerates the projection during every check. |
+| `Aggregate` is eager | **guaranteed** | By definition: it consumes the sequence. |
+| Tuple elements evaluate left to right | **guaranteed** | C# language rule. It is why `SaveChanges()` runs after the entities are tracked. |
+| `&&` short-circuits | **guaranteed** | C# language rule. It is why the category enumerator advances once per card. |
+| `IQueryable` operators translate to SQL until `AsEnumerable()`, then run in memory | **implementation-permitted** | Provider behavior: what EF Core can translate is its own business, and a boundary in the wrong place changes where work runs. |
+| `XamlReader.Load` runs `ObjectDataProvider` methods at parse time | **accidentally exploited** | The XAML README classifies it so. WPF documents a declarative UI. Running a program is a side effect of how the parser constructs objects. |
+| `Refresh` reruns a provider, and an `x:Array` stops the parser unwrapping the call | **accidentally exploited** | Observed behavior the entry relies on. |
+| A `for` initializer takes one declaration, so state goes in one anonymous object | **guaranteed** | A C# grammar rule. |
+| `Random.Shared` is safe to use from several threads | **guaranteed** | Documented. |
+| WPF objects belong to the thread that created them, and `Application.Run` pumps the dispatcher | **guaranteed** | WPF's threading model. `[STAThread]` is required. |
+| A named `Mutex` can guard EF Core's non-thread-safe context | **implementation-permitted** | It works as a cross-thread lock. The original keeps a background thread only as "a historic contrast". |
 
 **Costs to state.**
 
@@ -231,20 +231,20 @@ The ports show that the "bodiless loop" is a *shape*, not a C# feature. What car
 
 ## Connections across the repository
 
-- **The same question as Haskell and JavaScript.** Deferred LINQ pipelines, lazy lists in [Haskell](haskell.md) and pull iteration in [JavaScript](javascript.md) all ask when a description runs. [Evaluation, demand, and laziness](../concepts/evaluation-demand-and-laziness.md) compares them. The difference worth remembering: Haskell remembers a computed value, and LINQ reruns.
+- **The same question as Haskell and JavaScript.** Deferred LINQ pipelines, lazy lists in [Haskell](haskell.md) and pull iteration in [JavaScript](javascript.md) all ask when a description runs. [Evaluation, demand and laziness](../concepts/evaluation-demand-and-laziness.md) compares them. The difference worth remembering: Haskell remembers a computed value, and LINQ reruns.
 - **Document order as the program.** The XAML entry, [tar](tar.md) and [Tcl](tcl.md) all make data into a program. The concept guide [Reading adversarial programs](../concepts/reading-adversarial-programs.md) takes them as one case.
 - **The same four-card ceiling, now fixed.** The regex entries in [Regex engines and sed](regex-engines-and-sed.md) had it too, and were fixed the same way. [Comparative machine design](../concepts/comparative-machine-design.md) lists which entries obey "exactly 40 continues".
-- **Threads and callbacks.** [Events, callbacks, and reactive control](../concepts/events-callbacks-and-reactive-control.md) compares who owns the next turn, which is what the dispatcher decides here.
+- **Threads and callbacks.** [Events, callbacks and reactive control](../concepts/events-callbacks-and-reactive-control.md) compares who owns the next turn, which is what the dispatcher decides here.
 - **In the book.** [C#, LINQ and XAML](../../languages/csharp-linq-xaml.md), [Deferred execution](../../cs/04-evaluation-and-demand.md#deferred-execution), [Domain-specific languages](../../cs/05-formal-languages-as-computational-substrates.md#domain-specific-languages) and [Arbitrary code execution](../../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** In the `ModernChallenge1` header, hours are 13, 14, 13, 10. Give the sum when each condition runs, and say when `MoveNext()` is called. *(Conditions see sums 0, 13, 27, 40, then 50. `MoveNext()` is called on the first four, giving Meetings, Coding, Debugging and Learning. The fifth condition has sum 50, so `&&` skips `MoveNext()`. The fourth card is the crossing card.)*
 2. **Explain.** Why does `q.Sum()` followed by `q.ToList()` print the effects twice? What does that predict for the C# header? *(Each call enumerates the `Select` pipeline, so its effects run twice. In the header, each condition check constructs and immediately sums its projection, so the sum is computed before any next draw. Materializing the B7 projection with `ToList()` lets later consumers reuse its results.)*
 3. **Transfer.** Which construct in Python plays the part of the C# `for` header's condition slot in `iter(step, False)`? *(The sentinel: the loop ends when `step` returns `False`, so the stop test lives inside the function that makes the next card.)*
-4. **Evidence.** A reviewer says "four 10-hour cards in a `for`-header entry continue to a fifth." Design a test that could fail. *(Reproduce the header with all-10 hours, as the reduction above did, and check for five cards and a total of 50. The negative control is the header with four names, which stops at four cards and 40. The reduction was run for C#. Rust's unit tests assert it directly, and Go, Java and Kotlin were only compiled, so for those it is read from the source.)*
+4. **Evidence.** A reviewer says, "Four 10-hour cards in a `for`-header entry continue to a fifth." Design a test that could fail. *(Reproduce the header with all-10 hours, as the reduction above did, and check for five cards and a total of 50. The negative control is the header with four names, which stops at four cards and 40. The reduction was run for C#. Rust's unit tests assert it directly, and Go, Java and Kotlin were only compiled, so for those it is read from the source.)*
 
 ## Further reading
 

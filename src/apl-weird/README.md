@@ -3,7 +3,7 @@ name: "APL"
 teaches: "that `⎕CR`, `⎕FX` and compress make \"if\" and \"loop\" optional, and that a function can be its own successor."
 kind: weird
 languages: [apl]
-lesson: "languages/apl.md#2-self-modifying-functions-apl-weird"
+lesson: "languages/apl.md#self-modifying-functions-apl-weird"
 loop-by: self-modifying-control
 evaluation: eager
 assurance: implementation-permitted
@@ -65,7 +65,7 @@ flowchart TD
 
 **What this shows:** the recursion is a chain of different functions, not one function calling itself. Each `Card` function *writes* the next one as text and then calls it. The boolean `Alive` is both the stop rule and the guard on writing, because compressing with `0` removes every line of the child.
 
-**Why this mechanism matters:** the program is self-modifying, and its state is source text: the "genes" are four lines that each child gets with new values. A broken stop rule does not fail. It recurses for ever, which is why the check runs the program under a timeout.
+**Why this mechanism matters:** the program is self-modifying, and its state is source text: the "genes" are four lines that each child gets with new values. A broken stop rule does not fail. It recurses forever, which is why the check runs the program under a timeout.
 
 ## How the stunt works
 

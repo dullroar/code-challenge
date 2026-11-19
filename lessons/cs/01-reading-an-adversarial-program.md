@@ -4,7 +4,7 @@
 
 For an advanced reading path with traces and experiments, see the [reading adversarial programs study guide](../study-guides/concepts/reading-adversarial-programs.md).
 
-The programs in this book are *adversarial* on purpose. They do things that code should not do: run code inside a regex match, call methods while parsing a markup file, rewrite their own jump targets. They are safe to study because of how this repository handles them. Every entry writes fictional **DEMO ONLY** data, runs in a [sandbox](../../SANDBOX-SETUP.md), and is reviewed as untrusted code until someone has read and understood it.
+The programs in this book are *adversarial* on purpose. They do things that code should not do: run code inside a regex match, call methods while parsing a markup file, rewrite their own jump targets. They are safe to study because of how this repository handles them. Every entry writes fictional **DEMO ONLY** data, runs in a [sandbox](../../SANDBOX-SETUP.md) and is reviewed as untrusted code until someone has read and understood it.
 
 This chapter is the reader's safety model. It has two habits. First, **read the weird program next to its ordinary sibling**: [`cobol`](../../src/cobol/README.md) beside [`cobol-weird`](../../src/cobol-weird/README.md), [`haskell`](../../src/haskell/README.md) beside [`haskell-weird`](../../src/haskell-weird/README.md). The difference shows you exactly what the stunt costs. Second, **ask what kind of promise stands behind each trick**: guaranteed, implementation-permitted or accidentally exploited (see the [intro](../intro.md#three-kinds-of-knowledge)). The topics below are the security and review ideas that make those habits work. They include one that the tar entries bring out: authority comes from the command that runs a program, not from the data it reads ([Capability and authority](01-reading-an-adversarial-program.md#capability-and-authority)).
 
@@ -12,7 +12,7 @@ This chapter is the reader's safety model. It has two habits. First, **read the 
 
 A threat model answers four plain questions. What are we protecting? Who might attack it? How could they do it? What will we do about that? It exists because nobody can defend against "everything". You defend against a list, and the list is the threat model. Teams use it to decide where to spend review time and which protections to add. This repository turns the usual question around. The code is the thing we do *not* trust (a pull request from a stranger), and the thing we protect is the reviewer's machine. That is why [`CONTRIBUTING.md`](../../CONTRIBUTING.md) asks for a check script that runs on a throwaway system with no network.
 
-- **Use it when:** you are about to run, install or review code you did not write, or when you design anything that accepts input.
+- **Use it when:** you are about to run, install or review code you did not write or when you design anything that accepts input.
 - **Avoid it when:** you treat it as a document you write once. A threat model that nobody updates describes a system that no longer exists.
 
 **Two examples from this repo, where the threat model had to change:**
@@ -30,9 +30,9 @@ A threat model answers four plain questions. What are we protecting? Who might a
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | That Perl can execute code during a regex match. |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |
 
 ## Arbitrary code execution
 
@@ -52,10 +52,10 @@ Arbitrary code execution means that an attacker makes a program run instructions
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | That Perl can execute code during a regex match. |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |
 
 ## Sandbox
 
@@ -128,7 +128,7 @@ Trojan Source is an attack on the human reviewer. Unicode includes characters th
 A language specification says what programs *mean*. An implementation is one particular program that tries to follow it. The two can differ, and the difference is where this book lives. Each lesson tags a trick as **guaranteed** (the specification promises it), **implementation-permitted** (one compiler or platform allows it) or **accidentally exploited** (it works today, and nobody promised it). The IETF gave engineers a useful vocabulary for the same idea: MUST, SHOULD and MAY, defined in RFC 2119. A specification that uses those words carefully tells you exactly how much you can lean on it.
 
 - **Use it when:** before you rely on any behavior, ask which of the three kinds of promise stands behind it.
-- **Avoid:** treating "it worked on my machine" as evidence, or reading a specification as a promise about speed.
+- **Avoid it when:** you need performance evidence. A run on one machine establishes only what happened there.
 
 **Read more:**
 

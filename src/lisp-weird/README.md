@@ -149,7 +149,7 @@ You should not do this in production because the control flow is invisible: noth
 
 ## What `check.sh` enforces
 
-With comments removed, below the `RUN TIME` marker: none of `loop do dolist dotimes mapc mapcar mapcan map maphash reduce if when unless cond case tagbody go block return catch throw handler-case`; `(:method-combination or)` is present; there are exactly five `defcard` forms; the over-40 test appears once. Then the `progn` experiment above, then 25 runs each checked for sane records (hours 10-19, categories in order, correct running totals, stopping when the total passes 40) with SQLite agreeing with the output.
+With comments removed, below the `RUN TIME` marker: none of `loop do dolist dotimes mapc mapcar mapcan map maphash reduce if when unless cond case tagbody go block return catch throw handler-case`; `(:method-combination or)` is present; there are exactly five `defcard` forms; the over-40 test appears once. Then the `progn` experiment above, then 25 runs each checked for sane records (hours 10 to 19, categories in order, correct running totals, stopping when the total passes 40) with SQLite agreeing with the output.
 
 ## Run it in a container
 

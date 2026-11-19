@@ -8,12 +8,12 @@ When you finish, you should be able to:
 
 1. Place a notation on the Chomsky hierarchy and say what extra power turns a matcher into a computer: a stack, a counter, code blocks, callouts, a rewrite loop or a restart.
 2. Explain why one regex match always finishes while a loop of substitutions may not, and why that matters for what the entries can claim.
-3. Describe the *substrate* of each entry: what its alphabet is, what its rules are, and what plays memory.
+3. Describe the *substrate* of each entry: what its alphabet is, what its rules are and what plays memory.
 4. Explain "weird machine" and "language-theoretic security" with an example from the entries, and say what a defender should do.
 5. Say what each machine cannot do, with evidence: the old four-name ceiling, the missing counted repetition, the failed .NET `Match` that exposes nothing.
-6. Label claims as guaranteed, implementation-permitted, or accidentally exploited.
+6. Label claims as guaranteed, implementation-permitted or accidentally exploited.
 
-Scope limits. The guide is about the *relationship between a notation and the machine it can express*. It is not a course in automata theory: it names the levels and uses them. Its source chapter is [Formal languages as computational substrates](../../cs/05-formal-languages-as-computational-substrates.md).
+**Scope limits.** The guide is about the *relationship between a notation and the machine it can express*. It is not a course in automata theory: it names the levels and uses them. Its source chapter is [Formal languages as computational substrates](../../cs/05-formal-languages-as-computational-substrates.md).
 
 ## Before you begin
 
@@ -33,7 +33,7 @@ Scope limits. The guide is about the *relationship between a notation and the ma
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. The running total rises until it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it, and four 10-hour cards need a fifth. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
 For a formal-language reader the challenge needs two capabilities: *counting* (compare a total with 40) and *repetition with memory* (carry the total from one card to the next). A pure regular expression has neither. Every entry in this guide supplies them by borrowing a mechanism: a stack, tally marks, a restart, a host. The boundary is exact: a total of 40 must *continue*, so the machine must tell 40 from 41.
 
@@ -43,7 +43,7 @@ For each entry, ask what plays each role.
 
 **What repeats.** In a *searching* substrate (Perl, PCRE2, pcre2grep, .NET), a quantifier over a pattern; the engine explores paths. In a *rewriting* substrate (sed, m4, ed), a loop that applies rules until none matches. In a *restarting* substrate (Make), the engine reruns itself. In a *parsing* substrate (XAML), a walk over the document.
 
-**Where state lives.** In a captured stack (.NET: `b` is the budget, `s` is the total), in the text itself (sed: `#` marks; ed: `x` marks), in captures rebuilt every pass (CMake), in the host (a C struct for PCRE2, SQLite for pcre2grep), or in files (Make).
+**Where state lives.** In a captured stack (.NET: `b` is the budget, `s` is the total), in the text itself (sed: `#` marks; ed: `x` marks), in captures rebuilt every pass (CMake), in the host (a C struct for PCRE2, SQLite for pcre2grep) or in files (Make).
 
 **What advances the next step.** The engine's own control: backtracking, the rewrite loop, the restart, the parser.
 
@@ -92,20 +92,20 @@ Read the second row: a PCRE2 pattern that "fails" is the program's *success*, be
 | [B18. ed: move the stop rule and break the cleanup](../../exercises.md#b18-ed-move-the-stop-rule-and-break-the-cleanup-verified) | Change `x\{41,\}` to `x\{31,\}`. | The run stops after the first total over 30. One repeat count in a regex is the rule. |
 | [C2. Make the constraint real](../../exercises.md#c2-make-the-constraint-real-verified) | Write a check that bans loop words in Forth. | It must strip comments and strings first: a constraint check is itself a parser. |
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| .NET balancing groups pop one capture stack and push another | **Guaranteed** | Documented .NET regex behavior. A stack takes the engine beyond regular languages. |
-| A failed .NET `Match` exposes no captures | **Guaranteed** | Verified in B8. |
-| PCRE2 callouts call host code, and a positive return fails the path | **Guaranteed** | Documented API. |
-| Callouts are only visited if the optimizer does not skip them | **Implementation-permitted** | The entry sets flags and avoids the JIT; it did not test what the optimizer would elide without them. |
-| Perl code blocks run during a match, and `local` is undone on backtracking | **Guaranteed** | Documented Perl. |
-| A failed `MATCHES` clears CMake's registers | **Implementation-permitted** | Observed, not promised in so many words. |
-| CMake evaluates both operands of `AND` | **Accidentally exploited** | Observed, and needed to log the last card. |
-| gawk's `RS` as a regular expression, with `RT` | **Implementation-permitted** | gawk only. mawk silently gives zero cards (B13). |
-| A sed backtracking regex takes about 50 ms per frame | **Accidentally exploited** | A performance cliff used as a clock. It varies by machine. |
-| The `XamlReader` runs `ObjectDataProvider` methods when parsing | **Accidentally exploited** | A UI language used as an interpreter. |
+| .NET balancing groups pop one capture stack and push another | **guaranteed** | Documented .NET regex behavior. A stack takes the engine beyond regular languages. |
+| A failed .NET `Match` exposes no captures | **guaranteed** | Verified in B8. |
+| PCRE2 callouts call host code, and a positive return fails the path | **guaranteed** | Documented API. |
+| Callouts are only visited if the optimizer does not skip them | **implementation-permitted** | The entry sets flags and avoids the JIT; it did not test what the optimizer would elide without them. |
+| Perl code blocks run during a match, and `local` is undone on backtracking | **guaranteed** | Documented Perl. |
+| A failed `MATCHES` clears CMake's registers | **implementation-permitted** | Observed, not promised in so many words. |
+| CMake evaluates both operands of `AND` | **accidentally exploited** | Observed, and needed to log the last card. |
+| gawk's `RS` as a regular expression, with `RT` | **implementation-permitted** | gawk only. mawk silently gives zero cards (B13). |
+| A sed backtracking regex takes about 50 ms per frame | **accidentally exploited** | A performance cliff used as a clock. It varies by machine. |
+| The `XamlReader` runs `ObjectDataProvider` methods when parsing | **accidentally exploited** | A UI language used as an interpreter. |
 
 **Costs to state.**
 
@@ -116,20 +116,20 @@ Read the second row: a PCRE2 pattern that "fails" is the program's *success*, be
 
 ## Connections across the repository
 
-- **The language guides.** [Regex engines and sed](../languages/regex-engines-and-sed.md), [Make and CMake](../languages/make-and-cmake.md), [m4](../languages/m4.md), [ed and Ex](../languages/ed-and-ex.md), [tar](../languages/tar.md) and [C#, LINQ, XAML, and ports](../languages/csharp-linq-xaml-and-ports.md) each trace one substrate.
+- **The language guides.** [Regex engines and sed](../languages/regex-engines-and-sed.md), [Make and CMake](../languages/make-and-cmake.md), [m4](../languages/m4.md), [ed and Ex](../languages/ed-and-ex.md), [tar](../languages/tar.md) and [C#, LINQ, XAML and ports](../languages/csharp-linq-xaml-and-ports.md) each trace one substrate.
 - **State and control.** [State and control beyond variables](state-and-control-beyond-variables.md) says where each substrate keeps its program counter.
 - **Reading safely.** [Reading adversarial programs](reading-adversarial-programs.md) takes "an input language is a program" as its main example.
-- **Cost.** [Portability, abstraction, and cost](portability-abstraction-and-cost.md) covers the backtracking cliff and the implementation extensions.
+- **Cost.** [Portability, abstraction and cost](portability-abstraction-and-cost.md) covers the backtracking cliff and the implementation extensions.
 - **In the book.** [The Chomsky hierarchy](../../cs/05-formal-languages-as-computational-substrates.md#the-chomsky-hierarchy), [Regular expressions](../../cs/05-formal-languages-as-computational-substrates.md#regular-expressions), [Term and string rewriting](../../cs/05-formal-languages-as-computational-substrates.md#term-and-string-rewriting), [Macros and text expansion](../../cs/05-formal-languages-as-computational-substrates.md#macros-and-text-expansion) and [Build automation](../../cs/05-formal-languages-as-computational-substrates.md#build-automation).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** In the .NET entry the draws are 15, 19, 12, 17. Give the budget tokens left after each pass and say which pass ends the loop. *(26, then 7, then 0. After the third pass `b` is empty, so the next pass takes `(?!)` and the loop ends. The fourth draw is ignored.)*
 2. **Explain.** Why does the PCRE2 pattern end in `(*COMMIT)` and `(*FAIL)`, and what does each do? *(`(*COMMIT)` stops the engine from retrying shorter loops, so the `commit` callout runs once. `(*FAIL)` makes the whole match lose after the work is done, which is the signature move.)*
 3. **Transfer.** Name an input language in a system you use that is more powerful than it looks, and say how you would apply the rule of least power. *(For example a template language, a spreadsheet formula or a config format with `include`. Replace it with a weaker declared format, or parse it with a strict grammar before acting.)*
-4. **Evidence.** A reviewer says "the .NET pattern itself cannot write a row." Design a test that could fail. *(Check that `Program.cs` has exactly one `Regex.Match`, no `MatchEvaluator` or `Replace`, and that every file write is in host code after the match, which the entry's `check.sh` does. The negative control is a copy with a `MatchEvaluator`, which the check must reject.)*
+4. **Evidence.** A reviewer says, "The .NET pattern itself cannot write a row." Design a test that could fail. *(Check that `Program.cs` has exactly one `Regex.Match`, no `MatchEvaluator` or `Replace` and that every file write is in host code after the match, which the entry's `check.sh` does. The negative control is a copy with a `MatchEvaluator`, which the check must reject.)*
 
 ## Further reading
 

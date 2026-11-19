@@ -6,11 +6,11 @@ The [code challenge](../README.md) asks one question in many accents: *how far c
 
 The stunts are the door. These lessons are what is behind it.
 
-For the purposes of this book, WEIRD stands for **Weird Execution, Indirect Results and Data**. It doesn't, of course. But it is a surprisingly serviceable description of what these programs are up to.
+For the purposes of this book, WEIRD stands for **Weird Execution, Indirect Results and Data**. It does not, of course. But it is a surprisingly serviceable description of what these programs are up to.
 
 ## What the challenge does
 
-Start with a total of zero. Draw fictional time cards of 10–19 whole hours and cycle through Meetings, Coding, Debugging and Learning. Add the hours and keep the first card that takes the total over 40. Exactly 40 continues. That gives 3–5 cards and a final total of 41–59. Save the cards locally as **DEMO ONLY** records and show the result through the available interface. The picture shows the usual SQLite version of that task. Each program chooses when to persist the rows.
+Start with a total of zero. Draw fictional time cards of 10 to 19 whole hours and cycle through Meetings, Coding, Debugging and Learning. Add the hours and keep the first card that takes the total over 40. Exactly 40 continues. That gives 3 to 5 cards and a final total of 41 to 59. Save the cards locally as **DEMO ONLY** records and show the result through the available interface. The picture shows the usual SQLite version of that task. Each program chooses when to persist the rows.
 
 ```mermaid
 flowchart TD
@@ -47,12 +47,14 @@ Most tutorials teach the idioms first: here is the right way to iterate, to hold
 
 The aim is to take your understanding up a level in two directions at once:
 
-- **In a specific language.** You will learn what `ALTER`, `unsafeInterleaveIO`, `>in`, `include`, `CMAKE_MATCH_1` and `⎕FX`, `RT`, `unknown`, rescanning, method combination and a `find` that digs its own tree really do, which means you will learn how COBOL, Haskell, Forth, Make, CMake, APL, Common Lisp, m4, Tcl, AWK and find really work.
+- **In a specific language.** You will learn what `ALTER`, `unsafeInterleaveIO`, `>in`, `include`, `CMAKE_MATCH_1`, `⎕FX`, method combination, rescanning, `unknown`, `RT` and a `find` that digs its own tree really do, which means you will learn how COBOL, Haskell, Forth, Make, CMake, APL, Common Lisp, m4, Tcl, AWK and find really work.
 - **As concepts.** Control flow, state, evaluation order and side effects turn out to be separable things that different languages bolt together differently. Once you have seen control flow stored in a `GO TO`'s target, a parse position, a restarting build tool and a regex capture, you stop thinking of "the loop" as a given.
 
-## The shape of every lesson
+<a id="the-shape-of-every-lesson"></a>
 
-Each strange example is taught in the same five steps, whatever the language.
+## The shape of a lesson
+
+Most lessons use these five steps to teach a strange example. Survey chapters group related entries and adapt the steps to fit. Some chapters also collect quirks or compare the weird program with its ordinary counterpart.
 
 | Step | What happens |
 | --- | --- |
@@ -66,27 +68,27 @@ Without step 5 this would be a museum of curiosities. The exercise is what turns
 
 ## Three kinds of knowledge
 
-Experienced programmers sometimes confuse "I've done this for twenty years" with "the language guarantees this." Ask which particular behavior is promised, by which specification or runtime manual, and which behavior you have only seen in a test.
+Experienced programmers sometimes confuse "I've done this for twenty years" with "the language guarantees this." Ask which particular behavior is promised, by which specification or runtime manual and which behavior you have only seen in a test.
 
 | Tag | Meaning | Example |
 | --- | --- | --- |
-| **Guaranteed** | A named specification or documented API promises the behavior within its scope. | The .NET regex API documents balancing-group pops. That promise applies to the .NET regex engine. |
-| **Implementation-permitted** | Works because of a particular compiler, runtime, platform or version. | GnuCOBOL still runs `ALTER`. `pcre2grep` callout scripts need a special build. |
-| **Accidentally exploited** | A test may show it works, but the implementation makes no promise about the behavior. | A pre-order `find` may descend into a directory just created by its own `-exec`. POSIX leaves traversal of newly added files unspecified. |
+| **guaranteed** | A named specification or documented API promises the behavior within its scope. | The .NET regex API documents balancing-group pops. That promise applies to the .NET regex engine. |
+| **implementation-permitted** | Works because of a particular compiler, runtime, platform or version. | GnuCOBOL still runs `ALTER`. `pcre2grep` callout scripts need a special build. |
+| **accidentally exploited** | A test may show it works, but the implementation makes no promise about the behavior. | A pre-order `find` may descend into a directory just created by its own `-exec`. POSIX leaves traversal of newly added files unspecified. |
 
-An entry’s single assurance label records the weakest behavior its trick needs. A documented operation can sit right beside an undocumented assumption in the same program.
+An entry's single assurance label records the weakest behavior its trick needs. A documented operation can sit right beside an undocumented assumption in the same program.
 
 ## The recurring question
 
-Every lesson ends by asking:
+As you finish a lesson, ask this question:
 
 > Under what circumstances would this terrible idea become a reasonable engineering decision?
 
-Sometimes the answer is "never, given the alternatives." Sometimes it is "when you are writing a compiler, debugger, interpreter or test framework." Occasionally it is "when you are running a mainframe in 1978." A language feature is neither good nor bad in isolation: its value depends on the problem, the environment and the consequences. `ALTER` horrifies modern programmers, and it also served real purposes under real constraints. That does not mean we should revive it. It means we should understand why it worked, what it cost, and what changed.
+Sometimes the answer is "never, given the alternatives". Sometimes it is "when you are writing a compiler, debugger, interpreter or test framework". Occasionally it is "when you are running a mainframe in 1978". A language feature is neither good nor bad in isolation: its value depends on the problem, the environment and the consequences. `ALTER` horrifies modern programmers, and it also served real purposes under real constraints. That does not mean we should revive it. It means we should understand why it worked, what it cost and what changed.
 
 ## Weird next to boring
 
-Pair each weird program with the small, idiomatic version of the same behavior (the repo has several: [`cobol`](../src/cobol/README.md) beside [`cobol-weird`](../src/cobol-weird/README.md), [`haskell`](../src/haskell/README.md) beside [`haskell-weird`](../src/haskell-weird/README.md), [`lisp`](../src/lisp/README.md) beside [`lisp-weird`](../src/lisp-weird/README.md), and so on). The point is not that the idiomatic one is morally superior. It is to see what got easier, what got harder, and what surprising capability the weird version revealed.
+Pair each weird program with the small, idiomatic version of the same behavior (the repo has several: [`cobol`](../src/cobol/README.md) beside [`cobol-weird`](../src/cobol-weird/README.md), [`haskell`](../src/haskell/README.md) beside [`haskell-weird`](../src/haskell-weird/README.md), [`lisp`](../src/lisp/README.md) beside [`lisp-weird`](../src/lisp-weird/README.md) and so on). The point is not that the idiomatic one is morally superior. It is to see what got easier, what got harder and what surprising capability the weird version revealed.
 
 ## Three ways in
 
@@ -94,7 +96,7 @@ Pair each weird program with the small, idiomatic version of the same behavior (
 - **By language**, if you want to deepen the one you use: [languages/](languages/README.md).
 - **By mechanism**, if you want to explore an unfamiliar way of computing: [patterns](patterns.md). A reader who arrives for C# may meet Haskell's laziness and realize both raise the same question: *when does the computation actually run?* One who arrives for COBOL's `ALTER` meets Make's restart machinery and CMake's regex registers, which are other ways of keeping control state outside ordinary variables. That cross-pollination is the point.
 
-Then see [goals](goals.md), what was [overcome](problems-overcome.md), what is still [blocked](blocking-problems.md), and the [exercises](exercises.md).
+Then see [goals](goals.md), what was [overcome](problems-overcome.md), what is still [blocked](blocking-problems.md) and the [exercises](exercises.md).
 
 ## A word of caution
 

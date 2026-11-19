@@ -6,14 +6,14 @@ For an advanced reading path with traces and experiments, see the [portability, 
 
 Every abstraction hides something, and sooner or later the hidden thing shows. This chapter is about those moments. A language standard promises some things, allows others and ignores the rest. An optimizer may skip code that the language says nobody can see. A regex that is fast on every test can take a year on one bad input. A feature that nobody promised can still be the one that everybody uses.
 
-These ideas explain the three tags used in every lesson. **Guaranteed** means the specification promises it. **Implementation-permitted** means one implementation allows it. **Accidentally exploited** means it works, and nobody promised it. The concepts below give you the vocabulary for each: leaky abstractions, undefined and unspecified behavior, portability, optimizers, Hyrum's law, time complexity, ReDoS, and reproducibility (writing down every input so that the same sources give the same result).
+These ideas explain the three tags used in every lesson. **Guaranteed** means the specification promises it. **Implementation-permitted** means one implementation allows it. **Accidentally exploited** means it works, and nobody promised it. The concepts below give you the vocabulary for each: leaky abstractions, undefined and unspecified behavior, portability, optimizers, Hyrum's law, time complexity, ReDoS and reproducibility (writing down every input so that the same sources give the same result).
 
 ## Leaky abstractions
 
 An abstraction hides details so that you can think at a higher level. A *leaky* abstraction lets the hidden details show through when something goes wrong, or when speed matters. Joel Spolsky named the "Law of Leaky Abstractions" in 2002: every non-trivial abstraction leaks, at least a little. This book is a collection of leaks, found on purpose. "Matching text" leaks its backtracking cost. A build tool's "dependency" leaks file timestamps. LINQ's "query" leaks the limits of its SQL provider. You do not need to give up the abstraction. You need to know one layer below it.
 
 - **Use it when:** you learn a tool: ask "what is under this, and when will it show?"
-- **Avoid:** believing that the abstraction *is* reality, and building on a leak without writing down that you did.
+- **Avoid it when:** correctness depends on a leak you cannot document.
 
 **Read more:**
 
@@ -43,13 +43,13 @@ Standards use three different words for "the standard does not fully say". **Und
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | Why structured programming won, by running a program whose control flow rewrites itself. |
+| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | That a program can rewrite its own control flow and that structured programming makes such changes easier to trace. |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 
 ## Portability
 
-Software is portable if it runs correctly in more than one environment: another operating system, another implementation of the same language, another version. It exists as a goal because your users do not all have your machine. The usual tools are a written standard, a thin layer over the differences, and tests on more than one platform. The entries here have honest examples. The POSIX AWK subset runs everywhere, but a regular expression as the record separator is a gawk extension. On mawk, [`awk-weird`](../../src/awk-weird/README.md) reads forever. `close()` returns different values in different awks. The `pcre2grep` in Ubuntu is built without callout scripts.
+Software is portable if it runs correctly in more than one environment: another operating system, another implementation of the same language, another version. It exists as a goal because your users do not all have your machine. The usual tools are a written standard, a thin layer over the differences and tests on more than one platform. The entries here have honest examples. The POSIX AWK subset runs everywhere, but a regular expression as the record separator is a gawk extension. On mawk, [`awk-weird`](../../src/awk-weird/README.md) reads forever. `close()` returns different values in different awks. The `pcre2grep` in Ubuntu is built without callout scripts.
 
 - **Use it when:** you write for users you do not control. Pick a standard and test on at least two implementations.
 - **Avoid it as dogma:** when a stunt needs one implementation, name it, pin its version and say so in the README.
@@ -67,7 +67,7 @@ Software is portable if it runs correctly in more than one environment: another 
 | [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
 | [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | That program exit codes can steer control flow. |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Optimizers
@@ -75,7 +75,7 @@ Software is portable if it runs correctly in more than one environment: another 
 An optimizing compiler rewrites your program so that it runs faster or uses less memory, but it must keep the *observable behavior* that the language defines (the "as-if" rule). It exists so that you can write clear code and still get fast code. The leak is that anything the language does not count as observable may disappear. In [`regex-pcre2`](../../src/regex-pcre2/README.md) callouts only mean something if the engine visits them, and the optimizer may skip them. So the program compiles the pattern with `PCRE2_NO_AUTO_POSSESS`, `PCRE2_NO_START_OPTIMIZE` and `PCRE2_NO_DOTSTAR_ANCHOR`, and it does not use the JIT, which has no callout support.
 
 - **Use it when:** trust it for pure code, and measure before you hand-optimize.
-- **Avoid:** depending on effects that the language does not promise to keep.
+- **Avoid it when:** correctness depends on effects the language can discard.
 
 **Read more:**
 
@@ -88,14 +88,14 @@ An optimizing compiler rewrites your program so that it runs faster or uses less
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | That regex callouts can serve as a tiny instruction set. |
 
 ## Hyrum's law
 
 Hyrum's law says: with enough users of an interface, *every* observable behavior of it will be depended on by somebody, whatever the documentation promises. Hyrum Wright, a software engineer at Google, put the observation into words. It explains the third tag in this book, **accidentally exploited**. GNU Make documents that it restarts after it remakes an included makefile, but it never promised that you could use that as a loop. CMake's `MATCHES` clears every `CMAKE_MATCH` variable after a failed match, and that is observed behavior, not a promise. The entries lean on both. Maintainers know the law too. Go, for example, randomizes the order of map iteration on purpose, so that nobody can rely on it.
 
 - **Use it when:** you change a library (someone depends on the old behavior), and you decide whether to rely on an undocumented one (write it down, and add a test).
-- **Avoid:** building on behavior that nobody promised, in code that others must live with.
+- **Avoid it when:** code that others depend on would need behavior that nobody promised.
 
 **Read more:**
 
@@ -106,11 +106,11 @@ Hyrum's law says: with enough users of an interface, *every* observable behavior
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | That `while()` and a regex can form a tiny register machine. |
 | [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | That GNU Make can do arithmetic and loop in its own syntax, without a shell for either. |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Performance cliffs and time complexity
@@ -118,7 +118,7 @@ Hyrum's law says: with enough users of an interface, *every* observable behavior
 Time complexity describes how running time grows with the size of the input: linear (n), quadratic (n²), exponential (2ⁿ). It exists because small tests hide big problems. A function that takes a millisecond for ten items may take a year for sixty. In this repository the cliff is used on purpose. [`regex-sed`](../../src/regex-sed/README.md) has a catastrophic-backtracking regex, tuned to take about 50 milliseconds per frame, as a *clock*. That is a nice trick in a demo, and a fine example of why you cannot use speed as a timer in real software: another machine, another version, another answer.
 
 - **Use it when:** before you ship code that handles large or hostile input, ask what the worst case is.
-- **Avoid:** using performance as a clock, or as a promise.
+- **Avoid it when:** you need a clock or a guarantee of elapsed time.
 
 **Read more:**
 
@@ -134,10 +134,10 @@ Time complexity describes how running time grows with the size of the input: lin
 
 ## Regular-expression denial of service
 
-ReDoS (regular-expression denial of service) is an attack that sends an input on which a backtracking regex engine takes exponential, or very long, time. A pattern such as `(a+)+$` is fine on most strings and terrible on a long run of `a` characters followed by `!`. It exists because a backtracking engine tries every way to match before it gives up. Real outages have come from this: a regex in a web firewall rule took down Cloudflare in 2019, and one on whitespace slowed Stack Overflow in 2016. The mitigations are simple: use an engine that matches in linear time (RE2, Rust's `regex`, .NET's `NonBacktracking` option), set a match timeout, and limit the input length.
+ReDoS (regular-expression denial of service) is an attack that sends an input on which a backtracking regex engine takes exponential, or very long, time. A pattern such as `(a+)+$` is fine on most strings and terrible on a long run of `a` characters followed by `!`. It exists because a backtracking engine tries every way to match before it gives up. Real outages have come from this: a regex in a web firewall rule took down Cloudflare in 2019, and one on whitespace slowed Stack Overflow in 2016. The mitigations are simple: use an engine that matches in linear time (RE2, Rust's `regex`, .NET's `NonBacktracking` option), set a match timeout and limit the input length.
 
 - **Use the knowledge when:** any regex meets data that you do not control.
-- **Avoid:** nested quantifiers on overlapping patterns, and unreviewed patterns from users.
+- **Avoid it when:** an overlapping pattern has nested quantifiers or a user submits an unreviewed pattern.
 
 **Read more:**
 
@@ -155,7 +155,7 @@ ReDoS (regular-expression denial of service) is an attack that sends an input on
 
 A result is **reproducible** if the same inputs give the same answer, every time and on every machine. A build is **deterministic** if the same sources give the same bytes. Both depend on writing down everything that is an input: the seed, the order of the items, the versions of the tools, the time. What you forget to write down is where the difference comes from.
 
-The book you are reading is built this way: every list is sorted, nothing reads the clock, and the build date is fixed in a metadata file, so the same sources give the same bytes. The entries use the idea in four ways. [`tar-gnu`](../../src/tar-gnu/README.md) writes a tar archive in a fixed format with a fixed order, time and owner, so the same seed makes the same archive, byte for byte, which `cmp` checks. [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) makes a run a function of a seed and the archive's layout. [`javascript`](../../src/javascript/README.md) and [`javascript-weird`](../../src/javascript-weird/README.md) replay a run with `SEED=42`, because `Math.random` cannot be seeded and a small closure over a number can. Each one says what "the same" means: the bytes, the structure, or the behavior (see [Serialization, deserialization and object pickling](06-state-beyond-variables.md#serialization-deserialization-and-object-pickling)).
+The book you are reading is built this way: every list is sorted, nothing reads the clock and the build date is fixed in a metadata file, so the same sources give the same bytes. The entries use the idea in four ways. [`tar-gnu`](../../src/tar-gnu/README.md) writes a tar archive in a fixed format with a fixed order, time and owner, so the same seed makes the same archive, byte for byte, which `cmp` checks. [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) makes a run a function of a seed and the archive's layout. [`javascript`](../../src/javascript/README.md) and [`javascript-weird`](../../src/javascript-weird/README.md) replay a run with `SEED=42`, because `Math.random` cannot be seeded and a small closure over a number can. Each one says what "the same" means: the bytes, the structure or the behavior (see [Serialization, deserialization and object pickling](06-state-beyond-variables.md#serialization-deserialization-and-object-pickling)).
 
 - **Use it when:** you must debug, test or audit a result later. Make the inputs explicit, and record the seed.
 - **Avoid it when:** you confuse it with determinism of *everything*. A run is reproducible in the ways you named, and not in the ones you did not, such as the date in a week number near New Year.

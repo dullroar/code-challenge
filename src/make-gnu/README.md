@@ -1,6 +1,6 @@
 ---
 name: "GNU Make"
-teaches: "arithmetic and looping in plain Make syntax, no shell required."
+teaches: "that GNU Make can do arithmetic and loop in its own syntax, without a shell for either."
 kind: weird
 languages: [make]
 lesson: "languages/make-cmake.md#gnu-make"
@@ -15,7 +15,7 @@ analogies: [continuation, dataflow-programming, logical-clock]
 ---
 # GNU Make: the build tool is the interpreter
 
-**Teaches you:** arithmetic and looping in plain Make syntax, no shell required.
+**Teaches you:** that GNU Make can do arithmetic and loop in its own syntax, without a shell for either.
 
 > **DEMO ONLY.** Fictional time cards, written to a scratch SQLite file under `$XDG_DATA_HOME/MakeChallenge/`.
 > Nothing here touches real time reporting.
@@ -60,7 +60,7 @@ flowchart TD
     F --> G["sqlite3 reads the script that Make wrote"]
 ```
 
-**What this shows:** the loop is the build tool re-running itself. Each pass includes the `.tc-N.mk` files that exist, and a file that gets written forces a restart. The state is *which files exist*. The stop rule is that the rule declines to write a new file.
+**What this shows:** the loop is the build tool rerunning itself. Each pass includes the `.tc-N.mk` files that exist, and a file that gets written forces a restart. The state is *which files exist*. The stop rule is that the rule declines to write a new file.
 
 **Why this mechanism matters:** Make's dependency engine decides what to do next from the state of the file system. There is no loop statement and no `$(shell)`: arithmetic is list surgery on `x` words. The report is a chain of phony targets so that its output stays in order.
 
@@ -69,7 +69,7 @@ flowchart TD
 | Job | Done by | Shell? |
 |---|---|---|
 | Entropy | `$(file </proc/sys/kernel/random/uuid)`, letters stripped with nested `$(subst)`; first decimal digit left | no |
-| Hours 10–19 | the string `1` glued to that digit. "Mod 10" is picking a character | no |
+| Hours 10 to 19 | the string `1` glued to that digit. "Mod 10" is picking a character | no |
 | Category order | `$(word n,Meetings Coding Debugging Learning)` | no |
 | Arithmetic | numbers are lists of `x`; `$(words $(wordlist 1,a,$(U)) $(wordlist 1,b,$(U)))` adds, `$(wordlist b+1,a,…)` subtracts | no |
 | Stop rule (`total > 40`) | the 41st word of the running list exists: `$(word 41,…)` | no |
@@ -89,7 +89,7 @@ The stop rule is also checked by SQLite: the last statement inserts `total <= 40
 
 `check.sh` makes sure the stunt is real. The Makefile may not use `$(shell)`, `!=`, `.ONESHELL` or `load`, and its recipes may run only `mkdir`, `sqlite3`, `rm`, `sleep` and the no-op `:`.
 
-Then it runs `make` 25 times in a directory that holds nothing but the Makefile, and that directory must hold nothing else afterward. Each run must print as many rows as it has entries and report that Make re-executed itself once per entry. The usual rules apply: hours 10-19, categories in order, running totals right, `DEMO ONLY` on every row, a stop exactly when the total passes 40, an ISO week that matches SQLite's, and a database that agrees with the output. The stop-rule error must appear on stderr exactly once and nothing else may.
+Then it runs `make` 25 times in a directory that holds nothing but the Makefile, and that directory must hold nothing else afterward. Each run must print as many rows as it has entries and report that Make re-executed itself once per entry. The usual rules apply: hours 10 to 19, categories in order, running totals right, `DEMO ONLY` on every row, a stop exactly when the total passes 40, an ISO week that matches SQLite's, and a database that agrees with the output. The stop-rule error must appear on stderr exactly once and nothing else may.
 
 More tests follow. The pure-Make calendar is compared with `date -u` at boundary instants (`NOW` overrides the clock). The glow must be silent in a pipe, and on a pseudo-terminal it must draw 24 frames in 1 to 3 seconds. `make -n pop` must print its `wt.exe` command and write nothing. A leftover `.tc-0.mk` from an interrupted run must be refused, and `make clean` must remove it. Last, a non-demo row must be refused.
 

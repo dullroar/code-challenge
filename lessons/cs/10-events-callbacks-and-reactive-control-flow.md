@@ -72,15 +72,15 @@ The sources are the Node.js [`events` documentation](https://nodejs.org/api/even
 - **`emit()` is synchronous.** Listeners run in registration order, before `emit` returns. This is documented, so it is a promise and not an accident.
 - **The name `error` is special.** `emit('error', e)` with no listener *throws* `e`. Every other name with no listener does nothing.
 - **A copy of the listener list is made for each `emit`.** A listener that removes listeners (or adds some) changes the *next* emit, not the one in flight.
-- **Timers, immediates and microtasks have an order**, and it is not the order you might guess. After the current code finishes, Node runs `process.nextTick` callbacks, then promise callbacks (microtasks), and then goes round the event loop: expired timers, then I/O callbacks, then `setImmediate` callbacks, and so on. When `setTimeout(fn, 0)` and `setImmediate(fn)` are called from the main module, which runs first is *not promised*: it depends on how fast the process started. Inside an I/O callback, `setImmediate` always runs first. This is implementation-dependent behavior of the kind that [Hyrum's law](08-abstraction-leaks-and-implementation-dependence.md#hyrums-law) describes, so [`javascript-events`](../../src/javascript-events/README.md) uses `setImmediate` alone and never depends on the order between two of them.
+- **Timers, immediates and microtasks have an order**, and it is not the order you might guess. After the current code finishes, Node runs `process.nextTick` callbacks, then promise callbacks (microtasks), and then goes round the event loop: expired timers, then I/O callbacks, then `setImmediate` callbacks and so on. When `setTimeout(fn, 0)` and `setImmediate(fn)` are called from the main module, which runs first is *not promised*: it depends on how fast the process started. Inside an I/O callback, `setImmediate` always runs first. This is implementation-dependent behavior of the kind that [Hyrum's law](08-abstraction-leaks-and-implementation-dependence.md#hyrums-law) describes, so [`javascript-events`](../../src/javascript-events/README.md) uses `setImmediate` alone and never depends on the order between two of them.
 - **An `async` listener's failure is not caught by a `try` around `emit`.** The listener returns a promise, and `emit` has already returned. The option `captureRejections` turns such a rejection into an `error` event.
 - **Listeners need an owner.** A listener that nobody removes can keep a whole object alive. Node warns when one event has more than ten listeners, because that is usually a leak. A timer or an immediate left behind can keep the process from ending. [`javascript-events`](../../src/javascript-events/README.md) ends by removing every listener, and its lab checks that no timer or immediate is left.
 
-## State machines, re-entrancy and ending
+## State machines, reentrancy and ending
 
 A program of listeners is a [Transition systems and state machines](02-what-counts-as-a-machine.md#transition-systems-and-state-machines): a state, and moves that events trigger. [`javascript-events`](../../src/javascript-events/README.md) keeps its state in one object that only listeners touch, and each listener is one transition. Two questions decide whether such a program is sound.
 
-**Can a listener be called again while it is still running?** That is *re-entrancy*. A synchronous `emit` allows it: a listener emits an event whose listener emits the first event again. The synchronous column above is exactly that, and its price is the stack. The scheduled version cannot be re-entered, because the next card is a new turn.
+**Can a listener be called again while it is still running?** That is *reentrancy*. A synchronous `emit` allows it: a listener emits an event whose listener emits the first event again. The synchronous column above is exactly that, and its price is the stack. The scheduled version cannot be re-entered, because the next card is a new turn.
 
 **Does it end?** A chain of events that never stops is a loop that nobody can see. The program must have one listener that does *not* announce the next step, and it must tidy up: roll back what was not committed, close the database, remove the listeners and stop the timers. In [`javascript-events`](../../src/javascript-events/README.md) that is `finished` (or `failed`), and then `done` removes everything.
 
@@ -108,7 +108,7 @@ Telling the consumer "something happened" does not tell the producer to slow dow
 
 Events are also the wrong tool when:
 
-- there is exactly one listener, and it is always the same one. A function call says the same thing, is shorter, and a debugger can step through it;
+- there is exactly one listener, and it is always the same one. A function call says the same thing, is shorter and a debugger can step through it;
 - the order must be obvious. With events it is in the names and in the order of registration;
 - you need a result back. An event announces, and it does not answer.
 
@@ -132,7 +132,7 @@ An animation framework, data binding and a window's own loop are *mechanisms* th
 
 ## Predict, then run
 
-[Exercise B22](../exercises.md#b22-javascript-event-driven-predict-the-trace-then-remove-the-boundary-verified) asks you to write the trace of a run *before* you see it, to predict what `emit` and `setImmediate` print, and to remove the scheduling boundary and watch a million cards run out of stack. Do the prediction on paper first. The surprise is the point.
+[Exercise B22](../exercises.md#b22-javascript-event-driven-predict-the-trace-then-remove-the-boundary-verified) asks you to write the trace of a run *before* you see it, to predict what `emit` and `setImmediate` print and to remove the scheduling boundary and watch a million cards run out of stack. Do the prediction on paper first. The surprise is the point.
 
 ## Event-driven programming
 
@@ -158,12 +158,12 @@ A window is not enough to make a program event-driven. The WPF, Tk, GLib and Swi
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | demonstrates | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | counterexample | LINQ method chains, end to end. |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | counterexample | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
-| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | counterexample | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
-| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | counterexample | Iterators and closures as control flow. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | counterexample | That a chain of LINQ methods can express the entire program. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | counterexample | That a `for` statement with no body can drive runtime XAML, LINQ to Objects, EF Core and WPF animation. |
+| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | counterexample | That Python can drive a whole program with `iter(step, False)`, which calls `step` until it returns `False`. |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | counterexample | That iterators and closures can express the control flow of a whole Rust program. |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | counterexample | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | counterexample | That a markup parser can run a program while it describes a UI. |
 
 ## Callbacks
 
@@ -186,14 +186,14 @@ A callback can be called at once, before the function you handed it to returns (
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | demonstrates | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | analogy | Program exit codes as control flow. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | That regex callouts can serve as a tiny instruction set. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | analogy | That program exit codes can steer control flow. |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
 
 ## Publish and subscribe
 
-In **publish and subscribe**, a *producer* announces that something happened, and any number of *consumers* that registered an interest are called. The producer does not know who they are, and the consumers do not know who produced the event. That is the whole point: the two sides can change independently. Message queues, browser events, and Node's `EventEmitter` all follow this shape.
+In **publish and subscribe**, a *producer* announces that something happened, and any number of *consumers* that registered an interest are called. The producer does not know who they are, and the consumers do not know who produced the event. That is the whole point: the two sides can change independently. Message queues, browser events and Node's `EventEmitter` all follow this shape.
 
 The idea has two halves that are easy to confuse. *Who is called* is decided by registration (the table of listeners). *When they are called* is decided by the mechanism: an `EventEmitter` calls them at once and in order, and a message broker may deliver them later and somewhere else. [`javascript-events`](../../src/javascript-events/README.md) uses an emitter in the plainest way, with one listener per event, and its README says honestly that with exactly one listener the indirection buys nothing. A SQLite trigger in [`tcl-weird`](../../src/tcl-weird/README.md) is a subscription to "a row was inserted". The checkpoint action in [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) is a subscription with one subscriber.
 
@@ -237,14 +237,14 @@ User-interface toolkits run the same kind of loop. The WPF dispatcher (`Applicat
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | demonstrates | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
-| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
-| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | Iterators and closures as control flow. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | That a chain of LINQ methods can express the entire program. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | That a `for` statement with no body can drive runtime XAML, LINQ to Objects, EF Core and WPF animation. |
+| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | That Python can drive a whole program with `iter(step, False)`, which calls `step` until it returns `False`. |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | That iterators and closures can express the control flow of a whole Rust program. |
 
 ## Backpressure
 
-**Backpressure** is how a slow consumer tells a fast producer to wait. An event source announces things at its own speed. If the consumer cannot keep up, either a queue grows without a limit until memory runs out, or events are dropped. Backpressure turns that into a conversation: a bounded buffer, a stream that pauses its source, or a *pull*, where the consumer asks for one value when it is ready.
+**Backpressure** is how a slow consumer tells a fast producer to wait. An event source announces things at its own speed. If the consumer cannot keep up, either a queue grows without a limit until memory runs out, or events are dropped. Backpressure turns that into a conversation: a bounded buffer, a stream that pauses its source or a *pull*, where the consumer asks for one value when it is ready.
 
 A pull is the simplest backpressure, and [`javascript-weird`](../../src/javascript-weird/README.md) is one: it cannot be flooded, because nothing is drawn until something asks. [`javascript-events`](../../src/javascript-events/README.md) has no backpressure and does not need it: each card waits for the previous card, so producer and consumer are one program. [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) shows the missing half. tar keeps writing records, and so keeps calling the clock, after the machine is done. Those ticks only count as idle, because there is no way to ask tar to stop.
 

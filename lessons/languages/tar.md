@@ -1,6 +1,6 @@
 # tar
 
-Entries: [`src/tar-gnu`](../../src/tar-gnu/README.md) (the archive is a program) and [`src/tar-gnu-weird`](../../src/tar-gnu-weird/README.md) (the archive is a clock). `tar` ("tape archive") packs many files into one stream of bytes. It was made for magnetic tape, where you cannot jump around, so an archive is a *sequence*: a header, the file's bytes, the next header, and so on. That one fact is why a tar archive can be a program. Order is already part of the format.
+Entries: [`src/tar-gnu`](../../src/tar-gnu/README.md) (the archive is a program) and [`src/tar-gnu-weird`](../../src/tar-gnu-weird/README.md) (the archive is a clock). `tar` ("tape archive") packs many files into one stream of bytes. It was made for magnetic tape, where you cannot jump around, so an archive is a *sequence*: a header, the file's bytes, the next header and so on. That one fact is why a tar archive can be a program. Order is already part of the format.
 
 For an advanced reading path with traces and experiments, see the [tar study guide](../study-guides/languages/tar.md).
 
@@ -18,7 +18,7 @@ For an advanced reading path with traces and experiments, see the [tar study gui
 
 ## A program that is an archive
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/tar-gnu
@@ -26,7 +26,7 @@ sandbox/container/run-image.sh src/tar-gnu
 
 A tar archive of twelve tiny files. A dispatcher of about 80 lines. No loop in the dispatcher, no random numbers, no number 40.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 - **The members are the instructions.** `010.card` is "add a card". Its body is `category=Meetings` and `hours=13`. The name carries the order, and the body carries the operands.
 - **tar is the loop.** It reads the next member and starts the dispatcher, until the archive ends.
@@ -36,17 +36,17 @@ A tar archive of twelve tiny files. A dispatcher of about 80 lines. No loop in t
 
 The [README](../../src/tar-gnu/README.md#its-just-a-tar-file-serialization-deserialization-and-execution) has the full table of who does what.
 
-### 3. What did we just learn?
+### What did we just learn?
 
-- **Serialization, deserialization and execution are three acts.** You can write a program down, parse it, and run it. Most formats let you do the first two without the third. Python's `pickle` does not.
+- **Serialization, deserialization and execution are three acts.** You can write a program down, parse it and run it. Most formats let you do the first two without the third. Python's `pickle` does not.
 - **The trust boundary is the command line.** A plain extraction runs nothing. Adding `--to-command` is a decision, and it is the operator's decision.
 - **Fail closed.** The dispatcher refuses an unknown record, and then it refuses every record after it, because tar will not stop on its own.
 - **Four kinds of "the same".** Same bytes, same structure, same behavior and same live process are four different claims. This entry makes the first three and says plainly that it does not make the fourth.
 - **A format is a contract.** `tarprog/1` is not part of tar. Two programs agree on it.
 
-Tags: `--to-command` and `--occurrence` are **GNU extensions** (**implementation-permitted**). The `ustar` format and the order of members are in POSIX. That tar keeps going after a failed command is what GNU tar 1.35 does today, and the manual does not promise it: it is **accidentally exploited**, and the entry does not depend on it, because it writes its own halt.
+Tags: `--to-command` and `--occurrence` are GNU extensions (**implementation-permitted**). The `ustar` format and the order of members are in POSIX. That tar keeps going after a failed command is what GNU tar 1.35 does today, and the manual does not promise it: it is **accidentally exploited**, and the entry does not depend on it, because it writes its own halt.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **An archive that runs is a program that arrived as data.** If the operator runs `--to-command` on an archive from a stranger, the stranger's records decide what happens. Here the dispatcher is strict. A careless one is a remote command runner.
 - **Your own format has no tooling.** Nothing but a test keeps the builder and the dispatcher in step.
@@ -54,13 +54,13 @@ Tags: `--to-command` and `--occurrence` are **GNU extensions** (**implementation
 
 Legitimate uses: `--to-command` as a filter, such as checksumming each member while you extract. A tar archive as a *container* for a program's data, with a manifest.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercise B16](../exercises.md#b16-tar-read-the-program-then-run-it-verified).
 
 ## The archive is the clock
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/tar-gnu-weird
@@ -68,7 +68,7 @@ sandbox/container/run-image.sh src/tar-gnu-weird
 
 A tar archive whose payload is all zeros, and a state machine that moves one step each time tar says "I wrote a record". The program has no loop. tar is the loop.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 - **One checkpoint is one hour.** `tar -b 1 --checkpoint=1 --checkpoint-action=exec=...` runs a command for every 512 bytes it writes. The command is a single SQL transaction.
 - **The state is one row.** It holds the hours worked on the open card, the length of the card, the running total, the generator's seed and a `done` flag.
@@ -78,7 +78,7 @@ A tar archive whose payload is all zeros, and a state machine that moves one ste
 
 The [README](../../src/tar-gnu-weird/README.md#how-the-stunt-works) has the register table and the full list of what we measured.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **A progress indicator is an event source.** Once something calls your code at a steady beat, you have a clock. Event-driven programs work like this.
 - **A logical clock counts events, not seconds.** Ticks here are records written. Nothing in the run depends on how long a second takes.
@@ -86,9 +86,9 @@ The [README](../../src/tar-gnu-weird/README.md#how-the-stunt-works) has the regi
 - **A layout can set the pace as well as the meaning.** The payload of this archive is all zeros, and its size still decides when everything happens.
 - **Say what a count counts.** A checkpoint counts records. A record is a number of blocks. The same archive gives 21 ticks when created, 10 when listed and 21 when extracted.
 
-Tags: `--checkpoint`, `--checkpoint-action=exec` and `TAR_CHECKPOINT` are **GNU extensions** (**implementation-permitted**), tested on GNU tar 1.34 and 1.35. The exact tick count in list mode is **accidentally exploited** knowledge, and the entry does not use it.
+Tags: `--checkpoint`, `--checkpoint-action=exec` and `TAR_CHECKPOINT` are GNU extensions (**implementation-permitted**), tested on GNU tar 1.34 and 1.35. The exact tick count in list mode is **accidentally exploited** knowledge, and the entry does not use it.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **It is a progress meter.** If someone changes the blocking factor, your schedule changes with it.
 - **Every tick starts a process.** Do not use a checkpoint as a scheduler. Use a scheduler.
@@ -96,7 +96,7 @@ Tags: `--checkpoint`, `--checkpoint-action=exec` and `TAR_CHECKPOINT` are **GNU 
 
 Legitimate uses: progress bars for long backups, and `--checkpoint-action=wait` to pause a job for a cooperating process, as the manual shows.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercise B17](../exercises.md#b17-tar-weirder-predict-the-clock-verified).
 

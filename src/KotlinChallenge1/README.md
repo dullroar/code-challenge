@@ -1,6 +1,6 @@
 ---
 name: "Kotlin"
-teaches: "A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null."
+teaches: "that Kotlin can use `generateSequence` as the loop, ending when the generator returns null."
 kind: port
 languages: [kotlin]
 lesson: "languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery"

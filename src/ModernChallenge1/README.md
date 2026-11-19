@@ -1,6 +1,6 @@
 ---
 name: "C# `for`"
-teaches: "runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body."
+teaches: "that a `for` statement with no body can drive runtime XAML, LINQ to Objects, EF Core and WPF animation."
 kind: weird
 languages: [c-sharp]
 lesson: "languages/csharp-linq-xaml.md#the-original-modernchallenge1"
@@ -15,7 +15,7 @@ counterexamples: [event-driven-programming]
 ---
 # C# challenge: the original (modernized)
 
-**Teaches you:** runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body.
+**Teaches you:** that a `for` statement with no body can drive runtime XAML, LINQ to Objects, EF Core and WPF animation.
 
 This is where the whole thing started: a 2008 classroom exercise, kept alive and rebuilt for current .NET. The rule is one C# statement. `Main` contains exactly one `for` loop, and that loop's body is empty (`{ /* Intentionally empty. */ }`). Every piece of behavior - the random draws, the running total, the database save, the window, the animation - has to happen inside the loop's three `;`-separated clauses: initializer, condition, iterator.
 

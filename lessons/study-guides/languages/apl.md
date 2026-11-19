@@ -10,9 +10,9 @@ When you finish, you should be able to:
 2. Explain why an eager, whole-array program draws more values than it needs, and why that is a *bound* and not a loop count.
 3. Explain how `⎕CR` and `⎕FX` let a function read and write functions, and why the stop rule in `apl-weird` is a compress over text.
 4. Trace both programs through the same three cards, showing the arrays in one and the generated source in the other.
-5. Label each behavior as guaranteed, implementation-permitted, or accidentally exploited.
+5. Label each behavior as guaranteed, implementation-permitted or accidentally exploited.
 
-Scope limits. You need to read basic APL: `⍳`, `⍴`, `+\` (scan), `+/` (reduce), `/` (compress) and `↑` (take). The guide does not teach the whole glyph set, GNU APL's `⎕FIO` file functions beyond what the programs use, or SQL. If the APL symbols show as empty boxes, see [Seeing the glyphs](../../../src/apl/README.md#seeing-the-glyphs).
+**Scope limits.** You need to read basic APL: `⍳`, `⍴`, `+\` (scan), `+/` (reduce), `/` (compress) and `↑` (take). The guide does not teach the whole glyph set, GNU APL's `⎕FIO` file functions beyond what the programs use or SQL. If the APL symbols show as empty boxes, see [Seeing the glyphs](../../../src/apl/README.md#seeing-the-glyphs).
 
 The book's page is [APL](../../languages/apl.md). The ideas are in [Array programming](../../cs/04-evaluation-and-demand.md#array-programming), [Homoiconicity: code as data](../../cs/06-state-beyond-variables.md#homoiconicity-code-as-data) and [Self-modifying code](../../cs/03-control-flow-and-continuations.md#self-modifying-code).
 
@@ -25,7 +25,7 @@ sandbox/container/run-image.sh src/apl
 sandbox/container/run-image.sh src/apl-weird
 ```
 
-Edit only copies ([Running things safely](../../exercises.md#running-things-safely)). A broken self-rewriting program may recurse for ever and never fail: set `SANDBOX_TIMEOUT=40` for any change to `apl-weird`.
+Edit only copies ([Running things safely](../../exercises.md#running-things-safely)). A broken self-rewriting program may recurse without stopping: set `SANDBOX_TIMEOUT=40` for any change to `apl-weird`.
 
 **Prediction rule.** Before each run, write down the arrays (or the generated function text) you expect, and what output would prove you wrong.
 
@@ -41,19 +41,19 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Keep a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
 APL expresses the boundary in one comparison, `40≥`, "is the total at most 40?". It is true for 40. The program counts the cards for which it is true and then adds one, to include the card that crosses.
 
 ## The machine to identify
 
-**What repeats.** In `apl`, nothing repeats in the code: the array primitives apply to every element. [Four named assignments](../../../src/apl/timecards.apl#L30-L39) hold the calculation: five draws in `Drawn`, then three results derived from it in `Hours`, `Totals` and `Kinds`. In `apl-weird`, a *chain of calls*: `Card0` calls `Card1`, which `Card0` wrote, which calls `Card2`, and so on ([L43-55](../../../src/apl-weird/timecards.apl#L43-L55)). The chain is recursion-shaped, but each link is a *different function*.
+**What repeats.** In `apl`, nothing repeats in the code: the array primitives apply to every element. [Four named assignments](../../../src/apl/timecards.apl#L30-L39) hold the calculation: five draws in `Drawn`, then three results derived from it in `Hours`, `Totals` and `Kinds`. In `apl-weird`, a *chain of calls*: `Card0` calls `Card1`, which `Card0` wrote, which calls `Card2` and so on ([L43-55](../../../src/apl-weird/timecards.apl#L43-L55)). The chain is recursion-shaped, but each link is a *different function*.
 
 **Where state lives.** In `apl`, in arrays: `Drawn`, `Hours`, `Totals`, `Kinds`. All five values are drawn at once, so the state is *the whole vector*. In `apl-weird`, in the **source text** of each function. Lines 1 to 4 of every card are four "gene" lines: `N←` (card number), `C←` (category), `H←` (hours) and `T←` (running total). Each child gets new gene lines.
 
 **What advances the next step.** In `apl`, nothing advances: each primitive runs once over its argument. In `apl-weird`, a card builds the next card's text with `⎕FX` and runs it with `⍎`.
 
-**What stops it.** In `apl`, `+/40≥+\Drawn` counts the leading cards whose running total is at most 40. Because running totals only grow, "still at most 40" is true for a prefix and false for ever after, so the count *is* the position of the boundary. In `apl-weird`, `Alive←40≥T` is 1 or 0. `Alive/` compresses the child's source: a scalar 0 keeps no lines, so `⎕FX` defines nothing, and the same `Alive/` empties the call so `⍎` runs an empty string.
+**What stops it.** In `apl`, `+/40≥+\Drawn` counts the leading cards whose running total is at most 40. Because running totals only grow, "still at most 40" is true for a prefix and false for the remaining cards, so the count *is* the position of the boundary. In `apl-weird`, `Alive←40≥T` is 1 or 0. `Alive/` compresses the child's source: a scalar 0 keeps no lines, so `⎕FX` defines nothing, and the same `Alive/` empties the call so `⍎` runs an empty string.
 
 **What commits.** In `apl`, rows are written to a pipe to `sqlite3` *after* the arrays are computed, followed by `COMMIT;` and a pipe close that waits for `sqlite3`. In `apl-weird`, each card writes its `INSERT` as it runs, and `COMMIT;` is written after the whole chain returns ([L67-68](../../../src/apl-weird/timecards.apl#L67-L68)). The row printing in `apl-weird` happens on the way *down* the chain: the crossing card prints and saves itself, then finds it is not alive and writes no child.
 
@@ -108,7 +108,7 @@ Drawn         15 19 12 10 10
 | --- | --- | --- | --- |
 | 1 | `Drawn` | `15 19 12 10 10` | Five draws. Five cards of 10 hours always reach 50, so five is a bound. |
 | 2 | `+\Drawn` | `15 34 46 56 66` | The running total after each card. |
-| 3 | `40≥+\Drawn` | `1 1 0 0 0` | "Total is still at most 40": true, true, then false for ever. |
+| 3 | `40≥+\Drawn` | `1 1 0 0 0` | "Total is still at most 40": true, true, then false for the remaining cards. |
 | 4 | `+/` of that | `2` | Two cards are at or under 40. |
 | 5 | `1+` | `3` | Add the one card that crosses. |
 | 6 | `Drawn↑⍨3` | `15 19 12` | Take that many. |
@@ -150,7 +150,7 @@ The report then lists the functions in the workspace with `⎕NL 3` and reads ea
 | --- | --- | --- |
 | **Representation** | Arrays. The data is the program: each line is a function of the previous array. | Functions as text. Each card's state is four literal lines in its source. |
 | **Observability** | Print any intermediate array and see the whole state. | The state is in source text. `⎕CR 'Card2'` shows it, but only for functions that exist. A card that was never written leaves no evidence. |
-| **Tests** | Pure array expressions: fix `Drawn` and compare `Hours`. | You must run the chain. The book's check runs under `timeout` because a broken stop rule recurses for ever. |
+| **Tests** | Pure array expressions: fix `Drawn` and compare `Hours`. | You must run the chain. The book's check runs under `timeout` because a broken stop rule may prevent the recursion from stopping. |
 | **Debugging** | Read an array. | Read generated source, and remember that locals are *dynamically scoped*: a child sees its parent's variables unless each card declares its own (that is what `Locals` is for). |
 | **Portability** | Standard array primitives, plus GNU APL's `⎕FIO` for files and pipes. | Needs `⎕CR` and `⎕FX`, and the off-by-one in the copy (`5↓`) is invisible unless you run it. |
 | **Cost** | Draws five values and scans all five, even when three suffice. | Cheap: each card draws one value. But it defines a new function per card and leaves them in the workspace. |
@@ -167,18 +167,18 @@ The honest summary: the first program wastes data to avoid a decision, and the s
 | [A1. Read the rows](../../exercises.md#a1-read-the-rows-verified) | Which card crossed 40 here? | For `apl`, check that `+/40≥+\Drawn` counted the cards at or under 40. For `apl-weird`, check which `Card` function has the last `T←`. |
 | [F. Prove a README claim](../../exercises.md#f-prove-a-readme-claim-verified) | What would show that "five draws are always enough" is a bound? | A test that draws five 10-hour cards and checks that the fifth total is 50. A negative control would draw only four and show that the count of 4 stops at exactly 40. |
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| `+\`, `+/`, `/` and `↑` have fixed array semantics | **Guaranteed** | Core language definitions. Verified in the trace above. |
-| Five draws are enough because five cards of at least 10 hours reach 50 | **Guaranteed** | Arithmetic about this challenge, not about APL. |
-| `?`'s result depends on `⎕IO`, so the program subtracts it back out | **Guaranteed** | Specified behavior. `apl` is written to work in either origin. |
-| `⎕CR` returns a function's source as a matrix and `⎕FX` defines a function from one | **Implementation-permitted** | Part of the APL2 family, but their exact behavior, including what `⎕FX` returns for empty input, is an interpreter detail. The programs use GNU APL. |
-| Compressing a function's lines with `0` makes `⎕FX` define nothing | **Implementation-permitted** | Observed in GNU APL. The final workspace listing shows only the functions that should exist. |
-| GNU APL starts with `⎕RL←16807`, so every run draws the same cards unless seeded | **Implementation-permitted** | The program reseeds from the clock. |
-| `⎕FIO[24]`, `⎕FIO[22]` and friends | **Implementation-permitted** | GNU APL's file-and-process extension. Not portable to other APLs. |
-| The report finds the last card from the order of names `⎕NL 3` returns | **Accidentally exploited** | `Card0` to `Card4` sort correctly as text. With ten or more cards `Card10` would sort before `Card2`. The challenge's maximum is five cards, so the dependence never fails. Nobody promised the order for other bounds. |
+| `+\`, `+/`, `/` and `↑` have fixed array semantics | **guaranteed** | Core language definitions. Verified in the trace above. |
+| Five draws are enough because five cards of at least 10 hours reach 50 | **guaranteed** | Arithmetic about this challenge, not about APL. |
+| `?`'s result depends on `⎕IO`, so the program subtracts it back out | **guaranteed** | Specified behavior. `apl` is written to work in either origin. |
+| `⎕CR` returns a function's source as a matrix and `⎕FX` defines a function from one | **implementation-permitted** | Part of the APL2 family, but their exact behavior, including what `⎕FX` returns for empty input, is an interpreter detail. The programs use GNU APL. |
+| Compressing a function's lines with `0` makes `⎕FX` define nothing | **implementation-permitted** | Observed in GNU APL. The final workspace listing shows only the functions that should exist. |
+| GNU APL starts with `⎕RL←16807`, so every run draws the same cards unless seeded | **implementation-permitted** | The program reseeds from the clock. |
+| `⎕FIO[24]`, `⎕FIO[22]` and friends | **implementation-permitted** | GNU APL's file-and-process extension. Not portable to other APLs. |
+| The report finds the last card from the order of names `⎕NL 3` returns | **accidentally exploited** | `Card0` to `Card4` sort correctly as text. With ten or more cards `Card10` would sort before `Card2`. The challenge's maximum is five cards, so the dependence never fails. Nobody promised the order for other bounds. |
 
 **Costs to state.**
 
@@ -191,19 +191,19 @@ The honest summary: the first program wastes data to avoid a decision, and the s
 ## Connections across the repository
 
 - **Code as data in other languages.** [Tcl](tcl.md) stores program text in a database row and defines it when needed. [Common Lisp](common-lisp.md) can build and run forms. [COBOL](cobol.md) patches a jump instead of text.
-- **Eager versus lazy.** `apl` computes five values and discards two. [Haskell](haskell.md) reads only as much of an infinite list as it needs. The deferred LINQ pipelines in [C#, LINQ, XAML, and ports](csharp-linq-xaml-and-ports.md) wait for enumeration. The separate C# `for` header enumerates eagerly with `Sum()` each time it tests the condition. The concept guide [Evaluation, demand, and laziness](../concepts/evaluation-demand-and-laziness.md) sets these three side by side.
+- **Eager versus lazy.** `apl` computes five values and discards two. [Haskell](haskell.md) reads only as much of an infinite list as it needs. The deferred LINQ pipelines in [C#, LINQ, XAML and ports](csharp-linq-xaml-and-ports.md) wait for enumeration. The separate C# `for` header enumerates eagerly with `Sum()` each time it tests the condition. The concept guide [Evaluation, demand and laziness](../concepts/evaluation-demand-and-laziness.md) sets these three side by side.
 - **State outside variables.** `apl-weird` keeps its state in source lines, as [Make](make-and-cmake.md) keeps it in files and [Forth](forth.md) in a parse position. See [State and control beyond variables](../concepts/state-and-control-beyond-variables.md).
 - **Reproducibility of "random".** The APL entries reseed from the clock; the sed entry in [Regex engines and sed](regex-engines-and-sed.md) uses a seeded shift register and gives the same cards for the same seed.
 - **In the book.** [APL](../../languages/apl.md), [Array programming](../../cs/04-evaluation-and-demand.md#array-programming), [Eager evaluation](../../cs/04-evaluation-and-demand.md#eager-evaluation) and [Homoiconicity: code as data](../../cs/06-state-beyond-variables.md#homoiconicity-code-as-data).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
-1. **Trace.** `Drawn` is `12 14 13 10 11`. For `apl`, give `+\Drawn`, the boolean from `40≥`, the count, and the final `Hours`. *(Totals `12 26 39 49 60`. The boolean is `1 1 1 0 0`. The count is 3, plus 1 is 4. `Hours` is `12 14 13 10`, with a final total of 49. The crossing card is the fourth.)*
+1. **Trace.** `Drawn` is `12 14 13 10 11`. For `apl`, give `+\Drawn`, the boolean from `40≥`, the count and the final `Hours`. *(Totals `12 26 39 49 60`. The boolean is `1 1 1 0 0`. The count is 3, plus 1 is 4. `Hours` is `12 14 13 10`, with a final total of 49. The crossing card is the fourth.)*
 2. **Explain.** In `apl-weird`, why does `Card2` in the trace still print and save a row even though its `Alive` is 0? *(Printing and saving come *before* the `Alive` test in the card's body. `Alive` only controls whether the *next* card is written and called. The crossing card was written by a parent whose total was still at most 40.)*
 3. **Transfer.** In the Haskell weird entry, the stop rule is "how much of the list I read". In `apl`, it is "how many items a prefix count says to take". What is the main difference in *work done*? *(Haskell builds only the demanded prefix. APL builds five values and trims. Both answer "which cards are kept" the same way. They differ in whether the unused work happens.)*
-4. **Evidence.** A student claims "`apl-weird` never draws more than five hours." Design a test that could fail. *(Run the program many times in the sandbox and count the `Card` functions listed in the report. The count must never exceed 5. For a negative control, use the exercise B6 edit and show that the count, and the run time, explode. Remember the timeout.)*
+4. **Evidence.** A student says, "`apl-weird` never draws more than five hours." Design a test that could fail. *(Run the program many times in the sandbox and count the `Card` functions listed in the report. The count must never exceed 5. For a negative control, use the exercise B6 edit and show that the count, and the run time, explode. Remember the timeout.)*
 
 ## Further reading
 

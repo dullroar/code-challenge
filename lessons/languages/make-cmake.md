@@ -6,7 +6,7 @@ For an advanced reading path with traces and experiments, see the [Make and CMak
 
 ## GNU Make
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/make-gnu
@@ -14,7 +14,7 @@ sandbox/container/run-image.sh src/make-gnu
 
 A Makefile with **no `$(shell)`, no `!=`, no Guile and no `load`** (`check.sh` greps for all of them). It draws random hours, does arithmetic (including a full ISO-week calculation from the clock), loops, writes a database and glows on a terminal.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 - **Numbers are lists of `x`.** A 60,000-word "ruler" of `x`s, and `$(words $(wordlist 1,a,$(U)) $(wordlist 1,b,$(U)))` adds; `$(wordlist b+1,a,...)` subtracts. The stop rule `total > 40` is "the 41st word exists": `$(word 41,...)`.
 - **Entropy and the clock without a shell.** `$(file </proc/sys/kernel/random/uuid)` reads a file; nested `$(subst)` strips letters, leaving a decimal digit. Time is `btime` from `/proc/stat` plus `/proc/uptime`, added digit by digit with a carry.
@@ -31,15 +31,15 @@ A Makefile with **no `$(shell)`, no `!=`, no Guile and no `load`** (`check.sh` g
 - **The trailing `@:` matters.** A recipe that *expands to nothing* does not count as remaking the file. The card file is written while the recipe is *expanded* (`$(file >$@,...)`), but Make only notices a restart if a command actually ran, so each card ends with the shell's no-op `@:`.
 - **The report is a chain of phony targets** (`init`, `rows`, `footer`, frame targets), because Make expands every line of a recipe before running any.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **Make is a dependency engine that can restart itself.** "Remake the thing that describes the build" is a loop in disguise.
 - **State can be the existence of files.** Make state here is which `.tc-N.mk` files exist.
-- **Expansion time and execution time are different phases** ([Make's two phases](#quirks-and-walls)), and the program lives in the gap.
+- **Expansion time and execution time are different phases** ([Make's two phases](#quirks)), and the program lives in the gap.
 
-Tags: includes-and-restart is **documented** GNU Make behavior but its use as a loop is **accidentally exploited**. `$(file <...)` needs GNU Make 4.2+. `/proc` reads are **platform-specific** (Linux).
+Tags: remaking included makefiles and restarting are **guaranteed** by the GNU Make manual but its use as a loop is **accidentally exploited**. `$(file <...)` needs GNU Make 4.2+. `/proc` reads are **implementation-permitted** on Linux.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **A crashed run leaves `.tc-*.mk` behind**; the next `make` refuses to start (it would treat them as real cards) until `make clean`.
 - **Timestamp granularity.** The first design rewrote one `.state.mk` and restarted once, then stopped: WSL's file timestamps were coarse enough that the rewrite looked unchanged. "Missing to present" is unambiguous; "modified" is not.
@@ -48,13 +48,13 @@ Tags: includes-and-restart is **documented** GNU Make behavior but its use as a 
 
 Legitimate uses: generating includes (`-include $(DEPS)`) that cause a restart when regenerated is the *intended*, standard idiom for auto-dependencies. The weird version is that idiom run to a conclusion.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercises](../exercises.md#b4-make-remove-the-no-op-and-override-the-clock-verified).
 
 ## CMake
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/cmake
@@ -62,7 +62,7 @@ sandbox/container/run-image.sh src/cmake
 
 One `while()` with an empty body. Everything that decides anything is in its condition.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 [`timecards.cmake` L41-54](../../src/cmake/timecards.cmake#L41-L54):
 
@@ -75,30 +75,30 @@ endwhile()
 CMake's `if()`/`while()` `MATCHES` stores its capture groups in ordinary variables `CMAKE_MATCH_1`..`n`, and a `while()` **re-expands its condition on every pass**. So the condition builds its subject and its pattern from the previous pass's captures. That is a register machine, and the match is the program.
 
 - **State** ([L28-32](../../src/cmake/timecards.cmake#L28-L32)): numbers are runs of `x`; `CMAKE_MATCH_1` is the total, `_2` the digit peeked last pass, `_3` the rest of the digit tape, `_4` the log of finished cards, `_5` the last card's hours.
-- **Hours 10-19** come from a table *inside the subject* (`0:xxxxxxxxxx|1:xxxxxxxxxxx|...`) and a pattern that splices the previous pass's digit in (`${CMAKE_MATCH_2}:`).
+- **Hours 10 to 19** come from a table *inside the subject* (`0:xxxxxxxxxx|1:xxxxxxxxxxx|...`) and a pattern that splices the previous pass's digit in (`${CMAKE_MATCH_2}:`).
 - **The stop rule** is the first test: `NOT` (total + last card matches a literal of 41 `x`s). Exactly 40 continues.
 - **Order matters**: a failed `MATCHES` clears every register, a successful one rewrites them, so the stop test goes first so that the *main* match's captures are the ones that survive.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **Scope and evaluation order are program state.** Variables you did not declare (`CMAKE_MATCH_n`) are written as a side effect of a condition.
 - **A condition can be a statement.** Here evaluating the test *is* the instruction.
 - **Compare**: [Perl and PCRE2](regex.md) put the loop inside one regex match; CMake uses a regex *per pass* but lets the loop re-expand it. Same idea, different place.
 
-Tags: `CMAKE_MATCH_n` being set by `MATCHES` is **documented**; re-expansion of the `while()` condition each pass is **documented** behavior; clearing all registers on a failed match is **observed**, so treat it as **implementation-permitted**.
+Tags: Setting `CMAKE_MATCH_n` on a match and expanding the `while()` condition on each pass are **guaranteed** by the documentation. Clearing all registers on a failed match is **implementation-permitted**, based on observation.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **CMake's regex has no counted repetition** (`x{41}` is unsupported, hence the literal 41-character test), **no lookahead and no backreferences**. A tempting `(x?x?...)` x 40 for "at most 40" would backtrack exponentially on failure.
 - **The host still reports.** Output cannot happen from inside a condition, so printing, the SQLite writes and the glow are ordinary CMake after the loop.
 - **ISO year by hand.** `string(TIMESTAMP)` knows `%V` but not `%G`.
 - **`message()` goes to stderr**, hence `/dev/stdout` writes.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercises](../exercises.md#b5-cmake-mutate-the-literal-verified): the repo's own `check.sh` mutates the 41-character literal to prove it controls the loop.
 
-## Quirks and walls
+## Quirks
 
 - **Make expands every line of a recipe before it runs any**, so `$(info)` output would come out before SQLite's header.
 - **`#` starts a comment even inside a SQL string in a variable**; the header's `'# DEMO ONLY'` is written `\#`.
@@ -160,7 +160,7 @@ flowchart TD
     F --> G["sqlite3 reads the script that Make wrote"]
 ```
 
-**What this shows:** the loop is the build tool re-running itself. Each pass includes the `.tc-N.mk` files that exist, and a file that gets written forces a restart. The state is *which files exist*. The stop rule is that the rule declines to write a new file.
+**What this shows:** the loop is the build tool rerunning itself. Each pass includes the `.tc-N.mk` files that exist, and a file that gets written forces a restart. The state is *which files exist*. The stop rule is that the rule declines to write a new file.
 
 **Why this mechanism matters:** Make's dependency engine decides what to do next from the state of the file system. There is no loop statement and no `$(shell)`: arithmetic is list surgery on `x` words. The report is a chain of phony targets so that its output stays in order.
 <!-- END GENERATED program-flow:languages/make-cmake.md -->

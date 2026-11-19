@@ -10,15 +10,15 @@ When you finish, you should be able to:
 2. Explain what `MATCHES` leaves behind in `CMAKE_MATCH_1` to `CMAKE_MATCH_9`, and why those variables can act as registers.
 3. Trace each program through the same three cards, naming the state before and after each pass.
 4. Explain why each stop rule is a *length* (41 words or 41 characters) rather than a comparison.
-5. Label each behavior as guaranteed, implementation-permitted, or accidentally exploited, and say what a reproducibility check can and cannot prove.
+5. Label each behavior as guaranteed, implementation-permitted or accidentally exploited, and say what a reproducibility check can and cannot prove.
 
-Scope limits. You need to read a Makefile and know that `$(...)` expands a function or variable. You need to know that CMake runs scripts with `cmake -P`. This guide does not teach the calendar arithmetic in the Make entry (which computes an ISO week without a shell), the animated glow, or Windows Terminal support. It uses GNU Make and CMake 3.19 or later.
+**Scope limits.** You need to read a Makefile and know that `$(...)` expands a function or variable. You need to know that CMake runs scripts with `cmake -P`. This guide does not teach the calendar arithmetic in the Make entry (which computes an ISO week without a shell), the animated glow or Windows Terminal support. It uses GNU Make and CMake 3.19 or later.
 
 The book's page is [Make and CMake](../../languages/make-cmake.md). For the ideas, see [Build automation](../../cs/05-formal-languages-as-computational-substrates.md#build-automation), [Dependency graphs](../../cs/06-state-beyond-variables.md#dependency-graphs) and [Fixed-point iteration](../../cs/03-control-flow-and-continuations.md#fixed-point-iteration).
 
 ## Before you begin
 
-**Safety model.** Every entry writes fictional **DEMO ONLY** data to a local SQLite file. Make and CMake are programs that *run other programs*: both start `sqlite3`, and Make runs `mkdir` and `rm`. Read the source before you run it, and run it in the sandbox first:
+**Safety model.** Every entry writes fictional **DEMO ONLY** data to a scratch SQLite file. Make and CMake are programs that *run other programs*: both start `sqlite3`, and Make runs `mkdir` and `rm`. Read the source before you run it, and run it in the sandbox first:
 
 ```bash
 sandbox/container/run-image.sh src/make-gnu
@@ -41,23 +41,29 @@ Work on a copy for any edit ([Running things safely](../../exercises.md#running-
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when the total passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards make exactly 40, so a fifth card is drawn, and since there are only four categories it reuses Meetings. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
 Both programs report a result from SQLite after the draw. The stop-rule probe is its own statement: its expected failure leaves the card rows in place. Both programs write numbers in unary, so the stop rule becomes a question about length, and the boundary is easy to get wrong by one. In Make the test is *"does a 41st word exist?"* (`$(word 41, ...)`, [L111](../../../src/make-gnu/Makefile#L111)). In CMake it is *"does the total match 41 `x` characters?"* ([L41](../../../src/cmake/timecards.cmake#L41)). A total of 40 has no 41st word and does not match 41 characters, so both continue.
 
 ## The machine to identify
 
-**What repeats.** In `make-gnu`, the *whole Make process*: Make reads the makefile, includes every `.tc-N.mk` file written so far, and may write one more. In `cmake`, a `while()` with an empty body: only its condition does any work ([L41-54](../../../src/cmake/timecards.cmake#L41-L54)).
+**What repeats.** In `make-gnu`, the *whole Make process*: Make reads the makefile, includes every `.tc-N.mk` file written so far and may write one more. In `cmake`, a `while()` with an empty body: only its condition does any work ([L41-54](../../../src/cmake/timecards.cmake#L41-L54)).
 
-**Where state lives.** In `make-gnu`, in *which files exist* (`.tc-0.mk`, `.tc-1.mk`, ...) and in `MAKE_RESTARTS`. Each file holds one card as two variable assignments, such as `C0:=Meetings` and `H0:=15`. In `cmake`, in five variables that the program does not declare: `CMAKE_MATCH_1` is the total so far, `_2` is the digit peeked on the last pass, `_3` is the rest of a random digit tape, `_4` is the log of finished cards, and `_5` is the hours of the card added last pass ([L28-32](../../../src/cmake/timecards.cmake#L28-L32)). All numbers are runs of `x`.
+**Where state lives.** In `make-gnu`, state is in the set of existing files (`.tc-0.mk`, `.tc-1.mk` and so on) and in `MAKE_RESTARTS`. Each file holds one card in two variable assignments, such as `C0:=Meetings` and `H0:=15`.
+
+In `cmake`, five variables hold state ([L28-32](../../../src/cmake/timecards.cmake#L28-L32)). The program does not declare these variables. All numbers are runs of `x`.
+
+- `CMAKE_MATCH_1` holds the total so far.
+- `CMAKE_MATCH_2` holds the digit inspected on the last pass.
+- `CMAKE_MATCH_3` holds the rest of the random digit tape.
+- `CMAKE_MATCH_4` holds the log of finished cards.
+- `CMAKE_MATCH_5` holds the hours of the card added on the last pass.
 
 **What advances the next step.** In `make-gnu`, a file that gets *written*. A makefile that has been remade makes Make start over, and the pattern rule `.tc-%.mk` writes the next card file ([L110-111](../../../src/make-gnu/Makefile#L110-L111)). In `cmake`, `while()` re-expands its condition on every pass, and the condition builds its next subject string and pattern out of the previous pass's captures.
 
 **What stops it.** In `make-gnu`, the rule *declines to write a file*. If a 41st word exists, the recipe expands to nothing, no file appears, Make has nothing to restart for, and the default goal `all` runs. In `cmake`, the first of the two tests in the condition: `NOT` (total plus last card matches 41 `x`s). Or the main `MATCHES` fails.
 
 **What commits.** Both build a SQL script, then hand it to `sqlite3`: Make writes `.rows.sql` with `$(file ...)` and runs `sqlite3 $(DB) <.rows.sql`; CMake does the same with `file(WRITE)` and `execute_process`. The script's last statement tests the stop rule *inside SQLite*: it inserts `total <= 40` into a table whose only column has `CHECK(ok=1)`. When the rule is right, the insert fails and SQLite prints a named constraint error on stderr. That message is the stop rule announcing itself, not a program failure. The rows on the terminal are printed by the tool, not by SQLite.
-
-Here are the two Program Flow diagrams from the entries.
 
 <!-- diagram-source: src/make-gnu/README.md#program-flow -->
 
@@ -175,18 +181,18 @@ The "ordinary" version of each is the program the authors threw away or wrote fi
 
 **A trap when instrumenting CMake.** The scratch run first printed the registers with a helper that called `string(REGEX REPLACE ...)`. That command *also* writes `CMAKE_MATCH_n`, so it erased the registers and the loop ended at once, with zero cards. Looking at this program changes it unless you look through commands that do not touch the registers. `string(LENGTH ...)` does not, and it is what the trace above used.
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| Make re-executes itself after it remakes an included makefile, and `MAKE_RESTARTS` counts the restarts | **Implementation-permitted** | Documented GNU Make behavior (see "Remaking Makefiles" in the GNU Make manual, linked below). It is a GNU feature, not POSIX. |
-| Using that restart, triggered by a file the rule creates, as a loop | **Accidentally exploited** | This is the book's own example of the label. The feature exists to keep generated makefiles current. Nobody promised it for counting cards. |
-| A recipe that expands to nothing does not count as remaking the file | **Accidentally exploited** | The loop needs it, and it is observed rather than promised. Verified in exercise B4: delete `@:` and the restart never happens. |
-| A file going from missing to present is an unambiguous change; a rewritten file may look unchanged on a filesystem with coarse timestamps | **Implementation-permitted** | The README records that its first design rewrote one state file and restarted only once, on WSL. One file per pass avoids the problem. |
-| `MATCHES` sets `CMAKE_MATCH_n`, and `while()` re-expands its condition each pass | **Guaranteed** by the documentation | Both are documented. |
-| A failed match clears every register | **Implementation-permitted** | Observed, not promised in so many words. |
-| The main match runs in the same evaluation where the stop test says stop | **Accidentally exploited** | Observed in the scratch trace. The program needs it to log the last card. I found no promise of it in the CMake documentation. |
-| Reading `/proc/stat`, `/proc/uptime` and the kernel's uuid with `$(file </...)` | **Implementation-permitted** | Linux only. It is how the Make entry avoids `$(shell)`. |
+| Make re-executes itself after it remakes an included makefile, and `MAKE_RESTARTS` counts the restarts | **implementation-permitted** | Documented GNU Make behavior (see "Remaking Makefiles" in the GNU Make manual, linked below). It is a GNU feature, not POSIX. |
+| Using that restart, triggered by a file the rule creates, as a loop | **accidentally exploited** | This is the book's own example of the label. The feature exists to keep generated makefiles current. Nobody promised it for counting cards. |
+| A recipe that expands to nothing does not count as remaking the file | **accidentally exploited** | The loop needs it, and it is observed rather than promised. Verified in exercise B4: delete `@:` and the restart never happens. |
+| A file going from missing to present is an unambiguous change; a rewritten file may look unchanged on a filesystem with coarse timestamps | **implementation-permitted** | The README records that its first design rewrote one state file and restarted only once, on WSL. One file per pass avoids the problem. |
+| `MATCHES` sets `CMAKE_MATCH_n`, and `while()` re-expands its condition each pass | **guaranteed** by the documentation | Both are documented. |
+| A failed match clears every register | **implementation-permitted** | Observed, not promised in so many words. |
+| The main match runs in the same evaluation where the stop test says stop | **accidentally exploited** | Observed in the scratch trace. The program needs it to log the last card. I found no promise of it in the CMake documentation. |
+| Reading `/proc/stat`, `/proc/uptime` and the kernel's uuid with `$(file </...)` | **implementation-permitted** | Linux only. It is how the Make entry avoids `$(shell)`. |
 
 **Costs to state.**
 
@@ -201,17 +207,17 @@ The "ordinary" version of each is the program the authors threw away or wrote fi
 - **Control state outside variables.** [COBOL](cobol.md) keeps it in a jump target and [Forth](forth.md) in a parse position. Make keeps it in files and CMake in captures. [Tcl](tcl.md) keeps it in a database trigger. The concept guide [State and control beyond variables](../concepts/state-and-control-beyond-variables.md) lines them up.
 - **Rewriting until nothing changes.** [m4](m4.md) rescans its output, and [sed](regex-engines-and-sed.md) can loop with a branch. Make's restart is the same fixed-point idea with files as the text.
 - **A regex that is the program.** [Regex engines and sed](regex-engines-and-sed.md) puts the loop inside a single match. CMake lets the loop re-expand a regex on every pass.
-- **Reproducibility.** [Portability, abstraction, and cost](../concepts/portability-abstraction-and-cost.md) covers deterministic builds and what a fixed clock does and does not prove.
+- **Reproducibility.** [Portability, abstraction and cost](../concepts/portability-abstraction-and-cost.md) covers deterministic builds and what a fixed clock does and does not prove.
 - **In the book.** [Make and CMake](../../languages/make-cmake.md), [Build automation](../../cs/05-formal-languages-as-computational-substrates.md#build-automation) and [Dependency graphs](../../cs/06-state-beyond-variables.md#dependency-graphs).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** In `make-gnu`, hours are 11, 11, 11, 11 (total 44). How many times does Make re-execute itself, and in which pass does the rule decline to write? *(Four times. Passes 0 to 3 each write one card file, and in pass 4 the total is 44, so the 41st word exists and the rule writes nothing. `MAKE_RESTARTS` is 4 at the end.)*
 2. **Explain.** Why does deleting `@:` from the recipe give `entries=0`? *(The `$(file ...)` that writes the card runs while the recipe line is expanded, but if the line expands to no command, Make treats the file as not remade. No file counts as remade, so Make never restarts and the first pass reports zero cards.)*
 3. **Transfer.** Suppose the CMake condition were written with the main match first and the stop test second. Predict the output. *(The run reports zero cards. This was checked in a scratch copy. The main match sets the registers, then the stop test's own `MATCHES`, which has no capture groups and fails on the small total, clears all of them. The next evaluation starts from empty registers and the loop ends. The first order exists so that the match whose captures you need runs last.)*
-4. **Evidence.** A reviewer claims: "Make's loop needs a shell exactly once." Design a test that could fail, and say what the negative control is. *(Check that the only commands in the recipes are `mkdir`, `sqlite3`, `rm`, `sleep` and the no-op `:`, which the entry's `check.sh` does. For a control, add a `$(shell date)` and expect the check to fail. The claim is the entry's own and is classified as implementation-permitted.)*
+4. **Evidence.** A reviewer says, "Make's loop needs a shell exactly once." Design a test that could fail. What is the negative control? *(Check that the only commands in the recipes are `mkdir`, `sqlite3`, `rm`, `sleep` and the no-op `:`, which the entry's `check.sh` does. For a control, add a `$(shell date)` and expect the check to fail. The claim is the entry's own and is classified as implementation-permitted.)*
 
 ## Further reading
 

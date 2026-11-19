@@ -112,7 +112,7 @@ So we did not find a way to make the optimizer change the answer. A well-demonst
 
 `check.sh` needs GNU find. The line must be exactly one `find`, with no `for`, `while`, `until`, `case` or `if` anywhere in `timecards.sh`. Its primaries must be exactly `-O`, `-exec`, `-fprintf`, `-name`, `-o`, `-path`, `-regex` and `-regextype`. `-exec` may run only `mkdir` and `mktemp`. There may be no `-delete`, `-print`, `-printf`, `-ok`, `-execdir` or `-ls`. The line must be what `build-line.py` prints.
 
-Then, at each optimizer level from `-O0` to `-O3`, it runs the demo 15 times and checks hours 10-19, categories in order, running totals, `DEMO ONLY` on every row, an ISO week that matches `date`, a stop exactly when the total passes 40, one stop-rule error on stderr and nothing else, SQLite rows that match the printed ones, and an empty scratch folder afterward. Over the 60 runs, at least eight different hour values must show up.
+Then, at each optimizer level from `-O0` to `-O3`, it runs the demo 15 times and checks hours 10 to 19, categories in order, running totals, `DEMO ONLY` on every row, an ISO week that matches `date`, a stop exactly when the total passes 40, one stop-rule error on stderr and nothing else, SQLite rows that match the printed ones, and an empty scratch folder afterward. Over the 60 runs, at least eight different hour values must show up.
 
 At every level it also forces the dice with a fake `mktemp` first on `PATH`: seven scenarios that cover the tens and units digits, a total of exactly 40 (which must continue), and the re-roll paths. The answers must not depend on the `-O` level. Then `FIND_D=rates` must print success rates and leave the answers unchanged. Last, SQLite must refuse a non-demo row.
 

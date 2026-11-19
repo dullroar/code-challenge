@@ -1,6 +1,6 @@
 ---
 name: "CMake"
-teaches: "`while()` plus regex as a tiny register machine."
+teaches: "that `while()` and a regex can form a tiny register machine."
 kind: weird
 languages: [cmake]
 lesson: "languages/make-cmake.md#cmake"
@@ -14,7 +14,7 @@ tags: [build-automation, control-flow, domain-specific-language, hyrums-law, reg
 ---
 # CMake: `for (seed; test; iterate) ;`, with `while()` and a regex
 
-**Teaches you:** `while()` plus regex as a tiny register machine.
+**Teaches you:** that `while()` and a regex can form a tiny register machine.
 
 > **DEMO ONLY.** Fictional time cards, written to a scratch SQLite file under `$XDG_DATA_HOME/CmakeChallenge/`.
 > Nothing here touches real time reporting.
@@ -80,7 +80,7 @@ of the previous pass's captures. That is a register machine, and the match is th
 | Piece | What it is |
 |---|---|
 | State | numbers are runs of `x`: 1 = total so far, 2 = the digit peeked last pass, 3 = rest of the digit tape, 4 = the log of finished cards, 5 = hours of the card added last pass |
-| Hours 10-19 | the table `0:xxxxxxxxxx|1:xxxxxxxxxxx|...` is *in the subject*; the pattern splices the previous pass's digit in (`${CMAKE_MATCH_2}:`) and captures that row. The staircase is the 10-19 |
+| Hours 10 to 19 | the table `0:xxxxxxxxxx|1:xxxxxxxxxxx|...` is *in the subject*; the pattern splices the previous pass's digit in (`${CMAKE_MATCH_2}:`) and captures that row. The staircase is the 10 to 19 |
 | Running total | the next subject starts with `${CMAKE_MATCH_1}${CMAKE_MATCH_5}`: string concatenation of unary numbers |
 | Stop rule | the first test: `NOT` (total so far + last card matches a **41-character literal**). Exactly 40 continues. Mutating the literal changes the behavior (`check.sh` does) |
 | Loop control | the loop ends when the match says no. The regex stunt entries' "return no match, on purpose" is simply what stops this one |
@@ -96,7 +96,7 @@ hours), picks the ISO week, writes SQLite and plays the glow. `check.sh` fails i
 
 `check.sh` makes sure the stunt is real. The whole program must be exactly one `while()` whose body is empty, with nothing between the condition and `endwhile()`. There may be no `function`, `macro`, `include`, `cmake_language`, `add_custom` or `variable_watch`, and nothing before the loop may compute (no `math`, `list`, `foreach` or `string` surgery except drawing the digit tape). The only programs the file may start are `sqlite3`, `wt.exe` (for `POP`) and CMake itself (for `-E sleep`).
 
-Then it runs the program 25 times in an empty working directory, which must stay empty. Each run must print as many rows as it has entries, report that the empty loop went around once per entry, and keep the usual rules (hours 10-19, categories in order, running totals right, `DEMO ONLY` on every row, a stop exactly when the total passes 40, an ISO week that matches SQLite's). The stop-rule error must appear on stderr exactly once and nothing else may. The database must agree with the output and must hold no probe rows or scratch `.sql` files.
+Then it runs the program 25 times in an empty working directory, which must stay empty. Each run must print as many rows as it has entries, report that the empty loop went around once per entry, and keep the usual rules (hours 10 to 19, categories in order, running totals right, `DEMO ONLY` on every row, a stop exactly when the total passes 40, an ISO week that matches SQLite's). The stop-rule error must appear on stderr exactly once and nothing else may. The database must agree with the output and must hold no probe rows or scratch `.sql` files.
 
 Three more tests follow. A sweep of year boundaries (using `SOURCE_DATE_EPOCH`) compares the ISO week with `date -u`. The glow must be silent in a pipe, and on a pseudo-terminal it must draw 24 frames in 1 to 3 seconds. And a mutation test changes the 41-character stop literal to 51 and expects some total to go over the legal maximum of 59, which proves that the literal is the stop rule. Last, a non-demo row must be refused.
 

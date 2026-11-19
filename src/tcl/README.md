@@ -1,6 +1,6 @@
 ---
 name: "Tcl"
-teaches: "idiomatic Tcl: procs in a namespace, dicts for records, braced `expr`, and `db eval` binding Tcl variables straight into SQL."
+teaches: "that idiomatic Tcl uses procedures in a namespace, dicts for records, braced `expr` and `db eval` to bind Tcl variables into SQL."
 kind: idiomatic
 languages: [tcl]
 lesson: "languages/tcl.md"
@@ -12,11 +12,11 @@ tags: [reflection-and-metaprogramming, scope-and-binding, transaction]
 ---
 # Tcl
 
-**Teaches you:** idiomatic Tcl: procs in a namespace, dicts for records, braced `expr`, and `db eval` binding Tcl variables straight into SQL.
+**Teaches you:** that idiomatic Tcl uses procedures in a namespace, dicts for records, braced `expr` and `db eval` to bind Tcl variables into SQL.
 
 > **DEMO ONLY.** Fictional timecards in a scratch SQLite file. No connection to any real time-reporting system.
 
-This is the straight version, the one that shows how Tcl is *meant* to be written. The challenge ("add 10-19 hour cards until the total passes 40") is one `while` loop in the proc `timecards::draw`; everything else in [`timecards.tcl`](timecards.tcl) is a small proc that does one job. There is an optional Tk window. The weird version, where the loop is a recursive SQL trigger and the code lives in the database, is [`tcl-weird`](../tcl-weird/README.md).
+This is the straight version, the one that shows how Tcl is *meant* to be written. The challenge ("add 10 to 19 hour cards until the total passes 40") is one `while` loop in the proc `timecards::draw`; everything else in [`timecards.tcl`](timecards.tcl) is a small proc that does one job. There is an optional Tk window. The weird version, where the loop is a recursive SQL trigger and the code lives in the database, is [`tcl-weird`](../tcl-weird/README.md).
 
 ## Run it
 
@@ -112,7 +112,7 @@ flowchart TD
 
 ## What `check.sh` enforces
 
-The `DEMO ONLY` marker is there; no network-looking text; `draw` is a `while` on the limit; no unbraced `expr`; the file is a complete script. It then sources the file and calls `draw` 2,000 times, each deal checked: hours 10-19, no card after the total passed 40, correct running totals, categories in order, 3 to 5 cards. If Xvfb (or a `DISPLAY`) is present it runs `--gui --seconds 1`; otherwise it says "gui: SKIPPED". Finally 25 real runs are checked for sane records with SQLite agreeing with the printed output.
+The `DEMO ONLY` marker is there; no network-looking text; `draw` is a `while` on the limit; no unbraced `expr`; the file is a complete script. It then sources the file and calls `draw` 2,000 times, each deal checked: hours 10 to 19, no card after the total passed 40, correct running totals, categories in order, 3 to 5 cards. If Xvfb (or a `DISPLAY`) is present it runs `--gui --seconds 1`; otherwise it says "gui: SKIPPED". Finally 25 real runs are checked for sane records with SQLite agreeing with the printed output.
 
 ## Run it in a container
 

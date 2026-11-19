@@ -1,6 +1,6 @@
 ---
 name: "AWK"
-teaches: "portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream."
+teaches: "that portable AWK can build records out of fields and stream its output through a pipe, with arrays and parameter-local variables for state."
 kind: idiomatic
 languages: [awk]
 lesson: "languages/awk.md"
@@ -12,11 +12,11 @@ tags: [control-flow, declarative-programming, domain-specific-language, regular-
 ---
 # AWK
 
-**Teaches you:** portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream.
+**Teaches you:** that portable AWK can build records out of fields and stream its output through a pipe, with arrays and parameter-local variables for state.
 
 > **DEMO ONLY.** Fictional timecards in a scratch SQLite file. No connection to any real time-reporting system.
 
-This is the straight version, the one that shows how AWK is *meant* to be written. The challenge ("add 10-19 hour cards until the total passes 40") is one `while` loop; everything else in [`timecards.awk`](timecards.awk) is a small function that does one job. It is **portable POSIX awk**: it runs unchanged under gawk, mawk, the one-true-awk (BWK awk) and busybox awk. The weird version, which hands the loop to awk's own main loop and reads dice from `/dev/urandom`, is [`awk-weird`](../awk-weird/README.md).
+This is the straight version, the one that shows how AWK is *meant* to be written. The challenge ("add 10 to 19 hour cards until the total passes 40") is one `while` loop; everything else in [`timecards.awk`](timecards.awk) is a small function that does one job. It is **portable POSIX awk**: it runs unchanged under gawk, mawk, the one-true-awk (BWK awk) and busybox awk. The weird version, which hands the loop to awk's own main loop and reads dice from `/dev/urandom`, is [`awk-weird`](../awk-weird/README.md).
 
 ## Run it
 
@@ -112,7 +112,7 @@ An AWK program is a list of `pattern { action }` rules that run once per input r
 
 ## What `check.sh` enforces
 
-The `DEMO ONLY` marker is there; no network-looking text; the challenge is a `while (total <= LIMIT)`; `gawk --lint --posix` has no complaints (so no GNU extensions and no shadowed variables). Then 25 real runs, under **each** awk found (gawk, mawk, the one-true-awk, busybox awk when installed), each checked for sane records (hours 10-19, categories in order, correct running totals, stopping exactly when the total passes 40) with SQLite agreeing with the printed output.
+The `DEMO ONLY` marker is there; no network-looking text; the challenge is a `while (total <= LIMIT)`; `gawk --lint --posix` has no complaints (so no GNU extensions and no shadowed variables). Then 25 real runs, under **each** awk found (gawk, mawk, the one-true-awk, busybox awk when installed), each checked for sane records (hours 10 to 19, categories in order, correct running totals, stopping exactly when the total passes 40) with SQLite agreeing with the printed output.
 
 ## Run it in a container
 

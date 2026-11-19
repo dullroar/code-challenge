@@ -6,14 +6,14 @@ For an advanced reading path with traces and experiments, see the [formal langua
 
 A formal language is a notation with strict rules that a machine can process. The recurring surprise of this repository is that a notation built for *one* job turns out to be a computer. Regular expressions were made to match text, and Perl, PCRE2 and .NET engines turn them into search machines, a stack and a counter. `sed` is a rewriting system. Make and CMake were made to order builds, and they became a restarting loop and a register machine. XAML was made to describe a user interface, and its parser runs methods.
 
-This chapter gives you the theory underneath: the Chomsky hierarchy (how much machine does a notation need?), parsing, rewriting, macros and declarative languages, interpreters and virtual machines (a representation plus something that gives it behavior), and category theory, a small part of which is useful for saying exactly what a pipeline preserves. It ends with two security ideas that explain why this matters outside the book. If an input language is more powerful than its authors realized, then reading the input is the same as running a program. See [language-theoretic security](#language-theoretic-security) and [weird machines](#weird-machines).
+This chapter gives you the theory underneath: the Chomsky hierarchy (how much machine does a notation need?), parsing, rewriting, macros and declarative languages, interpreters and virtual machines (a representation plus something that gives it behavior) and category theory, a small part of which is useful for saying exactly what a pipeline preserves. It ends with two security ideas that explain why this matters outside the book. If an input language is more powerful than its authors realized, then reading the input is the same as running a program. See [language-theoretic security](#language-theoretic-security) and [weird machines](#weird-machines).
 
 ## The Chomsky hierarchy
 
 In 1956 Noam Chomsky sorted formal languages into four classes by power: regular, context-free, context-sensitive and unrestricted. Each class needs a stronger machine to recognize it: a finite automaton, a pushdown automaton (a finite machine plus a stack), a bounded Turing machine and a full Turing machine. It exists to answer a practical question: *how much machine does this notation need?* A regular expression, in the classic sense, cannot check that brackets are balanced, because that needs a stack. Real regex engines go beyond the classic class. .NET's balancing groups in [`regex-dotnet`](../../src/regex-dotnet/README.md) give the engine a stack of captures, and that is exactly the extra power.
 
 - **Use it when:** you choose a parsing tool, or you wonder whether a pattern can do the job.
-- **Avoid:** parsing nested formats such as HTML with a plain regular expression.
+- **Avoid it when:** you need to parse nested formats such as HTML with a plain regular expression.
 
 **Read more:**
 
@@ -25,7 +25,7 @@ In 1956 Noam Chomsky sorted formal languages into four classes by power: regular
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | That a regex can use a stack to count. |
 
 ## Regular expressions
 
@@ -45,15 +45,15 @@ A regular expression is a compact pattern for a set of strings. Stephen Kleene d
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`awk`](../../src/awk/README.md) | AWK | demonstrates | Portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream. |
+| [`awk`](../../src/awk/README.md) | AWK | demonstrates | That portable AWK can build records out of fields and stream its output through a pipe, with arrays and parameter-local variables for state. |
 | [`awk-weird`](../../src/awk-weird/README.md) | AWK | demonstrates | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
-| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | That `while()` and a regex can form a tiny register machine. |
 | [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | demonstrates | That a line editor is a rewriting machine: lines are the data, addresses are the program, and a failed substitution inside a global command is an "if". |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | That a regex can use a stack to count. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | That regex callouts can serve as a tiny instruction set. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | That program exit codes can steer control flow. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | That Perl can execute code during a regex match. |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 
 ## Parsing
@@ -61,7 +61,7 @@ A regular expression is a compact pattern for a set of strings. Stephen Kleene d
 Parsing turns text into structure, following a grammar. It exists because programs and data arrive as flat text, and the computer needs a tree. There are hand-written *recursive descent* parsers and generated ones. Every XML, JSON or programming-language tool has one. JSON is a good example of a format whose grammar is written down exactly (RFC 8259). Parsing is also where input becomes dangerous, because it is the first code that touches untrusted data. Two entries show a parser that does more than read. [`forth-weird`](../../src/forth-weird/README.md)'s text interpreter parses a word and runs it at once, so the program can move its own parse position. [`xaml`](../../src/xaml/README.md)'s parser builds objects *and calls methods* while it reads the file.
 
 - **Use it when:** you accept any structured input. Use a real parser and a real grammar.
-- **Avoid:** ad hoc parsing with `split` and regular expressions for nested formats, and parsers that also act on what they read.
+- **Avoid it when:** a shortcut with `split` or a regular expression would miss nested structure. Keep effects separate from parsing.
 
 **Read more:**
 
@@ -74,9 +74,9 @@ Parsing turns text into structure, following a grammar. It exists because progra
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | demonstrates | That the text interpreter's parse position is a program counter, if you let it be, and that the data stack can be a program's only memory. |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | That a regex can use a stack to count. |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |
 
 ## Term and string rewriting
 
@@ -129,7 +129,7 @@ The important arrow is the one that goes back. The expander does not just print 
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`lisp`](../../src/lisp/README.md) | Common Lisp | demonstrates | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
+| [`lisp`](../../src/lisp/README.md) | Common Lisp | demonstrates | That Common Lisp `LOOP` can express a whole algorithm as clauses for counting, drawing, summing, collecting and stopping. |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | demonstrates | That CLOS method combination is a control-flow construct: a class hierarchy is a loop, and `or` is a stop rule. |
 | [`m4`](../../src/m4/README.md) | m4 | demonstrates | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
 
@@ -138,7 +138,7 @@ The important arrow is the one that goes back. The expander does not just print 
 Declarative programming says *what* you want, not *how* to get it. SQL, HTML, CSS, Make, regular expressions and AWK's pattern column are all declarative. It exists because a tool that knows the goal can choose the method: a database picks the query plan, and `make` picks the build order. The trap is the belief that "declarative" means "harmless". When a declarative notation can name a function and give it arguments, it is one step from being a program. XAML's `ObjectDataProvider` and Make's `include` are examples, and [`xaml`](../../src/xaml/README.md) and [`make-gnu`](../../src/make-gnu/README.md) show where that step leads.
 
 - **Use it when:** the task is a query, a configuration or a build. Let the tool optimize.
-- **Avoid:** assuming a declarative file is safe to load from anyone. Check what it is allowed to call.
+- **Avoid it when:** you cannot control what an untrusted file can call. Check what it is allowed to call.
 
 **Read more:**
 
@@ -149,16 +149,16 @@ Declarative programming says *what* you want, not *how* to get it. SQL, HTML, CS
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`awk`](../../src/awk/README.md) | AWK | demonstrates | Portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream. |
+| [`awk`](../../src/awk/README.md) | AWK | demonstrates | That portable AWK can build records out of fields and stream its output through a pipe, with arrays and parameter-local variables for state. |
 | [`awk-weird`](../../src/awk-weird/README.md) | AWK | demonstrates | That a regular expression as the record separator turns a stream of random bytes into dice, and that awk's implicit main loop plus one pattern is a whole program. |
 | [`cobol`](../../src/cobol/README.md) | COBOL | demonstrates | That a stop rule can be declared as data, and that a number's picture can do your rounding. |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | That C# query syntax can express the computation and order its effects. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | That GNU Make can do arithmetic and loop in its own syntax, without a shell for either. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |
 
 ## Domain-specific languages
 
-A domain-specific language (DSL) is a small language for one kind of job. SQL is for queries, regular expressions for patterns, Make for builds, AWK for records, LINQ query syntax for collections. It exists because a tool that speaks the vocabulary of the problem is shorter, easier to read and often safer than general code. There is a classic danger. Users ask for variables, then conditions, then loops, and the DSL grows into a general language by accident, with fewer tools and worse error messages. Programmers call this the *inner-platform effect*. Most entries here are DSLs that crossed that line, which is why they were fun to write.
+A domain-specific language (DSL) is a small language for one kind of job. SQL is for queries, regular expressions for patterns, Make for builds, AWK for records, LINQ query syntax for collections. It exists because a tool that speaks the vocabulary of the problem is shorter, easier to read and often safer than general code. There is a classic danger. Users ask for variables, then conditions, then loops and the DSL grows into a general language by accident, with fewer tools and worse error messages. Programmers call this the *inner-platform effect*. Most entries here are DSLs that crossed that line, which is why they were fun to write.
 
 - **Use it when:** the domain has a stable vocabulary and many people use it.
 - **Avoid it when:** a library in a normal language does the same job. If your DSL needs loops, think again about embedding it in a general language.
@@ -172,13 +172,13 @@ A domain-specific language (DSL) is a small language for one kind of job. SQL is
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`awk`](../../src/awk/README.md) | AWK | demonstrates | Portable, idiomatic AWK: functions with local variables in the parameter list, arrays, fields as a record builder, and a pipe as an output stream. |
-| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
+| [`awk`](../../src/awk/README.md) | AWK | demonstrates | That portable AWK can build records out of fields and stream its output through a pipe, with arrays and parameter-local variables for state. |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | That `while()` and a regex can form a tiny register machine. |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |
-| [`lisp`](../../src/lisp/README.md) | Common Lisp | demonstrates | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | That C# query syntax can express the computation and order its effects. |
+| [`lisp`](../../src/lisp/README.md) | Common Lisp | demonstrates | That Common Lisp `LOOP` can express a whole algorithm as clauses for counting, drawing, summing, collecting and stopping. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | That regex callouts can serve as a tiny instruction set. |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 
 ## Markup languages
@@ -186,7 +186,7 @@ A domain-specific language (DSL) is a small language for one kind of job. SQL is
 A markup language is text with annotations that describe its structure: HTML, XML, Markdown, XAML. It exists so that people and tools can share one document, and so that content stays separate from presentation. XAML describes a tree of user-interface objects, and a loader creates the objects. The danger is a format that can name *types* and *methods*. Then loading a file means running code chosen by the file's author. That is the idea behind many deserialization attacks, and it is exactly what [`xaml`](../../src/xaml/README.md) does on purpose: all the behavior of that program lives in one markup file and runs while the file is parsed.
 
 - **Use it when:** you describe documents or data that both humans and tools must read.
-- **Avoid:** letting a document choose arbitrary types or call arbitrary methods. Use an allowlist.
+- **Avoid it when:** an untrusted document can choose arbitrary types or call arbitrary methods. Use an allowlist.
 
 **Read more:**
 
@@ -199,8 +199,8 @@ A markup language is text with annotations that describe its structure: HTML, XM
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | That a `for` statement with no body can drive runtime XAML, LINQ to Objects, EF Core and WPF animation. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |
 
 ## Build automation
 
@@ -233,15 +233,15 @@ The tool compares file dates along the arrows. `source.tc` is newer than `stage-
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | `while()` plus regex as a tiny register machine. |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`cmake`](../../src/cmake/README.md) | CMake | demonstrates | That `while()` and a regex can form a tiny register machine. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | demonstrates | That GNU Make can do arithmetic and loop in its own syntax, without a shell for either. |
 
 ## Language-theoretic security
 
-Language-theoretic security (LangSec) is a way of thinking about security. Every input format is a formal language, and the code that reads it is that language's recognizer. Many attacks work because two parsers read the same bytes differently, or because the input language is so powerful that no one can say what it will do. The advice follows from that: keep formats simple (see [Turing completeness](02-what-counts-as-a-machine.md#turing-completeness)), parse completely *before* acting, and use one well-tested parser. It also criticizes the old "robustness principle", *be liberal in what you accept*, because being liberal creates more meanings for the same bytes. The IETF has revisited that principle too.
+Language-theoretic security (LangSec) is a way of thinking about security. Every input format is a formal language, and the code that reads it is that language's recognizer. Many attacks work because two parsers read the same bytes differently, or because the input language is so powerful that no one can say what it will do. The advice follows from that: keep formats simple (see [Turing completeness](02-what-counts-as-a-machine.md#turing-completeness)), parse completely *before* acting and use one well-tested parser. It also criticizes the old "robustness principle", *be liberal in what you accept*, because being liberal creates more meanings for the same bytes. The IETF has revisited that principle too.
 
 - **Use it when:** you design a file format, a protocol or an API, or you review code that reads input.
-- **Avoid:** accepting "almost valid" input, and mixing parsing with processing.
+- **Avoid it when:** the design would require accepting "almost valid" input or mixing parsing with processing.
 
 **Read more:**
 
@@ -254,7 +254,7 @@ Language-theoretic security (LangSec) is a way of thinking about security. Every
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |
 
 ## Weird machines
 
@@ -277,7 +277,7 @@ Language-theoretic security (LangSec) is a way of thinking about security. Every
 | [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |
 
 ## Category theory
 
@@ -324,13 +324,13 @@ This book uses the ideas where an entry gives them something real to hold. [`has
 | --- | --- | --- | --- |
 | [`haskell`](../../src/haskell/README.md) | Haskell | analogy | That a lazy list and one `span` are the whole stop rule. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | analogy | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | analogy | LINQ method chains, end to end. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | analogy | That a chain of LINQ methods can express the entire program. |
 
 ## Interpreters and virtual machines
 
 An **interpreter** reads a program as data and does what it says, step by step. A **virtual machine** is an interpreter for a small, fixed instruction set. Both are the same trick: a *representation* (text, records, bytes) plus a *program that gives it behavior*. Take the interpreter away and the representation is only data.
 
-Several entries are interpreters in small. In [`tar-gnu`](../../src/tar-gnu/README.md) the program is the members of a tar archive, and a dispatcher of about 80 lines gives four record types their meaning. It checks every record against a strict grammar and refuses an unknown one. In [`tcl-weird`](../../src/tcl-weird/README.md) Tcl source is stored in SQLite rows, and an overridden `unknown` command fetches and runs it. In [`xaml`](../../src/xaml/README.md) the parser that loads a document is the interpreter that runs it. In [`regex-pcre2`](../../src/regex-pcre2/README.md) callout strings are opcodes, and a bodiless C function is the dispatcher. In [`ex-weird`](../../src/ex-weird/README.md) Ex is the interpreter and a register of text is the program, which the program rewrites and runs again. The question to ask of each is the same: what is the representation, what is the interpreter, and who chose to run the one with the other?
+Several entries are interpreters in small. In [`tar-gnu`](../../src/tar-gnu/README.md) the program is the members of a tar archive, and a dispatcher of about 80 lines gives four record types their meaning. It checks every record against a strict grammar and refuses an unknown one. In [`tcl-weird`](../../src/tcl-weird/README.md) Tcl source is stored in SQLite rows, and an overridden `unknown` command fetches and runs it. In [`xaml`](../../src/xaml/README.md) the parser that loads a document is the interpreter that runs it. In [`regex-pcre2`](../../src/regex-pcre2/README.md) callout strings are opcodes, and a bodiless C function is the dispatcher. In [`ex-weird`](../../src/ex-weird/README.md) Ex is the interpreter and a register of text is the program, which the program rewrites and runs again. The question to ask of each is the same: what is the representation, what is the interpreter and who chose to run the one with the other?
 
 - **Use it when:** a program is easier to change as data than as code, or you want a small, safe language for others to write in.
 - **Avoid it when:** the data comes from someone you do not trust and the interpreter is general. A strict grammar and a fixed set of instructions are what keep a data format from becoming a way in.
@@ -345,7 +345,7 @@ Several entries are interpreters in small. In [`tar-gnu`](../../src/tar-gnu/READ
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
 | [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | demonstrates | That an editor's registers can hold a program: a line of text is copied into a register and run with @, and the editor's own marks and line addresses do the arithmetic. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | That regex callouts can serve as a tiny instruction set. |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | demonstrates | That Tcl code is just strings, so it can live in a database and be fetched, defined and run on demand, with SQLite triggers as the control flow. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |

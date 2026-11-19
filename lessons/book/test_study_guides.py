@@ -191,6 +191,10 @@ class Mutations(unittest.TestCase):
         self.edit_guide(lambda s: s.replace("DEMO ONLY", "demo", -1))
         self.assertProblem("safety model")
 
+    def test_shared_challenge_paragraph_must_use_standard_wording(self):
+        self.edit_guide(lambda s: s.replace("first card that takes the total over 40", "card that makes the total exceed 40", 1))
+        self.assertProblem("must start with the standard paragraph")
+
     def test_exactly_40_must_be_stated(self):
         self.edit_guide(lambda s: s.replace("exactly 40", "forty", -1))
         self.assertProblem("exactly 40")

@@ -11,9 +11,9 @@ When you finish, you should be able to:
 3. Explain how a macro moves the repetition from run time to compile time.
 4. Trace both programs through the same three cards.
 5. Say why five is the most cards the weird program can deal, and what you would change to raise that.
-6. Label each behavior as guaranteed, implementation-permitted, or accidentally exploited.
+6. Label each behavior as guaranteed, implementation-permitted or accidentally exploited.
 
-Scope limits. You need to read Lisp syntax and know what a class and a method are. The guide does not teach the whole of CLOS, the reader macros beyond the one circular list, or the SQL. It uses SBCL 2.x (`sbcl --script`). The book's page is [Common Lisp](../../languages/lisp.md). For the ideas, see [Short-circuit evaluation](../../cs/04-evaluation-and-demand.md#short-circuit-evaluation) and [Control flow](../../cs/03-control-flow-and-continuations.md#control-flow).
+**Scope limits.** You need to read Lisp syntax and know what a class and a method are. The guide does not teach the whole of CLOS, the reader macros beyond the one circular list or the SQL. It uses SBCL 2.x (`sbcl --script`). The book's page is [Common Lisp](../../languages/lisp.md). For the ideas, see [Short-circuit evaluation](../../cs/04-evaluation-and-demand.md#short-circuit-evaluation) and [Control flow](../../cs/03-control-flow-and-continuations.md#control-flow).
 
 ## Before you begin
 
@@ -26,7 +26,7 @@ sandbox/container/run-image.sh src/lisp-weird
 
 Edit only copies ([Running things safely](../../exercises.md#running-things-safely)). Your numbers will differ from the ones printed here; the structure will not.
 
-**Prediction rule.** Before each run, write down which methods will run, in what order, and what the method that stops the chain returns.
+**Prediction rule.** Before each run, write down which methods will run, in what order and what the method that stops the chain returns.
 
 **Vocabulary.**
 
@@ -35,12 +35,12 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 | Generic function | A function whose code is a set of *methods*, chosen by the classes of the arguments. |
 | Class precedence list | The ordered list of a class and all its ancestors, most specific first. |
 | Method combination | The rule that says how the applicable methods are combined into one result. |
-| `or` combination | Run applicable methods most-specific-first, return the first non-`NIL` value, and stop. |
+| `or` combination | Run applicable methods most-specific-first, return the first non-`NIL` value and stop. |
 | `:around` method | A method that wraps the others and decides when they run, via `call-next-method`. |
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
 Both Lisp entries save the cards in one SQLite transaction and print a summary. Lisp writes the boundary as `(> total 40)`: false for 40. In the `LOOP` the test is `until (> total +limit+)` and comes *after* `collect`, which is why the crossing card is kept ([L39-46](../../../src/lisp/timecards.lisp#L39-L46)). In the weird program each method ends with `(> (total ledger) 40)`, and the method that returns true stops the chain ([L84](../../../src/lisp-weird/timecards.lisp#L84)).
 
@@ -127,7 +127,7 @@ Debugging	12	46	DEMO ONLY
 
 Five methods were applicable, and three ran. The crossing card is the method that returned true, so it has already dealt its card.
 
-**`lisp`: the `LOOP` clauses.** Each pass: `number` increases from 1, `hours` is drawn, `total` accumulates it, the card is collected, and *then* `until` tests. With 15, 19, 12 the totals are 15, 34, 46, and the test is true after the third pass. The collected list is the three cards in order. Because `until` is after `collect`, the third card is already on the list when the loop ends.
+**`lisp`: the `LOOP` clauses.** Each pass: `number` increases from 1, `hours` is drawn, `total` accumulates it, the card is collected and *then* `until` tests. With 15, 19, 12 the totals are 15, 34, 46, and the test is true after the third pass. The collected list is the three cards in order. Because `until` is after `collect`, the third card is already on the list when the loop ends.
 
 **Exactly 40.** With four 10-hour cards the totals are 10, 20, 30 and 40, and no method returns true. `card-5` is applicable and runs, because it is the last link. Its total is at least 50, so it returns true. The chain has exactly enough methods for the worst case, which is why the program has five classes.
 
@@ -156,17 +156,17 @@ A macro does the repetition at compile time. `defcard` is expanded five times as
 
 The one-sentence answer the book asks for in B10 is the best test: *which single word is the stop rule, and why does removing it not make the program fail?* The word is `or`. Without it the methods still run, and a program that deals too many cards looks like a program that works.
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| Applicable methods run in class-precedence order, most specific first | **Guaranteed** | Defined by ANSI Common Lisp. |
-| The built-in `or` method combination returns the first non-`NIL` value and skips the rest | **Guaranteed** | A standard method combination. Verified: cards 4 and 5 did not run. |
-| A method qualified `or` on a generic function using `progn` is invalid | **Guaranteed** | The standard requires qualifiers to match the combination. SBCL warns, as B10 step 2 shows. |
-| `#1=(... . #1#)` reads a circular list, so `(nth 4 *week*)` is Meetings again | **Guaranteed** | Standard reader syntax. The program does not modify the literal, which would be undefined. |
-| `make-random-state t` seeds from the operating system | **Guaranteed** that the state is randomly initialized | The exact source is implementation-defined. |
-| `sb-mop:compute-applicable-methods`, `sb-ext:run-program`, `sb-ext:posix-getenv` | **Implementation-permitted** | SBCL-specific names. They are why the programs need SBCL, not just any Common Lisp. |
-| Five classes are enough because five cards of 10 hours reach 50 | **Guaranteed** | Arithmetic, not Lisp. The class count is a *bound*. |
+| Applicable methods run in class-precedence order, most specific first | **guaranteed** | Defined by ANSI Common Lisp. |
+| The built-in `or` method combination returns the first non-`NIL` value and skips the rest | **guaranteed** | A standard method combination. Verified: cards 4 and 5 did not run. |
+| A method qualified `or` on a generic function using `progn` is invalid | **guaranteed** | The standard requires qualifiers to match the combination. SBCL warns, as B10 step 2 shows. |
+| `#1=(... . #1#)` reads a circular list, so `(nth 4 *week*)` is Meetings again | **guaranteed** | Standard reader syntax. The program does not modify the literal, which would be undefined. |
+| `make-random-state t` seeds from the operating system | **guaranteed** that the state is randomly initialized | The exact source is implementation-defined. |
+| `sb-mop:compute-applicable-methods`, `sb-ext:run-program`, `sb-ext:posix-getenv` | **implementation-permitted** | SBCL-specific names. They are why the programs need SBCL, not just any Common Lisp. |
+| Five classes are enough because five cards of 10 hours reach 50 | **guaranteed** | Arithmetic, not Lisp. The class count is a *bound*. |
 
 No behavior is merely accidentally exploited here: the weird entry uses documented features exactly as documented, in an order nobody would choose.
 
@@ -188,7 +188,7 @@ No behavior is merely accidentally exploited here: the weird entry uses document
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** In `lisp-weird`, hours are 11, 12, 10, 14. How many methods run, and what does each return? *(Four methods. Totals 11, 23, 33, 47. Cards 1, 2 and 3 return `NIL`, and card 4 returns `T`. `card-5` does not run.)*
 2. **Explain.** Why must `defcard` be called for card 5 first and for card 1 last? *(A class must exist before another can inherit from it, and card 1 inherits from card 2, and so on. The chain is built from the tail.)*

@@ -11,13 +11,13 @@ When you finish, you should be able to:
 3. Find the *interpreter* of a data format in a program: the component that turns bytes into effects.
 4. Name the trust boundary in `xaml`, `tar-gnu`, `tcl-weird`, `regex-perl` and `find-gnu`, and say what would break it.
 5. Explain why reading the program next to its ordinary sibling shows the cost of the stunt.
-6. Label each claim you make about a program as guaranteed, implementation-permitted, or accidentally exploited, and say what evidence supports it.
+6. Label each claim you make about a program as guaranteed, implementation-permitted or accidentally exploited, and say what evidence supports it.
 
-Scope limits. This guide is about *reading and running safely*. It is not a security course: it does not teach exploit development, threat modeling in depth, or sandbox internals. Its source chapter is [How to read an adversarial program](../../cs/01-reading-an-adversarial-program.md). For each entry's details, follow the links to the language guides.
+**Scope limits.** This guide is about *reading and running safely*. It is not a security course: it does not teach exploit development, threat modeling in depth or sandbox internals. Its source chapter is [How to read an adversarial program](../../cs/01-reading-an-adversarial-program.md). For each entry's details, follow the links to the language guides.
 
 ## Before you begin
 
-**Safety model.** The cards are fictional **DEMO ONLY** data. The examples use local scratch storage and have no connection to a real time-reporting system. That is a promise about the *data*. It is not a promise about the *code*, which starts processes, runs shells and parses its own input. So every entry is treated as untrusted until someone has read and understood it, and it is run in the sandbox first. From the repository root, with [`SANDBOX-SETUP.md`](../../../SANDBOX-SETUP.md) done:
+**Safety model.** The cards are fictional **DEMO ONLY** data. The examples use local scratch storage and have no connection to a real time-reporting system. That is a promise about the *data*. It is not a promise about the *code*, which starts processes, runs shells and parses its own input. So every entry is treated as untrusted until someone has read and understood it, and it is run it in the sandbox first. From the repository root, with [`SANDBOX-SETUP.md`](../../../SANDBOX-SETUP.md) done:
 
 ```bash
 sandbox/container/run-image.sh src/tar-gnu
@@ -27,7 +27,7 @@ The supported runners are `sandbox/container/run-image.sh <folder>`, `sandbox/ru
 
 Work on a copy for any experiment. Output is random, so compare properties, not numbers.
 
-**Prediction rule.** Before running anything, write: what files will it touch, what processes will it start, and what in its *input* can make it do something it would not do otherwise. Then run it and compare.
+**Prediction rule.** Before running anything, write: what files will it touch, what processes will it start and what in its *input* can make it do something it would not do otherwise. Then run it and compare.
 
 **Vocabulary.**
 
@@ -40,7 +40,9 @@ Work on a copy for any experiment. Output is random, so compare properties, not 
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) gives the reader an expected result: 10 to 19 hours per card, categories cycling, and the first card over 40 kept. A total of exactly 40 continues. For a conforming run, expect 3 to 5 cards and 41 to 59 hours. The two LINQ demos use a fixed work week, and XAML can reach 40 with no remaining pass. Storage and summaries differ by entry.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
+
+The two LINQ demos use a fixed work week. XAML can reach 40 with no remaining pass. Storage and summaries differ by entry.
 
 The small expected result gives you a way to test your reading. The shared checker `lessons/tools/check-demo.sh` tests the shape of a conforming report. Individual checks can give evidence about effects beyond the report, such as which records the tar interpreter accepts.
 
@@ -102,22 +104,22 @@ Read the weird program next to its ordinary sibling. The difference shows exactl
 
 | Exercise | Predict first | What the evidence shows |
 | --- | --- | --- |
-| [B16. tar: read the program, then run it](../../exercises.md#b16-tar-read-the-program-then-run-it-verified) | Add a member that is not in the instruction set. What are the exit statuses, and does a `pwned` file appear? | The inspector refuses (`REFUSE (unknown record type)`, exit 4), the interpreter runs nothing, and no file appears. Reading and running were different acts, and the trust boundary was the operator's decision. |
+| [B16. tar: read the program, then run it](../../exercises.md#b16-tar-read-the-program-then-run-it-verified) | Add a member that is not in the instruction set. What are the exit statuses, and does a `pwned` file appear? | The inspector refuses (`REFUSE (unknown record type)`, exit 4), the interpreter runs nothing and no file appears. Reading and running were different acts, and the trust boundary was the operator's decision. |
 | [B13. AWK: the missing RT](../../exercises.md#b13-awk-the-missing-rt-verified) | Run the unmodified program under `mawk` on a finite file. | `# committed total=0 entries=0`, no error, exit 0. mawk has no `RT`, so every record is skipped. "Portable-looking" code can fail *silently* on the wrong implementation. |
 | [B14. find: rig the dice](../../exercises.md#b14-find-rig-the-dice-verified) | Put a fake `mktemp` first on `PATH`. What changes? | The dice are rigged: with name `xxxxxS`, every card has 19 hours. A program that finds its tools through `PATH` takes whatever is first on it. |
 | [F2. Trojan Source](../../exercises.md#f2-trojan-source-hide-a-character-then-find-it-verified) | A zero-width space after `admin`: what does `node` print? | `false`. The string has a character you cannot see. The scan finds it and the bytes show it. |
 | [F. Prove a README claim](../../exercises.md#f-prove-a-readme-claim-verified) | What test would fail if the claim were false? | A claim is evidence only with a negative control. |
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Claim about a program | Label | Why |
 | --- | --- | --- |
-| Reading an archive with `tar -xf` does not run its contents | **Guaranteed** | An archive is data. Only the command attached gives it an effect. |
-| `tar-gnu`'s dispatcher passes no part of a member to a shell | **Guaranteed** by design, tested | The entry's check enforces it. |
-| `XamlReader.Load` runs `ObjectDataProvider` methods during parsing | **Accidentally exploited** | A documented UI language, used as an interpreter. The XAML README classifies it so. |
-| GNU `awk`'s `RT` holds the text that matched `RS` | **Implementation-permitted** | gawk only. mawk has none, and B13 shows what happens. |
-| `unknown` runs whatever text is in the table | **Guaranteed** | Documented Tcl. Safe here only because the table is private. |
-| A script that writes to `/dev/fd/3` writes to whatever is on fd 3 | **Guaranteed** | Operating-system behavior. The entry assumes its wrapper opened a pipe there. |
+| Reading an archive with `tar -xf` does not run its contents | **guaranteed** | An archive is data. Only the command attached gives it an effect. |
+| `tar-gnu`'s dispatcher passes no part of a member to a shell | **guaranteed** by design, tested | The entry's check enforces it. |
+| `XamlReader.Load` runs `ObjectDataProvider` methods during parsing | **accidentally exploited** | A documented UI language, used as an interpreter. The XAML README classifies it so. |
+| GNU `awk`'s `RT` holds the text that matched `RS` | **implementation-permitted** | gawk only. mawk has none, and B13 shows what happens. |
+| `unknown` runs whatever text is in the table | **guaranteed** | Documented Tcl. Safe here only because the table is private. |
+| A script that writes to `/dev/fd/3` writes to whatever is on fd 3 | **guaranteed** | Operating-system behavior. The entry assumes its wrapper opened a pipe there. |
 
 **Costs to state.**
 
@@ -129,21 +131,21 @@ Read the weird program next to its ordinary sibling. The difference shows exactl
 
 ## Connections across the repository
 
-- **Parsing as running.** [C#, LINQ, XAML, and ports](../languages/csharp-linq-xaml-and-ports.md) shows the XAML case.
+- **Parsing as running.** [C#, LINQ, XAML and ports](../languages/csharp-linq-xaml-and-ports.md) shows the XAML case.
 - **Authority from the command.** [tar](../languages/tar.md) is the repository's cleanest example.
 - **Code in a table.** [Tcl](../languages/tcl.md) and [APL](../languages/apl.md) both store code as text.
 - **Code in a pattern.** [Regex engines and sed](../languages/regex-engines-and-sed.md) runs Perl and C inside a match, and includes the `/dev/fd/3` hazard.
-- **State and control, and the comparison.** [State and control beyond variables](state-and-control-beyond-variables.md), [Effects, errors, and commitment](effects-errors-and-commitment.md) and [Comparative machine design](comparative-machine-design.md).
+- **State and control, and the comparison.** [State and control beyond variables](state-and-control-beyond-variables.md), [Effects, errors and commitment](effects-errors-and-commitment.md) and [Comparative machine design](comparative-machine-design.md).
 - **In the book.** [How to read an adversarial program](../../cs/01-reading-an-adversarial-program.md), including [Arbitrary code execution](../../cs/01-reading-an-adversarial-program.md#arbitrary-code-execution), [Principle of least privilege](../../cs/01-reading-an-adversarial-program.md#principle-of-least-privilege) and [Capability and authority](../../cs/01-reading-an-adversarial-program.md#capability-and-authority).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
-1. **Trace.** For an archive whose members are `000.begin`, `010.card`, `011.stop-over`, `025.exec`, `990.show`, which acts happen under `inspect.sh`, and which under `interpret.sh --execute`? *(The inspector reads and decodes all five and refuses `025.exec` with exit 4. The interpreter runs the inspector first, sees the refusal, and runs nothing. No member is executed.)*
+1. **Trace.** For an archive whose members are `000.begin`, `010.card`, `011.stop-over`, `025.exec`, `990.show`, which acts happen under `inspect.sh`, and which under `interpret.sh --execute`? *(The inspector reads and decodes all five and refuses `025.exec` with exit 4. The interpreter runs the inspector first, sees the refusal and runs nothing. No member is executed.)*
 2. **Explain.** Why is `tcl-weird` safe to run when `unknown` runs table text as code? *(The table is a `TEMP` table, built in memory by the program from literals, so nobody else can write to it. The boundary is the privacy of that table, not any check on the text.)*
-3. **Transfer.** You are asked to review a service that renders user-supplied templates. Which entries does it resemble, and what are your first three questions? *(It resembles `xaml` and `regex-perl`: a trusted engine reading attacker-influenced text. Ask: what can the template language call, who can write a template, and what authority does the renderer run with?)*
-4. **Evidence.** A colleague says "`tar-gnu` never runs anything from an archive that is not one of five record types." Design a test that could fail, and say what the negative control is. *(Build archives with an unknown member and a malformed body, run `interpret.sh --execute`, and check exit 4 and an untouched database. The control is a valid archive, which must run. The claim is guaranteed by design and tested.)*
+3. **Transfer.** You are asked to review a service that renders user-supplied templates. Which entries does it resemble, and what are your first three questions? *(It resembles `xaml` and `regex-perl`: a trusted engine reading attacker-influenced text. Ask: what can the template language call, who can write a template and what authority does the renderer run with?)*
+4. **Evidence.** A colleague says, "`tar-gnu` never runs anything from an archive that is not one of five record types." Design a test that could fail. What is the negative control? *(Build archives with an unknown member and a malformed body, run `interpret.sh --execute` and check exit 4 and an untouched database. The control is a valid archive, which must run. The claim is guaranteed by design and tested.)*
 
 ## Further reading
 

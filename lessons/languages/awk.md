@@ -10,20 +10,20 @@ An awk program is a list of **pattern-action rules**, and the language runs them
 | --- | --- | --- |
 | Parameters as local variables | [`awk/timecards.awk` L14](../../src/awk/timecards.awk#L14): `function command_line(command,    line) {` | awk has no `local`. Extra parameters you do not pass are locals, by convention set apart by spaces. |
 | Quoting by splitting | [L23](../../src/awk/timecards.awk#L23) `shell_quote` | `split(text, parts, "'")` makes quoting a path for the shell safe without regex tricks. |
-| Assigning to a field rebuilds `$0` | [L44](../../src/awk/timecards.awk#L44) `print_row` | Set `OFS`, assign `$1 = $1`, and `$0` is rejoined with tabs. |
+| Assigning to a field rebuilds `$0` | [L44](../../src/awk/timecards.awk#L44) `print_row` | Set `OFS`, assign `$1 = $1` and `$0` is rejoined with tabs. |
 | A pipe is a file | [L84](../../src/awk/timecards.awk#L84): `print "BEGIN;" \| sqlite` | `print ... \| command` starts a process on first use; `close(command)` waits for it. |
 | A plain loop, in `BEGIN` | [L93](../../src/awk/timecards.awk#L93): `while (total <= LIMIT) {` | The straight entry uses awk as a scripting language, not as a record processor. |
 | `close()` is the error check | [L102](../../src/awk/timecards.awk#L102) | It returns the command's exit status in gawk and mawk, but `status * 256` in busybox and `0` in the one-true-awk. See below. |
 
-## 1. A portable awk (`awk`)
+## A portable awk (`awk`)
 
 The straight entry restricts itself to what POSIX awk guarantees, so it runs under gawk, mawk, the one-true-awk (BWK) and busybox awk. Its `check.sh` runs it under all four and lints it with `gawk --lint --posix`, which must be silent. This is the lesson: **portable awk is a real constraint**, and the four implementations disagree in small ways.
 
-- **`close()` of a pipe returns different numbers per awk.** gawk and mawk return the exit status, busybox returns the status times 256, and the one-true-awk build tested returned 0 regardless. The entry treats "non-zero" as failure and does not depend on the value.
+- **`close()` of a pipe returns different numbers per awk.** gawk and mawk return the exit status, busybox returns the status times 256 and the one-true-awk build tested returned 0 regardless. The entry treats "non-zero" as failure and does not depend on the value.
 - **`srand`/`rand` are seeded from `od -An -N4 -tu4 /dev/urandom`** ([L70-71](../../src/awk/timecards.awk#L70-L71)): POSIX awk has no entropy source, and `srand()` with no argument is seeded by the time, which repeats within a second.
 - **Function parameters must not share a name with a global** (`--lint` catches the shadowing).
 
-## 2. Records from a random byte stream (`awk-weird`)
+## Records from a random byte stream (`awk-weird`)
 
 ### Behold the monstrosity
 
@@ -68,7 +68,7 @@ Rule 3 assigns `$0`, which makes awk **re-split** the record into fields with `F
 - **A source of randomness can be any stream you slice.** Cutting a uniform byte stream at a class of bytes gives a uniform digit; no generator or seed is needed.
 - **Implementations differ exactly where the standard stops.** `RT` is a gawk extension, so this program is a lesson in which part of awk is the language and which is gawk.
 
-Tags: pattern-action rules, `BEGIN`/`END`, `$0` re-splitting, `getline` from a command and `exit` are **guaranteed** by POSIX. A multi-character `RS` as a regex is a **gawk extension** that mawk, the one-true-awk and busybox accept too. `RT`, `systime()` and `PROCINFO` are **gawk-only**. Reading `/dev/urandom` as a plain file is **implementation-permitted** (Linux/BSD).
+Tags: pattern-action rules, `BEGIN`/`END`, `$0` re-splitting, `getline` from a command and `exit` are **guaranteed** by POSIX. A multi-character `RS` as a regex is **implementation-permitted** (gawk, mawk, the one-true-awk and busybox accept it). `RT`, `systime()` and `PROCINFO` are gawk extensions (**implementation-permitted**). Reading `/dev/urandom` as a plain file is **implementation-permitted** (Linux/BSD).
 
 ### Do this in production and you're fired
 

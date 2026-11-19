@@ -39,11 +39,19 @@ SECTIONS = [
     "Trace one run",
     "Compare the ordinary and weird designs",
     "What the exercises demonstrate",
-    "Failure modes, costs, and boundaries",
+    "Failure modes, costs and boundaries",
     "Connections across the repository",
     "Self-check",
     "Further reading",
 ]
+
+SHARED_CHALLENGE = (
+    "The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 "
+    "to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours "
+    "to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A "
+    "total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming "
+    "runs finish with 3 to 5 cards and a total of 41 to 59 hours."
+)
 
 # The five questions every guide must answer, as bold lead-ins under "The machine to identify".
 FIVE_QUESTIONS = ["What repeats.", "Where state lives.", "What advances the next step.", "What stops it.", "What commits."]
@@ -288,6 +296,9 @@ def check_guide(rel, text, repo=None):
     shared = body.get("The shared challenge", "")
     if "DEMO ONLY" not in text or "sandbox" not in text.lower():
         add("must state the safety model: DEMO ONLY data and sandbox-first execution")
+    first_paragraph = re.split(r"\n\s*\n", shared.strip(), maxsplit=1)[0]
+    if " ".join(first_paragraph.split()) != SHARED_CHALLENGE:
+        add('"The shared challenge" must start with the standard paragraph, including the exactly 40 rule')
     if "exactly 40" not in shared:
         add("'The shared challenge' must say that a total of exactly 40 continues")
     for q in FIVE_QUESTIONS:

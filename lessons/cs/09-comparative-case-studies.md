@@ -6,18 +6,18 @@ For an advanced reading path with traces and experiments, see the [comparative m
 
 The [shared challenge](../intro.md#what-the-challenge-does) asks for fictional cards up to and including the first card that takes the total over 40, a local record of those cards and a result the reader can see. Some entries print to a terminal, others open a window. See [where entries differ](../intro.md#where-entries-differ) for fixed LINQ data, the four-pass XAML ceiling and persistence variations. Each section asks what plays a particular **role**, starting with what repeats.
 
-The tables are generated from the metadata at the top of each entry’s README. The README and executable source are where you can check the classification. Evaluation describes what drives the main computation. In the C# `for`, for example, an embedded deferred LINQ projection is consumed immediately by `Sum()` on each test of the loop condition. The final table lists every entry with its kind, evaluation strategy and weakest required assurance.
+The tables are generated from the metadata at the top of each entry's README. The README and executable source are where you can check the classification. Evaluation describes what drives the main computation. In the C# `for`, for example, an embedded deferred LINQ projection is consumed immediately by `Sum()` on each test of the loop condition. The final table lists every entry with its kind, evaluation strategy and weakest required assurance.
 
 ## An ordinary loop, used in an unusual place
 
-The loop is still a loop. What changes is *where* the work happens. In the C#, Java and Go entries the loop has an empty body, and the three clauses of the `for` header do everything. In [`cmake`](../../src/cmake/README.md) a `while()` condition runs a regex, and its captures are the registers. In [`cobol`](../../src/cobol/README.md) the condition is a named fact about the data (`OVER-FORTY`), and `PERFORM ... UNTIL` repeats until it is true. Forth, Lisp and Tcl use their ordinary loop words. Read these beside the others: they show what stays the same when the loop is honest. [`javascript`](../../src/javascript/README.md) is the original's bodiless `for` in Node.js: three clauses, an object literal for state, and a timer for the animation.
+The loop is still a loop. What changes is *where* the work happens. In the C#, Java and Go entries the loop has an empty body, and the three clauses of the `for` header do everything. In [`cmake`](../../src/cmake/README.md) a `while()` condition runs a regex, and its captures are the registers. In [`cobol`](../../src/cobol/README.md) the condition is a named fact about the data (`OVER-FORTY`), and `PERFORM ... UNTIL` repeats until it is true. Forth, Lisp and Tcl use their ordinary loop words. Read these beside the others: they show what stays the same when the loop is honest. [`javascript`](../../src/javascript/README.md) is the original's bodiless `for` in Node.js: three clauses, an object literal for state and a timer for the animation.
 
 **Entries:**
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
 | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | Three expression slots | Fields of one anonymous object | eager | guaranteed |
-| [`cmake`](../../src/cmake/README.md) | CMake | A register machine | `CMAKE_MATCH_1`..`5`, rebuilt every pass | eager | accidentally-exploited |
+| [`cmake`](../../src/cmake/README.md) | CMake | A register machine | `CMAKE_MATCH_1`..`5`, rebuilt every pass | eager | accidentally exploited |
 | [`cobol`](../../src/cobol/README.md) | COBOL |  |  | eager | guaranteed |
 | [`lisp`](../../src/lisp/README.md) | Common Lisp |  |  | eager | guaranteed |
 | [`forth`](../../src/forth/README.md) | Forth |  |  | eager | guaranteed |
@@ -45,7 +45,7 @@ There is no loop. There is a sequence that someone keeps asking for, and the pro
 
 ## Whole-array operations instead of steps
 
-Do it to all of them at once, then cut. [`apl`](../../src/apl/README.md) draws five random values (a bound that can never be too small), takes a running sum, and keeps the prefix whose total does not pass 40, plus the card that does. There is no loop and no counter. The cost is that the program computes more than it needs, and the reader needs to think in arrays.
+Do it to all of them at once, then cut. [`apl`](../../src/apl/README.md) draws five random values (a bound that can never be too small), takes a running sum and keeps the prefix whose total does not pass 40, plus the card that does. There is no loop and no counter. The cost is that the program computes more than it needs, and the reader needs to think in arrays.
 
 **Entries:**
 
@@ -61,14 +61,14 @@ The program is text, and repetition is rewriting it. [`regex-sed`](../../src/reg
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
-| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | A string-rewriting machine with line addresses | The editor buffer: one line per card, and marks (x) that are added by joining lines | rewriting | accidentally-exploited |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | A dependency graph that can restart itself | Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | declarative | accidentally-exploited |
-| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | A string-rewriting system (a Markov algorithm) | One line of text, rewritten until no rule applies | rewriting | accidentally-exploited |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | A string-rewriting machine with line addresses | The editor buffer: one line per card, and marks (x) that are added by joining lines | rewriting | accidentally exploited |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | A dependency graph that can restart itself | Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | declarative | accidentally exploited |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | A string-rewriting system (a Markov algorithm) | One line of text, rewritten until no rule applies | rewriting | accidentally exploited |
 | [`m4`](../../src/m4/README.md) | m4 | A text-rescanning machine | The input stream: whatever macro text has not been read yet | rewriting | implementation-permitted |
 
 ## Control flow that rewrites itself
 
-The program changes where it goes next. [`cobol-weird`](../../src/cobol-weird/README.md) uses `ALTER` to rewire a `GO TO`. [`forth-weird`](../../src/forth-weird/README.md) moves `>in`, the text interpreter's parse position, backward to run the same words again. [`apl-weird`](../../src/apl-weird/README.md) reads its own source with `⎕CR`, rewrites it, and defines the new function with `⎕FX`: each step makes its own successor. This is the most dangerous role in the book. It is also the clearest picture of what a program counter really is. [`ex-weird`](../../src/ex-weird/README.md) copies a line of data from a tape into a register and runs it. On the tape the instruction is `@a` (run the program again) or a comment (stop), so the program reads its next step out of the data.
+The program changes where it goes next. [`cobol-weird`](../../src/cobol-weird/README.md) uses `ALTER` to rewire a `GO TO`. [`forth-weird`](../../src/forth-weird/README.md) moves `>in`, the text interpreter's parse position, backward to run the same words again. [`apl-weird`](../../src/apl-weird/README.md) reads its own source with `⎕CR`, rewrites it and defines the new function with `⎕FX`: each step makes its own successor. This is the most dangerous role in the book. It is also the clearest picture of what a program counter really is. [`ex-weird`](../../src/ex-weird/README.md) copies a line of data from a tape into a register and runs it. On the tape the instruction is `@a` (run the program again) or a comment (stop), so the program reads its next step out of the data.
 
 **Entries:**
 
@@ -78,12 +78,12 @@ The program changes where it goes next. [`cobol-weird`](../../src/cobol-weird/RE
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | A program whose jump targets are mutable | The target of one `GO TO` | eager | implementation-permitted |
 | [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | A register machine whose registers are editor marks, and whose program is a register that runs itself | The marks (where we are on a tape of numbered lines), the first line of the buffer (the next card), and registers a, d and n | eager | implementation-permitted |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | A stack machine with a movable instruction pointer | The data stack and the parse position `>in` | eager | implementation-permitted |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | A tree walk that grows the tree it is walking, with find itself reading the depth and the clock | The path from the start directory to the directory being visited; its depth is the running total | declarative | accidentally-exploited |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | A tree walk that grows the tree it is walking | The path from the start directory to the directory being visited | declarative | accidentally-exploited |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | A tree walk that grows the tree it is walking, with find itself reading the depth and the clock | The path from the start directory to the directory being visited; its depth is the running total | declarative | accidentally exploited |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | A tree walk that grows the tree it is walking | The path from the start directory to the directory being visited | declarative | accidentally exploited |
 
 ## Regex search with side effects and deliberate failure
 
-[`regex-perl`](../../src/regex-perl/README.md), [`regex-pcre2`](../../src/regex-pcre2/README.md) and [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) use one match to drive callbacks or embedded code. The actions build the result outside the matcher. Each pattern eventually forces the match to fail, and completed writes can survive that failure. Perl’s localized variables unwind on backtracking, while PCRE2 callouts keep their state in the C host or in external helpers.
+[`regex-perl`](../../src/regex-perl/README.md), [`regex-pcre2`](../../src/regex-pcre2/README.md) and [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) use one match to drive callbacks or embedded code. The actions build the result outside the matcher. Each pattern eventually forces the match to fail, and completed writes can survive that failure. Perl's localized variables unwind on backtracking, while PCRE2 callouts keep their state in the C host or in external helpers.
 
 **Entries:**
 
@@ -95,7 +95,7 @@ The program changes where it goes next. [`cobol-weird`](../../src/cobol-weird/RE
 
 ## Regex search that returns captures
 
-[`regex-dotnet`](../../src/regex-dotnet/README.md) spends tokens from a capture stack as it matches unary hours. An empty budget prevents another card from starting, so the match can succeed with the prefix that includes the crossing card. The host reads that match’s captures to build a TSV report. A failed match exposes no captures, so the same tape with a final failure assertion produces zero cards.
+[`regex-dotnet`](../../src/regex-dotnet/README.md) spends tokens from a capture stack as it matches unary hours. An empty budget prevents another card from starting, so the match can succeed with the prefix that includes the crossing card. The host reads that match's captures to build a TSV report. A failed match exposes no captures, so the same tape with a final failure assertion produces zero cards.
 
 **Entries:**
 
@@ -129,14 +129,14 @@ The input is the loop. AWK reads one record at a time and runs every pattern-act
 
 ## Document order is the program
 
-The order of the document is the order of the program. [`xaml`](../../src/xaml/README.md) has no code behind it. The XAML parser builds objects in the order it reads them, and several of those objects call methods as they are made. Four unrolled passes replace the loop, "carrier" arrays are the variables, and SQL or `DataTable` expressions make the decisions. The program is the markup file, and it runs while the file is parsed. [`tar-gnu`](../../src/tar-gnu/README.md) is the same idea with a tape instead of a markup file: the members of a tar archive are the instructions, and the order of the archive is the order of the program.
+The order of the document is the order of the program. [`xaml`](../../src/xaml/README.md) has no code behind it. The XAML parser builds objects in the order it reads them, and several of those objects call methods as they are made. Four unrolled passes replace the loop, "carrier" arrays are the variables and SQL or `DataTable` expressions make the decisions. The program is the markup file, and it runs while the file is parsed. [`tar-gnu`](../../src/tar-gnu/README.md) is the same idea with a tape instead of a markup file: the members of a tar archive are the instructions, and the order of the archive is the order of the program.
 
 **Entries:**
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | A tape reader (tar) feeding a five-word interpreter | The archive's members, which are the program, plus one SQLite row that says whether the run has halted or faulted | eager | implementation-permitted |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | An object-graph constructor that runs methods as it parses | Document order, plus "carrier" arrays | declarative | accidentally-exploited |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | An object-graph constructor that runs methods as it parses | Document order, plus "carrier" arrays | declarative | accidentally exploited |
 
 ## Where does the program live, and what makes the next step run?
 
@@ -166,7 +166,7 @@ Four different acts hide behind the words "the program is data". **Serialization
 | [`tar-gnu`](../../src/tar-gnu/README.md) | A builder writes the members of an archive, in a fixed order, from a seed | Tar parses the members. A passive inspector does the same without running anything | A dispatcher gives four record types a meaning, and runs them only when the operator passes `--to-command` | Same seed, same bytes (checked with `cmp`). The inspector and the database agree on every card. One archive in two fresh databases gives the same cards. It does **not** promise to resume a stopped run |
 | [`xaml`](../../src/xaml/README.md) | A `.xaml` file is an object graph written as markup | `XamlReader.Load` parses it | The same call runs it: methods are called as objects are made | None. Parsing *is* running, and the entry never writes the document back |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl source is stored as rows in SQLite | An overridden `unknown` command fetches a row | The fetched text is defined and evaluated as Tcl | The source comes back as the text that was stored. It does not keep any object identity |
-| [`apl-weird`](../../src/apl-weird/README.md) | `⎕CR` writes a function out as a matrix of characters | `⎕FX` defines a function from such a matrix | Each function rewrites its source, defines the copy, and calls it | The matrix is what `⎕FX` accepts back: a property of GNU APL that the entry uses |
+| [`apl-weird`](../../src/apl-weird/README.md) | `⎕CR` writes a function out as a matrix of characters | `⎕FX` defines a function from such a matrix | Each function rewrites its source, defines the copy and calls it | The matrix is what `⎕FX` accepts back: a property of GNU APL that the entry uses |
 | [`regex-sed`](../../src/regex-sed/README.md) and [`m4`](../../src/m4/README.md) | None apart from the text itself: the state *is* text | None: there is nothing to read back | The rules rewrite the text until none applies | The text is its own representation, so a round trip is the identity. This is an analogy, and not serialization in the object-graph sense |
 
 Read down the last column. Only one of the five makes a promise about *behavior* after a round trip, and it names what it does not promise. That is the honest shape of the topic: "I can write it down and read it back" is a weaker claim than "it will do the same thing", and both are weaker than "I can pause it and carry on".
@@ -182,18 +182,18 @@ Read down the last column. Only one of the five makes a promise about *behavior*
 | [`awk`](../../src/awk/README.md) | AWK | idiomatic | [The input is the loop](09-comparative-case-studies.md#the-input-is-the-loop) | eager | guaranteed | [`awk-weird`](../../src/awk-weird/README.md) |
 | [`awk-weird`](../../src/awk-weird/README.md) | AWK | weird | [The input is the loop](09-comparative-case-studies.md#the-input-is-the-loop) | eager | implementation-permitted | [`awk`](../../src/awk/README.md) |
 | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | weird | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
-| [`cmake`](../../src/cmake/README.md) | CMake | weird | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | accidentally-exploited | [`make-gnu`](../../src/make-gnu/README.md) |
+| [`cmake`](../../src/cmake/README.md) | CMake | weird | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | accidentally exploited | [`make-gnu`](../../src/make-gnu/README.md) |
 | [`cobol`](../../src/cobol/README.md) | COBOL | idiomatic | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`cobol-weird`](../../src/cobol-weird/README.md) |
 | [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | eager | implementation-permitted | [`cobol`](../../src/cobol/README.md) |
 | [`lisp`](../../src/lisp/README.md) | Common Lisp | idiomatic | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`lisp-weird`](../../src/lisp-weird/README.md) |
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | weird | [Dispatch and triggers: the rule fires the next step](09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step) | eager | implementation-permitted | [`lisp`](../../src/lisp/README.md) |
-| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | rewriting | accidentally-exploited | [`ex-weird`](../../src/ex-weird/README.md) |
+| [`ed-weird`](../../src/ed-weird/README.md) | ed, SQLite | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | rewriting | accidentally exploited | [`ex-weird`](../../src/ex-weird/README.md) |
 | [`ex-weird`](../../src/ex-weird/README.md) | Ex, SQLite | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | eager | implementation-permitted | [`ed-weird`](../../src/ed-weird/README.md) |
 | [`forth`](../../src/forth/README.md) | Forth | idiomatic | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`forth-weird`](../../src/forth-weird/README.md) |
 | [`forth-weird`](../../src/forth-weird/README.md) | Forth | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | eager | implementation-permitted | [`forth`](../../src/forth/README.md) |
-| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | declarative | accidentally-exploited | [`find-posix`](../../src/find-posix/README.md) |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | declarative | accidentally-exploited | [`cmake`](../../src/cmake/README.md) |
-| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | rewriting | accidentally-exploited |  |
+| [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | declarative | accidentally exploited | [`find-posix`](../../src/find-posix/README.md) |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | declarative | accidentally exploited | [`cmake`](../../src/cmake/README.md) |
+| [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | weird | [Text that is rewritten and read again](09-comparative-case-studies.md#text-that-is-rewritten-and-read-again) | rewriting | accidentally exploited |  |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | idiomatic | [Document order is the program](09-comparative-case-studies.md#document-order-is-the-program) | eager | implementation-permitted | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | weird | [Dispatch and triggers: the rule fires the next step](09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step) | eager | implementation-permitted | [`tar-gnu`](../../src/tar-gnu/README.md) |
 | [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | port | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
@@ -210,9 +210,9 @@ Read down the last column. Only one of the five makes a promise about *behavior*
 | [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | weird | [Regex search with side effects and deliberate failure](09-comparative-case-studies.md#regex-search-with-side-effects-and-deliberate-failure) | search | implementation-permitted | [`regex-perl`](../../src/regex-perl/README.md) |
 | [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | weird | [Regex search with side effects and deliberate failure](09-comparative-case-studies.md#regex-search-with-side-effects-and-deliberate-failure) | search | implementation-permitted | [`regex-pcre2`](../../src/regex-pcre2/README.md) |
 | [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | weird | [Regex search with side effects and deliberate failure](09-comparative-case-studies.md#regex-search-with-side-effects-and-deliberate-failure) | search | implementation-permitted | [`regex-pcre2`](../../src/regex-pcre2/README.md) |
-| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | declarative | accidentally-exploited | [`find-gnu`](../../src/find-gnu/README.md) |
+| [`find-posix`](../../src/find-posix/README.md) | find, SQLite | weird | [Control flow that rewrites itself](09-comparative-case-studies.md#control-flow-that-rewrites-itself) | declarative | accidentally exploited | [`find-gnu`](../../src/find-gnu/README.md) |
 | [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | port | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | port | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`tcl`](../../src/tcl/README.md) | Tcl | idiomatic | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | implementation-permitted | [`tcl-weird`](../../src/tcl-weird/README.md) |
 | [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | weird | [Dispatch and triggers: the rule fires the next step](09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step) | eager | implementation-permitted | [`tcl`](../../src/tcl/README.md) |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | weird | [Document order is the program](09-comparative-case-studies.md#document-order-is-the-program) | declarative | accidentally-exploited | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | weird | [Document order is the program](09-comparative-case-studies.md#document-order-is-the-program) | declarative | accidentally exploited | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) |

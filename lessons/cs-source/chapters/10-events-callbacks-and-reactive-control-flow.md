@@ -71,15 +71,15 @@ The sources are the Node.js [`events` documentation](https://nodejs.org/api/even
 - **`emit()` is synchronous.** Listeners run in registration order, before `emit` returns. This is documented, so it is a promise and not an accident.
 - **The name `error` is special.** `emit('error', e)` with no listener *throws* `e`. Every other name with no listener does nothing.
 - **A copy of the listener list is made for each `emit`.** A listener that removes listeners (or adds some) changes the *next* emit, not the one in flight.
-- **Timers, immediates and microtasks have an order**, and it is not the order you might guess. After the current code finishes, Node runs `process.nextTick` callbacks, then promise callbacks (microtasks), and then goes round the event loop: expired timers, then I/O callbacks, then `setImmediate` callbacks, and so on. When `setTimeout(fn, 0)` and `setImmediate(fn)` are called from the main module, which runs first is *not promised*: it depends on how fast the process started. Inside an I/O callback, `setImmediate` always runs first. This is implementation-dependent behavior of the kind that [[hyrums-law]] describes, so [[entry:javascript-events]] uses `setImmediate` alone and never depends on the order between two of them.
+- **Timers, immediates and microtasks have an order**, and it is not the order you might guess. After the current code finishes, Node runs `process.nextTick` callbacks, then promise callbacks (microtasks), and then goes round the event loop: expired timers, then I/O callbacks, then `setImmediate` callbacks and so on. When `setTimeout(fn, 0)` and `setImmediate(fn)` are called from the main module, which runs first is *not promised*: it depends on how fast the process started. Inside an I/O callback, `setImmediate` always runs first. This is implementation-dependent behavior of the kind that [[hyrums-law]] describes, so [[entry:javascript-events]] uses `setImmediate` alone and never depends on the order between two of them.
 - **An `async` listener's failure is not caught by a `try` around `emit`.** The listener returns a promise, and `emit` has already returned. The option `captureRejections` turns such a rejection into an `error` event.
 - **Listeners need an owner.** A listener that nobody removes can keep a whole object alive. Node warns when one event has more than ten listeners, because that is usually a leak. A timer or an immediate left behind can keep the process from ending. [[entry:javascript-events]] ends by removing every listener, and its lab checks that no timer or immediate is left.
 
-## State machines, re-entrancy and ending
+## State machines, reentrancy and ending
 
 A program of listeners is a [[transition-system]]: a state, and moves that events trigger. [[entry:javascript-events]] keeps its state in one object that only listeners touch, and each listener is one transition. Two questions decide whether such a program is sound.
 
-**Can a listener be called again while it is still running?** That is *re-entrancy*. A synchronous `emit` allows it: a listener emits an event whose listener emits the first event again. The synchronous column above is exactly that, and its price is the stack. The scheduled version cannot be re-entered, because the next card is a new turn.
+**Can a listener be called again while it is still running?** That is *reentrancy*. A synchronous `emit` allows it: a listener emits an event whose listener emits the first event again. The synchronous column above is exactly that, and its price is the stack. The scheduled version cannot be re-entered, because the next card is a new turn.
 
 **Does it end?** A chain of events that never stops is a loop that nobody can see. The program must have one listener that does *not* announce the next step, and it must tidy up: roll back what was not committed, close the database, remove the listeners and stop the timers. In [[entry:javascript-events]] that is `finished` (or `failed`), and then `done` removes everything.
 
@@ -107,7 +107,7 @@ Telling the consumer "something happened" does not tell the producer to slow dow
 
 Events are also the wrong tool when:
 
-- there is exactly one listener, and it is always the same one. A function call says the same thing, is shorter, and a debugger can step through it;
+- there is exactly one listener, and it is always the same one. A function call says the same thing, is shorter and a debugger can step through it;
 - the order must be obvious. With events it is in the names and in the order of registration;
 - you need a result back. An event announces, and it does not answer.
 
@@ -131,4 +131,4 @@ An animation framework, data binding and a window's own loop are *mechanisms* th
 
 ## Predict, then run
 
-[Exercise B22](../exercises.md#b22-javascript-event-driven-predict-the-trace-then-remove-the-boundary-verified) asks you to write the trace of a run *before* you see it, to predict what `emit` and `setImmediate` print, and to remove the scheduling boundary and watch a million cards run out of stack. Do the prediction on paper first. The surprise is the point.
+[Exercise B22](../exercises.md#b22-javascript-event-driven-predict-the-trace-then-remove-the-boundary-verified) asks you to write the trace of a run *before* you see it, to predict what `emit` and `setImmediate` print and to remove the scheduling boundary and watch a million cards run out of stack. Do the prediction on paper first. The surprise is the point.

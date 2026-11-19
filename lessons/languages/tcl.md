@@ -20,7 +20,7 @@ Tcl's rule is "everything is a command, and every command receives its arguments
 
 ## SQLite as the program
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/tcl-weird
@@ -28,13 +28,13 @@ sandbox/container/run-image.sh src/tcl-weird
 
 Open [`timecards.tcl`](../../src/tcl-weird/timecards.tcl). Exactly **two** procs are defined in Tcl, and neither deals a card. The code that does is *text in a database table*, and the loop is an SQL trigger.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 Three hooks make a program out of nothing.
 
 **Hook 1: SQL can call Tcl.** [`db function tcl call`](../../src/tcl-weird/timecards.tcl#L28-L34) registers an SQL function `tcl(command, args...)` whose implementation is a Tcl proc that runs a command. From inside any SQL statement, `SELECT tcl('hours')` runs the Tcl command `hours` and returns its result.
 
-**Hook 2: `unknown` is the library path.** When Tcl is asked to run a command that does not exist, it calls a command named `unknown`. The entry [renames and replaces it](../../src/tcl-weird/timecards.tcl#L36-L49): it looks the name up in a TEMP table `tcl_code(name, params, body)`; if there is a row, it defines a proc from it with `proc $name $params $body` and retries. So `hours`, `category`, `born` and the rest are *never* written as Tcl source. The first call to `tcl('hours')` finds no such command, asks `unknown`, which finds the row in SQLite, builds the proc, and runs it. The program prints which procs came out of the database at the end:
+**Hook 2: `unknown` is the library path.** When Tcl is asked to run a command that does not exist, it calls a command named `unknown`. The entry [renames and replaces it](../../src/tcl-weird/timecards.tcl#L36-L49): it looks the name up in a TEMP table `tcl_code(name, params, body)`; if there is a row, it defines a proc from it with `proc $name $params $body` and retries. So `hours`, `category`, `born` and the rest are *never* written as Tcl source. The first call to `tcl('hours')` finds no such command, asks `unknown`, which finds the row in SQLite, builds the proc and runs it. The program prints which procs came out of the database at the end:
 
 ```text
 # every proc that ran was fetched from SQLite by unknown: born category hours init runid week
@@ -58,16 +58,16 @@ Inserting a card fires the trigger, which prints the card (via `tcl('born', ...)
 
 **The window is data too.** With `--gui`, a TEMP table `ui(id, command)` holds eight Tk commands, run by `SELECT tcl('uplevel', '#0', command) FROM ui ORDER BY id`. `uplevel #0` evaluates each string at global level, where `.cards` and `.note` must live. Each card's `born` then adds a row to the tree view and updates the screen.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **Code and data are the same thing in Tcl.** A proc is created from two strings; the place the strings came from is up to you. Here it is a database row, so `UPDATE tcl_code SET body = ...` is a hot-patch.
 - **A database trigger is a control-flow construct.** It is an event handler that can cause the event it handles: that is recursion.
 - **Every hook point is a loop opportunity.** SQLite lets you register functions and triggers; Tcl lets you intercept lookups. Either alone is a feature, together they are a runtime.
 - **Braces versus substitution** decides everything in Tcl. (Compare [Make's expansion time versus run time](make-cmake.md#gnu-make) and [m4's quoting](m4.md).)
 
-Tags: `proc`, `unknown`, `uplevel`, `namespace`, `dict`, and `try` are **guaranteed** by Tcl 8.6. `db function` and `db eval` variable binding belong to the **sqlite3 Tcl package** (**implementation-permitted**: the interface is stable but is not part of Tcl). Recursive triggers need `PRAGMA recursive_triggers`, **documented SQLite** behavior. That each card's hours are drawn exactly once is **guaranteed by design**: the hours are written into a one-row TEMP table and read from it twice, so the result does not depend on how often SQLite evaluates a function. (An earlier version used a subquery and relied on SQLite calling the function once per row, which is **accidentally exploited**: SQLite does not promise that for non-deterministic functions.)
+Tags: `proc`, `unknown`, `uplevel`, `namespace`, `dict` and `try` are **guaranteed** by Tcl 8.6. `db function` and `db eval` variable binding belong to the sqlite3 Tcl package (**implementation-permitted**: the interface is stable but is not part of Tcl). Recursive triggers need `PRAGMA recursive_triggers`, a **guaranteed** SQLite feature when enabled. That each card's hours are drawn exactly once holds by construction: the hours are written into a one-row TEMP table and read from it twice, so the result does not depend on how often SQLite evaluates a function. (An earlier version used a subquery and relied on SQLite calling the function once per row, which is **accidentally exploited**: SQLite does not promise that for non-deterministic functions.)
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **Your program is not in version control.** It is in a TEMP table that exists only for this connection. The `.tcl` file holds two procs and a string.
 - **`unknown` is global.** Every misspelled command now takes a database lookup before the error. If the table is writable by someone else, so is your program.
@@ -76,9 +76,9 @@ Tags: `proc`, `unknown`, `uplevel`, `namespace`, `dict`, and `try` are **guarant
 - **A value used twice must be drawn once.** The hours are used as the hours and inside the running total. The trigger stores them in the one-row TEMP table `draw` and reads them from it, and `check.sh` counts the calls of the `hours` procedure (one per card).
 - **Tk quirk:** a `tclsh` that has loaded Tk does not exit when the script ends. The entry calls `destroy .` (a normal Tk program is waiting for events).
 
-Legitimate uses: **loading code on demand** (Tcl's own `unknown` already calls `auto_load` to find a command's definition on disk), **SQL functions that call back into the host language** (a standard SQLite feature), and **keeping rules in a table** so they can change without a deploy. Tcl Starkits packed a whole application into one virtual-filesystem file for the same reason: code that travels with its data.
+Legitimate uses: **loading code on demand** (Tcl's own `unknown` already calls `auto_load` to find a command's definition on disk), **SQL functions that call back into the host language** (a standard SQLite feature) and **keeping rules in a table** so they can change without a deploy. Tcl Starkits packed a whole application into one virtual-filesystem file for the same reason: code that travels with its data.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercises](../exercises.md#b12-tcl-edit-the-program-in-the-database-verified).
 

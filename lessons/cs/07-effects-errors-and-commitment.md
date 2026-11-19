@@ -43,23 +43,23 @@ Both calls return a value. Only the second also changes something outside itself
 | --- | --- | --- | --- |
 | [`find-gnu`](../../src/find-gnu/README.md) | find, SQLite | demonstrates | That the GNU extras to find (path depth, file times, regular expressions and a built-in profiler) can replace a whole table of branches, and that find's optimizer has nothing to reorder when every branch ends in a side effect. |
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
-| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | demonstrates | A one-statement port in Go: a three-part `for` with an empty body does all the work. |
-| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
-| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | demonstrates | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
+| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | demonstrates | That one three-part `for` with an empty body can run the whole Go program. |
+| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | That reading a lazy list can drive a program when forcing each element has a side effect. |
+| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | demonstrates | That a Java `for (init; condition; update) { }` can preserve the shape of the original C# program. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | demonstrates | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | demonstrates | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
-| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
-| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | Iterators and closures as control flow. |
+| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | demonstrates | That Kotlin can use `generateSequence` as the loop, ending when the generator returns null. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | That a chain of LINQ methods can express the entire program. |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | That C# query syntax can express the computation and order its effects. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | That a `for` statement with no body can drive runtime XAML, LINQ to Objects, EF Core and WPF animation. |
+| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | That Python can drive a whole program with `iter(step, False)`, which calls `step` until it returns `False`. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | That regex callouts can serve as a tiny instruction set. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | That program exit codes can steer control flow. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | That Perl can execute code during a regex match. |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | That iterators and closures can express the control flow of a whole Rust program. |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
-| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | How far a markup parser can be pushed before it stops describing a UI and starts *running* a program. |
+| [`xaml`](../../src/xaml/README.md) | XAML, C# | demonstrates | That a markup parser can run a program while it describes a UI. |
 
 ## Monads and effect systems
 
@@ -78,11 +78,11 @@ Pure functional languages have a neat answer to side effects: describe the effec
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
+| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | That reading a lazy list can drive a program when forcing each element has a side effect. |
 
 ## Exception handling
 
-Exception handling is a language feature for errors: raise a signal, unwind the stack, and let a handler deal with it. It exists to keep the normal path of the code free of error checks. COBOL has an older, simpler form. `ON SIZE ERROR` runs when an arithmetic result does not fit the field, and the field stays unchanged. In [`cobol-weird`](../../src/cobol-weird/README.md) that overflow *is* the stop rule: a two-digit counter overflows on purpose, and the error branch ends the loop. Errors as control flow work, but they hide the real design from the next reader.
+Exception handling is a language feature for errors: raise a signal, unwind the stack and let a handler deal with it. It exists to keep the normal path of the code free of error checks. COBOL has an older, simpler form. `ON SIZE ERROR` runs when an arithmetic result does not fit the field, and the field stays unchanged. In [`cobol-weird`](../../src/cobol-weird/README.md) that overflow *is* the stop rule: a two-digit counter overflows on purpose, and the error branch ends the loop. Errors as control flow work, but they hide the real design from the next reader.
 
 ```mermaid
 sequenceDiagram
@@ -115,7 +115,7 @@ The normal `return` of `save` and `process` never runs. The exception passes out
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | Why structured programming won, by running a program whose control flow rewrites itself. |
+| [`cobol-weird`](../../src/cobol-weird/README.md) | COBOL | demonstrates | That a program can rewrite its own control flow and that structured programming makes such changes easier to trace. |
 | [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | demonstrates | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
 
 ## Exit status
@@ -134,7 +134,7 @@ flowchart TB
 The status is one small number. The caller does not learn what went wrong, only which branch to take. In `cmd1 && cmd2` the shell runs `cmd2` after a 0. In `cmd1 || fallback` it runs `fallback` after any other value. A shell `if` reads the same status. A program that needs to say more must also print a message or write a file.
 
 - **Use it when:** scripts and tools that other tools call. Document what each code means.
-- **Avoid:** using it for rich data (it is one small number), and assuming every platform uses the same range.
+- **Avoid it when:** you need to return rich data or preserve a number outside the platform's exit-status range.
 
 **Read more:**
 
@@ -144,7 +144,7 @@ The status is one small number. The caller does not learn what went wrong, only 
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | That program exit codes can steer control flow. |
 | [`regex-sed`](../../src/regex-sed/README.md) | GNU sed, Regular expressions | demonstrates | That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock. |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
@@ -154,7 +154,7 @@ The status is one small number. The caller does not learn what went wrong, only 
 An integrity constraint is a rule that the database itself enforces: `NOT NULL`, `UNIQUE`, `FOREIGN KEY`, `CHECK`. It exists because "we validate in the application" is only as good as every application. A constraint makes bad data *impossible*, not just unlikely. In this repository `CHECK(demo_only=1)` appears in nearly every entry: a table where a non-demo row cannot exist, which each `check.sh` tries to violate. Here constraints are also used as a stop rule (a violation ends the run) and as a guarantee. The second use is the one to keep in real programs.
 
 - **Use it when:** a rule must hold no matter who writes the data. See also [Invariants](02-what-counts-as-a-machine.md#invariants).
-- **Avoid:** relying on constraints as your only validation (the messages are for programmers, not users), or building rules so complex that they need triggers.
+- **Avoid it when:** users need validation messages they can act on. Complex rules that need triggers are also a poor fit for a simple constraint.
 
 **Read more:**
 
@@ -170,13 +170,13 @@ An integrity constraint is a rule that the database itself enforces: `NOT NULL`,
 | [`find-posix`](../../src/find-posix/README.md) | find, SQLite | demonstrates | That a directory walk can be a loop and a program: find digs the tree it is walking, and the path to the current directory is the whole machine. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | demonstrates | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | That program exit codes can steer control flow. |
 | [`tar-gnu`](../../src/tar-gnu/README.md) | GNU tar, SQLite | demonstrates | That a tar archive can be a serialized program: tar reads the members in order, and only the command that the operator attaches gives them an effect. |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | demonstrates | That an archive's physical layout can set the pace of a program: tar's checkpoints are a clock, and each tick moves a state machine by one step. |
 
 ## Backtracking
 
-Backtracking is a systematic search. Try a choice, go on, and if you get stuck, undo the choice and try the next one. It exists for problems with many possible answers and some rules to prune them: puzzles, parsing, and pattern matching. Perl, PCRE2 and .NET regex engines work this way. The entries in this repository turn it around: *do the work in side effects, then fail on purpose.* The match returns false only after every row has been written. What survives the failure is the whole lesson. Perl's `local` variables are restored, but its `INSERT` and `print` calls cannot be undone. [`regex-dotnet`](../../src/regex-dotnet/README.md) cannot play this game at all, because a failed .NET match throws its captures away.
+Backtracking is a systematic search. Try a choice, go on, and if you get stuck, undo the choice and try the next one. It exists for problems with many possible answers and some rules to prune them: puzzles, parsing and pattern matching. Perl, PCRE2 and .NET regex engines work this way. The entries in this repository turn it around: *do the work in side effects, then fail on purpose.* The match returns false only after every row has been written. What survives the failure is the whole lesson. Perl's `local` variables are restored, but its `INSERT` and `print` calls cannot be undone. [`regex-dotnet`](../../src/regex-dotnet/README.md) cannot play this game at all, because a failed .NET match throws its captures away.
 
 ```mermaid
 flowchart TB
@@ -203,10 +203,10 @@ The search remembers the choices that still have untried alternatives. When a pa
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | A regex as a stack-based counter. |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
+| [`regex-dotnet`](../../src/regex-dotnet/README.md) | C#, Regular expressions | demonstrates | That a regex can use a stack to count. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | That regex callouts can serve as a tiny instruction set. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | That program exit codes can steer control flow. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | That Perl can execute code during a regex match. |
 
 ## The cut: committing to a choice
 
@@ -239,9 +239,9 @@ Compare this picture with plain backtracking. There, `B` would be tried after `A
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | Regex callouts as a tiny instruction set. |
-| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | Program exit codes as control flow. |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
+| [`regex-pcre2`](../../src/regex-pcre2/README.md) | C, PCRE2, Regular expressions | demonstrates | That regex callouts can serve as a tiny instruction set. |
+| [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md) | PCRE2, Regular expressions | demonstrates | That program exit codes can steer control flow. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | That Perl can execute code during a regex match. |
 
 ## Transactions
 
@@ -274,7 +274,7 @@ sequenceDiagram
 `COMMIT` makes both rows visible together, and `ROLLBACK` removes both. Neither reaches past the database. A notification, a printout or a file written outside it has already happened. That is why [`haskell-weird`](../../src/haskell-weird/README.md) had to force its lazy effects *before* the commit, and why this picture is about the boundary of the transaction and not about the cards. Not every entry places its transaction boundaries in the same spot.
 
 - **Use it when:** any multi-step change to stored data.
-- **Avoid:** long transactions that hold locks, and assuming that effects outside the database (an email, a file) can be rolled back. They cannot.
+- **Avoid it when:** the transaction would hold locks for a long time. Effects outside the database, such as an email or file write, remain after rollback.
 
 **Read more:**
 
@@ -287,8 +287,8 @@ sequenceDiagram
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
 | [`forth`](../../src/forth/README.md) | Forth | demonstrates | That a stack language needs one `begin ... until` and a pipe to be a whole program. |
-| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | Executable code inside a live regex match. |
-| [`tcl`](../../src/tcl/README.md) | Tcl | demonstrates | Idiomatic Tcl: procs in a namespace, dicts for records, braced `expr`, and `db eval` binding Tcl variables straight into SQL. |
+| [`regex-perl`](../../src/regex-perl/README.md) | Perl, Regular expressions | demonstrates | That Perl can execute code during a regex match. |
+| [`tcl`](../../src/tcl/README.md) | Tcl | demonstrates | That idiomatic Tcl uses procedures in a namespace, dicts for records, braced `expr` and `db eval` to bind Tcl variables into SQL. |
 
 ## Idempotence
 
@@ -327,8 +327,8 @@ For an operation `f` on a state `s`, idempotence means `f(f(s)) = f(s)`. The que
 
 Code is thread-safe if it behaves correctly when several threads use it at the same time. It exists as a problem because shared, changeable data plus parallel threads equals a race: the result depends on who gets there first. The entries on .NET and its ports touch two versions of the problem. In the C# entries, an EF Core `DbContext` is not thread-safe. In the one-statement ports, the code locks around the staged cards while a background thread saves them. And WPF has *thread affinity*: a window may only be touched by the thread that made it. Code that works once is not proof that it is safe.
 
-- **Use it when:** you share data across threads: use locks, immutable data, or one context per thread.
-- **Avoid:** sharing a changeable object between threads "just because it worked in the test".
+- **Use it when:** you share data across threads: use locks, immutable data or one context per thread.
+- **Avoid it when:** threads would share a mutable object with no synchronization. A passing test alone does not prove safety.
 
 **Read more:**
 
@@ -339,11 +339,11 @@ Code is thread-safe if it behaves correctly when several threads use it at the s
 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
-| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | demonstrates | A one-statement port in Go: a three-part `for` with an empty body does all the work. |
-| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | demonstrates | A one-statement port in Java: the literal original shape, `for (init; condition; update) { }`. |
-| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | demonstrates | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
-| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
-| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | Iterators and closures as control flow. |
+| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | demonstrates | That one three-part `for` with an empty body can run the whole Go program. |
+| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | demonstrates | That a Java `for (init; condition; update) { }` can preserve the shape of the original C# program. |
+| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | demonstrates | That Kotlin can use `generateSequence` as the loop, ending when the generator returns null. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | That a chain of LINQ methods can express the entire program. |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | That C# query syntax can express the computation and order its effects. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | That a `for` statement with no body can drive runtime XAML, LINQ to Objects, EF Core and WPF animation. |
+| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | That Python can drive a whole program with `iter(step, False)`, which calls `step` until it returns `False`. |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | That iterators and closures can express the control flow of a whole Rust program. |

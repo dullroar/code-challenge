@@ -359,7 +359,7 @@ Hand-written guides for advanced readers: traces of a fixed run, predictions bef
 
 **Language families**
 
-- [C#, LINQ, XAML, and ports study guide](study-guides/languages/csharp-linq-xaml-and-ports.md)
+- [C#, LINQ, XAML and ports study guide](study-guides/languages/csharp-linq-xaml-and-ports.md)
 - [COBOL study guide](study-guides/languages/cobol.md)
 - [Haskell study guide](study-guides/languages/haskell.md)
 - [Forth study guide](study-guides/languages/forth.md)
@@ -377,9 +377,9 @@ Hand-written guides for advanced readers: traces of a fixed run, predictions bef
 
 - [Reading adversarial programs study guide](study-guides/concepts/reading-adversarial-programs.md)
 - [State and control beyond variables study guide](study-guides/concepts/state-and-control-beyond-variables.md)
-- [Evaluation, demand, and laziness study guide](study-guides/concepts/evaluation-demand-and-laziness.md)
+- [Evaluation, demand and laziness study guide](study-guides/concepts/evaluation-demand-and-laziness.md)
 - [Formal languages and weird machines study guide](study-guides/concepts/formal-languages-and-weird-machines.md)
-- [Effects, errors, and commitment study guide](study-guides/concepts/effects-errors-and-commitment.md)
-- [Portability, abstraction, and cost study guide](study-guides/concepts/portability-abstraction-and-cost.md)
-- [Events, callbacks, and reactive control study guide](study-guides/concepts/events-callbacks-and-reactive-control.md)
+- [Effects, errors and commitment study guide](study-guides/concepts/effects-errors-and-commitment.md)
+- [Portability, abstraction and cost study guide](study-guides/concepts/portability-abstraction-and-cost.md)
+- [Events, callbacks and reactive control study guide](study-guides/concepts/events-callbacks-and-reactive-control.md)
 - [Comparative machine design study guide](study-guides/concepts/comparative-machine-design.md)

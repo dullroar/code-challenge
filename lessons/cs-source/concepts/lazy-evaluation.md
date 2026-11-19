@@ -25,7 +25,7 @@ flowchart TB
 
 A thunk is a promise to compute a value. Demanding a cell runs its thunk once and stores the value, so a second demand for `A` costs nothing. Cell `C` is never demanded, so its work never happens. Storing the value is part of lazy evaluation in the strict sense. A pipeline that only delays work, such as a generator, may compute the same value again on each pass. See [[generators]].
 
-- **Use it when:** the code is pure (no effects), you want infinite sequences, or some results may not be needed.
+- **Use it when:** the code is pure (no effects), you want infinite sequences or some results may not be needed.
 - **Avoid it when:** effects are involved, or when memory matters. A pile of unevaluated thunks can use a lot of it (a *space leak*).
 
 **Read more:**

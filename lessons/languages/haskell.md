@@ -17,7 +17,7 @@ Haskell is **lazy**: a value is computed only when something demands it. The str
 
 ## Lazy IO as control flow
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/haskell-weird
@@ -25,7 +25,7 @@ sandbox/container/run-image.sh src/haskell-weird
 
 An infinite list of cards. *Forcing the n-th cell prints card n and sends its `INSERT` to `sqlite3`.* Nothing else writes a row. No loop, accumulator, counter or explicit recursion.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 Three tricks stacked.
 
@@ -35,7 +35,7 @@ Three tricks stacked.
 
 The stop rule is [`untilOver40` (L82-83)](../../src/haskell-weird/timecards.hs#L82-L83): `under ++ take 1 over`. Reading card n runs `onBirth` for card n, so total reads equal total `INSERT`s by construction.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **Evaluation order is part of a program's meaning once effects are involved.** In a pure program it does not matter. Put IO behind a lazy cell and it decides *which rows exist*.
 - **Referential transparency is a contract, and `unsafe...` is where you stop honoring it.**
@@ -43,7 +43,7 @@ The stop rule is [`untilOver40` (L82-83)](../../src/haskell-weird/timecards.hs#L
 
 Tags: `span` laziness is **guaranteed** by the language semantics. `unsafeInterleaveIO` ordering is **implementation-permitted**: the program is correct because card n cannot be forced before card n-1, not because the evaluator promises an order.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **The README's own war story.** The first draft counted with `let entries = length cards`, and the program printed `# committed total=Meetings 12 12 ...` then crashed with "handle is closed". A lazy `let` meant nothing forced the cards until the summary was printed, after the pipe was closed. The cards' effects fired *during the output of `show`*. The fix: [L144](../../src/haskell-weird/timecards.hs#L144) `entries <- evaluate (length cards)`.
 - **`lazily` must defer its own pattern match.** If the `case` runs before `unsafeInterleaveIO`, forcing it needs `before`, which needs `cards`, which does not exist yet: `<<loop>>`.
@@ -52,7 +52,7 @@ Tags: `span` laziness is **guaranteed** by the language semantics. `unsafeInterl
 
 Legitimate uses: lazy IO exists for streaming (`getContents` over a large input) and the same hazards are why people moved to streaming libraries. Knot-tying (`fix`) is a respectable technique for self-referential data, such as circular structures and memo tables.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercises](../exercises.md#b2-haskell-break-the-laziness-verified): replace `unsafeInterleaveIO` with plain IO, or move the `evaluate`, and predict the output.
 

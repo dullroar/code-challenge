@@ -18,7 +18,7 @@ For an advanced reading path with traces and experiments, see the [JavaScript st
 
 ## The bodiless for in Node
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/javascript
@@ -26,7 +26,7 @@ sandbox/container/run-image.sh src/javascript
 
 One statement, about 80 lines long. The body is empty. No function is declared in the file.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 - **The initializer builds the state.** One `let i = ...` holds a list of hours, the database, the clock and a seeded random generator. A `for` allows one declaration, so the state is one object. The global Web Crypto object supplies a seed through `crypto.getRandomValues` when `SEED` is unset. `randomInt` is a separate export of `node:crypto`.
 - **The condition is the stop rule, and the report.** `total <= 40 ? true : (print, false)`. While it says `true` the loop goes on. When it says `false` it has already printed the result.
@@ -35,7 +35,7 @@ One statement, about 80 lines long. The body is empty. No function is declared i
 
 The [README](../../src/javascript/README.md#how-the-stunt-works) has the table of what the C# did and what this does, and a measured comparison with the original.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **Evaluation order is the program.** Init, test, body, update: the order is the control flow, and you can put side effects in any clause.
 - **A conditional is a value.** `?:` and `&&` choose between expressions, so they can choose between *effects*.
@@ -45,7 +45,7 @@ The [README](../../src/javascript/README.md#how-the-stunt-works) has the table o
 
 Tags: the `for` semantics, `?:`, `&&`, the comma operator and closures are **guaranteed** by the ECMAScript specification. `node:sqlite` is a Node.js API, outside the language standard (**implementation-permitted**).
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **A `for` with an empty body hides the program in its header.** Nobody can find the loop body, because there is none.
 - **Side effects in a condition are a bug waiting.** If the test runs twice, the result prints twice.
@@ -53,13 +53,13 @@ Tags: the `for` semantics, `?:`, `&&`, the comma operator and closures are **gua
 
 Legitimate uses: `for (;;)` with a `break`, and a comma in an update clause for two counters.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercise B20](../exercises.md#b20-javascript-read-the-clauses-move-the-limit-and-fail-the-structure-check-verified).
 
 ## Closures all the way down
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/javascript-weird
@@ -67,7 +67,7 @@ sandbox/container/run-image.sh src/javascript-weird
 
 No `for`, no `while`, no `this`. The algorithm is three closures of one line each. The program is one pipeline: `Iterator.from(...).map(...).map(...).toArray()`.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 - **A closure is a state machine.** `machine(nextHours)` returns a function. It remembers a count, a total and a stop flag in variables that only it can reach. Each call makes the next card.
 - **The iteration protocol is the loop.** An object with a `next()` method that says `{ done: true }` when it is finished. `toArray()` keeps asking until it hears that.
@@ -75,9 +75,9 @@ No `for`, no `while`, no `this`. The algorithm is three closures of one line eac
 - **Demand decides.** Nothing is drawn until something asks. `take(1)` draws one card. `toArray()` draws all of them.
 - **`reduce` is the fold that cannot stop.** It runs for every element. So it adds up the finished list, and the stop is done somewhere else.
 
-The [README](../../src/javascript-weird/README.md#how-the-stunt-works) has the closure diagram, a table of five ways to stop, and a comparison of the C# original, the bodiless `for` and this one.
+The [README](../../src/javascript-weird/README.md#how-the-stunt-works) has the closure diagram, a table of five ways to stop and a comparison of the C# original, the bodiless `for` and this one.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **A closure is a function plus its environment.** Lambda syntax alone is not a closure that matters. A function that changes a variable that lives past the call is.
 - **Closures capture variables, not values.** Two closures over one variable share it. Every call to a factory makes new variables.
@@ -88,21 +88,21 @@ The [README](../../src/javascript-weird/README.md#how-the-stunt-works) has the c
 
 Tags: closures, arrow functions and the iteration protocol are in the ECMAScript specification, and so are the iterator helpers since ECMAScript 2025 (**guaranteed**). `node:sqlite`, `WeakRef`'s timing and `--expose-gc` are engine and Node details, used only in the check.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **Effects inside `map` surprise people.** A reader expects `map` to be pure. This one saves rows.
 - **Hidden state is hard to inspect.** A debugger shows captured variables, and `console.log` of the function does not.
 - **An iterator that is spent is a trap.** A second pass over it gives nothing, with no error.
 
-Legitimate uses: closures for private state, factories for configured functions, lazy pipelines for streams that are too big to hold, and `some`/`find` for "stop at the first".
+Legitimate uses: closures for private state, factories for configured functions, lazy pipelines for streams that are too big to hold and `some`/`find` for "stop at the first".
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercise B21](../exercises.md#b21-javascript-weirder-move-the-stop-rule-in-a-closure-and-watch-the-demand-verified).
 
 ## Listeners all the way down
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/javascript-events
@@ -110,7 +110,7 @@ sandbox/container/run-image.sh src/javascript-events
 
 No `for`, no `while`, no pipeline, no closure factory. The visible start-up is one line, `program(realWorld()).emit('start')`. Everything else is a listener: a small function that Node calls when an event arrives.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 - **A listener does one thing and emits the next event.** `generate` draws a card and emits `card-created`. `card-created` saves it and emits `card-saved`. `card-saved` updates the total and emits `total-updated`. `total-updated` is the stop rule.
 - **`emit()` is a call.** It runs every listener of the event, in order, before it returns. The listener sits on top of the caller on the call stack.
@@ -118,9 +118,9 @@ No `for`, no `while`, no pipeline, no closure factory. The visible start-up is o
 - **The save comes first.** `node:sqlite` is synchronous, so the row is written when `run()` returns. The running total changes only after that.
 - **A failure is one event.** Every listener catches its own throw and emits `failed`. `failed` rolls back, closes the database, prints one line and removes every listener.
 
-The [README](../../src/javascript-events/README.md#how-the-stunt-works) has the table of events, the trace, and the comparison with the other two Node entries.
+The [README](../../src/javascript-events/README.md#how-the-stunt-works) has the table of events, the trace and the comparison with the other two Node entries.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **Control flow can be a set of registrations.** The order of the program is in the event names, and in what each listener emits.
 - **Synchronous `emit()` is not the event loop.** An emitter is a table of listeners and a function that calls them. The queue and the loop belong to Node.
@@ -131,16 +131,16 @@ The [README](../../src/javascript-events/README.md#how-the-stunt-works) has the 
 
 Tags: `EventEmitter`'s synchronous call and its order, and `setImmediate()` running after the current operation, are documented Node behavior (**guaranteed**). See the Node.js [`events` documentation](https://nodejs.org/api/events.html). The order of `setImmediate` against `setTimeout(fn, 0)` is not promised everywhere, so the program does not depend on it.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **One listener per event is a function call with extra steps.** If only one party can ever care, call it.
 - **The order is hard to see.** A reader must find every `emit` to know what follows what.
 - **There is no backpressure.** An emitter keeps emitting. This program is safe only because each card waits for the one before it.
 - **Listeners that change the listeners during an `emit`** make the order hard to predict. This program removes its listeners only at the very end.
 
-Legitimate uses: many parties may care about one thing (a server's `request`, a UI's `click`), the sender must not know the receivers, and the work is I/O that should not block the thread.
+Legitimate uses: many parties may care about one thing (a server's `request`, a UI's `click`), the sender must not know the receivers and the work is I/O that should not block the thread.
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercise B22](../exercises.md#b22-javascript-event-driven-predict-the-trace-then-remove-the-boundary-verified), and the chapter [Events, callbacks and reactive control flow](../cs/10-events-callbacks-and-reactive-control-flow.md).
 

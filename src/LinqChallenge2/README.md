@@ -1,6 +1,6 @@
 ---
 name: "LINQ"
-teaches: "C# query syntax, pushed as far as it goes."
+teaches: "that C# query syntax can express the computation and order its effects."
 kind: weird
 languages: [c-sharp, linq]
 lesson: "languages/csharp-linq-xaml.md#deferred-execution-and-the-void-to-value-trick"
@@ -12,7 +12,7 @@ tags: [dataflow-programming, declarative-programming, deferred-execution, domain
 ---
 # LINQ challenge, Variant B: one SQL-like query-expression statement
 
-**Teaches you:** C# query syntax, pushed as far as it goes.
+**Teaches you:** that C# query syntax can express the computation and order its effects.
 
 > **Not the shared challenge.** Like Variant A, this entry draws no random hours: its work week is five fixed 8-hour days, capped so that the total is exactly 40.0 hours and no card crosses the line. It teaches deferred execution and query syntax, not the stop rule "keep the first card over 40".
 

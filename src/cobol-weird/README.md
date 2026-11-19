@@ -1,6 +1,6 @@
 ---
 name: "COBOL"
-teaches: "why structured programming won, by running a program whose control flow rewrites itself."
+teaches: "that a program can rewrite its own control flow and that structured programming makes such changes easier to trace."
 kind: weird
 languages: [cobol]
 lesson: "languages/cobol.md#alter"
@@ -15,7 +15,7 @@ analogies: [continuation]
 ---
 # COBOL, weirder
 
-**Teaches you:** why structured programming won, by running a program whose control flow rewrites itself.
+**Teaches you:** that a program can rewrite its own control flow and that structured programming makes such changes easier to trace.
 
 > **DEMO ONLY.** Fictional timecards in a scratch SQLite file. No connection to any real time-reporting system.
 

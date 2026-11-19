@@ -2,18 +2,18 @@
 
 ## What this guide is for
 
-This guide reads two editor scripts that solve the challenge by editing a text buffer: [`src/ed-weird`](../../../src/ed-weird/README.md), a script for `ed` where categories are line addresses, hours are rewrite rules and one global command does the whole run; and [`src/ex-weird`](../../../src/ex-weird/README.md), a script for `ex` where a *register* holds the program, a *tape* in the buffer holds the stop rule, and a *mark* is the program counter. The question is: **when the program is a buffer being edited, what are the addresses, the registers and the program counter?**
+This guide examines two scripts that solve the challenge in a text buffer. In [`src/ed-weird`](../../../src/ed-weird/README.md), categories are line addresses and hours are rewrite rules. One global command runs the program. In [`src/ex-weird`](../../../src/ex-weird/README.md), a register holds the program. A tape in the buffer holds the stop rule and a mark is the program counter. **Where are the addresses, registers and program counter when the program edits a buffer?**
 
 When you finish, you should be able to:
 
-1. Explain what a line address, a mark and a register are in `ed` and `ex`, and what each one stores.
+1. Explain what a line address, a mark and a register are in `ed` and `ex` and what each one stores.
 2. Explain why a failed substitution inside a global command is an `if`, not an error.
 3. Trace both programs through the same five dice, naming the buffer contents at each stage.
 4. Explain how the Ex program's loop works: a register runs a register, and the tape decides whether the next run is a command or a comment.
 5. Explain why five dice are always enough, and how the launcher and the editor divide the work.
-6. Label each behavior as guaranteed, implementation-permitted, or accidentally exploited.
+6. Label each behavior as guaranteed, implementation-permitted or accidentally exploited.
 
-Scope limits. You need to read basic `ed` commands: `s/re/new/`, `g/re/cmd`, `a`, `d`, `j`, `t`, `p`. The guide does not teach every Ex command, the SQL, or Vim. It uses POSIX `ed` and `ex` as shipped in the sandbox (nvi for Ex; Vim in Ex mode works with different flags). The book's page is [ed and Ex](../../languages/editors.md). For ideas, see [Computation versus orchestration](../../cs/02-what-counts-as-a-machine.md#computation-versus-orchestration), [Capability and authority](../../cs/01-reading-an-adversarial-program.md#capability-and-authority) and [Representing state](../../cs/02-what-counts-as-a-machine.md#representing-state).
+**Scope limits.** You need to read basic `ed` commands: `s/re/new/`, `g/re/cmd`, `a`, `d`, `j`, `t`, `p`. The guide does not teach every Ex command, the SQL or Vim. It uses POSIX `ed` and `ex` as shipped in the sandbox (nvi for Ex; Vim in Ex mode works with different flags). The book's page is [ed and Ex](../../languages/editors.md). For ideas, see [Computation versus orchestration](../../cs/02-what-counts-as-a-machine.md#computation-versus-orchestration), [Capability and authority](../../cs/01-reading-an-adversarial-program.md#capability-and-authority) and [Representing state](../../cs/02-what-counts-as-a-machine.md#representing-state).
 
 ## Before you begin
 
@@ -40,13 +40,13 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and the fifth card is drawn, with the category wrapping to Meetings. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
 The launchers load the editor output into SQLite. Both scripts limit the input the same way: the launcher supplies **five** dice, because five cards of at least 10 hours always reach 50. The editor script decides how many of the five count. ed marks the first card whose marks reach 41 (`x\{41,\}`, [L46](../../../src/ed-weird/timecards.ed#L46)) and turns every later card into a "Dead" card. Ex reads a tape line for each new total: lines 0 to 40 say `@a` (go on), and lines 41 to 59 say `"` (a comment: do nothing) ([L53](../../../src/ex-weird/timecards.ex#L53)). A total of exactly 40 reads tape line 40, which says go on.
 
 ## The machine to identify
 
-The launcher draws five digits, loads the editor, and afterwards stores the rows in SQLite. It is orchestration, not computing: "every card, total and stop decision is made by ed" (or Ex). See [Computation versus orchestration](../../cs/02-what-counts-as-a-machine.md#computation-versus-orchestration).
+The launcher draws five digits, loads the editor and afterwards stores the rows in SQLite. It is orchestration, not computing: "every card, total and stop decision is made by ed" (or Ex). See [Computation versus orchestration](../../cs/02-what-counts-as-a-machine.md#computation-versus-orchestration).
 
 **What repeats.** In `ed-weird`, one global command over the card lines, in buffer order: `g/^[A-Za-z]* [0-9][0-9] x*$/` ([L42-46](../../../src/ed-weird/timecards.ed#L42-L46)). The global command is ed's own loop. In `ex-weird`, `@n`: the register `n` runs the program again, so the program runs itself ([L91](../../../src/ex-weird/timecards.ex#L91)).
 
@@ -56,7 +56,7 @@ The launcher draws five digits, loads the editor, and afterwards stores the rows
 
 **What stops it.** In `ed-weird`, three substitutions in the global command are guarded by their own patterns. The first needs a ledger that says "40 or less" (`|`). The second needs a ledger that says "already over" (`!`) and turns the card into `Dead`, and the third turns `|` into `!` when the marks reach 41. In `ex-weird`, the tape line under the mark is `"` once the total is 41 or more, so `@n` runs a comment and nothing happens.
 
-**What commits.** The editor commits nothing. It prints rows to standard output, and the launcher loads them into SQLite in one go, with the `CHECK` constraints that enforce DEMO ONLY and the hours range. The "commit" is in the launcher: this is a clean example of an authority boundary. The editor has no database access, and the database has no editor access.
+**What commits.** The editor commits nothing. It prints rows to standard output, and the launcher loads them into SQLite in one operation, with the `CHECK` constraints that enforce DEMO ONLY and the hours range. The "commit" is in the launcher: this is a clean example of an authority boundary. The editor has no database access, and the database has no editor access.
 
 <!-- diagram-source: src/ed-weird/README.md#program-flow -->
 
@@ -184,22 +184,22 @@ The two scripts split the same job differently. ed represents *what was added* (
 | B19, step 3 | Remove `\|@n`. | One card. Nothing runs register `n`, so the program never starts itself again. |
 | [C1. Weird next to boring](../../exercises.md#c1-weird-next-to-boring-verified) | In which script is the stop rule data? | In Ex, it is a line of the tape. In ed, it is a pattern. |
 
-A good one-sentence answer for B18: the `g` command made the loop, the failed `s` made the `if`, and the regular expression's repeat count made the limit.
+A good one-sentence answer for B18: the `g` command made the loop, the failed `s` made the `if` and the regular expression's repeat count made the limit.
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| A `g/re/cmd` command runs `cmd` on every matching line | **Guaranteed** | Documented ed behavior. |
-| A failed `s` inside a `g` command does nothing and does not stop the command | **Accidentally exploited** | The entry's README classifies it so. The GNU manual says a command list stops on the first error, and does not say that a substitution that finds nothing is not an error. On GNU ed 1.20.1 it is not, and without that there is no `if`. |
-| The program runs on GNU ed | **Implementation-permitted** | The README tested GNU ed 1.20.1. busybox ed has none of `t`, `m`, `j`, `g`, `v` or `Q`, no `#` comments, and cannot substitute on `^`, so it cannot run the script, and the check says so. |
-| `x\{41,\}` (an interval in a basic regular expression) | **Implementation-permitted** | POSIX BRE, and supported by GNU ed. busybox ed does not support intervals. |
-| Marks, registers and `@` in Ex | **Implementation-permitted** | Part of Ex as implemented by nvi and Vim. Register contents and the exact `@` semantics differ in small ways. |
-| A line that starts with `"` is a comment in Ex | **Guaranteed** by the Ex language | It is what makes a tape line a "stop". |
-| nvi prints `Error: stderr: Inappropriate ioctl for device` when it has no terminal | **Implementation-permitted** | A known message the launcher filters. Anything else that is not a row is an error. |
-| Vim in Ex mode needs `-s -u NONE -N` | **Implementation-permitted** | The launcher chooses flags by the editor's `--version`. |
-| Five dice always suffice | **Guaranteed** | Arithmetic: five cards of at least 10 hours reach 50. |
-| The tape ends at 59, matching the maximum total | **Guaranteed** by the challenge's range | A change to the hours range would need a longer tape. |
+| A `g/re/cmd` command runs `cmd` on every matching line | **guaranteed** | Documented ed behavior. |
+| A failed `s` inside a `g` command does nothing and does not stop the command | **accidentally exploited** | The entry's README classifies it so. The GNU manual says a command list stops on the first error, and does not say that a substitution that finds nothing is not an error. On GNU ed 1.20.1 it is not, and without that there is no `if`. |
+| The program runs on GNU ed | **implementation-permitted** | The README tested GNU ed 1.20.1. busybox ed has none of `t`, `m`, `j`, `g`, `v` or `Q`, no `#` comments and cannot substitute on `^`, so it cannot run the script, and the check says so. |
+| `x\{41,\}` (an interval in a basic regular expression) | **implementation-permitted** | POSIX BRE, and supported by GNU ed. busybox ed does not support intervals. |
+| Marks, registers and `@` in Ex | **implementation-permitted** | Part of Ex as implemented by nvi and Vim. Register contents and the exact `@` semantics differ in small ways. |
+| A line that starts with `"` is a comment in Ex | **guaranteed** by the Ex language | It is what makes a tape line a "stop". |
+| nvi prints `Error: stderr: Inappropriate ioctl for device` when it has no terminal | **implementation-permitted** | A known message the launcher filters. Anything else that is not a row is an error. |
+| Vim in Ex mode needs `-s -u NONE -N` | **implementation-permitted** | The launcher chooses flags by the editor's `--version`. |
+| Five dice always suffice | **guaranteed** | Arithmetic: five cards of at least 10 hours reach 50. |
+| The tape ends at 59, matching the maximum total | **guaranteed** by the challenge's range | A change to the hours range would need a longer tape. |
 
 Most of this is documented features used as documented. The exception is the silent failed `s`, which the ed README classifies as accidentally exploited: the `if` that the whole chain depends on is behavior of one implementation, not a promise. The unusual part elsewhere is the *combination*, such as using a register as both a program and a loop.
 
@@ -213,7 +213,7 @@ Most of this is documented features used as documented. The exception is the sil
 
 ## Connections across the repository
 
-- **A data-driven program counter.** In Ex, the position on a tape *is* the total and the stop rule is a line of text. [COBOL](cobol.md) stores the next step in a jump target, [Forth](forth.md) in the parse position, and [Make and CMake](make-and-cmake.md) in files and captures. The concept guide [State and control beyond variables](../concepts/state-and-control-beyond-variables.md) lines these up.
+- **A data-driven program counter.** In Ex, the position on a tape *is* the total and the stop rule is a line of text. [COBOL](cobol.md) stores the next step in a jump target, [Forth](forth.md) in the parse position and [Make and CMake](make-and-cmake.md) in files and captures. The concept guide [State and control beyond variables](../concepts/state-and-control-beyond-variables.md) lines these up.
 - **Rewriting as arithmetic.** ed adds by writing marks side by side, as the sed entry in [Regex engines and sed](regex-engines-and-sed.md) does with `#`. Both are string-rewriting machines.
 - **A failed match as an `if`.** The failed `s` inside `g` is the same move as the failed `MATCHES` in CMake and the failed pass in the regex entries, and like the CMake behavior it is accidentally exploited.
 - **Orchestration against computation.** The launcher is the same kind of host as the one in [tar](tar.md): the real work is the tool, and the shell glues it to SQLite.
@@ -221,12 +221,12 @@ Most of this is documented features used as documented. The exception is the sil
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** `DICE="2 2 2 2 2"` (hours 12 each). For the Ex script, give the mark position after each pass and the tape instruction there. *(Positions 12, 24, 36, 48. Instructions `@a`, `@a`, `@a`, `"`. Four cards, the fourth is the crossing card, and the fifth die is unused.)*
 2. **Explain.** Why does a `Dead` card keep the `!` and the marks? *(The `Dead` rule copies the ledger's `!` and marks onto the card, so the next card sees a ledger with `!` and dies too. The rule passes the "already over" state down the buffer.)*
 3. **Transfer.** The Ex tape stores the stop rule as 60 lines of data. What does a language with ordinary variables use instead, and what is the trade-off? *(A comparison on a variable. It is shorter and easier to read, and it cannot be changed by editing a line of data while the program is not running.)*
-4. **Evidence.** A reviewer claims "these scripts never run a shell command." Design a test that could fail. *(Search the script for `!` commands outside comments and strings, as `check.sh` style tests do for banned words. The negative control is a copy with an added `!true`, which the test must flag.)*
+4. **Evidence.** A reviewer says, "These scripts never run a shell command." Design a test that could fail. *(Search the script for `!` commands outside comments and strings, as `check.sh` style tests do for banned words. The negative control is a copy with an added `!true`, which the test must flag.)*
 
 ## Further reading
 

@@ -1,10 +1,12 @@
 # Regular expressions: five engines, five personalities
 
-Entries: [`regex-perl`](../../src/regex-perl/README.md), [`regex-pcre2`](../../src/regex-pcre2/README.md), [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md), [`regex-dotnet`](../../src/regex-dotnet/README.md), [`regex-sed`](../../src/regex-sed/README.md).
+Entries: [`src/regex-perl`](../../src/regex-perl/README.md), [`src/regex-pcre2`](../../src/regex-pcre2/README.md), [`src/regex-pcre2grep`](../../src/regex-pcre2grep/README.md), [`src/regex-dotnet`](../../src/regex-dotnet/README.md), [`src/regex-sed`](../../src/regex-sed/README.md).
 
 For an advanced reading path with traces and experiments, see the [regex engines and sed study guide](../study-guides/languages/regex-engines-and-sed.md).
 
-A regular expression looks like a pattern. These entries treat it as a **program**: the match is the computation, backtracking is the search, and the side effects are what you *wanted*. The recurring signature move is to do all the work and then **return "no match" on purpose**.
+A regular expression looks like a pattern. These entries treat it as a **program**: the match is the computation, backtracking is the search and the side effects are what you *wanted*. The recurring signature move is to do all the work and then **return "no match" on purpose**.
+
+This survey compares five engines. The Perl example works through the mechanism in detail and combines the explanation with the exercise.
 
 ## What makes each engine special
 
@@ -43,7 +45,8 @@ The file's only statement is a single `=~`. Seeding, the random draws, the SQLit
 
 - Backtracking is a search procedure, and a failing branch is information. State that unwinds (`local`) and state that does not (I/O) behave differently, and that difference is the whole trick. See [patterns](../patterns.md#backtracking-side-effects-and-error-handling).
 - **Production**: code in patterns is hard to test or debug, and in Perl, regex code blocks run with the file's `strict` rules and can only `local` package variables.
-- **Tags**: `(?{ })`, `(??{ })` and `local` unwinding are **documented Perl features**.
+
+Tags: `(?{ })`, `(??{ })` and `local` unwinding are **guaranteed** by the Perl regex documentation.
 
 ## PCRE2: callouts as an instruction set
 
@@ -53,7 +56,7 @@ The whole pattern ([`timecards.c` L24-26](../../src/regex-pcre2/timecards.c#L24-
 ^(?C"init")(?:(?C"gate")(Meetings|Coding|Debugging|Learning)(?C"book"))*(*COMMIT)(?C"commit")(*FAIL)
 ```
 
-(Plus a pulse tail.) The C host compiles it, registers one dispatcher, calls `pcre2_match` once, and prints the file. The callout string is an opcode: `init`, `gate` (returns 1 once the total is over 40 to fail the branch and end the loop), `book`, `commit`. **PCRE2 supplies the iteration, the category walk and the backtracking.**
+(Plus a pulse tail.) The C host compiles it, registers one dispatcher, calls `pcre2_match` once and prints the file. The callout string is an opcode: `init`, `gate` (returns 1 once the total is over 40 to fail the branch and end the loop), `book`, `commit`. **PCRE2 supplies the iteration, the category walk and the backtracking.**
 
 - **The optimizer caveat is the lesson.** Callouts only mean something if the engine visits them. The program compiles with `PCRE2_NO_AUTO_POSSESS | PCRE2_NO_START_OPTIMIZE | PCRE2_NO_DOTSTAR_ANCHOR` ([L84-86](../../src/regex-pcre2/timecards.c#L84-L86)) and avoids the JIT, which does not support callouts. This is **implementation-permitted**, and the README did not test what the optimizer would elide with the flags removed.
 - **State in a C struct does not rewind on backtracking**, unlike Perl's `local`. That suits this program: nothing is ever undone.
@@ -64,8 +67,8 @@ The whole pattern ([`timecards.c` L24-26](../../src/regex-pcre2/timecards.c#L24-
 The "host" is a stock `pcre2grep` and one command line. Callout strings name programs; **their exit codes steer the match**. The stop rule is an `INSERT INTO stop_rule SELECT (...)<=40` into a table with `CHECK(ok=1)`, so SQLite's constraint violation is the loop terminator.
 
 - **Callouts need absolute paths.** `pcre2grep` uses `fork` and `execv`, which do not search `PATH`. A bare `true` or `sleep` is silently a failed callout, indistinguishable from a vetoed branch.
-- **No state in the pattern.** The running total lives in SQLite and each callout re-reads it.
-- **Each write commits separately.** The helpers run independent SQLite commands in autocommit mode. The regex’s `(*COMMIT)` prunes backtracking paths. The final match failure leaves earlier database writes in place.
+- **No state in the pattern.** The running total lives in SQLite and each callout rereads it.
+- **Each write commits separately.** The helpers run independent SQLite commands in autocommit mode. The regex's `(*COMMIT)` prunes backtracking paths. The final match failure leaves earlier database writes in place.
 - **Ubuntu's own `pcre2grep` is built without callout scripts.** It needs an upstream build (the sandbox image pins 10.49). A textbook **implementation-permitted** case.
 - **Security**: callouts that run programs are a command-execution feature. `check.sh` allows only `/usr/bin/sqlite3`, `/usr/bin/test` and `/bin/sleep`.
 
@@ -73,10 +76,10 @@ The "host" is a stock `pcre2grep` and one command line. Callout strings name pro
 
 [`Program.cs` L13](../../src/regex-dotnet/Program.cs#L13) uses a budget of 41 empty captures and **balancing groups** that pop one per hour: `(?<-b>)`. The "counter" is a capture stack.
 
-This entry is the repo's best **honest failure**, and it is the one that most clearly marks where regex alone stops. See [blocking problems](../blocking-problems.md#regexdotnet):
+This entry is the repo's best **honest failure**, and it is the one that most clearly marks where regex alone stops. See [blocking problems](../blocking-problems.md#regex-dotnet):
 
 - A regex cannot draw random numbers, so the host seeds five unary strings.
-- The host reads the successful match’s captures and appends a TSV report.
+- The host reads the successful match's captures and appends a TSV report.
 - **Failure yields zero card rows.** Append `(?!)` to fail the entire match. On the fixed all-10 tape, the normal pattern succeeds with five cards and a total of 50. The forced failure exposes zero captures, leaves an empty TSV report and exits 1. See the [entry check](../../src/regex-dotnet/check.sh).
 
 ## GNU sed
@@ -103,7 +106,7 @@ The README has an eleven-step trace of one iteration, and `TRACE=1 ./timecards.s
 
 Never as an application design. But callouts and code blocks are legitimate in *tools*: tokenizers, lexers, instrumented matchers, pattern debuggers and teaching aids. And understanding backtracking performance cliffs, the thing sed's pulse exploits for a clock, is the practical skill that protects production systems from ReDoS.
 
-## Quirks, collected
+## Quirks
 
 - Perl regex code blocks need package variables; `strict` and `local` interact.
 - Perl's `no warnings 'regexp'` is needed to silence the "null iteration" warning on a dynamic loop body.

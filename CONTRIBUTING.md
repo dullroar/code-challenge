@@ -44,7 +44,7 @@ tags: [control-flow, stack-data-structure, stack-machine, transaction]
 | Key | Required | What to write |
 | --- | --- | --- |
 | `name` | yes | The language or tool, as a reader would say it: `"Forth"`, `"GNU sed"`, `".NET regex"`. |
-| `teaches` | yes | One sentence: what a reader learns. If your README has a `**Teaches you:**` line, use exactly the same words (the build checks this). |
+| `teaches` | yes | One lowercase `that` clause that says what a reader learns. If your README has a `**Teaches you:**` line, use exactly the same words (the build checks this). |
 | `kind` | yes | `idiomatic` (the ordinary way), `weird` (the stunt), or `port` (the same stunt in another language). |
 | `languages` | yes | A list of language ids, in lowercase, from [`lessons/cs-source/languages.txt`](lessons/cs-source/languages.txt): `[forth]`, `[c-sharp, linq]`. List every language the entry is written in or runs on (the host language, the query language, the regex flavor). The book's language index and tables are built from this. If yours is missing, use the nearest id and say so in your pull request. |
 | `lesson` | yes | The lesson page that covers it, relative to `lessons/`, with an optional `#anchor`: `"languages/forth.md"`. If there is no page for your language yet, use the closest one. A maintainer fixes it when they add yours. |
@@ -119,15 +119,7 @@ flowchart TD
 
 ### 4. Voice and tone
 
-All the READMEs and lessons share one voice. Please write in it.
-
-- **Playful, not silly.** Humor is welcome: "Behold the monstrosity", "do this in production and you're fired". A joke should still teach something.
-- **Clear for readers whose first language is not English.** Many readers use a translator, so write in short sentences (aim for under 25 words) with one idea each. Prefer active voice. Say "the program stops" and not "the program is brought to a halt".
-- **Avoid idioms and slang that do not translate**, such as "a piece of cake", "out of the box" and "ballpark". If you want a figure of speech, make sure the sentence is still clear without it.
-- **Explain a term the first time you use it**, and spell out an acronym once (for example, "denial of service (DoS)"). Use the same word for the same thing every time.
-- **Address the reader as "you".** Say "we" for the repository and its maintainers.
-- **Use American spelling** and plain ASCII punctuation in prose. (Code, APL glyphs and visible Unicode in examples are fine.)
-- **Keep your examples.** A concrete example beats a paragraph of explanation.
+Follow the [house style](house-style.md) for README prose, lesson text and study guides. Give readers a concrete example and keep the explanation clear for readers who use a translator.
 
 ### 5. Check it before you send it
 

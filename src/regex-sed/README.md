@@ -1,6 +1,6 @@
 ---
 name: "GNU sed"
-teaches: "That a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock."
+teaches: "that a program can be one line of text that substitutions rewrite until none applies: a Markov algorithm, with a catastrophic-backtracking regex as its clock."
 kind: weird
 languages: [sed, regex]
 lesson: "languages/regex.md#gnu-sed"

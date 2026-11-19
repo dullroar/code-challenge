@@ -2,7 +2,7 @@
 
 ## What this guide is for
 
-This guide reads three Node.js programs that solve the same challenge in three different control styles: [`src/javascript`](../../../src/javascript/README.md), one bodiless `for` statement whose three clauses do everything; [`src/javascript-weird`](../../../src/javascript-weird/README.md), three closures and a lazy iterator with no loop statement; and [`src/javascript-events`](../../../src/javascript-events/README.md), ten listeners on one `EventEmitter`. The question is: **who owns the next step: the loop header, the consumer that pulls, or the event loop?**
+This guide reads three Node.js programs that solve the same challenge in three different control styles: [`src/javascript`](../../../src/javascript/README.md), one bodiless `for` statement whose three clauses do everything; [`src/javascript-weird`](../../../src/javascript-weird/README.md), three closures and a lazy iterator with no loop statement; and [`src/javascript-events`](../../../src/javascript-events/README.md), ten listeners on one `EventEmitter`. The question is: **who owns the next step: the loop header, the consumer that pulls or the event loop?**
 
 When you finish, you should be able to:
 
@@ -11,9 +11,9 @@ When you finish, you should be able to:
 3. Explain pull iteration: nothing is drawn until a consumer asks, and the consumer decides how many cards exist.
 4. Explain the difference between `emit()` (a synchronous call) and `setImmediate()` (a new turn of the event loop), and what happens to the call stack without that boundary.
 5. Trace all three programs through the same three cards.
-6. Label each behavior as guaranteed, implementation-permitted, or accidentally exploited.
+6. Label each behavior as guaranteed, implementation-permitted or accidentally exploited.
 
-Scope limits. You need to read modern JavaScript: arrow functions, object literals, spread and the comma operator. The guide does not teach SQLite or the terminal pulse. It uses Node.js 24 with built-in `node:sqlite` and iterator helpers. The language page is [JavaScript](../../languages/javascript.md). For events in general, see the chapter [Events, callbacks, and reactive control flow](../../cs/10-events-callbacks-and-reactive-control-flow.md).
+**Scope limits.** You need to read modern JavaScript: arrow functions, object literals, spread and the comma operator. The guide does not teach SQLite or the terminal pulse. It uses Node.js 24 with built-in `node:sqlite` and iterator helpers. The language page is [JavaScript](../../languages/javascript.md). For events in general, see the chapter [Events, callbacks and reactive control flow](../../cs/10-events-callbacks-and-reactive-control-flow.md).
 
 ## Before you begin
 
@@ -41,9 +41,9 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 ## The shared challenge
 
-The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn, with the category wrapping to Meetings. Conforming runs finish with 3 to 5 cards and a total of 41 to 59.
+The [challenge specification](../../intro.md#what-the-challenge-does) calls for cards with a category and 10 to 19 whole hours. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to the running total. Stop when the total passes 40. Keep the **first card that takes the total over 40**. A total of exactly 40 continues. Four 10-hour cards need a fifth card, in the Meetings category. Conforming runs finish with 3 to 5 cards and a total of 41 to 59 hours.
 
-All three stop on the first crossing and print a summary, but their SQLite write boundaries differ. The first two insert as they go. The events version wraps the run in one transaction. Each style writes the stop test differently. In the `for`, the condition is `reduce(...) <= 40 ? true : (...show the result..., false)`: `<= 40` is true for 40, so the loop goes round ([L54](../../../src/javascript/timecards.mjs#L54)). In the weird program, `over = total > 40` is false for 40, so the machine keeps answering ([core.mjs L14](../../../src/javascript-weird/core.mjs#L14)). In the events program, `total > limit` is false for 40, so the next card is scheduled ([L115](../../../src/javascript-events/timecards.mjs#L115)).
+All three stop on the first crossing and print a summary, but their SQLite write boundaries differ. The first two insert as they go. The events version wraps the run in one transaction. Each style writes the stop test differently. In the `for`, the condition is `reduce(...) <= 40 ? true : (...show the result..., false)`: `<= 40` is true for 40, so the loop repeats ([L54](../../../src/javascript/timecards.mjs#L54)). In the weird program, `over = total > 40` is false for 40, so the machine keeps answering ([core.mjs L14](../../../src/javascript-weird/core.mjs#L14)). In the events program, `total > limit` is false for 40, so the next card is scheduled ([L115](../../../src/javascript-events/timecards.mjs#L115)).
 
 ## The machine to identify
 
@@ -51,13 +51,13 @@ All three stop on the first crossing and print a summary, but their SQLite write
 
 **Evaluation.** The three original entries seed via the global Web Crypto `crypto.getRandomValues` when `SEED` is absent. In the bodiless `for`, `reduce` sums the array immediately on every condition check. The [C# header](csharp-linq-xaml-and-ports.md) does the same work with `Sum()`, even though its inner LINQ projection is deferred until `Sum()` enumerates it. The pull iterator below uses a different driver.
 
-**Where state lives.** In `javascript`, the properties of one object literal that the `for` initializer builds: hours so far, the database, the random closure and the clock. In `javascript-weird`, three closures: a source of hours over one number, a card machine over `n`, `total` and `over`, and an iterator wrapper. None of that state can be reached except by calling the function ([core.mjs](../../../src/javascript-weird/core.mjs)). In `javascript-events`, an object `s` (`n`, `total`, `db`, ...) shared by the listeners, plus the registrations on the emitter itself.
+**Where state lives.** In `javascript`, the properties of one object literal that the `for` initializer builds: hours so far, the database, the random closure and the clock. In `javascript-weird`, three closures: a source of hours over one number, a card machine over `n`, `total` and `over` and an iterator wrapper. None of that state can be reached except by calling the function ([core.mjs](../../../src/javascript-weird/core.mjs)). In `javascript-events`, an object `s` (`n`, `total`, `db`, ...) shared by the listeners, plus the registrations on the emitter itself.
 
 **What advances the next step.** In `javascript`, the third `for` clause draws one card and saves it. In `javascript-weird`, a call to the iterator's `next()`. In `javascript-events`, one listener emits the event that the next listener is waiting for.
 
 **What stops it.** In `javascript`, the condition returns `false` after showing the result. In `javascript-weird`, the machine's `over` flag: after the crossing card, every ask answers `undefined`, and the iterator says `done`. In `javascript-events`, `total-updated` emits `finished` instead of scheduling another `generate`.
 
-**What commits.** In `javascript`, rows are saved by the iterator clause as they are made, and the condition prints. In `javascript-weird`, each ask saves its record in a `.map(save)` stage, and the summary is printed after the pipeline is complete. In `javascript-events`, `start` runs `BEGIN`, `card-created` inserts a row synchronously, and `finished` runs `COMMIT`. A throw in any listener becomes a `failed` event, which does a `ROLLBACK` exactly once.
+**What commits.** In `javascript`, rows are saved by the iterator clause as they are made, and the condition prints. In `javascript-weird`, each ask saves its record in a `.map(save)` stage, and the summary is printed after the pipeline is complete. In `javascript-events`, `start` runs `BEGIN`, `card-created` inserts a row synchronously and `finished` runs `COMMIT`. A throw in any listener becomes a `failed` event, which does a `ROLLBACK` exactly once.
 
 <!-- diagram-source: src/javascript/README.md#program-flow -->
 
@@ -185,7 +185,7 @@ emit generate
 
 (The printed rows and the summary appear between the lines in the real output and are omitted here.) `emit start` returned before any card existed. Each card ran in its own turn, four emits deep, and the stack unwound before the next turn. On turn 4 the total was 46, so `total-updated` emitted `finished` directly instead of scheduling, and `finished` committed.
 
-**Exactly 40.** With four 10-hour cards: the `for` test `40 <= 40` is true, so a fifth card is drawn. The weird machine has `over = 40 > 40`, false, so it answers again. The events listener evaluates `40 > 40`, false, and schedules a fifth `generate`. All three continue.
+**Exactly 40.** With four 10-hour cards: the `for` test `40 <= 40` is true, so a fifth card is drawn. The weird machine has `over = 40 > 40`, false, so it answers again. The events listener evaluates `40 > 40`, false and schedules a fifth `generate`. All three continue.
 
 ## Compare the ordinary and weird designs
 
@@ -198,7 +198,13 @@ emit generate
 | **Portability** | Node 22+ for `node:sqlite` | Also needs iterator helpers (`Iterator.from`, `.map`, `.toArray`) | Only Node's `EventEmitter` semantics (listener order, synchronous `emit`) |
 | **Cost** | One pass | Lazy: a card is made only when asked | A hop per card, and a flat call stack |
 
-The three programs separate three questions that most code ties together: *what is the next step* (the header, `next()`, or an event), *who decides to take it* (the loop, the consumer, or the loop in the runtime) and *where is the state* (an object, a closure, or a shared bag). A synchronous `emit` looks like an asynchronous event and is a function call. The event chain is recursion unless something breaks it.
+The three programs separate three questions that most code ties together.
+
+1. What is the next step? The header, `next()` or an event.
+2. Who decides to take it? The loop, the consumer or the loop in the runtime.
+3. Where is the state? An object, a closure or a shared object.
+
+A synchronous `emit` calls its listeners directly. The event chain recurses until a scheduling boundary lets those calls return.
 
 ## What the exercises demonstrate
 
@@ -213,45 +219,45 @@ The three programs separate three questions that most code ties together: *what 
 
 B22 step 4 is the most instructive failure in this family: the program is *correct* for the sizes you test and breaks at a size you do not. A chain of synchronous `emit` calls is a recursion whose depth grows with the number of cards.
 
-## Failure modes, costs, and boundaries
+## Failure modes, costs and boundaries
 
 | Behavior | Label | Why |
 | --- | --- | --- |
-| A closure keeps its captured variables alive and private | **Guaranteed** | Language semantics. |
-| On the dense hours array, the reducer visits every card on each call | **Guaranteed** | `Array.prototype.reduce` runs the callback for every present element unless evaluation throws. The plain entry calls it during every condition check. The weird entry folds once after collection. |
-| `emit()` calls listeners synchronously, in registration order, before it returns | **Guaranteed** | Documented Node.js behavior (see [`emitter.emit`](https://nodejs.org/api/events.html)). |
-| `emit('error', e)` with no `error` listener throws `e` | **Guaranteed** | Documented. The program registers an `error` listener to turn a stray error into `failed`. |
-| `setImmediate` runs its callback after the current code finishes and before timers of a later phase | **Guaranteed** | Documented Node.js scheduling. |
-| The Park-Miller closure replays a run for a given `SEED` | **Guaranteed** | It is plain arithmetic. `Math.random` cannot be seeded, which is why it is not used. |
-| `node:sqlite` is synchronous, so a row is written when `run()` returns | **Implementation-permitted** | A property of Node's built-in module at the tested version. If the API became asynchronous, the `card-saved` guarantee ("nothing downstream sees an unsaved card") would break. |
-| `Iterator.from(...).map(...).toArray()` | **Implementation-permitted** | Iterator helpers are recent. They exist in the Node 24 the entries target, not in older runtimes. |
-| A flat stack over about 2000 cards depends on the `setImmediate` boundary | **Guaranteed** by design, tested | Removing it fails a test and a long run, as exercise B22 shows. |
+| A closure keeps its captured variables alive and private | **guaranteed** | Language semantics. |
+| On the dense hours array, the reducer visits every card on each call | **guaranteed** | `Array.prototype.reduce` runs the callback for every present element unless evaluation throws. The plain entry calls it during every condition check. The weird entry folds once after collection. |
+| `emit()` calls listeners synchronously, in registration order, before it returns | **guaranteed** | Documented Node.js behavior (see [`emitter.emit`](https://nodejs.org/api/events.html)). |
+| `emit('error', e)` with no `error` listener throws `e` | **guaranteed** | Documented. The program registers an `error` listener to turn a stray error into `failed`. |
+| `setImmediate` runs its callback after the current code finishes and before timers of a later phase | **guaranteed** | Documented Node.js scheduling. |
+| The Park-Miller closure replays a run for a given `SEED` | **guaranteed** | It is plain arithmetic. `Math.random` cannot be seeded, which is why it is not used. |
+| `node:sqlite` is synchronous, so a row is written when `run()` returns | **implementation-permitted** | A property of Node's built-in module at the tested version. If the API became asynchronous, the `card-saved` guarantee ("nothing downstream sees an unsaved card") would break. |
+| `Iterator.from(...).map(...).toArray()` | **implementation-permitted** | Iterator helpers are recent. They exist in the Node 24 the entries target, not in older runtimes. |
+| A flat stack over about 2000 cards depends on the `setImmediate` boundary | **guaranteed** by design, tested | Removing it fails a test and a long run, as exercise B22 shows. |
 
 No JavaScript behavior here is merely accidentally exploited. The closest is that the `for` header uses the comma operator inside an arrow function because a `for` initializer accepts only one declaration; that is a language rule, but one the code works around rather than uses.
 
 **Costs to state.**
 
 - **A throw in a scheduled callback has no caller.** It would end the process. The events program wraps every listener so that a throw becomes `failed`, and `failed` removes every listener so that it runs exactly once.
-- **Re-entrancy.** A listener that emits can re-enter other listeners. The programs avoid it by having each listener do one thing and emit once.
+- **Reentrancy.** A listener that emits can re-enter other listeners. The programs avoid it by having each listener do one thing and emit once.
 - **Hidden order dependence.** Listener order is registration order. Reordering the `on(...)` calls changes the program.
-- **Where the techniques are legitimate.** Closures as private state, lazy iterators for large or infinite sources, and an emitter with explicit turn boundaries are ordinary JavaScript. The stunts are the empty-body `for` and the absence of any statement loop.
+- **Where the techniques are legitimate.** Closures as private state, lazy iterators for large or infinite sources and an emitter with explicit turn boundaries are ordinary JavaScript. The stunts are the empty-body `for` and the absence of any statement loop.
 
 ## Connections across the repository
 
-- **The same question as Haskell and LINQ.** Pull iteration in `javascript-weird` is the JavaScript form of [Haskell](haskell.md)'s lazy list and the deferred pipelines of [C#, LINQ, XAML, and ports](csharp-linq-xaml-and-ports.md). The concept guide [Evaluation, demand, and laziness](../concepts/evaluation-demand-and-laziness.md) puts them side by side.
+- **The same question as Haskell and LINQ.** Pull iteration in `javascript-weird` is the JavaScript form of [Haskell](haskell.md)'s lazy list and the deferred pipelines of [C#, LINQ, XAML and ports](csharp-linq-xaml-and-ports.md). The concept guide [Evaluation, demand and laziness](../concepts/evaluation-demand-and-laziness.md) puts them side by side.
 - **The `for` header as the whole program.** Four other ports (C#, Java, Go and Kotlin) use the same bodiless-`for` shape. See the comparison in the C# guide.
-- **Turn boundaries and re-entrancy.** [Events, callbacks, and reactive control](../concepts/events-callbacks-and-reactive-control.md) generalizes B22. [XAML and thread affinity](csharp-linq-xaml-and-ports.md) is a related hazard: *where* a callback runs matters.
+- **Turn boundaries and reentrancy.** [Events, callbacks and reactive control](../concepts/events-callbacks-and-reactive-control.md) generalizes B22. [XAML and thread affinity](csharp-linq-xaml-and-ports.md) is a related hazard: *where* a callback runs matters.
 - **Callbacks in other entries.** The PCRE2 callouts in [Regex engines and sed](regex-engines-and-sed.md) and the checkpoint actions in [tar](tar.md) are synchronous callbacks too, but the engine calls them, not an event loop.
 - **In the book.** [JavaScript](../../languages/javascript.md), [Iterators and generators](../../cs/04-evaluation-and-demand.md#iterators-and-generators), [Closures and lexical environments](../../cs/06-state-beyond-variables.md#closures-and-lexical-environments), [Callbacks](../../cs/10-events-callbacks-and-reactive-control-flow.md#callbacks) and [The event loop and scheduling turns](../../cs/10-events-callbacks-and-reactive-control-flow.md#the-event-loop-and-scheduling-turns).
 
 ## Self-check
 
-Answer before you read the italic text after each question.
+Answer each question in your own words before you read the italic text. Say what evidence would support each answer.
 
 1. **Trace.** Hours are 10, 10, 10, 10, 13. For `javascript-weird`, how many times does `toArray` ask the machine, and what does the last ask return? *(Six asks. The fifth card (13 hours, total 53) sets `over`, and the sixth ask returns `undefined`. Five asks produce cards, because exactly 40 does not set `over`.)*
 2. **Explain.** In `javascript-events`, why does `total-updated` call `later('generate')` but call `events.emit('finished')` directly? *(`later` hops to a new turn so the stack unwinds between cards. `finished` ends the chain, so there is no recursion to avoid, and it runs inside the same turn so the commit happens before anything else can intervene.)*
 3. **Transfer.** What would you use in Python or Rust to get the same "nothing is produced until asked" behavior as the iterator pipeline? *(A generator or an iterator adapter chain. Nothing runs until something consumes it, and the consumer decides how many items exist.)*
-4. **Evidence.** A reviewer says the events program "never nests more than five calls deep." Design a test that could fail. *(Wrap `emit` with a depth counter on a very long run, as in exercise B22, and assert the maximum depth. The negative control is the version with `later('generate')` replaced by a direct `emit`, whose depth grows with the number of cards. The claim is guaranteed by design and tested.)*
+4. **Evidence.** A reviewer says, "The events program never nests more than five calls deep." Design a test that could fail. *(Wrap `emit` with a depth counter on a very long run, as in exercise B22, and assert the maximum depth. The negative control is the version with `later('generate')` replaced by a direct `emit`, whose depth grows with the number of cards. The claim is guaranteed by design and tested.)*
 
 ## Further reading
 

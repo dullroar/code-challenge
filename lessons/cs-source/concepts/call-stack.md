@@ -23,7 +23,7 @@ flowchart TB
 Each active call owns one frame, and the newest frame is on top. When `saveRow` returns, its frame is removed and execution continues at the return address it stored, which is inside `drawCard`. The names here are examples, and the exact layout of a frame differs between languages and processors. The general idea of a stack is in [[stack-data-structure]].
 
 - **Use it when:** you read a stack trace, or you reason about recursion depth.
-- **Avoid:** unbounded recursion. A stack overflow ends the program, and in unsafe languages it can become a security hole.
+- **Avoid it when:** the recursion depth has no bound. A stack overflow ends the program, and in unsafe languages it can become a security hole.
 
 **Read more:**
 

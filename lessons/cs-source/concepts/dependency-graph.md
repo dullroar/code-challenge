@@ -20,7 +20,7 @@ flowchart LR
 Each arrow here runs from an input to the thing built from it, so a change travels along the arrows. (Some books draw the arrow the other way, from a thing to what it needs. The facts are the same.) Only `categories` changed, so only what is downstream of it must be redone. `raw cards` keeps its old result. The graph says what *must* be recomputed, not when values arrive. For that, see [[dataflow-programming]].
 
 - **Use it when:** any problem of the form "A must come before B".
-- **Avoid:** cycles, and dependencies that are not declared. A hidden dependency gives wrong incremental builds.
+- **Avoid it when:** the dependencies form a cycle or the graph leaves some dependencies implicit. A hidden dependency gives wrong incremental builds.
 
 **Read more:**
 

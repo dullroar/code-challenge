@@ -1,6 +1,6 @@
 ---
 name: "Haskell"
-teaches: "lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work."
+teaches: "that reading a lazy list can drive a program when forcing each element has a side effect."
 kind: weird
 languages: [haskell]
 lesson: "languages/haskell.md#lazy-io-as-control-flow"
@@ -14,7 +14,7 @@ tags: [control-flow, evaluation-strategy, lazy-evaluation, monad-and-effect-syst
 ---
 # Haskell on drugs
 
-**Teaches you:** lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work.
+**Teaches you:** that reading a lazy list can drive a program when forcing each element has a side effect.
 
 > **DEMO ONLY.** Fictional timecards in a scratch SQLite file. No connection to any real time-reporting system.
 

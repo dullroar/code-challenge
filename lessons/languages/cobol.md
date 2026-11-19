@@ -17,9 +17,9 @@ COBOL (1959) was built for records, totals and reports, and it shows. What makes
 
 ## ALTER
 
-`ALTER` is exhibit A for "a language quirk that was once a feature." It was declared obsolete in 1985 and deleted from the standard in 2002. GnuCOBOL still runs it, and warns five times.
+`ALTER` is exhibit A for "a language quirk that was once a feature". It was declared obsolete in 1985 and deleted from the standard in 2002. GnuCOBOL still runs it, and warns five times.
 
-### 1. Behold the monstrosity
+### Behold the monstrosity
 
 ```bash
 sandbox/container/run-image.sh src/cobol-weird
@@ -27,7 +27,7 @@ sandbox/container/run-image.sh src/cobol-weird
 
 Three to five time-card rows and a committed total over 40, from a program with no `IF`, `PERFORM`, `EVALUATE`, `UNTIL` or `MOD`.
 
-### 2. How the hell does that work?
+### How the hell does that work?
 
 Paragraphs run in the order they are written unless a `GO TO` redirects them. The loop is one paragraph that holds one `GO TO` ([`cobol-weird/timecards.cob` L150-151](../../src/cobol-weird/timecards.cob#L150-L151)):
 
@@ -49,7 +49,7 @@ END-ADD
 
 59 + total fits in two digits while the total is 40 or less. The add that reaches 100 is a *size error*: the field is left unchanged and `ON SIZE ERROR` rewires `NEXT-CARD` one last time. The `GO TO NEXT-CARD` that follows is the same statement as always, and now it ends the run.
 
-### 3. What did we just learn?
+### What did we just learn?
 
 - **A jump target can be state.** Control flow is not only the program counter walking source text; it can be data the program edits. Compare [Make's restart](make-cmake.md#gnu-make), [CMake's registers](make-cmake.md#cmake) and [Forth's `>in`](forth.md): all keep control state somewhere other than ordinary variables. See [patterns](../patterns.md#control-state-outside-variables).
 - **Overflow is a decision.** `ON SIZE ERROR` is a conditional triggered by arithmetic running out of digits rather than by a comparison anyone wrote.
@@ -57,17 +57,17 @@ END-ADD
 
 Tags: `ALTER` is **implementation-permitted** (deleted from the standard, kept by GnuCOBOL). Size-error behavior (field unchanged) is **guaranteed** by the standard.
 
-### 4. Do this in production and you're fired
+### Do this in production and you're fired
 
 - **You cannot understand a paragraph by reading it.** `NEXT-CARD` says `GO TO MEETINGS-CARD` and, at run time, almost never does. That complaint is what got `ALTER` removed.
 - **Debuggers show variables, not jump targets.** Nothing in the `WS-*` fields tells you which category is next.
 - **Portability.** Newer compilers may not accept it, and standards-conformance flags may reject it.
 - **Optimizers.** A compiler that cannot assume a `GO TO` is constant has little it can do with the paragraph.
-- **Reentrancy.** Rewriting the code's own jump table is the opposite of reentrant: two callers share one `NEXT-CARD`. (On the rewriting-the-program theme, see [APL](apl.md#2-self-modifying-functions-apl-weird).)
+- **Reentrancy.** Rewriting the code's own jump table is the opposite of reentrant: two callers share one `NEXT-CARD`. (On the rewriting-the-program theme, see [APL](apl.md#self-modifying-functions-apl-weird).)
 
 Legitimate uses: none in new code. Historically, though, in memory-poor, performance-sensitive batch systems, a switch set once and tested by an unconditional `GO TO` was cheaper than testing a flag on every pass. That is the "mainframe in 1978" answer to the recurring question: *it was reasonable when the constraint was real*. See the [intro](../intro.md#the-recurring-question).
 
-### 5. Now break it yourself
+### Now break it yourself
 
 See [exercises](../exercises.md#b1-cobol-predict-then-break-alter-verified): predict what happens if you add a `DISPLAY` to `NEXT-CARD`, or change the `59`.
 

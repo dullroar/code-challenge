@@ -1,6 +1,6 @@
 ---
 name: "Common Lisp"
-teaches: "how `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop."
+teaches: "that Common Lisp `LOOP` can express a whole algorithm as clauses for counting, drawing, summing, collecting and stopping."
 kind: idiomatic
 languages: [common-lisp]
 lesson: "languages/lisp.md"
@@ -13,11 +13,11 @@ analogies: [monoid-and-fold]
 ---
 # Common Lisp
 
-**Teaches you:** how `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop.
+**Teaches you:** that Common Lisp `LOOP` can express a whole algorithm as clauses for counting, drawing, summing, collecting and stopping.
 
 > **DEMO ONLY.** Fictional timecards in a scratch SQLite file. No connection to any real time-reporting system.
 
-This is the straight version, the one that shows how Common Lisp is *meant* to be written. The challenge ("add 10-19 hour cards until the total passes 40") is a single `LOOP` form in `draw-cards`; everything else in [`timecards.lisp`](timecards.lisp) is a small function that does one job and has a docstring. The weird version is [`lisp-weird`](../lisp-weird/README.md).
+This is the straight version, the one that shows how Common Lisp is *meant* to be written. The challenge ("add 10 to 19 hour cards until the total passes 40") is a single `LOOP` form in `draw-cards`; everything else in [`timecards.lisp`](timecards.lisp) is a small function that does one job and has a docstring. The weird version is [`lisp-weird`](../lisp-weird/README.md).
 
 ## Run it
 
@@ -111,7 +111,7 @@ Read the file top to bottom; each section only uses what is above it.
 
 ## What `check.sh` enforces
 
-The `DEMO ONLY` marker is there and nothing looks like network code; `draw-cards` is a `LOOP` ending in `until (> total +limit+)`; the file compiles with **no** warnings; `iso-week` agrees with `date(1)` on 22 edge-case dates; and 25 runs each print a sane record set (hours 10-19, categories in order, running totals right, stopping exactly when the total passes 40) with SQLite agreeing with the output. A non-demo row is refused by the table.
+The `DEMO ONLY` marker is there and nothing looks like network code; `draw-cards` is a `LOOP` ending in `until (> total +limit+)`; the file compiles with **no** warnings; `iso-week` agrees with `date(1)` on 22 edge-case dates; and 25 runs each print a sane record set (hours 10 to 19, categories in order, running totals right, stopping exactly when the total passes 40) with SQLite agreeing with the output. A non-demo row is refused by the table.
 
 ## Run it in a container
 

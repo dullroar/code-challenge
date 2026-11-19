@@ -4,9 +4,9 @@
 
 For an advanced reading path with traces and experiments, see the [evaluation, demand and laziness study guide](../study-guides/concepts/evaluation-demand-and-laziness.md).
 
-Is a value computed when you write it, when you first need it, or each time you ask? That is the question of **evaluation strategy**, and the same-looking code answers it differently in different languages.
+Is a value computed when you write it, when you first need it or each time you ask? That is the question of **evaluation strategy**, and the same-looking code answers it differently in different languages.
 
-Haskell is lazy: one `span` over an infinite list is the stop rule, because only the needed part is ever computed. LINQ is deferred: a pipeline does nothing until someone enumerates it. APL is eager and works on whole arrays at once, so it draws more numbers than it needs and trims the result. When effects are involved, the choice stops being a detail. If a lazy list performs input and output, then *reading the list* is what does the work. This chapter explains the vocabulary: strategies and short circuits, iterators and generators, first-class and higher-order functions, functors and `map`, monoids and folds (and why `reduce` cannot stop early), and dataflow. The table at the end shows every entry's strategy in one place.
+Haskell is lazy: one `span` over an infinite list is the stop rule, because only the needed part is ever computed. LINQ is deferred: a pipeline does nothing until someone enumerates it. APL is eager and works on whole arrays at once, so it draws more numbers than it needs and trims the result. When effects are involved, the choice stops being a detail. If a lazy list performs input and output, then *reading the list* is what does the work. This chapter explains the vocabulary: strategies and short circuits, iterators and generators, first-class and higher-order functions, functors and `map`, monoids and folds (and why `reduce` cannot stop early) and dataflow. The table at the end shows every entry's strategy in one place.
 
 ```mermaid
 flowchart TB
@@ -72,7 +72,7 @@ The values 1 to 5 are only a sample. Haskell's call-by-need *remembers* an evalu
 
 ## Evaluation strategies
 
-An evaluation strategy answers one question: *when* is an argument computed? Before the call (call by value, also called eager)? When it is first needed, and then remembered (call by need, also called lazy)? Every time it is used (call by name)? It exists because the answer changes what a program means as soon as there are effects or infinite data. `f(g(x))` looks the same in every language. It does not behave the same. This whole chapter is about that gap: [`haskell`](../../src/haskell/README.md) is lazy, [`apl`](../../src/apl/README.md) is eager, and LINQ is *deferred*.
+An evaluation strategy answers one question: *when* is an argument computed? Before the call (call by value, also called eager)? When it is first needed, and then remembered (call by need, also called lazy)? Every time it is used (call by name)? It exists because the answer changes what a program means as soon as there are effects or infinite data. `f(g(x))` looks the same in every language. It does not behave the same. This whole chapter is about that gap: [`haskell`](../../src/haskell/README.md) is lazy, [`apl`](../../src/apl/README.md) is eager and LINQ is *deferred*.
 
 - **Use it when:** you read any unfamiliar language. Find its default strategy first.
 - **Avoid assuming** that your habits from one language apply in another.
@@ -88,8 +88,8 @@ An evaluation strategy answers one question: *when* is an argument computed? Bef
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
 | [`haskell`](../../src/haskell/README.md) | Haskell | demonstrates | That a lazy list and one `span` are the whole stop rule. |
-| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
-| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
+| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | That reading a lazy list can drive a program when forcing each element has a side effect. |
+| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | That Python can drive a whole program with `iter(step, False)`, which calls `step` until it returns `False`. |
 
 ## Eager evaluation
 
@@ -111,7 +111,7 @@ Eager evaluation computes a value as soon as the code asks for it. It is the def
 | [`apl-weird`](../../src/apl-weird/README.md) | APL | demonstrates | That `⎕CR`, `⎕FX` and compress make "if" and "loop" optional, and that a function can be its own successor. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | That a `for` statement with no body can drive runtime XAML, LINQ to Objects, EF Core and WPF animation. |
 
 ## Lazy evaluation
 
@@ -137,7 +137,7 @@ flowchart TB
 
 A thunk is a promise to compute a value. Demanding a cell runs its thunk once and stores the value, so a second demand for `A` costs nothing. Cell `C` is never demanded, so its work never happens. Storing the value is part of lazy evaluation in the strict sense. A pipeline that only delays work, such as a generator, may compute the same value again on each pass. See [Iterators and generators](04-evaluation-and-demand.md#iterators-and-generators).
 
-- **Use it when:** the code is pure (no effects), you want infinite sequences, or some results may not be needed.
+- **Use it when:** the code is pure (no effects), you want infinite sequences or some results may not be needed.
 - **Avoid it when:** effects are involved, or when memory matters. A pile of unevaluated thunks can use a lot of it (a *space leak*).
 
 **Read more:**
@@ -151,13 +151,13 @@ A thunk is a promise to compute a value. Demanding a cell runs its thunk once an
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
 | [`haskell`](../../src/haskell/README.md) | Haskell | demonstrates | That a lazy list and one `span` are the whole stop rule. |
-| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
+| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | That reading a lazy list can drive a program when forcing each element has a side effect. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | demonstrates | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |
+| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | demonstrates | That Kotlin can use `generateSequence` as the loop, ending when the generator returns null. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | That a chain of LINQ methods can express the entire program. |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | That C# query syntax can express the computation and order its effects. |
 | [`m4`](../../src/m4/README.md) | m4 | demonstrates | That a macro processor is a programming language: no loop statement and no variable, just text that gets scanned again. |
-| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | Iterators and closures as control flow. |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | That iterators and closures can express the control flow of a whole Rust program. |
 
 ## Short-circuit evaluation
 
@@ -224,9 +224,9 @@ Deferred execution means that you describe a query or a pipeline now, and it run
 | --- | --- | --- | --- |
 | [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | demonstrates | That a program can be a set of listeners, each doing one small thing and then emitting the event the next one waits for; and that emit() calls its listeners at once, so only an explicit scheduling boundary gives the event loop a turn. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |
-| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | Runtime XAML, LINQ to Objects, EF Core, and WPF animation - all from inside a `for` statement that has no body. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | That a chain of LINQ methods can express the entire program. |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | That C# query syntax can express the computation and order its effects. |
+| [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | demonstrates | That a `for` statement with no body can drive runtime XAML, LINQ to Objects, EF Core and WPF animation. |
 
 ## Iterators and generators
 
@@ -253,7 +253,7 @@ sequenceDiagram
 The consumer asks and the generator answers. This is *pull*: nothing runs until `next()` is called, and the generator does only enough work to reach its next `yield`. A push design, such as a callback, would draw the arrows the other way (see [Callbacks](10-events-callbacks-and-reactive-control-flow.md#callbacks)). The consumer can also stop early by not asking again.
 
 - **Use it when:** you stream data, or describe an unlimited series and take a prefix.
-- **Avoid:** iterators with hidden effects, and the surprise of a one-shot iterator that is already used up.
+- **Avoid it when:** the iterator has hidden effects or callers expect to reuse a one-shot iterator.
 
 **Read more:**
 
@@ -268,9 +268,9 @@ The consumer asks and the generator answers. This is *pull*: nothing runs until 
 | --- | --- | --- | --- |
 | [`haskell`](../../src/haskell/README.md) | Haskell | demonstrates | That a lazy list and one `span` are the whole stop rule. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | demonstrates | A one-statement port in Kotlin: `generateSequence` is the loop, and it ends when the generator returns null. |
-| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | A one-statement port in Python: `iter(step, False)` calls a function again and again until it returns `False`. |
-| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | Iterators and closures as control flow. |
+| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | demonstrates | That Kotlin can use `generateSequence` as the loop, ending when the generator returns null. |
+| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | demonstrates | That Python can drive a whole program with `iter(step, False)`, which calls `step` until it returns `False`. |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | That iterators and closures can express the control flow of a whole Rust program. |
 
 ## Referential transparency
 
@@ -313,7 +313,7 @@ The left side can be replaced by `5` anywhere. The right side cannot: the call's
 | --- | --- | --- | --- |
 | [`apl`](../../src/apl/README.md) | APL | demonstrates | That five rolls and a take-while can replace a loop. |
 | [`haskell`](../../src/haskell/README.md) | Haskell | demonstrates | That a lazy list and one `span` are the whole stop rule. |
-| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | Lazy IO as control flow: a list whose elements have side effects, so reading the list is what does the work. |
+| [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | demonstrates | That reading a lazy list can drive a program when forcing each element has a side effect. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
 
 ## Array programming
@@ -351,11 +351,11 @@ Read the picture from top to bottom. Each step is one operation on a whole array
 
 ## First-class and higher-order functions
 
-A language has **first-class functions** when a function is a value: you can store it, pass it as an argument, return it from another function and keep it in a data structure. A **higher-order function** is a function that takes a function, returns one, or both. `map`, `filter` and `reduce` take functions. A function that builds a configured function, such as a counter factory, returns one.
+A language has **first-class functions** when a function is a value: you can store it, pass it as an argument, return it from another function and keep it in a data structure. A **higher-order function** is a function that takes a function, returns one or both. `map`, `filter` and `reduce` take functions. A function that builds a configured function, such as a counter factory, returns one.
 
 It exists because it lets you separate *what to do to each item* from *how to walk the items*. The walk can then be lazy, eager, parallel or early-stopping, and the code that says what to do does not change. [`haskell`](../../src/haskell/README.md) describes the cards with `zipWith3` and `scanl1`. [`LinqChallenge1`](../../src/LinqChallenge1/README.md) chains `Select` and `Aggregate`. [`RustChallenge1`](../../src/RustChallenge1/README.md) steers a loop with iterators and closures. [`javascript-weird`](../../src/javascript-weird/README.md) is built the same way throughout: a pipeline of `map` calls that take closures, ended by `toArray`, and a `reduce` over the finished list.
 
-The price is a different kind of reading. When the walk is hidden in a library call, you cannot see in what order the callbacks run, how many times, or whether the walk stops early. That matters when the callback has an effect. `reduce` cannot stop early, `some` can, and the lazy `map` of an iterator runs one value at a time while an array's `map` finishes each stage before the next one begins ([`javascript-weird`](../../src/javascript-weird/README.md) shows both orders).
+The price is a different kind of reading. When the walk is hidden in a library call, you cannot see in what order the callbacks run, how many times or whether the walk stops early. That matters when the callback has an effect. `reduce` cannot stop early, `some` can, and the lazy `map` of an iterator runs one value at a time while an array's `map` finishes each stage before the next one begins ([`javascript-weird`](../../src/javascript-weird/README.md) shows both orders).
 
 - **Use it when:** the work on each item is separate from the walk, or you want to reuse one walk with many callbacks.
 - **Avoid it when:** the callback has hidden effects and the order matters. Write the order down, or use a plain loop and say why.
@@ -373,8 +373,8 @@ The price is a different kind of reading. When the walk is hidden in a library c
 | [`haskell`](../../src/haskell/README.md) | Haskell | demonstrates | That a lazy list and one `span` are the whole stop rule. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
-| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | Iterators and closures as control flow. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | That a chain of LINQ methods can express the entire program. |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | demonstrates | That iterators and closures can express the control flow of a whole Rust program. |
 
 ## Functors and mapping
 
@@ -383,7 +383,7 @@ A **functor** is a container type with a `map` that applies a function to the va
 - **Identity:** `map(id, xs) = xs`. Mapping a function that changes nothing changes nothing.
 - **Composition:** `map(g ∘ f, xs) = map(g, map(f, xs))`. Mapping two functions in one pass equals mapping them one after the other.
 
-Lists, `Maybe`, and functions themselves are functors in Haskell (`fmap`). JavaScript's `Array.prototype.map`, LINQ's `Select` and a Kotlin `Sequence.map` all *look* like this. Whether each one really obeys the laws depends on what the function does. If the function has a side effect, or reads a counter, the second law fails in practice: the effects happen in a different order. `[1,2,3].map(f).map(g)` runs `f` three times and then `g` three times. A lazy sequence interleaves them: `f(1), g(1), f(2), g(2), …`. With pure functions you cannot tell the difference. With effects you can. [`javascript-weird`](../../src/javascript-weird/README.md) saves a row inside a `map`, so the lazy order is the program, and its check script shows both orders.
+Lists, `Maybe` and functions themselves are functors in Haskell (`fmap`). JavaScript's `Array.prototype.map`, LINQ's `Select` and a Kotlin `Sequence.map` all *look* like this. Whether each one really obeys the laws depends on what the function does. If the function has a side effect, or reads a counter, the second law fails in practice: the effects happen in a different order. `[1,2,3].map(f).map(g)` runs `f` three times and then `g` three times. A lazy sequence interleaves them: `f(1), g(1), f(2), g(2), …`. With pure functions you cannot tell the difference. With effects you can. [`javascript-weird`](../../src/javascript-weird/README.md) saves a row inside a `map`, so the lazy order is the program, and its check script shows both orders.
 
 Laziness differs too. Python's `map` and a LINQ `Select` are lazy and run nothing until asked. JavaScript's `Array.prototype.map` is eager and builds the whole result at once. Haskell's `fmap` on a list is lazy again. The type of `map` is the same in all of them. The *evaluation* is not.
 
@@ -400,7 +400,7 @@ Laziness differs too. Python's `map` and a LINQ `Select` are lazy and run nothin
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | analogy | LINQ method chains, end to end. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | analogy | That a chain of LINQ methods can express the entire program. |
 
 ## Monoids and folds
 
@@ -408,7 +408,7 @@ A **monoid** is a type with an *associative* combining operation and an *identit
 
 When the operation is associative, the grouping does not matter: `(a + b) + c = a + (b + c)`. That lets a fold be split across threads, or restarted from a partial result. When there is an identity, the fold of an empty list has a sensible answer: the seed.
 
-A **scan** (`scanl` in Haskell) is a fold that keeps every partial result: `scanl (+) 0 [10,12,15]` is `[0,10,22,37]`. A running total is a scan. [`haskell`](../../src/haskell/README.md) uses `scanl1` to get every running total of the card hours, then `span` to take the cards until one crosses 40. A fold gives only the last total, and cannot say where to stop. In JavaScript, `reduce` is a fold. It cannot stop early by itself, because it must walk the whole array (it has no `break`). Stopping needs `some`, `find`, a generator, or a different tool. [`javascript-weird`](../../src/javascript-weird/README.md) shows each of these.
+A **scan** (`scanl` in Haskell) is a fold that keeps every partial result: `scanl (+) 0 [10,12,15]` is `[0,10,22,37]`. A running total is a scan. [`haskell`](../../src/haskell/README.md) uses `scanl1` to get every running total of the card hours, then `span` to take the cards until one crosses 40. A fold gives only the last total, and cannot say where to stop. In JavaScript, `reduce` is a fold. It cannot stop early by itself, because it must walk the whole array (it has no `break`). Stopping needs `some`, `find`, a generator or a different tool. [`javascript-weird`](../../src/javascript-weird/README.md) shows each of these.
 
 An associative operation is not the same as a commutative one. `"ab" + "c"` is not `"c" + "ab"`. Folds over non-commutative monoids depend on order.
 
@@ -429,8 +429,8 @@ An associative operation is not the same as a commutative one. `"ab" + "c"` is n
 | [`haskell`](../../src/haskell/README.md) | Haskell | demonstrates | That a lazy list and one `span` are the whole stop rule. |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | demonstrates | That a for statement is three expressions and an empty body, and that JavaScript's own evaluation order, truthiness and comma operator are enough to run a whole program from the three clauses. |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
-| [`lisp`](../../src/lisp/README.md) | Common Lisp | analogy | How `LOOP` can express a whole algorithm as a list of clauses: count, draw, sum, collect, stop. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | That a chain of LINQ methods can express the entire program. |
+| [`lisp`](../../src/lisp/README.md) | Common Lisp | analogy | That Common Lisp `LOOP` can express a whole algorithm as clauses for counting, drawing, summing, collecting and stopping. |
 
 ## Dataflow programming
 
@@ -465,6 +465,6 @@ It matters here because several entries move control out of statements and into 
 | Entry | Language | How it relates | What it teaches |
 | --- | --- | --- | --- |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | demonstrates | That a closure is a state machine: a function plus the variables it was made next to, pulled one step at a time by an iterator, with reduce as the one fold that cannot stop. |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | LINQ method chains, end to end. |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | C# query syntax, pushed as far as it goes. |
-| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | analogy | Arithmetic and looping in plain Make syntax, no shell required. |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | demonstrates | That a chain of LINQ methods can express the entire program. |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | demonstrates | That C# query syntax can express the computation and order its effects. |
+| [`make-gnu`](../../src/make-gnu/README.md) | GNU Make | analogy | That GNU Make can do arithmetic and loop in its own syntax, without a shell for either. |

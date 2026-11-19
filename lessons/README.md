@@ -6,7 +6,7 @@ Start here: **[Intro: why these lessons exist](intro.md)**
 
 | Way in | Page |
 | --- | --- |
-| By overall goals | [goals.md](goals.md) |
+| By goal | [goals.md](goals.md) |
 | By computer science concept | [cs/](cs/README.md) |
 | By language | [languages/](languages/README.md) |
 | By solution pattern | [patterns.md](patterns.md) |
@@ -17,3 +17,5 @@ Start here: **[Intro: why these lessons exist](intro.md)**
 | **Study guides**: traces, predictions and evidence for advanced readers | [study-guides/](study-guides/README.md) |
 
 Back to the [challenge](../README.md).
+
+For publication commands, see [Building the book](book/README.md) and [Building the study guides](book/README.md#building-the-study-guides).

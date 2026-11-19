@@ -22,7 +22,7 @@ Now imagine the thing you came here for: **whiteboarding in this.** Ask yourself
 
 The honest summary: APL is an astonishingly good *thinking* notation and an unforgiving *maintenance* language. The repo lets you feel both sides.
 
-## 1. Array thinking replaces control flow (`apl`)
+## Array thinking replaces control flow (`apl`)
 
 ### Behold the monstrosity
 
@@ -45,7 +45,7 @@ Kinds←(≢Hours)⍴Categories
 
 Read each right to left.
 
-1. **Draw everything up front.** `5⍴10` is five tens, `?` rolls each, and `10-⎕IO` shifts to 10..19. Why five? Every card is at least 10, so five always total at least 50. Five is a *bound that can never be too small*, not a loop count.
+1. **Draw everything up front.** `5⍴10` is five tens, `?` rolls each and `10-⎕IO` shifts to 10 to 19. Why five? Every card is at least 10, so five always total at least 50. Five is a *bound that can never be too small*, not a loop count.
 2. **Apply the stop rule as data.** `+\Drawn` is the running total; `40≥` turns it into `1 1 0 0 ...`; `+/` counts the 1s; `1+` adds the card that crosses; `↑⍨` takes that many.
 3. **Derive the rest.** `⍴` *recycles* when the right argument is shorter than the target, so four category names fill a slot for each kept card, up to five. The fifth slot, if there is one, gets `Meetings` again.
 
@@ -54,9 +54,9 @@ Read each right to left.
 - A loop with a stop condition can be replaced by **computing a prefix of a precomputed sequence.** Haskell's [`span` over a lazy list](haskell.md) does the same thing with laziness instead of a bound. The two languages disagree about *when* the list is made and agree about *what* it is.
 - `⎕IO` (index origin) is a language-level setting. The straight entry never assumes it; the weird one sets `⎕IO←0` and relies on it.
 
-Tags: array primitives are **guaranteed**. `⎕FIO` (file I/O) and the `⊃`/`↑` meanings are **implementation-specific**: in APL2-family interpreters (GNU APL) `⊃` *discloses* and `↑` is "first", and Dyalog swaps them.
+Tags: array primitives are **guaranteed**. `⎕FIO` (file I/O) and the `⊃`/`↑` meanings are **implementation-permitted** and vary by interpreter: in APL2-family interpreters (GNU APL) `⊃` *discloses* and `↑` is "first", and Dyalog swaps them.
 
-## 2. Self-modifying functions (`apl-weird`)
+## Self-modifying functions (`apl-weird`)
 
 ### Behold the monstrosity
 
@@ -98,9 +98,9 @@ The state of the program is not in variables. **It is in the program text.**
 - **No `⎕IO` independence**: the weird version relies on `⎕IO←0`.
 - **Debugging and security.** Behavior that depends on generated source defeats static tools, and `⍎` on assembled text is the classic injection shape. (Here, every value is a number the program computed.)
 
-Legitimate uses: metaprogramming, interactive exploration, and code generation, where APL's workspace model (functions as editable data) is an actual strength.
+Legitimate uses: metaprogramming, interactive exploration and code generation, where APL's workspace model (functions as editable data) is an actual strength.
 
-### Break it yourself
+### Now break it yourself
 
 See [exercises](../exercises.md#b6-apl-the-off-by-one-rewrite-verified).
 
@@ -116,11 +116,11 @@ See [exercises](../exercises.md#b6-apl-the-off-by-one-rewrite-verified).
 
 ## Weird next to boring
 
-Both entries are APL, and neither is idiomatic in the sense a C programmer means it. The first says: *a loop was never needed.* The second says: *neither was a fixed program.* The interesting comparison is what each makes easy. The first is short, testable, and obvious once you read it right to left. The second proves that source text is a mutable value.
+Both entries are APL, and neither is idiomatic in the sense a C programmer means it. The first says: *a loop was never needed.* The second says: *neither was a fixed program.* The interesting comparison is what each makes easy. The first is short, testable and obvious once you read it right to left. The second proves that source text is a mutable value.
 
 ## Under what circumstances would this terrible idea become reasonable?
 
-The first isn't a terrible idea; it is how APL programmers actually think. The second becomes reasonable when you are generating code from data in an environment designed for it. And as a *design* notation, APL's real home, it was reasonable from the start: it was meant for describing computation on a blackboard, long before anyone ran it.
+The first is not a terrible idea; it is how APL programmers actually think. The second becomes reasonable when you are generating code from data in an environment designed for it. And as a *design* notation, APL's real home, it was reasonable from the start: it was meant for describing computation on a blackboard, long before anyone ran it.
 
 <!-- BEGIN GENERATED program-flow:languages/apl.md -->
 ## How each program runs
@@ -166,7 +166,7 @@ flowchart TD
 
 **What this shows:** the recursion is a chain of different functions, not one function calling itself. Each `Card` function *writes* the next one as text and then calls it. The boolean `Alive` is both the stop rule and the guard on writing, because compressing with `0` removes every line of the child.
 
-**Why this mechanism matters:** the program is self-modifying, and its state is source text: the "genes" are four lines that each child gets with new values. A broken stop rule does not fail. It recurses for ever, which is why the check runs the program under a timeout.
+**Why this mechanism matters:** the program is self-modifying, and its state is source text: the "genes" are four lines that each child gets with new values. A broken stop rule does not fail. It recurses forever, which is why the check runs the program under a timeout.
 <!-- END GENERATED program-flow:languages/apl.md -->
 
 ## Computer science behind this page

@@ -114,7 +114,7 @@ A **closure** is a function together with the variables it was made next to. [`c
 | Closure | Captured variables | One call does |
 |---|---|---|
 | `hoursFrom(seed)` | `state` | Moves `state` (Park-Miller) and answers 10 to 19 |
-| `machine(nextHours)` | `n`, `total`, `over` | Asks for hours, adds them to `total`, sets `over = total > 40`, and answers the card. After the card that took the total over 40, it answers `undefined` for ever |
+| `machine(nextHours)` | `n`, `total`, `over` | Asks for hours, adds them to `total`, sets `over = total > 40`, and answers the card. After the card that took the total over 40, it answers `undefined` forever |
 | `cards(next)` | none of its own: it holds `next` | Wraps the machine in the **iteration protocol**: `next()` answers `{ value: card, done: false }`, or `{ done: true }` when the machine has no card |
 
 **The stop rule is `over = total > 40`.** It is a variable inside a closure, set in the same call that makes the crossing card. So the crossing card is the last one, and it is included.

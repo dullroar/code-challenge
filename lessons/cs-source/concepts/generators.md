@@ -26,7 +26,7 @@ sequenceDiagram
 The consumer asks and the generator answers. This is *pull*: nothing runs until `next()` is called, and the generator does only enough work to reach its next `yield`. A push design, such as a callback, would draw the arrows the other way (see [[callback]]). The consumer can also stop early by not asking again.
 
 - **Use it when:** you stream data, or describe an unlimited series and take a prefix.
-- **Avoid:** iterators with hidden effects, and the surprise of a one-shot iterator that is already used up.
+- **Avoid it when:** the iterator has hidden effects or callers expect to reuse a one-shot iterator.
 
 **Read more:**
 
