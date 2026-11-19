@@ -14,6 +14,8 @@ tags: [dataflow-programming, declarative-programming, deferred-execution, domain
 
 **Teaches you:** C# query syntax, pushed as far as it goes.
 
+> **Not the shared challenge.** Like Variant A, this entry draws no random hours: its work week is five fixed 8-hour days, capped so that the total is exactly 40.0 hours and no card crosses the line. It teaches deferred execution and query syntax, not the stop rule "keep the first card over 40".
+
 The same demo as [`src/LinqChallenge1`](../LinqChallenge1/README.md) - a fixed 40-hour timecard, tracked and saved through EF Core and SQLite, crossing the `IQueryable<T>` → `IEnumerable<T>` boundary, and a WPF **DEMO ONLY** terminal window that shows, pulses, and closes itself - but written so nearly every component, not just the headline data-shaping stage, is phrased as a C# query expression (`from` / `where` / `let` / `select`). Where a `let` has to turn a `void`-returning WPF/EF call into a value, the inline `Func<T>.Invoke()` wrapper is itself nested inside a throwaway one-row query. Turtles all the way down, on purpose.
 
 ## Run it

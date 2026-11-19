@@ -32,6 +32,13 @@ a=$(echo 'run:t wk:w rng:0110100110010110 tty:1 trace:0' | sed -nE -f timecards.
 b=$(echo 'run:t wk:w rng:0110100110010110 tty:1 trace:0' | sed -nE -f timecards.sed 3>/dev/null || true)
 [[ -n $a && $a == "$b" ]] || fail "same seed, different output"
 
+# 4b. Exactly 40 continues. Four 10-hour cards total exactly 40, so a fifth card must follow: Meetings again, total 50. A copy of the script
+#     whose draw always yields the digit 0 (hours 10) makes that the only possible run.
+sed 's/rng:\\1\\2 d:\\1\//rng:\\1\\2 d:0000\//' timecards.sed > "$data/tens.sed"
+cmp -s timecards.sed "$data/tens.sed" && fail "the exactly-40 test could not rewrite the draw in timecards.sed"
+tens=$(echo 'run:t wk:w rng:0110100110010110 tty:1 trace:0' | sed -nE -f "$data/tens.sed" 3>/dev/null | grep -E '^(Meetings|Coding|Debugging|Learning)	' | cut -f1-3 | tr '\t' ' ' | paste -sd, || true)
+[[ $tens == "Meetings 10 10,Coding 10 20,Debugging 10 30,Learning 10 40,Meetings 10 50" ]] || fail "all-10 cards must give five rows ending at 50 (exactly 40 continues); got: $tens"
+
 # 5. Run the real thing a bunch of times. Every run must stop exactly when it should, every running total
 #    must equal the previous one plus the hours (sed's tally arithmetic), and SQLite must agree with stdout.
 hours_seen=""
@@ -51,7 +58,7 @@ for i in $(seq 1 25); do
             prev = $3
         }
         END { if (n != entries || prev != total) { print "summary disagrees with rows"; exit 1 }
-              if (n < 4 && prev <= 40) { print "stopped early at " prev; exit 1 } }' <<<"$out" || fail "run $i"
+              if (n < 3 || n > 5 || prev <= 40) { print "a run has 3 to 5 cards and ends over 40; this one has " n " cards, total " prev; exit 1 } }' <<<"$out" || fail "run $i"
     hours_seen+=$(awk -F'\t' '/^(Meetings|Coding|Debugging|Learning)\t/ { printf "%s ", $2 }' <<<"$out")
     db_row=$(sqlite3 "$db" "select count(*) || ' ' || coalesce(max(running_total),0) || ' ' || min(demo_only) || max(demo_only) from demo_timecards where run_id = '$run'")
     [[ $db_row == "$entries $total 11" ]] || fail "run $i: db says '$db_row', output says '$entries $total 11'"
@@ -64,4 +71,4 @@ distinct=$(tr ' ' '\n' <<<"$hours_seen" | grep . | sort -u | wc -l)
 if sqlite3 "$db" "insert into demo_timecards(run_id,category,hours,running_total,demo_only) values('x','x',10,10,0)" 2>/dev/null; then
     fail "db accepted a non-demo row"
 fi
-echo "OK: one sed command, no shell-outs; 25 runs stopped when they should, added up in tally marks, committed to SQLite, and exited 1"
+echo "OK: one sed command, no shell-outs; 25 runs stopped when they should, added up in tally marks, committed to SQLite, and exited 1; exactly 40 continued to a fifth card"

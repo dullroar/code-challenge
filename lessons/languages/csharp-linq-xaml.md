@@ -46,6 +46,8 @@ Legitimate uses: none for the header as written. The *ideas* (state in an object
 
 ## Deferred execution and the void-to-value trick
 
+A note before the code: the two LINQ entries are **not** the shared challenge. They draw no random hours. Their work week is five fixed 8-hour days, capped so that the total is exactly 40.0 hours and no card crosses the line, because they teach deferred execution rather than the stop rule.
+
 ### LinqChallenge1: one fluent chain
 
 One `;`-terminated expression statement, built from LINQ calls, starting at [`Program.cs` L45](../../src/LinqChallenge1/Program.cs#L45) and ending in `.Aggregate(...)` that forces the lazy tail. Stages:
@@ -99,7 +101,7 @@ See [exercises](../exercises.md#b7-linq-enumerate-twice-verified).
 
 ### Honest fine print
 
-- **The loop is unrolled**: four copy-pasted passes. "Four categories" is baked into the markup.
+- **The loop is unrolled**: four copy-pasted passes. "Four categories" is baked into the markup, so this entry can deal at most four cards. With the shipped seed (`Random(42)`: 16, 11, 11, 15 hours) it always deals four and ends at 53, so the case where four cards total exactly 40 (which should continue to a fifth) never arises. It is the only entry with that limit.
 - **The branching is done by SQL or `DataTable`**, not by WPF triggers.
 - **`Random(42)` is fixed-seeded** in the `.xaml` files, so the hours are the same on every run.
 - **`XamlChallenge1.csproj` has `<Page Remove="**/*.xaml" />`**, so the files are loaded at run time, never compiled. That *is* the point.

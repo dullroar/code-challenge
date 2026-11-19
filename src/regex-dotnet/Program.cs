@@ -1,6 +1,6 @@
 // DEMO ONLY. Fictional timecards, written to a scratch file under XDG_DATA_HOME. See README.md.
 //
-// The host draws four random hour counts (a regex cannot), hands them over as a unary "tape",
+// The host draws five random hour counts (a regex cannot), hands them over as a unary "tape",
 // fires ONE Regex.Match, and reports what the pattern captured. No loops, no callbacks, no
 // MatchEvaluator. The pattern walks the categories, accumulates hours, and decides when to stop.
 using System.Globalization;
@@ -9,8 +9,8 @@ using System.Text.RegularExpressions;
 string Draw() => new('a', Random.Shared.Next(10, 20));
 
 var m = Regex.Match(
-    $"Meetings:{Draw()};Coding:{Draw()};Debugging:{Draw()};Learning:{Draw()};",
-    @"\A(?:(?<b>)){41}(?:(?(b)(?<cat>(?(fm)(?(fc)(?(fd)(?(fl)(?!)|(?<fl>)Learning)|(?<fd>)Debugging)|(?<fc>)Coding)|(?<fm>)Meetings)):(?<hrs>(?:(?(b)(?<-b>))(?<s>)a){10,19});|(?!)))*");
+    $"Meetings:{Draw()};Coding:{Draw()};Debugging:{Draw()};Learning:{Draw()};Meetings:{Draw()};",
+    @"\A(?:(?<b>)){41}(?:(?(b)(?<cat>(?(fm)(?(fc)(?(fd)(?(fl)(?(f5)(?!)|(?<f5>)Meetings)|(?<fl>)Learning)|(?<fd>)Debugging)|(?<fc>)Coding)|(?<fm>)Meetings)):(?<hrs>(?:(?(b)(?<-b>))(?<s>)a){10,19});|(?!)))*");
 
 var week = $"{ISOWeek.GetYear(DateTime.Now)}-W{ISOWeek.GetWeekOfYear(DateTime.Now):00}";
 var report = string.Concat(

@@ -72,7 +72,7 @@ Every row was run in the sandbox or in a scratch folder. Two of them name "Park-
 - Run the ed script under **busybox ed**: it cannot run it, and the entry's check says so. That is the *loud* kind.
 - Run `tar-gnu` on **BSD or macOS tar**: there is no `--to-command`, so it fails. Also loud.
 
-**Exactly 40.** The boundary is a portability test of the *specification*. An entry that ignores it (four names) agrees with the other entries 9,999 runs in 10,000. A claim of "the same challenge" holds for most runs and fails at the edge. A test suite that samples random runs will almost never find it.
+**Exactly 40.** The boundary is a portability test of the *specification*. An entry that ignored it (four names, as the regex and `for`-header entries did until they were fixed) agreed with the other entries 9,999 runs in 10,000. A claim of "the same challenge" held for most runs and failed at the edge. A test suite that samples random runs almost never finds it. Forcing the edge does: each fixed entry's `check.sh` now builds an all-10-hour variant. `xaml` still has the four-card limit.
 
 ## Compare the ordinary and weird designs
 
@@ -85,7 +85,7 @@ Every row was run in the sandbox or in a scratch folder. Two of them name "Park-
 | **Portability** | Broad | Narrow, and the README says how narrow |
 | **Cost** | Normal | A cliff may be the point |
 
-The repository's own tally of how strong each entry's promise is, taken from the `assurance` key of the READMEs: **17** entries are guaranteed (the ports, the LINQ entries, the JavaScript entries, plain COBOL, Haskell, Forth, Lisp and awk, and `regex-dotnet`), **15** are implementation-permitted (APL, `awk-weird`, `cobol-weird`, `forth-weird`, `haskell-weird`, `lisp-weird`, `m4`, the other regex entries, both tar entries, Tcl and `ex-weird`), and **8** are accidentally exploited (`cmake`, `ed-weird`, `find-gnu`, `find-posix`, `make-gnu`, `regex-sed`, `tcl-weird` and `xaml`). Idiomatic entries tend to be guaranteed, and the weird entries are not.
+The repository's own tally of how strong each entry's promise is, taken from the `assurance` key of the READMEs: **17** entries are guaranteed (the ports, the LINQ entries, the JavaScript entries, plain COBOL, Haskell, Forth, Lisp and awk, and `regex-dotnet`), **16** are implementation-permitted (APL, `awk-weird`, `cobol-weird`, `forth-weird`, `haskell-weird`, `lisp-weird`, `m4`, the other regex entries, both tar entries, Tcl, `tcl-weird` and `ex-weird`), and **7** are accidentally exploited (`cmake`, `ed-weird`, `find-gnu`, `find-posix`, `make-gnu`, `regex-sed` and `xaml`). (`tcl-weird` was in the last group until its hours were drawn into a table instead of depending on SQLite's evaluation order.) Idiomatic entries tend to be guaranteed, and the weird entries are not.
 
 ## What the exercises demonstrate
 

@@ -31,11 +31,20 @@ expected() {   # seed week -> the rows, as the program should print them
         n=$(( n + 1 ))
     done
 }
-for seed in 1 2 12345 99999 1000003 2147483646 $(seq 7000 7040); do
+for seed in 1 2 12345 99999 1000003 2147483646 4020 $(seq 7000 7040); do   # 4020: four 10-hour cards total exactly 40, so a fifth card follows
     want=$(expected "$seed" 2026-W01)
     got=$(run -Dtc_seed="$seed" -Dtc_week=2026-W01 | grep -E '^(Meetings|Coding|Debugging|Learning)	')
     [[ $got == "$want" ]] || { echo "FAIL: seed $seed: output differs from the bash reference"; diff <(echo "$want") <(echo "$got") || true; exit 1; }
 done
+
+# 2b. Exactly 40 continues: seed 4020 deals 10, 10, 10, 10 (a total of exactly 40) and then a fifth card, Meetings again, ending at 55.
+got=$(run -Dtc_seed=4020 -Dtc_week=2026-W01 | grep -E '^(Meetings|Coding|Debugging|Learning)	' | cut -f1-3 | tr '\t' ' ' | paste -sd' ')
+[[ $got == "Meetings 10 10 Coding 10 20 Debugging 10 30 Learning 10 40 Meetings 15 55" ]] || { echo "FAIL: seed 4020 should continue past exactly 40 to a fifth card; got: $got"; exit 1; }
+
+# 2c. The loop does not nest. tc_card names itself in text that m4 reads again after the call has returned, so the nesting depth does
+#     not grow with the number of cards: the smallest -L that works is the same for a 3-card run (seed 230) and a 5-card run (seed 4020).
+smallest() { local seed=$1 L; for L in 1 2 3 4 5 6 7 8; do if "${M4:-m4}" -L "$L" -Dtc_seed="$seed" -Dtc_week=2026-W01 timecards.m4 >/dev/null 2>&1; then echo "$L"; return; fi; done; echo none; }
+[[ $(smallest 230) == "$(smallest 4020)" && $(smallest 230) != none ]] || { echo "FAIL: nesting depth depends on the number of cards ($(smallest 230) for 3 cards, $(smallest 4020) for 5)"; exit 1; }
 
 # 3. The mechanism: if tc_card stops expanding itself, exactly one card is dealt.
 sed 's/\[tc_card()\])\])/[])])/' timecards.m4 > "$data/once.m4"

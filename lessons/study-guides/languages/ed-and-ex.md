@@ -48,7 +48,7 @@ Both scripts handle this the same way: the launcher supplies **five** dice, beca
 
 The launcher draws five digits, loads the editor, and afterwards stores the rows in SQLite. It is orchestration, not computing: "every card, total and stop decision is made by ed" (or Ex). See [Computation versus orchestration](../../cs/02-what-counts-as-a-machine.md#computation-versus-orchestration).
 
-**What repeats.** In `ed-weird`, one global command over the card lines, in buffer order: `g/^[A-Za-z]* [0-9][0-9] x*$/` ([L42-46](../../../src/ed-weird/timecards.ed#L42-L46)). The global command is ed's own loop. In `ex-weird`, `@n`: the register `n` runs the program again, so the program runs itself ([L88-91](../../../src/ex-weird/timecards.ex#L88-L91)).
+**What repeats.** In `ed-weird`, one global command over the card lines, in buffer order: `g/^[A-Za-z]* [0-9][0-9] x*$/` ([L42-46](../../../src/ed-weird/timecards.ed#L42-L46)). The global command is ed's own loop. In `ex-weird`, `@n`: the register `n` runs the program again, so the program runs itself ([L91](../../../src/ex-weird/timecards.ex#L91)).
 
 **Where state lives.** In `ed-weird`, in the text of the lines: a card is `Name hours marks`, and the running total is the number of `x` marks. A "ledger" line above the first card holds the total so far. Adding is writing marks side by side. In `ex-weird`, in a *position*: a mark `t` says where on the 60-line tape we are, and moving it down by the card's hours is the addition. The tape line under the mark has the total as its number.
 

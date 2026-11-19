@@ -94,16 +94,22 @@ db eval {
         ('ttk::label .note -textvariable ::summary'),
         ('pack .note -pady {0 8}');
 
+    -- One row, where a card's hours wait. The hours are drawn into it once and read from it twice (as the hours and in the total), so no
+    -- result depends on how often SQLite chooses to call the random function.
+    CREATE TEMP TABLE draw(h INTEGER);
+    INSERT INTO draw VALUES (0);
+
     -- The loop. Each card that is inserted prints itself (born), then inserts
     -- the next one while the total is still 40 or less. The WHERE is the stop rule.
     CREATE TEMP TRIGGER next_card AFTER INSERT ON main.demo_timecards
     BEGIN
         SELECT tcl('born', NEW.category, NEW.hours, NEW.running_total, NEW.iso_week);
+        UPDATE draw SET h = tcl('hours') WHERE NEW.running_total <= 40;
         INSERT INTO demo_timecards(run_id, category, hours, running_total, iso_week, created_at)
         SELECT NEW.run_id,
                tcl('category', (SELECT count(*) FROM demo_timecards WHERE run_id = NEW.run_id) + 1),
                h, NEW.running_total + h, NEW.iso_week, datetime('now')
-        FROM (SELECT tcl('hours') AS h)
+        FROM draw
         WHERE NEW.running_total <= 40;
     END;
 }
@@ -123,9 +129,10 @@ if {$gui} {
 db eval {SELECT tcl('init')}
 db transaction {
     db eval {
+        UPDATE draw SET h = tcl('hours');
         INSERT INTO main.demo_timecards(run_id, category, hours, running_total, iso_week, created_at)
         SELECT tcl('runid'), tcl('category', 1), h, h, tcl('week'), datetime('now')
-        FROM (SELECT tcl('hours') AS h)
+        FROM draw
     }
 }
 

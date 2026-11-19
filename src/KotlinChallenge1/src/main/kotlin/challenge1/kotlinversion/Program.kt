@@ -64,7 +64,7 @@ fun main(args: Array<String>) {
                 val timeCards = ctx.getBean(DemoTimeCardRepository::class.java)
                 val pending = mutableListOf<DemoTimeCard>()
                 val rnd: Random = ThreadLocalRandom.current()
-                val categories = listOf("Meetings", "Coding", "Debugging", "Learning").iterator()
+                val categories = listOf("Meetings", "Coding", "Debugging", "Learning", "Meetings").iterator()
                 val mutex = ReentrantLock()
             }
                 //   *

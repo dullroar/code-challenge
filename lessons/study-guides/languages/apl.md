@@ -47,7 +47,7 @@ APL expresses the boundary in one comparison, `40≥`, "is the total at most 40?
 
 ## The machine to identify
 
-**What repeats.** In `apl`, nothing repeats in the code: the array primitives apply to every element. There are three expressions ([L30, L35, L38](../../../src/apl/timecards.apl#L30)). In `apl-weird`, a *chain of calls*: `Card0` calls `Card1`, which `Card0` wrote, which calls `Card2`, and so on ([L43-55](../../../src/apl-weird/timecards.apl#L43-L55)). The chain is recursion-shaped, but each link is a *different function*.
+**What repeats.** In `apl`, nothing repeats in the code: the array primitives apply to every element. There are three expressions ([L30](../../../src/apl/timecards.apl#L30), [L35](../../../src/apl/timecards.apl#L35) and [L38](../../../src/apl/timecards.apl#L38)). In `apl-weird`, a *chain of calls*: `Card0` calls `Card1`, which `Card0` wrote, which calls `Card2`, and so on ([L43-55](../../../src/apl-weird/timecards.apl#L43-L55)). The chain is recursion-shaped, but each link is a *different function*.
 
 **Where state lives.** In `apl`, in arrays: `Drawn`, `Hours`, `Totals`, `Kinds`. All five values are drawn at once, so the state is *the whole vector*. In `apl-weird`, in the **source text** of each function. Lines 1 to 4 of every card are four "gene" lines: `N←` (card number), `C←` (category), `H←` (hours) and `T←` (running total). Each child gets new gene lines.
 

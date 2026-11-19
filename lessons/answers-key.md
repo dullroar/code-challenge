@@ -21,7 +21,7 @@ Debugging  12   46      <- crossing card: the total before it was 34, which is <
 ```
 
 - The card that crosses is the first whose running total is **over 40**; the total before it is always **at most 40** (otherwise the run would have stopped earlier). The totals can end anywhere from 41 to 59.
-- Exactly 40 does not stop the run because every stop rule asks "is the total *over* 40?" (`<= 40` keeps going, `41` or more stops). Four 10-hour cards total exactly 40, so a fifth card is drawn. [`regex-dotnet`](../src/regex-dotnet/README.md) prints no running-total column, so `check-demo.sh` adds the hours itself.
+- Exactly 40 does not stop the run because every stop rule asks "is the total *over* 40?" (`<= 40` keeps going, `41` or more stops). Four 10-hour cards total exactly 40, so a fifth card is drawn. (Until the five-name fix, the regex entries and the `for`-header entries stopped at four cards and 40; each now forces that case in its check. [`xaml`](../src/xaml/README.md) still cannot deal a fifth card, see the [intro](intro.md).) [`regex-dotnet`](../src/regex-dotnet/README.md) prints no running-total column, so `check-demo.sh` adds the hours itself.
 
 ## B1. COBOL: predict, then break ALTER
 

@@ -83,6 +83,7 @@ A markup language has no `for`, no `if`, and no assignment - in theory. In pract
 Obfuscation is not the same as lying, so here is what the trick actually costs:
 
 - **The loop is unrolled, not looped.** There is no loop construct anywhere in these files - only four copy-pasted passes. "Four categories" is baked into the markup, not computed.
+- **At most four cards, so "exactly 40 continues" is out of reach here.** Every other entry that cycles or repeats its categories deals a fifth card when four cards total exactly 40. This one has four passes and no fifth, so a hypothetical run of four 10-hour cards would stop at 40. The files seed `Random(42)`, whose first four hours are 16, 11, 11 and 15 (total 53, so the fourth card crosses and the trigger keeps it), so the shipped files always deal exactly four cards and never meet the case. A different seed (exercise E2) could. A fifth pass is not hard to write, but it could not be tested here, because the entry needs Windows and WPF, so it has not been added.
 - **Conditional *effects* come from the expression engines**, not from WPF's `Trigger`/`DataTrigger` system. `DataTable.Compute` and SQL branch on data; XAML triggers are not used for program logic here.
 - **Three files, three flavors of the same program.** `strict.xaml` uses nothing outside .NET itself, so it saves XML rather than a database. `sqlite.xaml` adds the SQLite package. `efcore.xaml` adds EF Core, through two small model classes copied from the [C# original](../ModernChallenge1/README.md).
 

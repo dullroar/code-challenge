@@ -10,7 +10,7 @@ When you finish, you should be able to:
 2. Explain why one regex match always finishes while a loop of substitutions may not, and why that matters for what the entries can claim.
 3. Describe the *substrate* of each entry: what its alphabet is, what its rules are, and what plays memory.
 4. Explain "weird machine" and "language-theoretic security" with an example from the entries, and say what a defender should do.
-5. Say what each machine cannot do, with evidence: the four-name ceiling, the missing counted repetition, the failed .NET `Match` that exposes nothing.
+5. Say what each machine cannot do, with evidence: the old four-name ceiling, the missing counted repetition, the failed .NET `Match` that exposes nothing.
 6. Label claims as guaranteed, implementation-permitted, or accidentally exploited.
 
 Scope limits. The guide is about the *relationship between a notation and the machine it can express*. It is not a course in automata theory: it names the levels and uses them. Its source chapter is [Formal languages as computational substrates](../../cs/05-formal-languages-as-computational-substrates.md).
@@ -66,7 +66,7 @@ Read the second row: a PCRE2 pattern that "fails" is the program's *success*, be
 
 **What the notation cannot do.** The .NET entry cannot draw random numbers or write a file, so the host seeds four unary strings and writes the result. The sed entry has no numbers at all, so a random generator is a 16-character string of `0` and `1`. The CMake regex has no counted repetition, no lookahead and no backreferences, so the stop test is a literal of 41 `x`s, and a pattern parameterized by a register is the only way to look something up.
 
-**Exactly 40.** A substrate can express "continue at 40" only if it can tell 40 from 41. A budget of 41 tokens, a literal of 41 marks and a tape line for 40 all do. But the *supply* is finite in several: the four category names in a subject, a `cats:` list, four unrolled XAML passes. A run of four 10-hour cards ends at exactly 40, which the shared checker rejects. The notation was powerful enough to *count* to 41 and not powerful enough to *supply* a fifth name.
+**Exactly 40.** A substrate can express "continue at 40" only if it can tell 40 from 41. A budget of 41 tokens, a literal of 41 marks and a tape line for 40 all do. But the *supply* is finite in several: the category names in a subject, a `cats:` list, the unrolled XAML passes. With four names, a run of four 10-hour cards ended at exactly 40, which the shared checker rejects. The notation was powerful enough to *count* to 41 and not powerful enough to *supply* a fifth name. The regex entries now carry five names and prove it in their checks; `xaml`, with four unrolled passes, still has the limit.
 
 ## Compare the ordinary and weird designs
 

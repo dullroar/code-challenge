@@ -42,11 +42,11 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn. Final totals are 41 to 59, with 3 to 5 cards. Rows are stored in SQLite and the program prints a summary.
 
-Tcl writes the boundary two ways. In `tcl`, `while {$total <= $limit}` ([L40](../../../src/tcl/timecards.tcl#L40)): true for 40, so the loop goes round. In `tcl-weird`, the trigger inserts the next card `WHERE NEW.running_total <= 40` ([L107](../../../src/tcl-weird/timecards.tcl#L107)). A card is inserted only if the *previous* card's total was at most 40, so the crossing card is the last one inserted.
+Tcl writes the boundary two ways. In `tcl`, `while {$total <= $limit}` ([L40](../../../src/tcl/timecards.tcl#L40)): true for 40, so the loop goes round. In `tcl-weird`, the trigger inserts the next card `WHERE NEW.running_total <= 40` ([L113](../../../src/tcl-weird/timecards.tcl#L113)). A card is inserted only if the *previous* card's total was at most 40, so the crossing card is the last one inserted.
 
 ## The machine to identify
 
-**What repeats.** In `tcl`, a `while` loop in the procedure `draw`. In `tcl-weird`, a trigger: inserting a card fires `next_card`, which inserts another card, which fires `next_card` again ([L99-108](../../../src/tcl-weird/timecards.tcl#L99-L108)). SQLite does the repeating.
+**What repeats.** In `tcl`, a `while` loop in the procedure `draw`. In `tcl-weird`, a trigger: inserting a card fires `next_card`, which inserts another card, which fires `next_card` again ([L104-114](../../../src/tcl-weird/timecards.tcl#L104-L114)). SQLite does the repeating.
 
 **Where state lives.** In `tcl`, in local variables (`total`, `cards`). In `tcl-weird`, in *the table*. The card number is not a counter: the category is looked up as `count(*)` of the run's existing rows plus one, and the total is carried in the inserted row's `running_total`. The next step reads the row that caused it, `NEW`.
 
@@ -54,7 +54,7 @@ Tcl writes the boundary two ways. In `tcl`, `while {$total <= $limit}` ([L40](..
 
 **What stops it.** In `tcl`, the loop condition. In `tcl-weird`, the trigger's `WHERE NEW.running_total <= 40`: when it is false the `INSERT ... SELECT` yields no rows, so nothing is inserted and the chain ends.
 
-**What commits.** In `tcl`, `save` writes the finished list in one `db transaction`. In `tcl-weird`, the whole chain of triggered inserts runs inside one `db transaction` that wraps the starting `INSERT` ([L124-130](../../../src/tcl-weird/timecards.tcl#L124-L130)). The rows are *printed* by the `born` procedure as each card is inserted, so a row can be printed before the transaction commits.
+**What commits.** In `tcl`, `save` writes the finished list in one `db transaction`. In `tcl-weird`, the whole chain of triggered inserts runs inside one `db transaction` that wraps the starting `INSERT` ([L129-137](../../../src/tcl-weird/timecards.tcl#L129-L137)). The rows are *printed* by the `born` procedure as each card is inserted, so a row can be printed before the transaction commits.
 
 <!-- diagram-source: src/tcl/README.md#program-flow -->
 
@@ -119,11 +119,11 @@ The programs draw random hours. Use hours **15, 19, 12**. To check it, a scratch
 ```text
 # DEMO ONLY run <id>
   (hours proc: handing out 15)
-  (born: card of 15 hours, total 15; the trigger inserts the next card only if total <= 40)
+  (born: card of 15 hours, total 15)
   (hours proc: handing out 19)
-  (born: card of 19 hours, total 34; the trigger inserts the next card only if total <= 40)
+  (born: card of 19 hours, total 34)
   (hours proc: handing out 12)
-  (born: card of 12 hours, total 46; the trigger inserts the next card only if total <= 40)
+  (born: card of 12 hours, total 46)
 Meetings	15	15	DEMO ONLY
 Coding	19	34	DEMO ONLY
 Debugging	12	46	DEMO ONLY
@@ -136,10 +136,10 @@ Debugging	12	46	DEMO ONLY
 | Step | Engine acts | What happens | State after |
 | --- | --- | --- | --- |
 | 0 | Tcl | `db eval {SELECT tcl('init')}`: `unknown` fetches `init` from the table and runs it | procedures defined: `init` |
-| 1 | SQLite | The starting `INSERT ... SELECT` calls `tcl('hours')`: Tcl asks `unknown` for `hours`, and gets 15 | card 1 row: 15 hours, total 15 |
-| 2 | SQLite trigger | `AFTER INSERT` fires `next_card`. It calls `born` (prints card 1), then evaluates `WHERE 15 <= 40`: true | card 2 inserted |
-| 3 | SQLite trigger | Fires again on card 2 (19 hours, total 34). `born` prints it. `34 <= 40`: true | card 3 inserted |
-| 4 | SQLite trigger | Fires on card 3 (12 hours, total 46). `born` prints it. `46 <= 40`: **false**. The `INSERT ... SELECT` produces no row | chain ends |
+| 1 | SQLite | An `UPDATE draw SET h = tcl('hours')` draws the hours into the one-row TEMP table: Tcl asks `unknown` for `hours`, and gets 15. The starting `INSERT ... SELECT` reads `h` from `draw` twice, as the hours and as the total | card 1 row: 15 hours, total 15 |
+| 2 | SQLite trigger | `AFTER INSERT` fires `next_card`. It calls `born` (prints card 1), then `UPDATE draw` draws the next hours (19), guarded by `WHERE 15 <= 40`: true | card 2 inserted |
+| 3 | SQLite trigger | Fires again on card 2 (19 hours, total 34). `born` prints it. The guarded `UPDATE` draws 12. `34 <= 40`: true | card 3 inserted |
+| 4 | SQLite trigger | Fires on card 3 (12 hours, total 46). `born` prints it. `46 <= 40`: **false**, so the `UPDATE` draws nothing and the `INSERT ... SELECT` produces no row | chain ends |
 | 5 | Tcl | The transaction commits. Tcl runs a `SELECT count(*), max(running_total)` and prints the summary | 3 entries, total 46 |
 
 The procedures fetched from the table were `born`, `category`, `hours`, `init`, `runid` and `week`: exactly the ones that were *called*. The table held more text than ran.
@@ -156,7 +156,7 @@ The procedures fetched from the table were `born`, `category`, `hours`, `init`, 
 | **Observability** | Print `$cards`. | You must read the table and the trigger. The procedures that deal and print cards do not exist until something calls them. |
 | **Tests** | Call `timecards::draw`. | Run the whole thing. The stop rule is a `WHERE` inside a trigger, not testable alone. |
 | **Debugging** | Standard Tcl stack traces. | A Tcl error inside an SQL function is reported through SQLite, and the stack mixes `unknown`, `uplevel` and `db eval`. |
-| **Portability** | Tcl 8.6 and the `sqlite3` package. | The same, plus SQLite's trigger and recursion semantics, and the order SQLite evaluates a subquery's function call. |
+| **Portability** | Tcl 8.6 and the `sqlite3` package. | The same, plus SQLite's trigger and recursion semantics, and SQLite's rule that a TEMP trigger's bare table name resolves to the table in `main`. |
 | **Cost** | A loop. | One trigger firing per card, with a Tcl callback at each. The recursion depth is limited (1000 by default), and the challenge needs 3 to 5. |
 
 The difference to remember: `tcl` has *one* engine and `tcl-weird` has *two*, SQLite and Tcl, and each calls the other. The control moves between them, and neither has the whole picture.
@@ -169,7 +169,7 @@ The difference to remember: `tcl` has *one* engine and `tcl-weird` has *two*, SQ
 | B12, step 2 | Change the `hours` row's body to `expr {10}`. | Exactly five rows, totals 10, 20, 30, 40, 50, and the shared checker passes. The run does not stop at 40, because exactly 40 continues. You edited text inside an SQL string, not a Tcl procedure. |
 | B12, the three hooks | Name them. Which did you change in step 2? | An SQL function that calls Tcl, the `unknown` handler, and the trigger. Step 2 changed the *data that `unknown` serves*. |
 | [C1. Weird next to boring](../../exercises.md#c1-weird-next-to-boring-verified) | In which program can you see the rule in one place? | `tcl`: the `while` condition. `tcl-weird`: the `WHERE` in a trigger, three layers deep. |
-| [F. Prove a README claim](../../exercises.md#f-prove-a-readme-claim-verified) | The README says the hours value is the same in `h` and in `NEW.running_total + h`. Can you test it? | The shared checker fails if the running totals do not equal the sum of hours, which is the evidence. A negative control needs a version that draws the hours twice. See the next section for why this is risky. |
+| [F. Prove a README claim](../../exercises.md#f-prove-a-readme-claim-verified) | The README says each card's hours are drawn once. Can you test it? | Yes: count the calls of the `hours` procedure (the entry's `check.sh` does) and compare with the number of cards. The negative control is a variant that calls `tcl('hours')` in both places, which makes the count twice the card count and fails the check. This replaced an earlier dependence on SQLite's evaluation order. |
 
 ## Failure modes, costs, and boundaries
 
@@ -179,7 +179,7 @@ The difference to remember: `tcl` has *one* engine and `tcl-weird` has *two*, SQ
 | A command's arguments are strings, and code can be built and run as text | **Guaranteed** | Tcl's core model. |
 | An SQLite trigger fires for each inserted row, and a trigger's own inserts fire triggers only with `recursive_triggers` on | **Guaranteed** | Documented SQLite behavior. Verified by B12 step 1. |
 | SQLite limits trigger recursion (1000 by default) | **Guaranteed** | The challenge needs 3 to 5. |
-| The same `h` value appears in `h` and in `NEW.running_total + h` | **Accidentally exploited** | SQLite evaluates the subquery's non-deterministic function call once per row here, so both uses see one value. SQLite does not promise it for non-deterministic functions. The check fails if it ever changes, because running totals would no longer add up. |
+| The same hours appear as `h` and inside `NEW.running_total + h` | **Guaranteed** by design (after the fix) | The hours are written into the one-row TEMP table `draw` and read from it twice. Before the fix they came from a subquery whose function SQLite happened to evaluate once per row, which it does not promise for non-deterministic functions (**accidentally exploited**). The entry's `check.sh` now counts the calls of the `hours` procedure: one per card. |
 | `TEMP` tables and triggers disappear with the connection | **Guaranteed** | Documented. It keeps the program out of the file on disk. |
 | `INSERT INTO main.demo_timecards` is rejected inside a trigger, so the trigger body uses the bare name | **Implementation-permitted** | SQLite's rule about qualified names in triggers. The `TEMP` trigger resolves the bare name to the one table in `main`. |
 | Tk keeps `tclsh` alive after the script ends | **Implementation-permitted** | Why the script ends with `destroy .`. |
@@ -189,7 +189,7 @@ The difference to remember: `tcl` has *one* engine and `tcl-weird` has *two*, SQ
 **Costs to state.**
 
 - **Two engines, two stacks.** An error in a procedure shows a trace that mixes Tcl and SQLite frames.
-- **Order of evaluation belongs to SQLite.** The program depends on one call per row, as above. A hardened version would draw the hours once and store them first.
+- **Order of evaluation belongs to SQLite, so the program does not depend on it.** An earlier version used a subquery and relied on one function call per row. It now draws the hours into the one-row TEMP table `draw` first, and `check.sh` counts the calls (one per card). The check was also run against a variant that calls the function twice, and failed there.
 - **Hidden control flow.** Reading the top-level script tells you almost nothing about what runs. The loop is in a `CREATE TRIGGER` statement.
 - **Where the technique is legitimate.** Triggers are how databases enforce rules and keep audit trails. `unknown` is how Tcl implements autoloading. Putting both to work as a loop is a stunt.
 

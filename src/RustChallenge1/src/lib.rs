@@ -7,7 +7,8 @@ use rusqlite::{params, Connection};
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
-const CATEGORIES: [&str; 4] = ["Meetings", "Coding", "Debugging", "Learning"];
+// Five names, so that four 10-hour cards (a total of exactly 40, which continues) can be followed by a fifth.
+const CATEGORIES: [&str; 5] = ["Meetings", "Coding", "Debugging", "Learning", "Meetings"];
 const HOURS: std::ops::RangeInclusive<i32> = 10..=19;
 
 #[derive(Debug, Clone)]
@@ -176,9 +177,13 @@ mod tests {
     #[test]
     fn threshold_is_inclusive_and_categories_end_the_batch() {
         assert!(batch_of(3, &[10, 10, 10]).can_continue());
-        let full = batch_of(3, &[10, 10, 10, 10]);
-        assert_eq!(full.total(), 40);
+        let exactly_forty = batch_of(3, &[10, 10, 10, 10]);
+        assert_eq!(exactly_forty.total(), 40);
+        assert!(exactly_forty.can_continue(), "exactly 40 continues");
+        let full = batch_of(3, &[10, 10, 10, 10, 10]);
+        assert_eq!(full.total(), 50);
         assert!(!full.can_continue());
+        assert_eq!(full.cards()[4].category, "Meetings");
         let over = batch_of(3, &[19, 19, 19]);
         assert_eq!(over.total(), 57);
         assert!(!over.can_continue());
@@ -187,7 +192,7 @@ mod tests {
     }
     #[test]
     fn extending_a_finished_batch_yields_none() {
-        assert!(batch_of(3, &[10, 10, 10, 10]).extended(10).is_none());
+        assert!(batch_of(3, &[10, 10, 10, 10, 10]).extended(10).is_none());
         assert!(batch_of(3, &[19, 19, 19]).extended(10).is_none());
     }
     #[test]

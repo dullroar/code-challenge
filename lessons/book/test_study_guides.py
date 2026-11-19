@@ -211,6 +211,10 @@ class Mutations(unittest.TestCase):
         self.edit_guide(lambda s: s.replace("timecards.cob#L93)", "timecards.cob#L9999)", 1))
         self.assertProblem("out of range")
 
+    def test_a_line_link_whose_text_and_anchor_disagree_is_caught(self):
+        self.edit_guide(lambda s: s.replace("[L93](../../../src/cobol/timecards.cob#L93)", "[L93](../../../src/cobol/timecards.cob#L94)", 1))
+        self.assertProblem("the link text says L93 but the anchor is #L94")
+
     def test_an_external_host_must_be_on_the_allowlist(self):
         self.edit_guide(lambda s: s.replace("## Further reading\n", "## Further reading\n\n- [Blog](https://example.com/a-blog-post) (a blog).\n", 1))
         self.assertProblem("is not in lessons/book/link-hosts.txt")

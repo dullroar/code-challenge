@@ -43,7 +43,7 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn, with the category wrapping to Meetings. Final totals are 41 to 59, with 3 to 5 cards. Rows go into a SQLite table and the program prints a summary.
 
-Each style writes the boundary differently. In the `for`, the condition is `reduce(...) <= 40 ? true : (...show the result..., false)`: `<= 40` is true for 40, so the loop goes round ([L54](../../../src/javascript/timecards.mjs#L54)). In the weird program, `over = total > 40` is false for 40, so the machine keeps answering ([core.mjs L14](../../../src/javascript-weird/core.mjs#L14)). In the events program, `total > limit` is false for 40, so the next card is scheduled ([L113](../../../src/javascript-events/timecards.mjs#L113-L114)).
+Each style writes the boundary differently. In the `for`, the condition is `reduce(...) <= 40 ? true : (...show the result..., false)`: `<= 40` is true for 40, so the loop goes round ([L54](../../../src/javascript/timecards.mjs#L54)). In the weird program, `over = total > 40` is false for 40, so the machine keeps answering ([core.mjs L14](../../../src/javascript-weird/core.mjs#L14)). In the events program, `total > limit` is false for 40, so the next card is scheduled ([L115](../../../src/javascript-events/timecards.mjs#L115)).
 
 ## The machine to identify
 

@@ -137,17 +137,17 @@ The worksheet, filled in for representative entries. Hours are 15, 19, 12 throug
 
 **Which role is played by what.** Read the *decision* column: it is a size error, a masked distance, a declining rule, a regex match, a predicate, an assignment, a listener's comparison, a returned value, a `WHERE` clause, a compress, a stop member, a flag, a callout's return, a conditional group, an address, a failed substitution, a comment, an `ifelse`. Eighteen entries and eighteen different decision mechanisms. The *role* is the same.
 
-**Exactly 40, and the ceiling.** Here the comparison finds something the individual entries do not say. The specification says exactly 40 continues, so a fifth card must be possible. Entries whose supply of categories or cards is a finite list of *four* cannot draw it.
+**Exactly 40, and the ceiling.** Here the comparison found something the individual entries did not say. The specification says exactly 40 continues, so a fifth card must be possible. Entries whose supply of categories or cards was a finite list of *four* could not draw it. That was found while writing these guides, and all but one entry is now fixed.
 
 | Group | Entries | Supply | Evidence |
 | --- | --- | --- | --- |
-| Four names, one pass | `regex-pcre2`, `regex-dotnet` | the subject or tape holds four category names | **run**: four 10-hour draws gave `total=40 entries=4`, and the shared checker said `FAIL: final total 40 does not pass 40` (PCRE2 run through the checker, .NET run) |
-| Four names, one pass | the `for`-header entries `ModernChallenge1` and the Java, Go, Kotlin and Python ports | a one-pass category iterator | **run for the C# header** (a reduction): `stop: total 40 after 4 cards`. The ports and Rust are read from the source. |
-| Four names, one pass | `regex-perl`, `regex-pcre2grep`, `regex-sed`, `xaml` | a scaffold or list of four, or four unrolled passes | read from the source and the READMEs, not run |
+| Was four names, now five | `regex-perl`, `regex-pcre2`, `regex-pcre2grep`, `regex-dotnet`, `regex-sed` | a subject, scaffold, tape or `cats:` list, now with `Meetings` repeated | **run**: before the fix, four 10-hour draws gave `total=40 entries=4` (PCRE2 and .NET, and the shared checker said `FAIL: final total 40 does not pass 40`). Each `check.sh` now forces all-10 cards and requires five rows ending at 50, and each new check fails on the old code |
+| Was four names, now five | `ModernChallenge1` and the Java, Go, Kotlin, Python and Rust ports | a one-pass category iterator or list, now with `Meetings` repeated | **run for the C# header** (a reduction): `stop: total 50 after 5 cards`. Rust's unit tests assert it. Go, Java and Kotlin compile. Python's list change was checked with a reduction of its condition |
+| Still four passes | `xaml` | four copied passes in markup | read from the README, not run (Windows only). With the shipped seed it always deals four cards totalling 53, so the case never arises |
 | Five slots | `tar-gnu`, `ed-weird`, `ex-weird`, `lisp-weird`, `apl` | exactly the worst case (five cards of at least 10 hours reach 50) | the five slots cover the worst case, read from the source. **Run** for `ed-weird` (B18: all-10 dice give five cards, totals 10 to 50) |
-| Cycling | `cobol`, `cobol-weird`, `haskell`, `forth`, `make-gnu`, `cmake`, `javascript` family, `m4`, `tcl` | the category is computed from a count | **run** for `cobol-weird` (a scratch run with all-10 hours), `m4` (seed 4020) and `tcl-weird` (B12 step 2). Read from the source for the rest. |
+| Cycling | `cobol`, `cobol-weird`, `haskell`, `forth`, `make-gnu`, `cmake`, `javascript` family, `m4`, `tcl` | the category is computed from a count | **run** for `cobol-weird` (a scratch run with all-10 hours), `m4` (seed 4020, now also in its `check.sh`) and `tcl-weird` (B12 step 2). Read from the source for the rest |
 
-The probability is one run in 10,000, so none of this is visible in ordinary testing. The entries' own checks accept "four entries" as a legitimate stop, so they pass. The shared checker catches the case. A specification and its checks must agree *at the edge*, and here they do not.
+The probability was one run in 10,000, so none of this was visible in ordinary testing. The entries' own checks had accepted "four entries" as a legitimate stop, so they passed. Only the shared checker caught the case. The lesson stands after the fix: a specification and its checks must agree *at the edge*, and the way to make them agree is a test that *forces* the edge. That is what each new `check.sh` does.
 
 ## Compare the ordinary and weird designs
 
@@ -175,14 +175,14 @@ The probability is one run in 10,000, so none of this is visible in ordinary tes
 
 ## Failure modes, costs, and boundaries
 
-The book's table of every entry's promise has three labels. Here is the distribution, from the READMEs' `assurance` key: **17** guaranteed, **15** implementation-permitted, **8** accidentally exploited.
+The book's table of every entry's promise has three labels. Here is the distribution, from the READMEs' `assurance` key: **17** guaranteed, **16** implementation-permitted, **7** accidentally exploited (`tcl-weird` moved from the last group to the middle one when its evaluation-order dependence was removed).
 
 | Claim | Label | Why |
 | --- | --- | --- |
 | The worksheet's roles exist in every entry | **Guaranteed** | They follow from the challenge. |
 | A decision mechanism's *name* (a flag, a mask, a `WHERE`) describes what it does | **Guaranteed** by the language, per entry | Documented semantics in each. |
 | Three entries share the stop-rule label "accidentally exploited" because of a specific observed behavior (Make's remake, CMake's `AND`, ed's silent `s`) | **Accidentally exploited** | Each is observed, not promised. |
-| Four-name entries stop at four cards | **Accidentally exploited** | A consequence of how the supply was written. |
+| The number of names or slots bounds the number of cards | **Guaranteed** by construction, tested | A bound of five is exactly the worst case. With four names (before the fix, and still in `xaml`) it contradicted the shared challenge at exactly 40. |
 | The assurance tally above | **Guaranteed** as a count | It is read from the READMEs. The labels themselves are the authors' judgment. |
 
 **Costs to state.**
@@ -206,7 +206,7 @@ The book's table of every entry's promise has three labels. Here is the distribu
 Answer before you read the italic text after each question.
 
 1. **Trace.** Fill in the worksheet for `lisp-weird`: where is the program, the state, what repeats, what decides. *(The program is five classes with one `or` method each. The state is the `ledger` object plus the position in the class precedence list. What repeats is the next applicable method, run by the `or` combination. The decision is a method returning true.)*
-2. **Explain.** Why is a total of exactly 40 a test of an entry's *supply* and not only of its stop rule? *(The stop rule says to continue at 40, so a fifth card must be possible. An entry with only four category names has no fifth, so it stops at 40 whatever its rule says.)*
+2. **Explain.** Why is a total of exactly 40 a test of an entry's *supply* and not only of its stop rule? *(The stop rule says to continue at 40, so a fifth card must be possible. An entry with only four category names has no fifth, so it stops at 40 whatever its rule says. That was true of the regex entries and the `for`-header entries before they were fixed, and is still true of `xaml`.)*
 3. **Transfer.** Pick a program you maintain. Fill in the worksheet for its main loop. Which cell is hardest to answer? *(Often "what makes a decision" is spread over several places, and "what evidence proves the claim" is missing. The hardest cell tells you where your program is hardest to review.)*
 4. **Evidence.** A colleague says "every entry that cycles categories continues at 40." Design a test that could fail. *(Run each with a forced all-10 input (`DICE`, `SEED`, `--hours`, a fixed list), then check for five rows and totals 10, 20, 30, 40, 50. The negative control is a four-name entry, which stops at 40.)*
 

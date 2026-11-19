@@ -6,7 +6,7 @@ languages: [tcl, sqlite]
 lesson: "languages/tcl.md#sqlite-as-the-program"
 loop-by: dispatch-and-triggers
 evaluation: eager
-assurance: accidentally-exploited
+assurance: implementation-permitted
 pairs-with: tcl
 machine: "A string-command interpreter whose command lookup can be hooked"
 state: "A TEMP table of proc source, and the depth of trigger recursion"
@@ -125,15 +125,16 @@ Tcl code *is* text, so it fits in a column. (`TEMP` tables and triggers belong t
 CREATE TEMP TRIGGER next_card AFTER INSERT ON main.demo_timecards
 BEGIN
     SELECT tcl('born', NEW.category, NEW.hours, NEW.running_total, NEW.iso_week);
+    UPDATE draw SET h = tcl('hours') WHERE NEW.running_total <= 40;
     INSERT INTO demo_timecards(...)
     SELECT NEW.run_id, tcl('category', (SELECT count(*) ...) + 1),
            h, NEW.running_total + h, NEW.iso_week, datetime('now')
-    FROM (SELECT tcl('hours') AS h)
+    FROM draw
     WHERE NEW.running_total <= 40;
 END;
 ```
 
-When a row is inserted, the trigger fires. It first calls `born` (print the row and, if there is a window, add a table row), then inserts the next card **if the total is 40 or less**: that `WHERE` is the stop rule. That insert fires the same trigger again, which is allowed because of `PRAGMA recursive_triggers = ON`; without it SQLite refuses to let a trigger trigger itself. The recursion depth *is* the number of cards.
+When a row is inserted, the trigger fires. It first calls `born` (print the row and, if there is a window, add a table row), then draws the next card's hours into a one-row TEMP table, `draw`, and inserts the next card **if the total is 40 or less**: that `WHERE` is the stop rule. The hours go through `draw` because they are used twice, as the hours and in the running total, and a table row holds one value no matter how often SQLite evaluates a function. That insert fires the same trigger again, which is allowed because of `PRAGMA recursive_triggers = ON`; without it SQLite refuses to let a trigger trigger itself. The recursion depth *is* the number of cards.
 
 ### The one statement
 
@@ -141,9 +142,10 @@ When a row is inserted, the trigger fires. It first calls `born` (print the row 
 db eval {SELECT tcl('init')}                       ;# seeds rand()
 db transaction {
     db eval {
+        UPDATE draw SET h = tcl('hours');
         INSERT INTO main.demo_timecards(...)
         SELECT tcl('runid'), tcl('category', 1), h, h, tcl('week'), datetime('now')
-        FROM (SELECT tcl('hours') AS h)
+        FROM draw
     }
 }
 ```
@@ -188,7 +190,7 @@ Why you might get fired: the control flow of a program is hidden in a trigger an
 
 ## Gotchas worth knowing
 
-- **Statements are evaluated once per call, and SQLite owns the order.** The trigger depends on `h` being the same value in `h` and in `NEW.running_total + h`. Here SQLite evaluates the subquery's function call once per row; `check.sh` would fail if it did not (running totals must equal the sum), but SQLite does not promise this for non-deterministic functions. A hardened version would draw the hours once and store them.
+- **A function result that is used twice is drawn once and stored.** The hours appear twice in the new row (as the hours and inside the running total). Called twice, a random function would give two different values and the running total would stop adding up. An earlier version put the call in a subquery and relied on SQLite evaluating it once per row, which SQLite does not promise for non-deterministic functions. Now the hours are written into the one-row TEMP table `draw` and read from it twice, and `check.sh` counts the calls of the `hours` procedure and requires one per card.
 - **Qualified names in triggers.** `INSERT INTO main.demo_timecards` is rejected inside a trigger ("qualified table names are not allowed"), so the trigger body uses the bare name. The trigger is `TEMP`, so the bare name resolves to the one table in `main`.
 - **A tclsh that has loaded Tk does not exit** at the end of the script while the main window exists, so the script ends with `destroy .`.
 - **Depth.** SQLite limits trigger recursion (1000 by default); the challenge needs 3 to 5.

@@ -350,6 +350,11 @@ def check_links(rel, text, repo=None):
         if not os.path.exists(full):
             problems.append(f"{where}: link to a missing file: {target}")
             continue
+        lab = re.fullmatch(r"L(\d+)(?:-(\d+))?", m.group(1))
+        if lab and frag:
+            want = f"L{lab.group(1)}" + (f"-L{lab.group(2)}" if lab.group(2) else "")
+            if frag != want:
+                problems.append(f"{where}: the link text says {m.group(1)} but the anchor is #{frag}: {target}")
         if not frag or os.path.isdir(full):
             continue
         if full.endswith(".md"):

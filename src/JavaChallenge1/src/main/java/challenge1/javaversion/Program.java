@@ -70,7 +70,7 @@ public class Program {
                 final DemoTimeCardRepository timeCards = ctx.getBean(DemoTimeCardRepository.class);
                 final List<DemoTimeCard> pending = new ArrayList<>();
                 final Random rnd = ThreadLocalRandom.current();
-                final Iterator<String> categories = List.of("Meetings", "Coding", "Debugging", "Learning").iterator();
+                final Iterator<String> categories = List.of("Meetings", "Coding", "Debugging", "Learning", "Meetings").iterator();
                 final ReentrantLock mutex = new ReentrantLock();
             }
                 //   *

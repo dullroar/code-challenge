@@ -67,11 +67,11 @@ The Linux script entries share a reporting shape (rows, a committed total, a stu
 
 ### regex.dotnet
 
-- **A regex cannot draw random numbers**, so the host seeds four unary strings.
+- **A regex cannot draw random numbers**, so the host seeds five unary strings.
 - **A regex cannot write**, so there are no side effects.
 - **The signature move is impossible.** Append `(?!)` and the match fails, and a failed `Match` exposes no captures. The entry must return true.
 - **No pulse.** It needs side effects during the match.
-- **Unrolled randomness**: the tape always holds four draws even when three are needed.
+- **Unrolled randomness**: the tape always holds five draws even when three are needed.
 - **The host still reports**, with a `Zip` over captures.
 
 ### regex.pcre2grep

@@ -101,7 +101,7 @@ The decisive trace here is of a *failure*. For each entry the table gives the fa
 
 **The three kinds of "error as a signal".** In `cobol-weird`, `ON SIZE ERROR` is local arithmetic error control: the field is too small, the clause runs, and the program takes it as the stop rule. In `make-gnu` and `cmake`, the last statement inserts `total <= 40` into a `CHECK(ok=1)` column: SQLite refuses, prints a named constraint error on stderr, and the run goes on to print its summary. The entry's check requires that error to appear *exactly once*. In `regex-sed`, exit status 1 means "returned false on purpose", and the wrapper maps 1 to 0.
 
-**Exactly 40.** The boundary shows what the commit can claim. A run that stops at four cards with a total of exactly 40 still commits and prints `# committed total=40 entries=4`, and the shared checker rejects it. The entry's own claim of success and the shared check disagree: "committed" says the *data was saved*, and the checker asks whether the *rule* was obeyed. Commit is not correctness.
+**Exactly 40.** The boundary shows what the commit can claim. Before the five-name fix, a regex or `for`-header run that stopped at four cards with a total of exactly 40 still committed and printed `# committed total=40 entries=4`, and the shared checker rejected it. The entry's own claim of success and the shared check disagree: "committed" says the *data was saved*, and the checker asks whether the *rule* was obeyed. Commit is not correctness.
 
 ## Compare the ordinary and weird designs
 

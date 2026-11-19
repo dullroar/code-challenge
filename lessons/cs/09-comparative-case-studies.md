@@ -105,7 +105,7 @@ The rule fires the next step. In [`lisp-weird`](../../src/lisp-weird/README.md) 
 | [`lisp-weird`](../../src/lisp-weird/README.md) | Common Lisp | A method dispatcher with a pluggable combination rule | The class precedence list, and each method's return value | eager | implementation-permitted |
 | [`tar-gnu-weird`](../../src/tar-gnu-weird/README.md) | GNU tar, SQLite | A finite-state machine, driven by a logical clock that tar supplies | One SQLite row (the machine's registers) and the number of records tar has written | eager | implementation-permitted |
 | [`javascript-events`](../../src/javascript-events/README.md) | JavaScript, SQLite | A set of listeners on one EventEmitter, which together are a state machine | The running total and the card count, held in one object that only the listeners touch | eager | guaranteed |
-| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | A string-command interpreter whose command lookup can be hooked | A TEMP table of proc source, and the depth of trigger recursion | eager | accidentally-exploited |
+| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | A string-command interpreter whose command lookup can be hooked | A TEMP table of proc source, and the depth of trigger recursion | eager | implementation-permitted |
 
 ## The input is the loop
 
@@ -205,5 +205,5 @@ Read down the last column. Only one of the five makes a promise about *behavior*
 | [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | port | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | port | [A lazy sequence that someone keeps asking for](09-comparative-case-studies.md#a-lazy-sequence-that-someone-keeps-asking-for) | lazy | guaranteed | [`JavaChallenge1`](../../src/JavaChallenge1/README.md) |
 | [`tcl`](../../src/tcl/README.md) | Tcl | idiomatic | [An ordinary loop, used in an unusual place](09-comparative-case-studies.md#an-ordinary-loop-used-in-an-unusual-place) | eager | implementation-permitted | [`tcl-weird`](../../src/tcl-weird/README.md) |
-| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | weird | [Dispatch and triggers: the rule fires the next step](09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step) | eager | accidentally-exploited | [`tcl`](../../src/tcl/README.md) |
+| [`tcl-weird`](../../src/tcl-weird/README.md) | Tcl, SQLite | weird | [Dispatch and triggers: the rule fires the next step](09-comparative-case-studies.md#dispatch-and-triggers-the-rule-fires-the-next-step) | eager | implementation-permitted | [`tcl`](../../src/tcl/README.md) |
 | [`xaml`](../../src/xaml/README.md) | XAML, C# | weird | [Document order is the program](09-comparative-case-studies.md#document-order-is-the-program) | declarative | accidentally-exploited | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) |

@@ -42,7 +42,7 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, and a fifth is drawn. Final totals are 41 to 59, with 3 to 5 cards. Rows go into SQLite as one transaction and a summary is printed.
 
-Lisp writes the boundary as `(> total 40)`: false for 40. In the `LOOP` the test is `until (> total +limit+)` and comes *after* `collect`, which is why the crossing card is kept ([L41-46](../../../src/lisp/timecards.lisp#L41-L46)). In the weird program each method ends with `(> (total ledger) 40)`, and the method that returns true stops the chain ([L84](../../../src/lisp-weird/timecards.lisp#L84)).
+Lisp writes the boundary as `(> total 40)`: false for 40. In the `LOOP` the test is `until (> total +limit+)` and comes *after* `collect`, which is why the crossing card is kept ([L39-46](../../../src/lisp/timecards.lisp#L39-L46)). In the weird program each method ends with `(> (total ledger) 40)`, and the method that returns true stops the chain ([L84](../../../src/lisp-weird/timecards.lisp#L84)).
 
 ## The machine to identify
 

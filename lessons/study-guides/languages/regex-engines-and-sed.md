@@ -10,7 +10,7 @@ When you finish, you should be able to:
 2. Say what survives a failed match in each engine: Perl's `local`, PCRE2's C state, pcre2grep's database writes, .NET's captures, sed's pattern space.
 3. Explain what `(*COMMIT)`, `(*FAIL)` and a callout's return value do, and why the order of the pieces matters.
 4. Trace PCRE2, .NET and sed through a fixed run and name the state at each step.
-5. Explain why the regex entries can run at most four cards, what that does to the "exactly 40 continues" rule, and how a backtracking pattern becomes a denial-of-service risk.
+5. Explain how a finite supply of category names set a hidden ceiling of four cards, what that did to the "exactly 40 continues" rule, how the five-name fix and its test work, and how a backtracking pattern becomes a denial-of-service risk.
 6. Label each behavior as guaranteed, implementation-permitted, or accidentally exploited.
 
 Scope limits. You need to know what a capture group, a greedy quantifier and alternation are. The guide does not teach regex syntax from scratch, the SQL, or the terminal "pulse" animation. It covers Perl 5, PCRE2 10.x, pcre2grep with callout scripts, .NET 10 and GNU sed. For the theory, see [Regular expressions](../../cs/05-formal-languages-as-computational-substrates.md#regular-expressions) and [Backtracking](../../cs/07-effects-errors-and-commitment.md#backtracking) in the book. The language page is [Regular expressions: five engines](../../languages/regex.md).
@@ -44,7 +44,7 @@ Edit only copies ([Running things safely](../../exercises.md#running-things-safe
 
 A *card* is a category and a whole number of hours from 10 to 19. Categories cycle through Meetings, Coding, Debugging and Learning. Add each card's hours to a running total and stop when it passes 40. The run **retains the first card that takes the total above 40**. A total of exactly 40 does *not* stop it: four 10-hour cards total exactly 40, so a fifth is drawn. Final totals are 41 to 59, with 3 to 5 cards.
 
-This family cannot fully obey that last sentence, and the guide treats that as a finding, not an error in your reading. Each regex entry walks a *finite list of four category names* (the subject string, the scaffold, or sed's `cats:` list). When the four names run out, the loop ends, whatever the total is. A run of four 10-hour cards ends at exactly 40 with four rows. That has probability one in 10,000 per run, so the entries pass their own checks, and the repository's own `check.sh` files accept "four entries" as a legitimate stop. But the shared checker, `lessons/tools/check-demo.sh`, rejects such a run (see Trace). Everywhere else in the book, exactly 40 continues. Here it can only continue if a fifth name exists.
+This family once could not obey that last sentence, and the way it was found is instructive. Each regex entry walked a *finite list of four category names* (the subject string, the scaffold, or sed's `cats:` list). When the four names ran out the loop ended, whatever the total was, so a run of four 10-hour cards ended at exactly 40 with four rows. That has probability one in 10,000 per run, so the entries passed their own checks, which accepted "four entries" as a legitimate stop. The shared checker `lessons/tools/check-demo.sh` rejects such a run, and running it with forced draws while writing this guide showed the problem (see Trace). It is now fixed: each entry has **five** names (`Meetings` repeats), and each `check.sh` builds a copy of the program whose every card is worth 10 hours and requires a fifth card, `Meetings`, ending at 50.
 
 ## The machine to identify
 
@@ -90,8 +90,8 @@ The PCRE2 diagram is a conversation: the engine calls back into C at every callo
 ```mermaid
 flowchart TD
     accTitle: regex-dotnet: balancing groups as a budget stack
-    accDescr: A flowchart. The host draws four hour counts and writes them as a tape of letters a, one per hour. It runs one regex match. The pattern first pushes 41 empty captures onto the stack of group b, which is the budget. Each pass of the star loop first checks whether the budget stack is non-empty. If it is, a chain of conditional flag groups picks the next category. Then 10 to 19 letters a are matched, and each one pops a budget token, if any is left, and pushes a token onto the running total stack. When the budget is empty, a failing lookahead fails the pass and the loop ends. The host then reads out the categories, the hours and the size of the total stack.
-    A["Host: draw four hour counts, write them as a tape of a's"] --> B["One Regex match runs against the tape"]
+    accDescr: A flowchart. The host draws five hour counts and writes them as a tape of letters a, one per hour. It runs one regex match. The pattern first pushes 41 empty captures onto the stack of group b, which is the budget. Each pass of the star loop first checks whether the budget stack is non-empty. If it is, a chain of conditional flag groups picks the next category. Then 10 to 19 letters a are matched, and each one pops a budget token, if any is left, and pushes a token onto the running total stack. When the budget is empty, a failing lookahead fails the pass and the loop ends. The host then reads out the categories, the hours and the size of the total stack.
+    A["Host: draw five hour counts, write them as a tape of a's"] --> B["One Regex match runs against the tape"]
     B --> C["Push 41 empty captures onto group b: the budget"]
     C --> D{{"Is the budget stack non-empty?"}}
     D -->|yes| E["Category picker: the first flag not yet set names the category"]
@@ -159,7 +159,7 @@ The crossing card is already booked when the gate fires. That is the rule "keep 
 
 ### .NET: the budget stack
 
-The scratch copy drew from the command line instead of `Random`. With draws `15 19 12 17` it printed three rows and `# captured total=46 entries=3`. The fourth draw was ignored. The trace in terms of stacks:
+The scratch copy drew from the command line instead of `Random`. With draws `15 19 12 17 11` it printed three rows and `# captured total=46 entries=3`. The fourth and fifth draws were ignored. The trace in terms of stacks:
 
 | Step | Budget stack `b` | Total stack `s` | What the pattern does |
 | --- | --- | --- | --- |
@@ -171,34 +171,34 @@ The scratch copy drew from the command line instead of `Random`. With draws `15 
 
 The crossing card can overshoot the budget in the middle of its hours. Only the next pass is refused.
 
-**The boundary the family cannot cross.** The scratch copies were also run with four 10-hour draws. Both the PCRE2 and the .NET copy stopped with `total=40 entries=4`. After `Learning` there is no fifth category name in the subject, so no fifth pass can start, although 40 is not over 40. For PCRE2, the shared checker confirmed it:
+**The boundary: before and after the fix.** Before the fix, scratch copies of PCRE2 and .NET were run with four 10-hour draws. Both stopped with `total=40 entries=4`: after `Learning` there was no fifth category name, so no fifth pass could start, although 40 is not over 40. For PCRE2 the shared checker confirmed it:
 
 ```text
 $ bash lessons/tools/check-demo.sh out.txt
 FAIL: final total 40 does not pass 40
 ```
 
-The same holds for the Perl entry (its postponed block returns `$::c[$::n] // '(*FAIL)'`, which fails when the four names are used up) and for sed (`/ cats: /b done`). Only PCRE2 and .NET were run with forced draws. For Perl and sed this is read from the code.
+The same held for the Perl entry (its postponed block returns `$::c[$::n] // '(*FAIL)'`, which fails when the names are used up) and for sed (`/ cats: /b done`). The fix is one more name in each: `MeetingsCodingDebuggingLearningMeetings` in PCRE2's subject and pcre2grep's tape, a fifth `Meetings` in Perl's scaffold and `@::c`, a fifth tape entry and one more flag group (`f5`) in the .NET picker, and `cats:Meetings,Coding,Debugging,Learning,Meetings,` in sed. Each `check.sh` now builds a variant whose every card is worth 10 hours and requires five rows (the fourth `Learning`, the fifth `Meetings`, total 50). The new tests were also run against the old code, and each failed there (`total=40 entries=4`), so they can fail. All five entries pass them now.
 
 ### sed: one line, rewritten
 
 `TRACE=1` prints sed's state line at every loop head. With the README's seed, the state at each `:entry`, without its unchanging prefix, was:
 
 ```text
-rng:1011001110100101 cats:Meetings,Coding,Debugging,Learning, tot: n:
-rng:0101101100111010 cats:Coding,Debugging,Learning, tot:############### n:%
-rng:0100101001011011 cats:Debugging,Learning, tot:############################# n:%%
-rng:0100010010100101 cats:Learning, tot:########################################### n:%%%
+rng:1011001110100101 cats:Meetings,Coding,Debugging,Learning,Meetings, tot: n:
+rng:0101101100111010 cats:Coding,Debugging,Learning,Meetings, tot:############### n:%
+rng:0100101001011011 cats:Debugging,Learning,Meetings, tot:############################# n:%%
+rng:0100010010100101 cats:Learning,Meetings, tot:########################################### n:%%%
 ```
 
 | Loop head | Total (marks) | Categories left | `/ tot:#{41}/` | Next |
 | --- | ---: | --- | --- | --- |
-| 1 | 0 | four | no match | take Meetings, draw 15 |
-| 2 | 15 | three | no match | take Coding, draw 14 |
-| 3 | 29 | two | no match | take Debugging, draw 14 |
-| 4 | **43** | one | **match** | `b done`: print the summary, write `COMMIT` |
+| 1 | 0 | five | no match | take Meetings, draw 15 |
+| 2 | 15 | four | no match | take Coding, draw 14 |
+| 3 | 29 | three | no match | take Debugging, draw 14 |
+| 4 | **43** | two | **match** | `b done`: print the summary, write `COMMIT` |
 
-The rows were `Meetings 15 15`, `Coding 14 29` and `Debugging 14 43`, with `# committed total=43 entries=3`. Each trip between loop heads rewrites the shift register to produce a digit, rejects draws of 10 to 15 (`/ rng:1(01|1)/b draw`) and turns the accepted digit into tally marks. The number of state lines per card is not constant, because a rejected draw repeats a step. Learning was never used: the stop rule fired first. Had the total been 40 at the fourth head, `cats:` would hold one name and a fourth card would be drawn. The list, not the total, would stop the fifth.
+The rows were `Meetings 15 15`, `Coding 14 29` and `Debugging 14 43`, with `# committed total=43 entries=3`. Each trip between loop heads rewrites the shift register to produce a digit, rejects draws of 10 to 15 (`/ rng:1(01|1)/b draw`) and turns the accepted digit into tally marks. The number of state lines per card is not constant, because a rejected draw repeats a step. Learning and the second Meetings were never used: the stop rule fired first. Had the total been exactly 40 at a later head, `cats:` would still hold a name, so another card would be drawn. With five names the list can only end a run after five cards, and five cards of at least 10 hours always pass 40.
 
 ## Compare the ordinary and weird designs
 
@@ -223,7 +223,7 @@ Searching and rewriting differ in a way worth stating. A single match always fin
 | B8, pcre2grep | Change the first `(?C{/usr/bin/sqlite3` to `(?C{sqlite3`. What happens? | No output at all and exit code 0. `pcre2grep` uses `fork` and `execv`, which do not search `PATH`, so a callout that cannot start looks the same as a vetoed branch. |
 | [B9. sed: watch a computation](../../exercises.md#b9-sed-watch-a-computation-verified) | Roughly how many state lines per card? | Many, and not a constant number, because rejected draws repeat a step. The last `tot:` has 41 or more `#`. |
 | [C1. Weird next to boring](../../exercises.md#c1-weird-next-to-boring-verified) | Which entry would you debug first? | The one whose whole state you can print: sed. |
-| [A1. Read the rows](../../exercises.md#a1-read-the-rows-verified) | Run `src/regex-dotnet`, whose rows have no running-total column. How many cards? | You must sum the hours yourself. This is also where the four-card ceiling is invisible, because the rarest case, exactly 40, almost never appears. |
+| [A1. Read the rows](../../exercises.md#a1-read-the-rows-verified) | Run `src/regex-dotnet`, whose rows have no running-total column. How many cards? | You must sum the hours yourself. This is also where the old four-card ceiling was invisible, because the rarest case, exactly 40, almost never appears. The `check.sh` of every regex entry now forces it. |
 
 The B8 exercise asks for three sentences contrasting what survives a failed match. The version that shows you understood: Perl's `local` values are restored when the engine backtracks, but the prints and inserts stay done. PCRE2's C struct is never rewound. In .NET nothing survives, because the only output was the captures.
 
@@ -239,7 +239,7 @@ The B8 exercise asks for three sentences contrasting what survives a failed matc
 | A failed .NET `Match` exposes no captures | **Guaranteed** | Verified in exercise B8. |
 | sed's `T`, `Q`, `--debug`, `\x1b` and `-E` intervals | **Implementation-permitted** | GNU extensions. BSD and macOS sed will not run the script. |
 | The sed pulse takes about 50 ms per frame because a regex backtracks catastrophically | **Accidentally exploited** | The cost of a failing pattern is a performance cliff nobody promised, and it varies with the CPU. The pulse is skipped in pipes and in `check.sh`. |
-| Four category names is the maximum number of cards | **Accidentally exploited** | A consequence of how the subject was written, not a stated design rule. It contradicts the shared challenge for one run in 10,000. |
+| The number of category names bounds the number of cards | **Guaranteed** by construction, tested | With five names a run has at most five cards, which is exactly the worst case (five cards of at least 10 hours reach 50). With four names (before the fix) the bound contradicted the shared challenge for one run in 10,000. |
 
 **Costs to state.**
 
@@ -261,10 +261,10 @@ The B8 exercise asks for three sentences contrasting what survives a failed matc
 
 Answer before you read the italic text after each question.
 
-1. **Trace.** In the PCRE2 entry, hours are 13, 12, 14, 15. List the `gate` returns and the number of rows. *(The gate sees totals 0, 13, 25 and 39 and returns 0 each time, so four cards are booked. A fifth gate sees 54 and returns 1, which ends the loop. Four rows, total 54, and the crossing card is the fourth. Had the total been exactly 40 after four cards, the fifth gate would return 0 and the loop would still end, because the subject has no fifth category name.)*
+1. **Trace.** In the PCRE2 entry, hours are 13, 12, 14, 15. List the `gate` returns and the number of rows. *(The gate sees totals 0, 13, 25 and 39 and returns 0 each time, so four cards are booked. A fifth gate sees 54 and returns 1, which ends the loop. Four rows, total 54, and the crossing card is the fourth. Had the total been exactly 40 after four cards, the fifth gate would return 0, and the fifth name in the subject, `Meetings`, would be matched and booked: the fix described above. Before it, the subject had no fifth name, and the loop ended at 40.)*
 2. **Explain.** Why does PCRE2 need `(*COMMIT)` before the `commit` callout? *(The final `(*FAIL)` makes the engine backtrack. Without `(*COMMIT)` it would retry shorter loops, and `commit` would run more than once.)*
 3. **Transfer.** The .NET entry cannot "return false on purpose" and the PCRE2 entry can. What is the difference in where each keeps its output? *(PCRE2 writes to a file in side effects that survive the failure. .NET's only output is its captures, and a failed `Match` discards them.)*
-4. **Evidence.** A reviewer claims: "These entries can never draw a fifth card." Design a test that could fail, and say which entries your evidence covers. *(Run PCRE2 or .NET with a fixed four-draw tape of 10s and check the card count is 4 and the total 40. The negative control is a variant with a fifth category name, which must draw a fifth card. This covers only the entries you ran, and the others are an inference from code. The claim's label is accidentally exploited.)*
+4. **Evidence.** A reviewer claims: "A total of exactly 40 continues to a fifth card in every regex entry." Design a test that could fail, and say what the negative control is. *(Run each entry, or a copy with every card worth 10 hours, and check for five rows ending at 50. The `check.sh` files now do exactly that. The negative control is the entry as it was before the fix, which stops at four rows and a total of 40. Run the new checks against the old code to see them fail.)*
 
 ## Further reading
 
