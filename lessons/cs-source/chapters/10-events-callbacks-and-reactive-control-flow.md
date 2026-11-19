@@ -1,6 +1,8 @@
 ---
 title: "Events, callbacks and reactive control flow"
 ---
+For an advanced reading path with traces and experiments, see the [events, callbacks and reactive control study guide](../study-guides/concepts/events-callbacks-and-reactive-control.md).
+
 Every entry in this book answers one question: **who chooses what runs next?** In a `for` loop, the loop chooses. In a lazy pipeline, whoever asks for the next value chooses. In this chapter, something else chooses: an *event*. A program registers small functions, and something else calls them when something happens. The program does not say when.
 
 That sounds like a window with buttons, but it is a general way to build control flow, and this book has it in small, honest forms. [[entry:javascript-events]] is built from nothing else: ten listeners on one emitter, and no loop statement. The other chapters show how code is chosen by a counter, a demand or a rewrite. This one shows what changes when a *notification* does the choosing.

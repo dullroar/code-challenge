@@ -28,12 +28,25 @@ for i in $(seq 1 25); do
     [[ $rows -eq $entries ]] || { echo "FAIL run $i: $rows rows but entries=$entries"; exit 1; }
     sum=$(awk -F'\t' '/^(Meetings|Coding|Debugging|Learning)\t/ { s += $2 } END { print s + 0 }' <<<"$out")
     (( sum == total )) || { echo "FAIL run $i: hours sum to $sum but total=$total"; exit 1; }
-    (( entries == 4 || total > 40 )) || { echo "FAIL run $i: stopped early at $total"; exit 1; }
-    (( entries >= 3 )) || { echo "FAIL run $i: too few entries"; exit 1; }
+    (( total > 40 )) || { echo "FAIL run $i: stopped early at $total"; exit 1; }
+    (( entries >= 3 && entries <= 5 )) || { echo "FAIL run $i: $entries entries; a run has 3 to 5"; exit 1; }
     (( total <= 40 + 19 )) || { echo "FAIL run $i: overshot ($total)"; exit 1; }
     awk -F'\t' '/^(Meetings|Coding|Debugging|Learning)\t/ && ($2 < 10 || $2 > 19) { bad = 1 } END { exit bad }' <<<"$out" || { echo "FAIL run $i: hours out of 10-19"; exit 1; }
-    # An entry list that stopped at 3 must have exceeded 40 by the third; one that did 4 must not have before the fourth.
-    first3=$(awk -F'\t' '/^(Meetings|Coding|Debugging)\t/ { s += $2 } END { print s + 0 }' <<<"$out")
-    (( entries == 3 && first3 > 40 || entries == 4 && first3 <= 40 )) || { echo "FAIL run $i: stop rule wrong (first three = $first3, entries = $entries)"; exit 1; }
+    # The stop rule: the total before the last card is 40 or less (exactly 40 continues), and the last card took it over 40.
+    before_last=$(awk -F'\t' '/^(Meetings|Coding|Debugging|Learning)\t/ { prev = s; s += $2 } END { print prev + 0 }' <<<"$out")
+    (( before_last <= 40 )) || { echo "FAIL run $i: kept going after the total passed 40 (total before the last card = $before_last)"; exit 1; }
 done
-echo "OK: 25 runs, every one stopped exactly when the total passed 40 (or after the fourth category)"
+
+# 3. Exactly 40 continues. Four 10-hour cards total exactly 40, so a fifth card must be drawn: Meetings again, total 50.
+#    A copy of the host with every card worth 10 hours makes that the only possible run.
+mkdir "$data/fixed"; cp RegexDotnet.csproj "$data/fixed/"
+sed "s/string Draw() => new('a', Random.Shared.Next(10, 20));/string Draw() => new('a', 10);/" Program.cs > "$data/fixed/Program.cs"
+grep -q "new('a', 10)" "$data/fixed/Program.cs" || { echo "FAIL: the exactly-40 test could not rewrite Draw() in Program.cs"; exit 1; }
+(cd "$data/fixed" && dotnet build -c Release -v q --nologo -o "$data/fixedbin" >/dev/null)
+out=$(dotnet "$data/fixedbin/RegexDotnet.dll")
+[[ $(grep -cE '^(Meetings|Coding|Debugging|Learning)	' <<<"$out") -eq 5 ]] || { echo "FAIL: all-10 cards must give five rows (exactly 40 continues)"; echo "$out"; exit 1; }
+grep -q '^# captured total=50 entries=5' <<<"$out" || { echo "FAIL: expected total=50 entries=5"; echo "$out"; exit 1; }
+mapfile -t rows < <(grep -E '^(Meetings|Coding|Debugging|Learning)	' <<<"$out")
+[[ ${rows[3]} == Learning* && ${rows[4]} == Meetings* ]] || { echo "FAIL: the fourth card must be Learning and the fifth Meetings"; echo "$out"; exit 1; }
+
+echo "OK: 25 runs, every one stopped exactly when the total passed 40; exactly 40 continued to a fifth card"

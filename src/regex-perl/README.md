@@ -82,7 +82,7 @@ Below the `use` lines, `timecards.pl` is one line: a constant scaffold string `=
 | --- | --- |
 | `^(?{ ... })` | Initializer: seeds the state, makes the scratch directory, starts `sqlite3` on a pipe, creates the table (with a `CHECK(demo_only=1)` constraint) and opens a transaction |
 | `(?:  ...  )*` | The loop. Perl's greedy quantifier is the iteration; the scaffold string gives each pass something to eat |
-| `(??{ $::t<=40 ? $::c[$::n] // '(*FAIL)' : '(*FAIL)' })` | The stop rule and the category chooser in one: it hands the engine the *next category name as a pattern*, or `(*FAIL)` once the total passes 40 or the categories run out. A failed pass is what ends the quantifier |
+| `(??{ $::t<=40 ? $::c[$::n] // '(*FAIL)' : '(*FAIL)' })` | The stop rule and the category chooser in one: it hands the engine the *next category name as a pattern*, or `(*FAIL)` once the total passes 40 or the categories run out (five names: Meetings repeats, so four 10-hour cards, a total of exactly 40, are followed by a fifth). A failed pass is what ends the quantifier |
 | `(?{ local $::t = ...; local $::n = ...; print ... })` | One timecard: draws 10-19, adds it to the total, advances the category, sends an `INSERT` to SQLite and prints the row |
 | `(*COMMIT)` | Once the loop ends, backtracking may not retry shorter loops (or the finalizer would run more than once) |
 | `(?{ COMMIT; close; print ... })` | Finalizer: commits the SQLite transaction, closes the pipe (which waits for `sqlite3` to finish), prints the summary |
@@ -93,7 +93,7 @@ Below the `use` lines, `timecards.pl` is one line: a constant scaffold string `=
 
 ## What `check.sh` enforces
 
-`check.sh` checks that the file really is one statement: everything except comments, blank lines and `use` lines must be a single line, with exactly one top-level match and no loop keyword outside comments. Then it runs the program 25 times. Each run must print the "returns false" line, as many rows as it has entries, hours from 10 to 19, no early stop (four entries, or a total over 40), at least three entries and a total of at most 59. SQLite must agree with the output, the database must hold 25 distinct runs, and a non-demo row must be refused.
+`check.sh` checks that the file really is one statement: everything except comments, blank lines and `use` lines must be a single line, with exactly one top-level match and no loop keyword outside comments. Then it runs the program 25 times. Each run must print the "returns false" line, as many rows as it has entries, hours from 10 to 19, no early stop (the total must end over 40), three to five entries and a total of at most 59. It also runs a copy of the program in which every card is worth 10 hours and checks that exactly 40 continues: five rows, the fifth `Meetings`, total 50. SQLite must agree with the output, the database must hold 25 distinct runs, and a non-demo row must be refused.
 
 ## Gotchas worth knowing
 

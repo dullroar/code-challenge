@@ -1,8 +1,8 @@
-# DEMO ONLY. Fictional timecards. GNU sed, run as: sed -nEu -f timecards.sed 3>(sql sink). See README.md.
+# DEMO ONLY. Fictional timecards. GNU sed, run as: sed -nEu -f timecards.sed 3>(sql sink). Never without that 3> redirect (see README.md, Gotchas): `w /dev/fd/3` would open whatever else holds fd 3, even this file.
 # The whole program state is ONE line of text. No variables, no numbers, no arithmetic: hours are tally
 # marks, the random draws are a 16-bit shift register made of 0s and 1s, every decision is "did this
 # regex match?", the SQL goes out on fd 3 for sqlite3 to run, and the script ends by exiting 1 (failure).
-s/^run:([^ ]+) wk:([^ ]+) rng:([01]{16}) tty:([0-9]+) trace:([01])$/run:\1 wk:\2 tty:\4 trace:\5 rng:\3 cats:Meetings,Coding,Debugging,Learning, tot: n:/
+s/^run:([^ ]+) wk:([^ ]+) rng:([01]{16}) tty:([0-9]+) trace:([01])$/run:\1 wk:\2 tty:\4 trace:\5 rng:\3 cats:Meetings,Coding,Debugging,Learning,Meetings, tot: n:/
 T bad
 s/ rng:0{16} / rng:0000000000000001 /
 h

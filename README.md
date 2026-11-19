@@ -35,7 +35,7 @@ The rules, the shared demo, and the do's and don'ts live in **[`CHALLENGE.md`](C
 
 **Want to run one without trusting it?** Every Linux entry (including the Rust/GTK and Go ones) has its own tiny, locked-down **Docker container** that runs it with no network and shows you what it did, and every Windows or GUI entry runs in a throwaway **Windows Sandbox**. See **[`SANDBOX-SETUP.md`](SANDBOX-SETUP.md)** for the one-time setup, then open the folder's README (linked in the table below) and look for its **Run it in a container** or **Run it in Windows Sandbox** section for the one command.
 
-Every entry builds the same small demo: make up some *Meetings / Coding / Debugging / Learning* time-card hours, save them to a local **DEMO ONLY** SQLite file, stop once the total passes 40, and show the result. Nothing here touches a real time-reporting system - see the [disclaimer](#disclaimer).
+Every entry builds the same small demo: make up some *Meetings / Coding / Debugging / Learning* time-card hours, save them to a local **DEMO ONLY** SQLite file, stop once the total passes 40 (the two LINQ entries use a fixed 40-hour week instead, and a total of exactly 40 continues in every other entry except `xaml`, which can deal at most four cards), and show the result. Nothing here touches a real time-reporting system - see the [disclaimer](#disclaimer).
 
 **ALL OF THESE ARE TESTED AND WORK AS ADVERTISED.** Remember that while reading the code.
 

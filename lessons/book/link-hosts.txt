@@ -9,6 +9,8 @@
 # developer.mozilla.org           MDN, CC BY-SA 2.5 or later
 # nodejs.org                     Node.js documentation (MIT license)
 # github.com/dullroar/            this project's own repositories (a host with a path is allowed only under that path)
+# www.gnu.org/software/           official GNU manuals (Make, tar, m4, sed ...): the GNU Project's own documentation, stable for decades, freely readable (GFDL)
+#                                 Added for the study guides (lessons/study-guides/), where a claim about an implementation needs its manual.
 en.wikipedia.org
 www.rfc-editor.org
 owasp.org
@@ -16,3 +18,4 @@ cheatsheetseries.owasp.org
 developer.mozilla.org
 nodejs.org
 github.com/dullroar/
+www.gnu.org/software/

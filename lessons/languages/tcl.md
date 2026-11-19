@@ -2,6 +2,8 @@
 
 Entries: [`src/tcl`](../../src/tcl/README.md) (a `while` loop, dicts, an optional Tk window) and [`src/tcl-weird`](../../src/tcl-weird/README.md) (the program lives in SQLite).
 
+For an advanced reading path with traces and experiments, see the [Tcl study guide](../study-guides/languages/tcl.md).
+
 ## What makes Tcl special
 
 Tcl's rule is "everything is a command, and every command receives its arguments as strings". There is no keyword for `while`, `proc` or `if`: they are commands, and `{...}` is just a way to hand a command an unevaluated string. That makes the language tiny, and makes two features cheap that most languages treat as exotic: **rewriting how unknown commands are resolved** and **running a string as code in another scope**.
@@ -38,15 +40,16 @@ Three hooks make a program out of nothing.
 # every proc that ran was fetched from SQLite by unknown: born category hours init runid week
 ```
 
-**Hook 3: the loop is a recursive trigger.** The [trigger](../../src/tcl-weird/timecards.tcl#L99-L108):
+**Hook 3: the loop is a recursive trigger.** The [trigger](../../src/tcl-weird/timecards.tcl#L104-L114):
 
 ```sql
 CREATE TEMP TRIGGER next_card AFTER INSERT ON main.demo_timecards
 BEGIN
     SELECT tcl('born', NEW.category, NEW.hours, NEW.running_total, NEW.iso_week);
+    UPDATE draw SET h = tcl('hours') WHERE NEW.running_total <= 40;
     INSERT INTO demo_timecards(...)
     SELECT NEW.run_id, tcl('category', ...), h, NEW.running_total + h, ...
-    FROM (SELECT tcl('hours') AS h)
+    FROM draw
     WHERE NEW.running_total <= 40;
 END;
 ```
@@ -62,7 +65,7 @@ Inserting a card fires the trigger, which prints the card (via `tcl('born', ...)
 - **Every hook point is a loop opportunity.** SQLite lets you register functions and triggers; Tcl lets you intercept lookups. Either alone is a feature, together they are a runtime.
 - **Braces versus substitution** decides everything in Tcl. (Compare [Make's expansion time versus run time](make-cmake.md#gnu-make) and [m4's quoting](m4.md).)
 
-Tags: `proc`, `unknown`, `uplevel`, `namespace`, `dict`, and `try` are **guaranteed** by Tcl 8.6. `db function` and `db eval` variable binding belong to the **sqlite3 Tcl package** (**implementation-permitted**: the interface is stable but is not part of Tcl). Recursive triggers need `PRAGMA recursive_triggers`, **documented SQLite** behavior. That `SELECT tcl('hours')` is called *once* per trigger run is **accidentally exploited**: SQLite evaluates the subquery a single time, but does not promise that.
+Tags: `proc`, `unknown`, `uplevel`, `namespace`, `dict`, and `try` are **guaranteed** by Tcl 8.6. `db function` and `db eval` variable binding belong to the **sqlite3 Tcl package** (**implementation-permitted**: the interface is stable but is not part of Tcl). Recursive triggers need `PRAGMA recursive_triggers`, **documented SQLite** behavior. That each card's hours are drawn exactly once is **guaranteed by design**: the hours are written into a one-row TEMP table and read from it twice, so the result does not depend on how often SQLite evaluates a function. (An earlier version used a subquery and relied on SQLite calling the function once per row, which is **accidentally exploited**: SQLite does not promise that for non-deterministic functions.)
 
 ### 4. Do this in production and you're fired
 
@@ -70,7 +73,7 @@ Tags: `proc`, `unknown`, `uplevel`, `namespace`, `dict`, and `try` are **guarant
 - **`unknown` is global.** Every misspelled command now takes a database lookup before the error. If the table is writable by someone else, so is your program.
 - **Triggers are invisible in stack traces**, and SQLite's recursion depth limit (`SQLITE_MAX_TRIGGER_DEPTH`, 1000 by default) is a hidden constraint.
 - **Quoting is two levels deep:** the Tcl in the SQL in the Tcl. A stray brace breaks the outer string.
-- **It depends on SQLite's evaluation order.** The stunt's `check.sh` has a test that would catch a change, but SQLite does not promise it.
+- **A value used twice must be drawn once.** The hours are used as the hours and inside the running total. The trigger stores them in the one-row TEMP table `draw` and reads them from it, and `check.sh` counts the calls of the `hours` procedure (one per card).
 - **Tk quirk:** a `tclsh` that has loaded Tk does not exit when the script ends. The entry calls `destroy .` (a normal Tk program is waiting for events).
 
 Legitimate uses: **loading code on demand** (Tcl's own `unknown` already calls `auto_load` to find a command's definition on disk), **SQL functions that call back into the host language** (a standard SQLite feature), and **keeping rules in a table** so they can change without a deploy. Tcl Starkits packed a whole application into one virtual-filesystem file for the same reason: code that travels with its data.

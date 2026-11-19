@@ -2,6 +2,8 @@
 
 Entries: [`ModernChallenge1`](../../src/ModernChallenge1/README.md), [`LinqChallenge1`](../../src/LinqChallenge1/README.md), [`LinqChallenge2`](../../src/LinqChallenge2/README.md), [`xaml`](../../src/xaml/README.md), and the ports [Java](../../src/JavaChallenge1/README.md), [Kotlin](../../src/KotlinChallenge1/README.md), [Python](../../src/PythonChallenge1/README.md), [Go](../../src/GoChallenge1/README.md), [Rust](../../src/RustChallenge1/README.md).
 
+For an advanced reading path with traces and experiments, see the [C#, LINQ, XAML and ports study guide](../study-guides/languages/csharp-linq-xaml-and-ports.md).
+
 C# is the *canonical* language of the repo: the challenge began as a 2008 classroom exercise showing off C# 3.0 and .NET 3.x features. It is also where the [blocking problems](../blocking-problems.md) are measured from.
 
 ## The original: ModernChallenge1
@@ -43,6 +45,8 @@ The window is built from a string of raw XAML via `XamlReader.Load` at run time 
 Legitimate uses: none for the header as written. The *ideas* (state in an object, pure queries over a list, effects at the edge) are ordinary.
 
 ## Deferred execution and the void-to-value trick
+
+A note before the code: the two LINQ entries are **not** the shared challenge. They draw no random hours. Their work week is five fixed 8-hour days, capped so that the total is exactly 40.0 hours and no card crosses the line, because they teach deferred execution rather than the stop rule.
 
 ### LinqChallenge1: one fluent chain
 
@@ -97,7 +101,7 @@ See [exercises](../exercises.md#b7-linq-enumerate-twice-verified).
 
 ### Honest fine print
 
-- **The loop is unrolled**: four copy-pasted passes. "Four categories" is baked into the markup.
+- **The loop is unrolled**: four copy-pasted passes. "Four categories" is baked into the markup, so this entry can deal at most four cards. With the shipped seed (`Random(42)`: 16, 11, 11, 15 hours) it always deals four and ends at 53, so the case where four cards total exactly 40 (which should continue to a fifth) never arises. It is the only entry with that limit.
 - **The branching is done by SQL or `DataTable`**, not by WPF triggers.
 - **`Random(42)` is fixed-seeded** in the `.xaml` files, so the hours are the same on every run.
 - **`XamlChallenge1.csproj` has `<Page Remove="**/*.xaml" />`**, so the files are loaded at run time, never compiled. That *is* the point.

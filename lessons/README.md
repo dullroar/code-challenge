@@ -14,5 +14,6 @@ Start here: **[Intro: why these lessons exist](intro.md)**
 | Blocking problems | [blocking-problems.md](blocking-problems.md) |
 | Exercises | [exercises.md](exercises.md) |
 | Index of concepts, languages and entries | [index.md](index.md) |
+| **Study guides**: traces, predictions and evidence for advanced readers | [study-guides/](study-guides/README.md) |
 
 Back to the [challenge](../README.md).

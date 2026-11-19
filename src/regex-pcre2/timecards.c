@@ -19,7 +19,7 @@ typedef struct { FILE *out; long start; int total, entries, committed, frame; co
  * so failures must use something else or a broken run would masquerade as the expected outcome. */
 #define FAILED PCRE2_ERROR_CALLOUT
 
-static const char SUBJECT[] = "MeetingsCodingDebuggingLearning";
+static const char SUBJECT[] = "MeetingsCodingDebuggingLearningMeetings"; /* five names: four 10-hour cards total exactly 40, which continues */
 static const char TICKS[] = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"; /* 60: ~3 s of pulse */
 static const char PATTERN[] =
     "^(?C\"init\")(?:(?C\"gate\")(Meetings|Coding|Debugging|Learning)(?C\"book\"))*"

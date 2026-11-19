@@ -159,7 +159,7 @@ def main() -> None:
             repo=DemoTimeCardRepository(Path(__file__).parent / "data" / "demo-timecards.db"),
             pending=[],
             rnd=random.Random(),
-            categories=deque(["Meetings", "Coding", "Debugging", "Learning"]),
+            categories=deque(["Meetings", "Coding", "Debugging", "Learning", "Meetings"]),
             mutex=threading.RLock())),
         False):
         ...

@@ -15,6 +15,7 @@ python lessons/book/build.py --check-diagrams   # the full render gate for the P
 - **Title and copyright pages** are in [`front-matter.md`](../front-matter.md) (plain HTML, inserted before the table of contents). Edit authors and the copyright line there.
 - **Long code lines** (regexes, XAML, CMake) are hard-wrapped in the PDF by `wrap-code.lua` so nothing runs off the page. A line that continues ends in `↩` and the next line starts with `↪`. The Markdown source is untouched; HTML and EPUB reflow on their own.
 - The PDF and EPUB in the repo root are committed; the HTML (and the intermediate `book.md`) go to `lessons/book/out/`, which is git-ignored.
+- **The study guides are a separate document set.** [`lessons/study-guides/`](../study-guides/README.md) holds hand-written guides that build with `python lessons/study-guides/build.py` into `learn-programming-the-weird-way-study-guides.pdf` and `.epub` beside the book's. That script imports this one (`build_documents`), so the link rewriting, diagram rendering, Pandoc call, stylesheet and reproducibility rule are shared and not copied. The guides are not in `chapters.txt`, and the book only links to them. [`study_guides.py`](study_guides.py) checks them and [`test_study_guides.py`](test_study_guides.py) tests those checks.
 
 ## Diagrams
 

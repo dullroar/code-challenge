@@ -32,9 +32,9 @@ set(CMAKE_MATCH_4 "")                  # finished cards, in unary, dash-separate
 set(CMAKE_MATCH_5 "")                  # hours of the card added last pass, in unary
 
 # ---- the one statement ------------------------------------------------------------------------------------------------
-# 1st test: NOT (total so far + last card is 41 or more x's): the stop rule, "exactly 40 continues". It is first
-#           because a match that fails clears the registers and one that succeeds rewrites them, so the main match
-#           must run last for its captures to be the ones that survive.
+# 1st test: NOT (total so far + last card is 41 or more x's): the stop rule, "exactly 40 continues". It is first because a match
+#           that fails clears the registers and one that succeeds rewrites them, so the main match must run last. NOTE: AND does not
+#           stop at the first false test: on the final pass the 2nd test still runs, and that is how the last card reaches the log (4).
 # 2nd test: build "<total>|<tape>|<log>||0:<10 x's>|1:<11 x's>|...|9:<19 x's>|" from the last pass's registers, then
 #           match it with a pattern that peeks the next digit off the tape (groups 2,3), keeps the log (4), and
 #           looks up this card's hours in the table by the digit the pattern splices in from last pass (5).

@@ -37,6 +37,16 @@ out=$(run "$data/nineteen.tcl")
 [[ $(grep -cE '^(Meetings|Coding|Debugging|Learning)	19	' <<<"$out") -eq 3 ]] || { echo "FAIL: editing the hours row did not change the program"; echo "$out"; exit 1; }
 grep -q 'fetched from SQLite by unknown: born category hours init runid week' <<<"$out" || { echo "FAIL: procs were not loaded from SQLite"; echo "$out"; exit 1; }
 rm -rf "$data/TclWeird"
+#    b2) Each card draws its hours exactly once. The hours are read twice (as the hours and in the running total), so the random
+#       function must not be called twice per card; SQLite does not promise how often it calls a function. Count the calls.
+sed -e "s/'expr {10 + int(rand() \* 10)}'/'incr ::calls; expr {10 + int(rand() * 10)}'/" \
+    -e 's/^puts "# the loop was a recursive trigger, and one INSERT started it"/puts "# hours calls: $::calls"\n&/' timecards.tcl > "$data/counted.tcl"
+for i in 1 2 3 4 5; do
+    out=$(run "$data/counted.tcl")
+    calls=$(sed -nE 's/^# hours calls: ([0-9]+)$/\1/p' <<<"$out"); entries=$(sed -nE 's/.*entries=([0-9]+).*/\1/p' <<<"$out")
+    [[ -n $calls && $calls -eq $entries ]] || { echo "FAIL: run $i drew hours $calls times for $entries cards"; echo "$out"; exit 1; }
+    rm -rf "$data/TclWeird"
+done
 #    c) The temp tables and trigger are gone afterwards: the file on disk holds only the timecards.
 run >/dev/null
 [[ $(sqlite3 "$db" "select group_concat(name) from sqlite_master") == "demo_timecards" ]] || { echo "FAIL: the file holds more than the timecard table"; exit 1; }

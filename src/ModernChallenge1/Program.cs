@@ -51,7 +51,7 @@ internal static class Program
                 user = Environment.UserName,
                 ctx = new DemoTimeCardContext(),
                 rnd = Random.Shared,
-                categories = new List<string> { "Meetings", "Coding", "Debugging", "Learning" }
+                categories = new List<string> { "Meetings", "Coding", "Debugging", "Learning", "Meetings" }
                     .GetEnumerator() as IEnumerator<string>,
                 app = new Application { ShutdownMode = ShutdownMode.OnLastWindowClose },
                 mutex = new Mutex(false, "ModernChallenge1DemoMutex")

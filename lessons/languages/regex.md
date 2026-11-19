@@ -2,6 +2,8 @@
 
 Entries: [`regex-perl`](../../src/regex-perl/README.md), [`regex-pcre2`](../../src/regex-pcre2/README.md), [`regex-pcre2grep`](../../src/regex-pcre2grep/README.md), [`regex-dotnet`](../../src/regex-dotnet/README.md), [`regex-sed`](../../src/regex-sed/README.md).
 
+For an advanced reading path with traces and experiments, see the [regex engines and sed study guide](../study-guides/languages/regex-engines-and-sed.md).
+
 A regular expression looks like a pattern. These entries treat it as a **program**: the match is the computation, backtracking is the search, and the side effects are what you *wanted*. The recurring signature move is to do all the work and then **return "no match" on purpose**.
 
 ## What makes each engine special
@@ -73,7 +75,7 @@ The "host" is a stock `pcre2grep` and one command line. Callout strings name pro
 
 This entry is the repo's best **honest failure**, and it is the one that most clearly marks where regex alone stops. See [blocking problems](../blocking-problems.md#regexdotnet):
 
-- A regex cannot draw random numbers, so the host seeds four unary strings.
+- A regex cannot draw random numbers, so the host seeds five unary strings.
 - A regex cannot write anything.
 - **The signature move is impossible**: append `(?!)` and the match fails, and a failed .NET `Match` exposes no captures, so everything accumulated is gone. This track *must* return true.
 
@@ -124,8 +126,8 @@ From [`regex-dotnet`](../../src/regex-dotnet/README.md) ([source section](../../
 ```mermaid
 flowchart TD
     accTitle: regex-dotnet: balancing groups as a budget stack
-    accDescr: A flowchart. The host draws four hour counts and writes them as a tape of letters a, one per hour. It runs one regex match. The pattern first pushes 41 empty captures onto the stack of group b, which is the budget. Each pass of the star loop first checks whether the budget stack is non-empty. If it is, a chain of conditional flag groups picks the next category. Then 10 to 19 letters a are matched, and each one pops a budget token, if any is left, and pushes a token onto the running total stack. When the budget is empty, a failing lookahead fails the pass and the loop ends. The host then reads out the categories, the hours and the size of the total stack.
-    A["Host: draw four hour counts, write them as a tape of a's"] --> B["One Regex match runs against the tape"]
+    accDescr: A flowchart. The host draws five hour counts and writes them as a tape of letters a, one per hour. It runs one regex match. The pattern first pushes 41 empty captures onto the stack of group b, which is the budget. Each pass of the star loop first checks whether the budget stack is non-empty. If it is, a chain of conditional flag groups picks the next category. Then 10 to 19 letters a are matched, and each one pops a budget token, if any is left, and pushes a token onto the running total stack. When the budget is empty, a failing lookahead fails the pass and the loop ends. The host then reads out the categories, the hours and the size of the total stack.
+    A["Host: draw five hour counts, write them as a tape of a's"] --> B["One Regex match runs against the tape"]
     B --> C["Push 41 empty captures onto group b: the budget"]
     C --> D{{"Is the budget stack non-empty?"}}
     D -->|yes| E["Category picker: the first flag not yet set names the category"]

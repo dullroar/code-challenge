@@ -2,7 +2,7 @@
 
 You already know how to write a loop, query a database and call a function. You have read the tutorials. This is what comes after them.
 
-The [code challenge](../README.md) asks one question in many accents: *how far can a language's own machinery be pushed before it starts acting like a general-purpose program?* Every entry builds the same small demo (fictional time cards of 10-19 hours, added until the total passes 40, saved to a local **DEMO ONLY** SQLite file) under an absurd constraint: one statement, no loop, no `IF`, nothing but a regex, nothing but a markup file.
+The [code challenge](../README.md) asks one question in many accents: *how far can a language's own machinery be pushed before it starts acting like a general-purpose program?* Every entry builds the same small demo (fictional time cards of 10-19 hours, added until the total passes 40, saved to a local **DEMO ONLY** SQLite file; the two LINQ entries are the exception, see below) under an absurd constraint: one statement, no loop, no `IF`, nothing but a regex, nothing but a markup file.
 
 The stunts are the door. These lessons are what is behind it.
 
@@ -23,6 +23,8 @@ flowchart TD
 ```
 
 *How* it happens is what the entries disagree about. Each entry's README has a **Program Flow** section with its own picture, and the book shows it on the lesson page of that entry's language, under **How each program runs**. Those pictures are not all flowcharts, because the machines are not all alike. A COBOL program with a rewritten `GO TO` is a state that changes. A Haskell program is a demand that pulls. An m4 program is text that is read again. A Node program built from listeners is a conversation. If a picture could be pasted unchanged into ten entries, it would not be teaching anything.
+
+**The LINQ exception, and the XAML limit.** [`LinqChallenge1`](../src/LinqChallenge1/README.md) and [`LinqChallenge2`](../src/LinqChallenge2/README.md) teach deferred execution, not the stop rule. They draw no random hours: their work week is five fixed 8-hour days, capped so that the total is exactly 40.0 hours and no card crosses the line. One more entry differs for a mechanical reason: [`xaml`](../src/xaml/README.md) is written as four copied passes, so it can deal at most four cards, and a run of four 10-hour cards would end at exactly 40 instead of continuing to a fifth. Its files seed the generator with 42, which always gives four cards totalling 53, so the shipped program never meets that case. Every other entry follows the rule that a total of exactly 40 continues; the shared checker [`check-demo.sh`](tools/check-demo.sh) fails a run that stops at 40.
 
 ## The teaching philosophy
 

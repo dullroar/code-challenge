@@ -348,3 +348,34 @@ Three indexes, all built from the metadata at the top of each entry's README: th
 - [Whole-array operations instead of steps](cs/09-comparative-case-studies.md#whole-array-operations-instead-of-steps): [`apl`](../src/apl/README.md)
 
 </div>
+
+## Study guides
+
+Hand-written guides for advanced readers: traces of a fixed run, predictions before execution, and evidence. They are a separate document from the book. See [the study guides](study-guides/README.md).
+
+**Language families**
+
+- [C#, LINQ, XAML, and ports study guide](study-guides/languages/csharp-linq-xaml-and-ports.md)
+- [COBOL study guide](study-guides/languages/cobol.md)
+- [Haskell study guide](study-guides/languages/haskell.md)
+- [Forth study guide](study-guides/languages/forth.md)
+- [Make and CMake study guide](study-guides/languages/make-and-cmake.md)
+- [Regex engines and sed study guide](study-guides/languages/regex-engines-and-sed.md)
+- [APL study guide](study-guides/languages/apl.md)
+- [JavaScript study guide](study-guides/languages/javascript.md)
+- [Common Lisp study guide](study-guides/languages/common-lisp.md)
+- [m4 study guide](study-guides/languages/m4.md)
+- [Tcl study guide](study-guides/languages/tcl.md)
+- [ed and Ex study guide](study-guides/languages/ed-and-ex.md)
+- [tar study guide](study-guides/languages/tar.md)
+
+**Concepts**
+
+- [Reading adversarial programs study guide](study-guides/concepts/reading-adversarial-programs.md)
+- [State and control beyond variables study guide](study-guides/concepts/state-and-control-beyond-variables.md)
+- [Evaluation, demand, and laziness study guide](study-guides/concepts/evaluation-demand-and-laziness.md)
+- [Formal languages and weird machines study guide](study-guides/concepts/formal-languages-and-weird-machines.md)
+- [Effects, errors, and commitment study guide](study-guides/concepts/effects-errors-and-commitment.md)
+- [Portability, abstraction, and cost study guide](study-guides/concepts/portability-abstraction-and-cost.md)
+- [Events, callbacks, and reactive control study guide](study-guides/concepts/events-callbacks-and-reactive-control.md)
+- [Comparative machine design study guide](study-guides/concepts/comparative-machine-design.md)

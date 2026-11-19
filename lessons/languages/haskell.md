@@ -2,6 +2,8 @@
 
 Entries: [`src/haskell`](../../src/haskell/README.md) (one pure function) and [`src/haskell-weird`](../../src/haskell-weird/README.md) ("Haskell on drugs": reading the list does the work).
 
+For an advanced reading path with traces and experiments, see the [Haskell study guide](../study-guides/languages/haskell.md).
+
 ## What makes Haskell special
 
 Haskell is **lazy**: a value is computed only when something demands it. The straight entry uses that for a stop rule that is not a loop condition at all, but *how much of a list you choose to read*.

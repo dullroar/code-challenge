@@ -2,6 +2,8 @@
 
 Entries: [`src/tar-gnu`](../../src/tar-gnu/README.md) (the archive is a program) and [`src/tar-gnu-weird`](../../src/tar-gnu-weird/README.md) (the archive is a clock). `tar` ("tape archive") packs many files into one stream of bytes. It was made for magnetic tape, where you cannot jump around, so an archive is a *sequence*: a header, the file's bytes, the next header, and so on. That one fact is why a tar archive can be a program. Order is already part of the format.
 
+For an advanced reading path with traces and experiments, see the [tar study guide](../study-guides/languages/tar.md).
+
 ## What makes tar special
 
 | Feature | What it teaches |

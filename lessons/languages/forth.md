@@ -2,6 +2,8 @@
 
 Entries: [`src/forth`](../../src/forth/README.md) (one `begin ... until`) and [`src/forth-weird`](../../src/forth-weird/README.md) (no loop word, no variable).
 
+For an advanced reading path with traces and experiments, see the [Forth study guide](../study-guides/languages/forth.md).
+
 ## What makes Forth special
 
 Forth has almost no syntax: the interpreter reads a space-delimited word, looks it up, runs it. Words pass values on a **stack**, and every definition carries a stack comment like `( hours -- )`. The language is small enough that you can reach into the interpreter itself.

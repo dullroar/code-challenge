@@ -134,7 +134,7 @@ run:1794625386-3788 wk:2026-W46 rng:1011001110100101 tty:1 trace:0
 The first substitution validates it and adds the rest of the state. From then on, the pattern space looks like this, and it is the entire computer:
 
 ```text
-run:1794625386-3788 wk:2026-W46 tty:1 trace:0 rng:0101101100111010 cats:Coding,Debugging,Learning, tot:############### n:%
+run:1794625386-3788 wk:2026-W46 tty:1 trace:0 rng:0101101100111010 cats:Coding,Debugging,Learning,Meetings, tot:############### n:%
 ```
 
 | Field | Holds | Represented as |
@@ -165,7 +165,7 @@ This is the **second** iteration of that run: it books *Coding, 14 hours*, takin
 #### Step 1: the loop head and the stop rule
 
 ```text
-… rng:0101101100111010 cats:Coding,Debugging,Learning, tot:############### n:%
+… rng:0101101100111010 cats:Coding,Debugging,Learning,Meetings, tot:############### n:%
 ```
 
 ```sed
@@ -186,7 +186,7 @@ s/ cats:([A-Za-z]+),(.*)$/ cats:\2 c:\1/
 The first category moves off the list into a scratch field `c:` at the end:
 
 ```text
-… rng:0101101100111010 cats:Debugging,Learning, tot:############### n:% c:Coding
+… rng:0101101100111010 cats:Debugging,Learning,Meetings, tot:############### n:% c:Coding
 ```
 
 #### Step 3: draw a random nibble (four shift-register steps)
@@ -271,7 +271,7 @@ s/ d:1001$/ d:9/
 The nibble is copied to the end as `d:0100`, and a ten-rule lookup table rewrites it. Rules for `0000` through `0011` don't match, then `d:0100` becomes `d:4`, and the remaining rules don't match either:
 
 ```text
-… rng:0100101001011011 cats:Debugging,Learning, tot:############### n:% c:Coding d:4
+… rng:0100101001011011 cats:Debugging,Learning,Meetings, tot:############### n:% c:Coding d:4
 ```
 
 The hours are now *the text* `1` followed by `4`. Nothing ever adds 10 to 4.
@@ -379,7 +379,7 @@ b entry
 `g` copies the saved state back from the hold space, the per-entry scratch fields are deleted, and execution jumps to the top. The next iteration starts with:
 
 ```text
-… rng:0100101001011011 cats:Debugging,Learning, tot:############################# n:%%
+… rng:0100101001011011 cats:Debugging,Learning,Meetings, tot:############################# n:%%
 ```
 
 The third iteration books Debugging 14, for a total of 43. Then step 1's stop rule finds 41 marks in a row, and `b done` ends the loop.
@@ -404,10 +404,11 @@ Finally `Q1` quits with exit status 1. In shell terms the program "fails" after 
 
 `check.sh` checks the host first: exactly one `sed` command, and no `for`, `while`, `until`, `select`, `if` or `case`. Then it checks the sed script. It may use no `e`, `r`, `R` or `W` command and no `s///e` flag, and the only files it may write are file descriptor 3 (the SQL) and stderr (the trace). The script must exit with status 1 (the "returns false" move) and with status 2 on a malformed tape, and the same seed must always give the same timecards.
 
-Then it runs the real thing 25 times. In every run, each running total must equal the previous one plus the hours, hours must be from 10 to 19, the program must stop as soon as the total passes 40, and the summary must agree with the rows. SQLite must agree with the output, the database must hold 25 distinct runs, and the hours must show at least six different values, so the shift register is not stuck. Last, a non-demo row must be refused.
+Then it proves that exactly 40 continues: a copy of the script whose draw always yields hours of 10 must deal five cards, the fifth `Meetings`, ending at 50. Then it runs the real thing 25 times. In every run, each running total must equal the previous one plus the hours, hours must be from 10 to 19, the program must stop as soon as the total passes 40, and the summary must agree with the rows. SQLite must agree with the output, the database must hold 25 distinct runs, and the hours must show at least six different values, so the shift register is not stuck. Last, a non-demo row must be refused.
 
 ## Gotchas worth knowing
 
+- **Never run `timecards.sed` without its `3>` redirect.** The script writes its SQL with `w /dev/fd/3`. Run directly, for example `sed -nEu -f timecards.sed < tape` from a harness that leaves fd 3 closed, the descriptor number 3 can be the *script file itself* (sed opens it first), and `w /dev/fd/3` then opens and overwrites it with SQL. This happened once, while the study guides were being checked, and it destroyed the script until it was restored from Git. Use `timecards.sh`, or give sed an explicit `3>` target, as `check.sh` does (`3>/dev/null` or a pipe to `sqlite3`).
 - **sed has a goto.** `b` and `t` jump, which the Perl and PCRE entries don't have. Those entries had to get their loops out of quantifiers and backtracking, which is arguably the stricter constraint. Here almost every jump is behind an address (`/regex/b label`), so a regex match still makes every decision, but the structure is a rewriting machine with a program counter, not a single match.
 - **"Returning false" is weaker.** In Perl and PCRE the *match itself* reports failure after doing the work. sed has no match result that spans the whole program, so the closest equivalent is the process exit status.
 - **The randomness is a toy.** The host seeds the shift register with 16 bits from `/dev/urandom` (an all-zero seed, which would stick the register, is replaced inside sed). After that, every draw is sed rewriting `0`s and `1`s. The taps (16, 14, 13, 11) give the maximal period of 65,535, but the same seed always gives the same timecards, and `check.sh` relies on that. It is not a good random number generator, which suits a DEMO ONLY program.

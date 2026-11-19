@@ -56,7 +56,7 @@ func main() {
 </style>`,
 		user:       cmp.Or(os.Getenv("USERNAME"), os.Getenv("USER")),
 		repo:       Must(OpenRepository(filepath.Join("data", "demo-timecards.db"))),
-		categories: []string{"Meetings", "Coding", "Debugging", "Learning"},
+		categories: []string{"Meetings", "Coding", "Debugging", "Learning", "Meetings"},
 	}; //   *
 	//  *
 	// **************** FIRST SEMICOLON ****************

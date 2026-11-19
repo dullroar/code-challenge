@@ -84,7 +84,7 @@ The pattern is the whole program:
 ^(?C"init")(?:(?C"gate")(Meetings|Coding|Debugging|Learning)(?C"book"))*(*COMMIT)(?C"commit")(*FAIL)
 ```
 
-The C host (`timecards.c`) compiles it, registers one callout dispatcher, calls `pcre2_match` once against `MeetingsCodingDebuggingLearning`, and prints the file. It has no `for`, `while`, `do`, `goto`, or recursion (`check.sh` greps for them). The callout strings are opcodes:
+The C host (`timecards.c`) compiles it, registers one callout dispatcher, calls `pcre2_match` once against `MeetingsCodingDebuggingLearningMeetings` (five names, so that four 10-hour cards, a total of exactly 40, can be followed by a fifth), and prints the file. It has no `for`, `while`, `do`, `goto`, or recursion (`check.sh` greps for them). The callout strings are opcodes:
 
 | Opcode | Does | Return value to the engine |
 | --- | --- | --- |
@@ -105,11 +105,11 @@ Callouts only mean something if the engine actually visits them. This program co
 
 ## What `check.sh` enforces
 
-`check.sh` checks that the C host has no loop keyword (comments excluded). Then it runs the program 25 times. Each run must exit cleanly and report `pcre2_match returned -1 (no match)`. Each run must print as many rows as it has entries, with at least three entries, hours from 10 to 19, no early stop (four entries, or a total over 40), and a total of at most 59.
+`check.sh` checks that the C host has no loop keyword (comments excluded). Then it runs the program 25 times. Each run must exit cleanly and report `pcre2_match returned -1 (no match)`. Each run must print as many rows as it has entries, with at least three entries, hours from 10 to 19, no early stop (the total must end over 40), three to five entries, and a total of at most 59. It also builds a copy of the host in which every card is worth 10 hours and checks that exactly 40 continues: five rows, the fifth `Meetings`, total 50.
 
 ## Gotchas worth knowing
 
-- The `*` loop ends because `gate` fails the next iteration (or the four category names run out), not because anything in C decides to stop. The C only answers the question "is the total over 40?" when the engine asks.
+- The `*` loop ends because `gate` fails the next iteration (or the five category names run out, which only matters when the total is still 40 or less after four cards: it never is after five), not because anything in C decides to stop. The C only answers the question "is the total over 40?" when the engine asks.
 - The state (`total`, `entries`, the file) lives in a C struct that the callouts share, so, unlike Perl's `local`, none of it rewinds on backtracking. That suits this program: nothing is ever undone.
 - The dispatcher is a ternary chain, not a table, to keep the host free of loops and function-pointer tricks. Unknown opcodes (and I/O errors) abort the match with `PCRE2_ERROR_CALLOUT`, which is deliberately not the `-1` that means "no match", and the host reports success only if `commit` actually ran.
 

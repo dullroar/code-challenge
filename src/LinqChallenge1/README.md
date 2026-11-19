@@ -16,6 +16,8 @@ counterexamples: [event-driven-programming]
 
 **Teaches you:** LINQ method chains, end to end.
 
+> **Not the shared challenge.** This entry draws no random hours: its work week is five fixed 8-hour days, capped so that the total is exactly 40.0 hours and no card crosses the line. It teaches deferred execution and LINQ method chains, not the stop rule "keep the first card over 40".
+
 One `;`-terminated expression statement, built entirely from LINQ method calls. It generates a fixed 40-hour timecard, tracks and saves it through EF Core and SQLite, crosses the `IQueryable<T>` → `IEnumerable<T>` boundary, and builds, shows, pulses, and closes a WPF **DEMO ONLY** terminal window - all inside that one statement. No `RunEverything`-style helper does the real work; `Main` only sets up the STA thread, the `DbContext`, and the `Application` before calling it.
 
 ## Run it

@@ -2,6 +2,8 @@
 
 Entries: [`src/make-gnu`](../../src/make-gnu/README.md) and [`src/cmake`](../../src/cmake/README.md). Both are build tools asked to behave like programming languages, in different ways.
 
+For an advanced reading path with traces and experiments, see the [Make and CMake study guide](../study-guides/languages/make-and-cmake.md).
+
 ## GNU Make
 
 ### 1. Behold the monstrosity
@@ -139,7 +141,7 @@ flowchart TD
 
 **What this shows:** `while()` re-expands its condition on every pass, and `MATCHES` stores its captures in ordinary variables. So the condition can build its next subject out of its last captures, and the *match* is the program. Numbers are runs of `x`, and the stop rule is a 41-character literal.
 
-**Why this mechanism matters:** the loop has an empty body and a register machine for a condition. Test 1 must run first, because a failed match clears the registers and a successful one rewrites them, so the main match has to run last for its captures to survive.
+**Why this mechanism matters:** the loop has an empty body and a register machine for a condition. Test 1 must run first, because a failed match clears the registers and a successful one rewrites them, so the main match has to run last for its captures to survive. `AND` does not stop at the first false test: on the final pass, when test 1 has already said stop, test 2 still runs, and that is what moves the last card into the log (`CMAKE_MATCH_4`). The registers then also hold one more hours lookup that is never reported. CMake's documentation does not promise that both operands are evaluated, so this is accidentally exploited. Swapping the two tests gives a run with zero cards.
 
 ### Program flow of `make-gnu`
 
