@@ -2,6 +2,8 @@
 
 *Traces, predictions and evidence for advanced readers of* Learn Programming the Weird Way!
 
+**WEIRD** stands for **Weird Execution, Indirect Results and Data**. The W is recursive. The rest gives you something to trace: what executes, where the result turns up, and what the program gets away with treating as data.
+
 The book teaches each language by pairing an idiomatic program with a weird one. These guides take the next step. For each language family and for each big idea, a guide asks you to **identify the machine, trace one fixed run, predict before you execute, and prove the claim with evidence**. They are written for a senior undergraduate or a graduate reader. They do not teach what a loop is. They teach why *this* loop-like mechanism has particular consequences.
 
 The guides are hand-written. They began with a COBOL study guide by the book's co-author Ken Astl, and keep its method.
@@ -74,6 +76,8 @@ python lessons/book/test_study_guides.py       # the tests: template, diagrams, 
 ```
 
 The outputs are `learn-programming-the-weird-way-study-guides.pdf` and `.epub`. The reading order is [`chapters.txt`](chapters.txt). The build reuses the book's own pipeline ([`lessons/book/build.py`](../book/build.py)) for link rewriting, diagrams, Pandoc and reproducibility. [`lessons/book/study_guides.py`](../book/study_guides.py) checks each guide for the template, for placeholder text, for diagrams that match their source, and for links.
+
+The [PDF release gate](../book/README.md#pdf-release-gate) checks the guide PDF after each full build. Pass `--release` to make the PDF and its lint scan required.
 
 **Diagrams.** A Program Flow diagram in a guide is copied verbatim from `src/<entry>/README.md` and marked with `<!-- diagram-source: src/<entry>/README.md#program-flow -->`. The build fails if a copy has drifted. A new diagram is allowed only when it shows a relationship no source diagram shows (cross-language state placement, a lazy-demand trace, a transaction boundary or an authority boundary), and is marked `<!-- diagram-new: kind - why -->`.
 
