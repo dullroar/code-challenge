@@ -18,13 +18,13 @@ The loop is still a loop. What changes is *where* the work happens. In the C#, J
 | --- | --- | --- | --- | --- | --- |
 | [`ModernChallenge1`](../../src/ModernChallenge1/README.md) | C# | Three expression slots | Fields of one anonymous object | eager | guaranteed |
 | [`cmake`](../../src/cmake/README.md) | CMake | A register machine | `CMAKE_MATCH_1`..`5`, rebuilt every pass | eager | accidentally exploited |
-| [`cobol`](../../src/cobol/README.md) | COBOL |  |  | eager | guaranteed |
-| [`lisp`](../../src/lisp/README.md) | Common Lisp |  |  | eager | guaranteed |
-| [`forth`](../../src/forth/README.md) | Forth |  |  | eager | guaranteed |
-| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go |  |  | eager | guaranteed |
-| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java |  |  | eager | guaranteed |
+| [`cobol`](../../src/cobol/README.md) | COBOL | Ordinary: a structured `PERFORM ... UNTIL` loop that asks the data for the stop rule | `WS-TOTAL` and its 88-level name `OVER-FORTY` | eager | guaranteed |
+| [`lisp`](../../src/lisp/README.md) | Common Lisp | Ordinary: one `LOOP` that runs its clauses in order on every pass | Variables the `LOOP` owns, such as `total` | eager | guaranteed |
+| [`forth`](../../src/forth/README.md) | Forth | Ordinary: a stack machine with one `begin ... until` loop | The variables `total` and `cards`, and the data stack | eager | guaranteed |
+| [`GoChallenge1`](../../src/GoChallenge1/README.md) | Go | Three expression slots, with helper functions in the slots | Fields of one anonymous struct | eager | guaranteed |
+| [`JavaChallenge1`](../../src/JavaChallenge1/README.md) | Java | Three expression slots | Fields of one anonymous class | eager | guaranteed |
 | [`javascript`](../../src/javascript/README.md) | JavaScript, SQLite | Three expression slots | Properties of one object literal | eager | guaranteed |
-| [`tcl`](../../src/tcl/README.md) | Tcl |  |  | eager | implementation-permitted |
+| [`tcl`](../../src/tcl/README.md) | Tcl | Ordinary: a `while` loop that draws first and saves afterwards | Dicts and Tcl variables, saved in one `db transaction` | eager | implementation-permitted |
 
 ## A lazy sequence that someone keeps asking for
 
@@ -34,14 +34,14 @@ There is no loop. There is a sequence that someone keeps asking for, and the pro
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
-| [`haskell`](../../src/haskell/README.md) | Haskell |  |  | lazy | guaranteed |
+| [`haskell`](../../src/haskell/README.md) | Haskell | Ordinary: a lazy list that one `span` reads until the test fails | The unevaluated parts of the lists, read on demand | lazy | guaranteed |
 | [`haskell-weird`](../../src/haskell-weird/README.md) | Haskell | A lazy graph reducer | Thunks: which parts of a list have been demanded | lazy | implementation-permitted |
 | [`javascript-weird`](../../src/javascript-weird/README.md) | JavaScript, SQLite | A closure-backed state machine, pulled by a lazy iterator | Variables captured by closures: the generator's number, and the machine's card count, total and stop flag | lazy | guaranteed |
-| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin |  |  | lazy | guaranteed |
-| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ |  |  | deferred | guaranteed |
-| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ |  |  | deferred | guaranteed |
-| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python |  |  | lazy | guaranteed |
-| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust |  |  | lazy | guaranteed |
+| [`KotlinChallenge1`](../../src/KotlinChallenge1/README.md) | Kotlin | A lazy sequence that the empty `for` pulls | Properties of one object expression, the seed of the sequence | lazy | guaranteed |
+| [`LinqChallenge1`](../../src/LinqChallenge1/README.md) | C#, LINQ | A lazy chain of LINQ stages that one final `Aggregate` demands | Inside the stages' enumerators, and in the database | deferred | guaranteed |
+| [`LinqChallenge2`](../../src/LinqChallenge2/README.md) | C#, LINQ | A lazy query that its closing `Single()` demands | A prefix sum recomputed in each `where`, and the database; no accumulator variable | deferred | guaranteed |
+| [`PythonChallenge1`](../../src/PythonChallenge1/README.md) | Python | A function that `iter` calls until it returns the sentinel `False` | Attributes of one state object passed to the lambda | lazy | guaranteed |
+| [`RustChallenge1`](../../src/RustChallenge1/README.md) | Rust | A chain of values from `successors`, which stops at `None` | A new immutable `DemoBatch` for every step; nothing is mutated | lazy | guaranteed |
 
 ## Whole-array operations instead of steps
 
@@ -51,7 +51,7 @@ Do it to all of them at once, then cut. [`apl`](../../src/apl/README.md) draws f
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
-| [`apl`](../../src/apl/README.md) | APL |  |  | eager | implementation-permitted |
+| [`apl`](../../src/apl/README.md) | APL | Ordinary: an array machine that draws five cards at once and decides afterwards | Arrays, and nothing hidden | eager | implementation-permitted |
 
 ## Text that is rewritten and read again
 
@@ -124,7 +124,7 @@ The input is the loop. AWK reads one record at a time and runs every pattern-act
 
 | Entry | Language | The machine | Where the state lives | Evaluation | Assurance |
 | --- | --- | --- | --- | --- | --- |
-| [`awk`](../../src/awk/README.md) | AWK |  |  | eager | guaranteed |
+| [`awk`](../../src/awk/README.md) | AWK | Ordinary: a `while` loop in `BEGIN`, with a pipe to sqlite3 as the output | Arrays and parameter-local variables | eager | guaranteed |
 | [`awk-weird`](../../src/awk-weird/README.md) | AWK | A record-processing loop that you can aim at any byte stream | The input stream and the record separator `RS` | eager | implementation-permitted |
 
 ## Document order is the program

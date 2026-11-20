@@ -8,6 +8,8 @@ loop-by: loop-statement
 evaluation: eager
 assurance: guaranteed
 pairs-with: cobol-weird
+machine: "Ordinary: a structured `PERFORM ... UNTIL` loop that asks the data for the stop rule"
+state: "`WS-TOTAL` and its 88-level name `OVER-FORTY`"
 tags: [control-flow, declarative-programming, integrity-constraint, state-encoding]
 ---
 # COBOL

@@ -8,6 +8,8 @@ loop-by: lazy-demand
 evaluation: lazy
 assurance: guaranteed
 pairs-with: JavaChallenge1
+machine: "A lazy sequence that the empty `for` pulls"
+state: "Properties of one object expression, the seed of the sequence"
 tags: [generators, lazy-evaluation, side-effect, thread-safety]
 analogies: [coroutine]
 ---

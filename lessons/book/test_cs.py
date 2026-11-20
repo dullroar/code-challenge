@@ -133,5 +133,12 @@ class TestTheLintersRefuse(Base):
         self.edit("src/tar-gnu/README.md", lambda s: s.replace("**Teaches you:** that a tar archive", "**Teaches you:** that a TAR archive", 1))
         self.assertTrue(any("'teaches' differs" in p for p in self.problems()), self.problems())
 
+    def test_every_entry_must_name_its_machine_and_its_state(self):
+        """The comparative tables must never show a blank cell. An ordinary entry says so in words ("Ordinary: ...")."""
+        self.edit("src/awk/README.md", lambda s: re.sub(r"^machine: .*\n", "", s, count=1, flags=re.M))
+        self.assertTrue(any("awk" in p and "missing required key 'machine'" in p for p in self.problems()), self.problems())
+        self.edit("src/cobol/README.md", lambda s: re.sub(r"^state: .*\n", "", s, count=1, flags=re.M))
+        self.assertTrue(any("cobol" in p and "missing required key 'state'" in p for p in self.problems()), self.problems())
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

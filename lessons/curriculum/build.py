@@ -28,7 +28,7 @@ STEM = "curriculum"
 HTML = "curriculum.html"
 CHAPTER = "../docs/curriculum.md"     # relative to lessons/, as the book's link rewriting expects
 WEEKS = 16
-TARGET_PAGES, MAX_PAGES = 6, 10       # the plan: aim for 5 to 6 pages of body text, never more than 10 in the whole PDF
+TARGET_PAGES, MAX_PAGES = 8, 12       # the plan: aim for about 8 pages in the whole PDF, never more than 12 (the rubric and the log template added two)
 MAX_WORDS = 25                        # Simplified Technical English: at most 25 words in a descriptive sentence
 
 def load_book_build():
@@ -74,6 +74,18 @@ def check_curriculum(text=None, repo=REPO):
                 add(f"the diagram needs '{key}:'")
         if not re.search(r"flowchart|stateDiagram", src.split("\n", 1)[0]):
             add("the diagram must be a flowchart or a state diagram")
+
+    # printed chapter numbers: "Ch N" must be the chapter's number in the printed book (chapters.txt order, numbered from 1)
+    order = [l.strip() for l in study_guides.read(os.path.join(BOOKDIR, "chapters.txt")).splitlines() if l.strip() and not l.startswith("#")]
+    for m in re.finditer(r"\[Ch (\d+)\]\(\.\./lessons/(cs/[^)#]+)", text):
+        want = order.index(m.group(2)) + 1 if m.group(2) in order else None
+        if want != int(m.group(1)):
+            add(f"'Ch {m.group(1)}' links to {m.group(2)}, which is chapter {want} of the printed book")
+    # the diagram's arrows must land on a node, not on the box around the nodes
+    for _, _, src in blocks:
+        for box in re.findall(r"^\s*subgraph\s+(\w+)", src, re.M):
+            if re.search(r"(?:-->|---)\s*(?:\|[^|]*\|\s*)?" + box + r"\b", src) or re.search(r"\b" + box + r"\s*(?:-->|---)", src):
+                add(f"the diagram has an arrow to or from the box '{box}'; point arrows at a node inside it")
 
     # links: relative ones resolve to a file and a heading, external ones use an allowed host over https
     stripped = re.sub(r"```.*?```", "", text, flags=re.S)
@@ -147,7 +159,7 @@ def main():
     pdf = os.path.join(book.artifacts_dir(), STEM + ".pdf")
     pages = pdf_pages(pdf) if os.path.exists(pdf) else None
     if pages is not None:
-        print(f"curriculum.pdf: {pages} pages (title page and contents included; the plan is {TARGET_PAGES} pages of body text and at most {MAX_PAGES} in all)")
+        print(f"curriculum.pdf: {pages} pages (title page and contents included; the plan is about {TARGET_PAGES} in all and at most {MAX_PAGES})")
         if pages > MAX_PAGES:
             raise SystemExit(f"curriculum.pdf has {pages} pages; the limit is {MAX_PAGES}")
 

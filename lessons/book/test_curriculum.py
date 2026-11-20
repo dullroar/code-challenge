@@ -46,6 +46,23 @@ class BrokenCurriculum(unittest.TestCase):
     def test_a_diagram_without_a_description_is_reported(self):
         self.assertTrue(any("accDescr" in p for p in self.problems("accDescr:", "accDesc:")))
 
+    def test_a_wrong_chapter_number_is_reported(self):
+        self.assertTrue(any("chapter 4 of the printed book" in p for p in self.problems("[Ch 4](../lessons/cs/01-", "[Ch 1](../lessons/cs/01-")))
+
+    def test_an_arrow_to_the_box_is_reported(self):
+        self.assertTrue(any("arrow to or from the box" in p for p in self.problems("    S([\"Start: phase = W\"]) --> W", "    S([\"Start: phase = W\"]) --> weeks")))
+
+    def test_the_loop_is_bounded(self):
+        text = real()
+        self.assertIn("A second failed review ends the course", text)
+        self.assertIn("Stop and report the gap", text)
+
+    def test_every_week_has_a_required_guide_in_bold(self):
+        rows = [l for l in real().splitlines() if re.match(r"^\| \d+ \|", l)]
+        self.assertEqual(len(rows), 16)
+        for row in rows:
+            self.assertIn("**[", row, row[:40])
+
     def test_a_broken_link_is_reported(self):
         self.assertTrue(any("missing file" in p for p in self.problems("study-guides/languages/cobol.md", "study-guides/languages/cobol-gone.md")))
         self.assertTrue(any("missing heading" in p for p in self.problems("#running-things-safely", "#running-things-safe")))

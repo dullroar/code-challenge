@@ -8,6 +8,8 @@ loop-by: input-driven
 evaluation: eager
 assurance: guaranteed
 pairs-with: awk-weird
+machine: "Ordinary: a `while` loop in `BEGIN`, with a pipe to sqlite3 as the output"
+state: "Arrays and parameter-local variables"
 tags: [control-flow, declarative-programming, domain-specific-language, regular-expression]
 ---
 # AWK

@@ -8,6 +8,8 @@ loop-by: loop-statement
 evaluation: eager
 assurance: guaranteed
 pairs-with: ModernChallenge1
+machine: "Three expression slots"
+state: "Fields of one anonymous class"
 tags: [control-flow, side-effect, thread-safety]
 analogies: [closure]
 ---

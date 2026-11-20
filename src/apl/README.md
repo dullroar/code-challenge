@@ -8,6 +8,8 @@ loop-by: bulk-array
 evaluation: eager
 assurance: implementation-permitted
 pairs-with: apl-weird
+machine: "Ordinary: an array machine that draws five cards at once and decides afterwards"
+state: "Arrays, and nothing hidden"
 tags: [array-programming, eager-evaluation, referential-transparency]
 ---
 # APL

@@ -17,7 +17,7 @@ When you finish, you should be able to:
 
 ## Before you begin
 
-**Safety model.** The cards are fictional **DEMO ONLY** data. The examples use local scratch storage and have no connection to a real time-reporting system. That is a promise about the *data*. It is not a promise about the *code*, which starts processes, runs shells and parses its own input. So every entry is treated as untrusted until someone has read and understood it, and it is run it in the sandbox first. From the repository root, with [`SANDBOX-SETUP.md`](../../../SANDBOX-SETUP.md) done:
+**Safety model.** The cards are fictional **DEMO ONLY** data. The examples use local scratch storage and have no connection to a real time-reporting system. That is a promise about the *data*. It is not a promise about the *code*, which starts processes, runs shells and parses its own input. So every entry is treated as untrusted until someone has read and understood it, and it is run in the sandbox first. From the repository root, with [`SANDBOX-SETUP.md`](../../../SANDBOX-SETUP.md) done:
 
 ```bash
 sandbox/container/run-image.sh src/tar-gnu

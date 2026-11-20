@@ -8,6 +8,8 @@ loop-by: loop-statement
 evaluation: eager
 assurance: guaranteed
 pairs-with: JavaChallenge1
+machine: "Three expression slots, with helper functions in the slots"
+state: "Fields of one anonymous struct"
 tags: [control-flow, side-effect, thread-safety]
 ---
 # One Statement, Go Edition

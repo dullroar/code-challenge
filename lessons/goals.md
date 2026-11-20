@@ -12,29 +12,43 @@ Every weird entry forces you to name the machine hiding inside a language. Once 
 | Language / tool | The machine it really is | Where the program's state lives | Lesson |
 | --- | --- | --- | --- |
 | .NET regex | A counter built from a stack | Balancing-group capture stacks | [regex](languages/regex.md#net-balancing-groups) |
+| APL | Ordinary: an array machine that draws five cards at once and decides afterwards | Arrays, and nothing hidden | [apl](languages/apl.md) |
 | APL | An array machine, with code that is also an array | Arrays, and the source text of functions | [apl](languages/apl.md#self-modifying-functions-apl-weird) |
+| AWK | Ordinary: a `while` loop in `BEGIN`, with a pipe to sqlite3 as the output | Arrays and parameter-local variables | [awk](languages/awk.md) |
 | AWK | A record-processing loop that you can aim at any byte stream | The input stream and the record separator `RS` | [awk](languages/awk.md#records-from-a-random-byte-stream-awk-weird) |
 | C# `for` | Three expression slots | Fields of one anonymous object | [csharp-linq-xaml](languages/csharp-linq-xaml.md#the-original-modernchallenge1) |
 | CMake | A register machine | `CMAKE_MATCH_1`..`5`, rebuilt every pass | [make-cmake](languages/make-cmake.md#cmake) |
+| COBOL | Ordinary: a structured `PERFORM ... UNTIL` loop that asks the data for the stop rule | `WS-TOTAL` and its 88-level name `OVER-FORTY` | [cobol](languages/cobol.md) |
 | COBOL | A program whose jump targets are mutable | The target of one `GO TO` | [cobol](languages/cobol.md#alter) |
+| Common Lisp | Ordinary: one `LOOP` that runs its clauses in order on every pass | Variables the `LOOP` owns, such as `total` | [lisp](languages/lisp.md) |
 | Common Lisp | A method dispatcher with a pluggable combination rule | The class precedence list, and each method's return value | [lisp](languages/lisp.md#method-combination-as-control-flow) |
 | ed | A string-rewriting machine with line addresses | The editor buffer: one line per card, and marks (x) that are added by joining lines | [editors](languages/editors.md#the-buffer-is-the-machine) |
 | Ex | A register machine whose registers are editor marks, and whose program is a register that runs itself | The marks (where we are on a tape of numbered lines), the first line of the buffer (the next card), and registers a, d and n | [editors](languages/editors.md#a-program-you-can-edit) |
+| Forth | Ordinary: a stack machine with one `begin ... until` loop | The variables `total` and `cards`, and the data stack | [forth](languages/forth.md) |
 | Forth | A stack machine with a movable instruction pointer | The data stack and the parse position `>in` | [forth](languages/forth.md) |
 | GNU find | A tree walk that grows the tree it is walking, with find itself reading the depth and the clock | The path from the start directory to the directory being visited; its depth is the running total | [find](languages/find.md) |
 | GNU Make | A dependency graph that can restart itself | Which `.tc-N.mk` files exist, and `MAKE_RESTARTS` | [make-cmake](languages/make-cmake.md#gnu-make) |
 | GNU sed | A string-rewriting system (a Markov algorithm) | One line of text, rewritten until no rule applies | [regex](languages/regex.md#gnu-sed) |
 | GNU tar | A tape reader (tar) feeding a five-word interpreter | The archive's members, which are the program, plus one SQLite row that says whether the run has halted or faulted | [tar](languages/tar.md#a-program-that-is-an-archive) |
 | GNU tar | A finite-state machine, driven by a logical clock that tar supplies | One SQLite row (the machine's registers) and the number of records tar has written | [tar](languages/tar.md#the-archive-is-the-clock) |
+| Go | Three expression slots, with helper functions in the slots | Fields of one anonymous struct | [csharp-linq-xaml](languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery) |
+| Haskell | Ordinary: a lazy list that one `span` reads until the test fails | The unevaluated parts of the lists, read on demand | [haskell](languages/haskell.md) |
 | Haskell | A lazy graph reducer | Thunks: which parts of a list have been demanded | [haskell](languages/haskell.md#lazy-io-as-control-flow) |
+| Java | Three expression slots | Fields of one anonymous class | [csharp-linq-xaml](languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery) |
 | JavaScript | Three expression slots | Properties of one object literal | [javascript](languages/javascript.md#the-bodiless-for-in-node) |
 | JavaScript | A set of listeners on one EventEmitter, which together are a state machine | The running total and the card count, held in one object that only the listeners touch | [javascript](languages/javascript.md#listeners-all-the-way-down) |
 | JavaScript | A closure-backed state machine, pulled by a lazy iterator | Variables captured by closures: the generator's number, and the machine's card count, total and stop flag | [javascript](languages/javascript.md#closures-all-the-way-down) |
+| Kotlin | A lazy sequence that the empty `for` pulls | Properties of one object expression, the seed of the sequence | [csharp-linq-xaml](languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery) |
+| LINQ | A lazy chain of LINQ stages that one final `Aggregate` demands | Inside the stages' enumerators, and in the database | [csharp-linq-xaml](languages/csharp-linq-xaml.md#deferred-execution-and-the-void-to-value-trick) |
+| LINQ | A lazy query that its closing `Single()` demands | A prefix sum recomputed in each `where`, and the database; no accumulator variable | [csharp-linq-xaml](languages/csharp-linq-xaml.md#deferred-execution-and-the-void-to-value-trick) |
 | m4 | A text-rescanning machine | The input stream: whatever macro text has not been read yet | [m4](languages/m4.md#a-loop-made-of-rescanning) |
 | PCRE2 | A backtracking search with hooks | A C struct that never rewinds | [regex](languages/regex.md#pcre2-callouts-as-an-instruction-set) |
 | pcre2grep | A backtracking search that runs one program per callout | SQLite rows, and the exit code of each callout | [regex](languages/regex.md#pcre2grep-exit-codes-as-control-flow) |
 | Perl | A backtracking search with hooks | `local` variables that unwind (effects do not) | [regex](languages/regex.md#perl-code-inside-the-match) |
 | POSIX find | A tree walk that grows the tree it is walking | The path from the start directory to the directory being visited | [find](languages/find.md) |
+| Python | A function that `iter` calls until it returns the sentinel `False` | Attributes of one state object passed to the lambda | [csharp-linq-xaml](languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery) |
+| Rust | A chain of values from `successors`, which stops at `None` | A new immutable `DemoBatch` for every step; nothing is mutated | [csharp-linq-xaml](languages/csharp-linq-xaml.md#the-one-statement-ports-same-trick-different-machinery) |
+| Tcl | Ordinary: a `while` loop that draws first and saves afterwards | Dicts and Tcl variables, saved in one `db transaction` | [tcl](languages/tcl.md) |
 | Tcl | A string-command interpreter whose command lookup can be hooked | A TEMP table of proc source, and the depth of trigger recursion | [tcl](languages/tcl.md#sqlite-as-the-program) |
 | XAML | An object-graph constructor that runs methods as it parses | Document order, plus "carrier" arrays | [csharp-linq-xaml](languages/csharp-linq-xaml.md#xaml) |
 <!-- END GENERATED machines -->

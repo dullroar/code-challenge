@@ -170,7 +170,7 @@ Line count is the weakest comparison. By the book's counting convention (non-com
 | **Portability** | Standard COBOL: the `PIC`, level 88 and `PERFORM UNTIL` semantics are part of the language. | `ALTER` was declared obsolete in 1985 and deleted from the standard in 2002. GnuCOBOL accepts it and warns five times. A compiler in standards mode may not. |
 | **Cost** | A readable loop. Changing the limit means editing one `VALUE` range, and renaming the condition if you want to keep the name honest. | The program cannot be reentered safely, because two callers would share one rewritten `NEXT-CARD`. Optimizers can assume little about a `GO TO` that might change. |
 
-Notice the asymmetry in what each design *can't* say. The idiomatic version cannot make the loop target data. The weird version cannot make the stop rule readable. Neither is morally better. The book's historical case for `ALTER` is a tightly controlled batch system in which a switch set once and tested by an unconditional `GO TO` was cheaper than testing a flag on every pass, when memory and cycles were the constraint. That is a statement about 1978. It is not a recommendation for new code.
+Notice the asymmetry in what each design *cannot* say. The idiomatic version cannot make the loop target data. The weird version cannot make the stop rule readable. Neither is morally better. The book's historical case for `ALTER` is a tightly controlled batch system in which a switch set once and tested by an unconditional `GO TO` was cheaper than testing a flag on every pass, when memory and cycles were the constraint. That is a statement about 1978. It is not a recommendation for new code.
 
 ## What the exercises demonstrate
 

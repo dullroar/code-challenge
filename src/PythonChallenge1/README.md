@@ -8,6 +8,8 @@ loop-by: lazy-demand
 evaluation: lazy
 assurance: guaranteed
 pairs-with: JavaChallenge1
+machine: "A function that `iter` calls until it returns the sentinel `False`"
+state: "Attributes of one state object passed to the lambda"
 tags: [evaluation-strategy, event-loop, generators, side-effect, thread-safety]
 analogies: [coroutine]
 counterexamples: [event-driven-programming]
