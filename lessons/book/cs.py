@@ -757,7 +757,7 @@ def check_links(model):
             urls.setdefault(u, where)
     bad = []
     for u, where in sorted(urls.items()):
-        req = urllib.request.Request(u, headers={"User-Agent": "code-challenge-link-check/1.0"})
+        req = urllib.request.Request(u, headers={"User-Agent": "learn-programming-the-weird-way-link-check/1.0"})
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
                 if r.status != 200:

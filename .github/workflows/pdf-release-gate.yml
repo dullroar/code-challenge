@@ -53,6 +53,8 @@ jobs:
           python lessons/book/test_study_guides.py
           python lessons/book/test_curriculum.py
           python lessons/book/test_editorial.py
+          python lessons/book/test_repo_links.py
+          python lessons/book/test_repo_identity.py
 
       - name: Run the full Mermaid render gate
         run: python lessons/book/build.py --check-diagrams

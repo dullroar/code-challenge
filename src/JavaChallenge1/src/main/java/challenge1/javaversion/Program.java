@@ -27,7 +27,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.util.ReflectionUtils;
 
 // A Java + Spring port of Jim Lehmer's 2008 C# 3.0 challenge, following the 2026 .NET
-// modernization at https://github.com/dullroar/code-challenge.
+// modernization at https://github.com/dullroar/learn-programming-the-weird-way.
 //
 // The objective remains: make a small desktop program using exactly one Java statement - a
 // for statement whose body is empty. The point is comparison, not production style.

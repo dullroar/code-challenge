@@ -17,7 +17,7 @@ links, which is what you want on GitHub and is wrong in a single document. This 
 chapters in chapters.txt order and rewrites relative links in Pandoc's parsed document:
   * to another chapter           -> an in-book anchor (#heading-id)
   * to lessons/README.md         -> plain text (the web index is not part of the book)
-  * to anything else in the repo -> its GitHub URL
+  * to anything else in the repo -> its GitHub URL (repo_links.py holds the repository's address; the sources never do)
 
 Parts of the book are generated from metadata (see cs.py): the entries' YAML frontmatter and the
 files under lessons/cs-source/ become the "By computer science concept" chapters in lessons/cs/ and
@@ -33,14 +33,14 @@ table of contents). The PDF and EPUB are written to the repo root as learn-progr
 """
 import calendar, json, os, re, shutil, subprocess, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import cs, diagrams
+import cs, diagrams, repo_links
 from pathlib import PurePosixPath
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LESSONS = os.path.dirname(HERE)
 REPO = os.path.dirname(LESSONS)
 OUT = os.path.join(HERE, "out")
-GITHUB = "https://github.com/dullroar/code-challenge/blob/master/"
+GITHUB = repo_links.blob_base()     # prefix of a published link to a file; the one canonical address lives in repo_links.py
 
 def slug(heading):
     h = re.sub(r"`", "", heading.strip().lower())
@@ -112,8 +112,8 @@ def link_target(target, chapter, ids, maps):
     if rel in ids:
         return "#" + (book_id(rel, frag) if frag else ids[rel])
     if full.endswith("/") or os.path.isdir(os.path.join(REPO, full)):
-        return GITHUB.replace("/blob/", "/tree/") + full.replace(" ", "%20")
-    return GITHUB + full.replace(" ", "%20") + ("#" + frag if frag else "")
+        return repo_links.folder_url(full)
+    return repo_links.file_url(full, frag)
 
 def rewrite_links(nodes, chapter, ids, maps):
     """Walk Pandoc's nested inlines and blocks. Code nodes hold plain strings."""
@@ -409,6 +409,16 @@ def main():
     if checking:
         check(html)
 
+def write_front(front, md_stem):
+    """The title and copyright pages with the repository's address filled in, written beside the other build output."""
+    with open(front, encoding="utf-8") as f:
+        text = repo_links.fill_placeholders(f.read())
+    os.makedirs(OUT, exist_ok=True)
+    path = os.path.join(OUT, md_stem + "-front.html")
+    with open(path, "w", encoding="utf-8", newline="\n") as f:
+        f.write(text)
+    return path
+
 def build_documents(texts, stem, metadata, front, html_name, md_stem, checking, prune_cache=True):
     """Build one document set from `texts` ({chapter path relative to lessons/: Markdown}): standalone HTML in lessons/book/out/
     and, unless `checking`, `<stem>.epub` and `<stem>.pdf` in the artifacts directory. The book and the study guides both call this,
@@ -422,6 +432,7 @@ def build_documents(texts, stem, metadata, front, html_name, md_stem, checking, 
     document = prepare_document(texts, figs, "svg", md_stem)
     base = ["pandoc", "-f", "json", "--metadata-file", metadata, "--wrap=none", "--toc", "--toc-depth=2",
             "--number-sections"]
+    front = write_front(front, md_stem)
     front_option = ["--include-before-body", front]
     outs = [("html", document, front_option + ["-s", "--embed-resources", "--css", CSS, "-o", os.path.join(OUT, html_name)])]
     if not checking:

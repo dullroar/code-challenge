@@ -56,6 +56,7 @@ class BuildHookTests(unittest.TestCase):
                       patch.object(build, "source_date_epoch", return_value="0"),
                       patch.object(build, "render_figures"),
                       patch.object(build, "prepare_document", return_value="{}"),
+                      patch.object(build, "write_front", side_effect=lambda front, stem: front),   # "front" is not a real file here
                       patch.object(build, "pdf_engine", return_value="weasyprint"),
                       patch.object(build.subprocess, "run") as run):
                     run.return_value.returncode = 2
