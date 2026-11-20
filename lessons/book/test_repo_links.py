@@ -67,7 +67,7 @@ class LinkTarget(unittest.TestCase):
                 self.assertEqual(self.resolve(target), target)
 
     def test_the_old_repository_name_never_appears(self):
-        self.assertNotIn("code-challenge", self.resolve("../../src/apl/README.md"))
+        self.assertNotRegex(self.resolve("../../src/apl/README.md"), r"code[-_]challenge")   # spelled as a pattern so this file does not contain the old name
 
     def test_an_override_reaches_every_published_link(self):
         with patch.dict(os.environ, {"REPOSITORY_WEB_BASE": "https://github.com/x/y"}):
