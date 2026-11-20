@@ -51,8 +51,8 @@ case_branch() {   # case_branch <name> <shell commands run in the repo on a new 
     (cd "$repo" && git checkout -q master && git checkout -q -b "$1" && bash -c "$2" && git add -A && git commit -qm "$1")
 }
 FM="---\nname: New\nteaches: x\nkind: weird\nlanguages: [new]\nlesson: languages/new.md\nloop-by: loop-statement\nevaluation: eager\nassurance: guaranteed\ntags: [control-flow]\n---\n"
-HB='# New\n\n## Run it\n\n## How the stunt works\n\n## What \`check.sh\` enforces\n\n## Gotchas worth knowing\n\n'
-HP='# New\n\n## Run it\n\n## How the stunt works\n\n## What \`check.ps1\` enforces\n\n## Gotchas worth knowing\n\n'
+HB='# New\n\n## Run it\n\n## Program Flow\n\n## How the stunt works\n\n## What \`check.sh\` enforces\n\n## Gotchas worth knowing\n\n'
+HP='# New\n\n## Run it\n\n## Program Flow\n\n## How the stunt works\n\n## What \`check.ps1\` enforces\n\n## Gotchas worth knowing\n\n'
 good='mkdir -p src/newentry && printf -- "'"$FM$HB"'## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
 case_branch good          "$good && echo '| new | row |' >> README.md"
 case_branch good-windows 'mkdir -p src/newentry && printf -- "'"$FM$HP"'## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "exit 0\n" > src/newentry/check.ps1'
@@ -115,6 +115,7 @@ ENV CC_RUN=x \
 ' dockerfile-env-multiline
 case_branch docker-only   'mkdir -p src/newentry && printf -- "'"$FM$HB"'" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh && printf "FROM cc-rt-sqlite:local\nENV CC_RUN=x\n" > src/newentry/Dockerfile'
 case_branch no-how-heading "$good && sed -i 's/^## How the stunt works/## How it works/' src/newentry/README.md"
+case_branch no-flow-heading "$good && sed -i 's/^## Program Flow/## Flow/' src/newentry/README.md"
 case_branch no-gotchas-heading "$good && sed -i 's/^## Gotchas worth knowing/## Fine print/' src/newentry/README.md"
 case_branch no-check-heading "$good && sed -i 's/^## What .check.sh. enforces/## Checks/' src/newentry/README.md"
 case_branch no-frontmatter 'mkdir -p src/newentry && printf "# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
@@ -133,7 +134,7 @@ expect 0 "entry with a multi-line build-stage RUN passes" scope good-dockerfile-
 for b in dockerfile-run-multiline dockerfile-env-multiline dockerfile-bad-from dockerfile-run-final dockerfile-add dockerfile-env-path dockerfile-user-root dockerfile-copy-external; do
     expect 1 "rejects: $b" scope "$b"
 done
-for b in no-how-heading no-gotchas-heading no-check-heading no-frontmatter incomplete-frontmatter no-tags no-run-instructions sandbox-edit workflow existing two-entries no-check binary symlink bidi zero-width control-chars odd-path too-large readme-blob; do
+for b in no-how-heading no-flow-heading no-gotchas-heading no-check-heading no-frontmatter incomplete-frontmatter no-tags no-run-instructions sandbox-edit workflow existing two-entries no-check binary symlink bidi zero-width control-chars odd-path too-large readme-blob; do
     expect 1 "rejects: $b" scope "$b"
 done
 
