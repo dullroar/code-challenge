@@ -135,4 +135,4 @@ Self-taught readers can keep the same order and drop the weights. Replace the pe
 
 ## Scope
 
-This document is a plan. It does not change the [book](../lessons/README.md), the [study guides](../lessons/study-guides/README.md), the [challenge](../CHALLENGE.md), the exercises or the solutions. The source and the sample programs are at [github.com/dullroar/code-challenge](https://github.com/dullroar/code-challenge).
+This document is a plan. It does not change the [book](../lessons/README.md), the [study guides](../lessons/study-guides/README.md), the [challenge](../CHALLENGE.md), the exercises or the solutions. The source and the sample programs are in the [repository's README](../README.md).

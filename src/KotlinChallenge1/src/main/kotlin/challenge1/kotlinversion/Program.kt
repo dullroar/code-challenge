@@ -20,7 +20,7 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.util.ReflectionUtils
 
 // A Kotlin + Spring port of Jim Lehmer's 2008 C# 3.0 challenge, following the 2026 .NET
-// modernization at https://github.com/dullroar/code-challenge. It sits beside the Java port
+// modernization at https://github.com/dullroar/learn-programming-the-weird-way. It sits beside the Java port
 // in challenge1.javaversion so the two languages can be compared line for line.
 //
 // The objective remains: make a small desktop program using exactly one statement - a

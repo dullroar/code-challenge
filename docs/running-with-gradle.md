@@ -7,7 +7,7 @@ The root [`build.gradle`](../build.gradle) has a task for every entry, plus task
 ./gradlew runForth                # Linux, macOS
 ```
 
-In IntelliJ IDEA, open the repository, trust it, and reload Gradle. The tasks appear in the **Gradle** tool window under **code-challenge → Tasks**, in the groups below.
+In IntelliJ IDEA, open the repository, trust it, and reload Gradle. The tasks appear in the **Gradle** tool window under **learn-programming-the-weird-way → Tasks**, in the groups below.
 
 A task only starts an entry from its own folder. You still need that entry's language installed.
 
