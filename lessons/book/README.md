@@ -127,7 +127,9 @@ External links must follow the policy in [`link-hosts.txt`](link-hosts.txt): Wik
 
 ### Reproducible builds
 
-The same sources give the same bytes. Every list is sorted, nothing reads the clock, and `SOURCE_DATE_EPOCH` is set from the `date:` line in [`metadata.yaml`](metadata.yaml), which also holds a fixed EPUB identifier. Bump `date:` when you publish new books. The check is simple: build twice with `--artifacts-dir` pointing at two empty folders and compare the files with `sha256sum`. They match for the same pandoc and WeasyPrint versions (tested with pandoc 3.1.3 and WeasyPrint on Ubuntu 24.04).
+The same sources give the same bytes. Every list is sorted, nothing reads the clock, and `SOURCE_DATE_EPOCH` is set from the `date:` line in [`metadata.yaml`](metadata.yaml), which also holds a fixed EPUB identifier. Bump `date:` when you publish new books. The check is simple: build twice with `--artifacts-dir` pointing at two empty folders and compare the files with `sha256sum`. They match for the same pandoc and WeasyPrint versions (tested with pandoc 3.1.3 and WeasyPrint on Ubuntu 24.04). That includes a build from an empty diagram cache (`lessons/book/out/diagrams/`): the cache only saves time, and the committed PDFs and EPUBs do not depend on it.
+
+That last point took a fix. Mermaid draws some node shapes, above all the stadium `A(["..."])`, with rough.js, which jitters each outline with random numbers. Unseeded, every fresh draw of such a diagram differed from the last. Many concept pages use stadiums, so a clean checkout rebuilt different bytes, and the committed files could be reproduced only from the exact cache that had built them. [`diagrams/mermaid-config.json`](diagrams/mermaid-config.json) now sets `handDrawnSeed`, which makes the jitter the same on every draw. Keep it. `test_diagrams.py` draws every node shape twice from an empty cache and fails if the SVG or PNG changes. If you change the seed, the Mermaid CLI or Chrome version, or the config, every diagram is drawn again and the PDFs and EPUBs change: rebuild all six and commit them together.
 
 ### When an entry is added (for maintainers)
 
