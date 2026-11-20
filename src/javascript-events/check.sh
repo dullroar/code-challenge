@@ -106,10 +106,16 @@ done
 s=$(awk 'BEGIN { for (s = 1; s < 4000000; s++) { r = s; t = 0; for (n = 1; n <= 4; n++) { r = r * 48271 % 2147483647; t += 10 + r % 10 } if (t == 40) { print s; exit } } }')
 if [[ -n $s ]]; then check_seed "$s"; [[ $(rows "$(SEED=$s node timecards.mjs)" | wc -l) -eq 5 ]] || fail "a total of exactly 40 after four cards must continue to a fifth"; echo "ok: seed $s makes exactly 40 after four cards, and the program goes on to a fifth"; fi
 # the three Node entries share one generator, so one seed gives one set of cards in all of them
+# (The sandbox copies one entry at a time, so the siblings are only there in a full checkout; say so when they are not.)
+siblings=""
 for other in javascript javascript-weird; do
-    [[ $(rows "$(SEED=42 node "../$other/timecards.mjs")" | cut -f1-3) == "$(rows "$(SEED=42 node timecards.mjs)" | cut -f1-3)" ]] || fail "SEED=42 gives other cards than ../$other"
+    if [[ -f ../$other/timecards.mjs ]]; then
+        [[ $(rows "$(SEED=42 node "../$other/timecards.mjs")" | cut -f1-3) == "$(rows "$(SEED=42 node timecards.mjs)" | cut -f1-3)" ]] || fail "SEED=42 gives other cards than ../$other"
+        siblings="$siblings $other"
+    fi
 done
-echo "ok: replay: SEED=42 twice gives the same cards, and the same cards as the other two Node entries; 12 seeds (totals 41, 42, 50, 51, 57 in 3 to 5 cards) match a separate simulation of the generator"
+if [[ -n $siblings ]]; then same="and the same cards as$siblings"; else same="(the comparison with the other Node entries was skipped: they are not beside this one, as in a one-entry sandbox)"; fi
+echo "ok: replay: SEED=42 twice gives the same cards, $same; 12 seeds (totals 41, 42, 50, 51, 57 in 3 to 5 cards) match a separate simulation of the generator"
 
 # ---- 4. The ISO week is computed by hand in the program; it must agree with GNU date, year boundaries included.
 for d in 2026-12-31 2021-01-03 2024-12-30 2026-01-01 2016-01-03 2020-12-31 2027-01-03 2015-12-28 2012-01-01 2038-12-31; do
