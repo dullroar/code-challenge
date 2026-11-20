@@ -44,7 +44,7 @@ EVALUATION = ("eager", "lazy", "deferred", "rewriting", "search", "declarative")
 ENTRY_FIELDS = {
     "name": ("str", True), "teaches": ("str", True), "kind": ("str", True), "languages": ("list", True),
     "lesson": ("str", True), "loop-by": ("str", True), "evaluation": ("str", True), "assurance": ("str", True),
-    "tags": ("list", True), "pairs-with": ("str", False), "machine": ("str", False), "state": ("str", False),
+    "tags": ("list", True), "pairs-with": ("str", False), "machine": ("str", True), "state": ("str", True),
     # How an entry relates to a concept it does not DEMONSTRATE. `tags` = a direct demonstration. `analogies` = the entry
     # looks like the concept without being an instance of it. `counterexamples` = the entry shows what the concept is not.
     "analogies": ("list", False), "counterexamples": ("list", False),
@@ -281,8 +281,6 @@ class Model:
                              f"(a maintainer adds new ones)")
             if "pairs-with" in e and e["pairs-with"] not in self.entries:
                 p.add(w, f"pairs-with {e['pairs-with']!r} is not an entry")
-            if ("machine" in e) != ("state" in e):
-                p.add(w, "machine and state go together: give both or neither")
             if "lesson" in e:
                 self._check_lesson(w, e["lesson"])
             m = re.search(r"^\*\*Teaches you:\*\* (.+)$", e["_body"], re.M)

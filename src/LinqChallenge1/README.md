@@ -8,6 +8,8 @@ loop-by: lazy-demand
 evaluation: deferred
 assurance: guaranteed
 pairs-with: LinqChallenge2
+machine: "A lazy chain of LINQ stages that one final `Aggregate` demands"
+state: "Inside the stages' enumerators, and in the database"
 tags: [control-flow, dataflow-programming, deferred-execution, event-loop, first-class-and-higher-order-functions, lazy-evaluation, monoid-and-fold, side-effect, thread-safety]
 analogies: [category-theory, functor]
 counterexamples: [event-driven-programming]

@@ -8,6 +8,8 @@ loop-by: loop-statement
 evaluation: eager
 assurance: implementation-permitted
 pairs-with: tcl-weird
+machine: "Ordinary: a `while` loop that draws first and saves afterwards"
+state: "Dicts and Tcl variables, saved in one `db transaction`"
 tags: [reflection-and-metaprogramming, scope-and-binding, transaction]
 ---
 # Tcl

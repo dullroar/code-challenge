@@ -8,6 +8,8 @@ loop-by: lazy-demand
 evaluation: lazy
 assurance: guaranteed
 pairs-with: haskell-weird
+machine: "Ordinary: a lazy list that one `span` reads until the test fails"
+state: "The unevaluated parts of the lists, read on demand"
 tags: [evaluation-strategy, first-class-and-higher-order-functions, generators, lazy-evaluation, monoid-and-fold, referential-transparency]
 analogies: [category-theory]
 ---
@@ -49,7 +51,7 @@ flowchart TD
     accDescr: A flowchart of data and demand. The function rolls is an infinite list of hours made with iterate. The categories are an infinite cycle. A running sum of the hours gives the totals. The function zipWith3 glues the categories, hours and totals into allCards, an infinite list of cards, none of them built yet. The function span asks for one card at a time and stops at the first card whose total is over 40. The result keeps the cards before it and the first card over 40. The function main then pipes the INSERTs to sqlite3 and prints the rows.
     A["rolls: an infinite list of hours, from iterate next seed"] --> C["scanl1 (+): the running totals"]
     A --> D
-    B["cycle of the four categories: repeats for ever"] --> D
+    B["cycle of the four categories: repeats forever"] --> D
     C --> D["zipWith3 Card: allCards, an infinite list, none of it built yet"]
     D --> E["span (total <= 40): asks for one card at a time, stops at the first that fails"]
     E --> F["under ++ take 1 over: the cards before 40 and the crossing card"]

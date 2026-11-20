@@ -63,7 +63,7 @@ for entry in "${!entries[@]}"; do
     if [[ -z $fm ]]; then
         fail "$dir/README.md must start with the frontmatter block described in CONTRIBUTING.md"
     else
-        for key in name teaches kind languages lesson loop-by evaluation assurance tags; do
+        for key in name teaches kind languages lesson loop-by evaluation assurance machine state tags; do
             grep -q "^$key:" <<<"$fm" || fail "$dir/README.md frontmatter is missing '$key:'"
         done
         tags=$(sed -nE 's/^tags:[[:space:]]*\[(.*)\][[:space:]]*$/\1/p' <<<"$fm" | tr -d ' ')

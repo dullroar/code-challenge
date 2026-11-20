@@ -8,6 +8,8 @@ loop-by: loop-statement
 evaluation: eager
 assurance: guaranteed
 pairs-with: lisp-weird
+machine: "Ordinary: one `LOOP` that runs its clauses in order on every pass"
+state: "Variables the `LOOP` owns, such as `total`"
 tags: [control-flow, domain-specific-language, homoiconicity, macro-processing]
 analogies: [monoid-and-fold]
 ---

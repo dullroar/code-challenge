@@ -54,7 +54,7 @@ tags: [control-flow, stack-data-structure, stack-machine, transaction]
 | `tags` | yes | A list of computer-science concepts. See below. |
 | `pairs-with` | no | Your closest sibling entry: the ordinary version of a weird one, or the other way round. |
 | `analogies`, `counterexamples` | no | Concept ids (the same vocabulary as `tags`). Use `tags` only for ideas your entry **demonstrates**. Use `analogies` for an idea your entry *resembles* without being an instance of it (a Kotlin `generateSequence` is not a coroutine, but it is a cousin). Use `counterexamples` for an idea your entry shows by *not* being it (a closure is not a continuation). An entry can relate to a concept in only one of the three ways. The concept's "In this repo" table says which. |
-| `machine`, `state` | no, but give both or neither | The two sentences from the book's "name the machine" table: *what machine is your entry really?* and *where does its state live?* Give them if your entry is a stunt. |
+| `machine`, `state` | yes | The two sentences from the book's "name the machine" table: *what machine is your entry really?* and *where does its state live?* Every entry gives both, so the comparison tables have no blank cell. If your entry is an ordinary program with nothing hidden, say so in words: ``machine: "Ordinary: a `while` loop that draws first and saves afterwards"``. |
 
 The block is a small, strict subset of YAML, so no parser library is needed: `key: value`, `key: "quoted text"` and `key: [a, b]`. Put text that contains a colon or a `#` in quotes. Comment lines start with `#`. Nothing else is allowed, and the build tells you the line it did not understand.
 

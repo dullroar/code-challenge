@@ -8,6 +8,8 @@ loop-by: lazy-demand
 evaluation: deferred
 assurance: guaranteed
 pairs-with: LinqChallenge1
+machine: "A lazy query that its closing `Single()` demands"
+state: "A prefix sum recomputed in each `where`, and the database; no accumulator variable"
 tags: [dataflow-programming, declarative-programming, deferred-execution, domain-specific-language, lazy-evaluation, side-effect, thread-safety]
 ---
 # LINQ challenge, Variant B: one SQL-like query-expression statement

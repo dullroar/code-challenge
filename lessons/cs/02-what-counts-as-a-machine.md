@@ -36,7 +36,7 @@ A model of computation is a precise description of what "computing" means: what 
 
 **In this repo:**
 
-**Applies to every entry that names its machine** (26 of 40; see the [table of machines](../goals.md)). Each of these entries states, in its machine and state fields, what kind of machine it really is and where its state lives, which is the habit this concept teaches.
+**Applies to every entry that names its machine** (40 of 40; see the [table of machines](../goals.md)). Each of these entries states, in its machine and state fields, what kind of machine it really is and where its state lives, which is the habit this concept teaches.
 
 ## Transition systems and state machines
 

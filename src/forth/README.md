@@ -8,6 +8,8 @@ loop-by: loop-statement
 evaluation: eager
 assurance: guaranteed
 pairs-with: forth-weird
+machine: "Ordinary: a stack machine with one `begin ... until` loop"
+state: "The variables `total` and `cards`, and the data stack"
 tags: [control-flow, stack-data-structure, stack-machine, transaction]
 ---
 # Forth

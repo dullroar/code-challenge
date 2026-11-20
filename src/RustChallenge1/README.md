@@ -8,6 +8,8 @@ loop-by: lazy-demand
 evaluation: lazy
 assurance: guaranteed
 pairs-with: JavaChallenge1
+machine: "A chain of values from `successors`, which stops at `None`"
+state: "A new immutable `DemoBatch` for every step; nothing is mutated"
 tags: [closure, event-loop, first-class-and-higher-order-functions, generators, lazy-evaluation, side-effect, thread-safety]
 analogies: [coroutine]
 counterexamples: [event-driven-programming]

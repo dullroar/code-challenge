@@ -50,7 +50,7 @@ repo=$(mktemp -d); trap 'rm -rf "$repo"' EXIT
 case_branch() {   # case_branch <name> <shell commands run in the repo on a new branch>
     (cd "$repo" && git checkout -q master && git checkout -q -b "$1" && bash -c "$2" && git add -A && git commit -qm "$1")
 }
-FM="---\nname: New\nteaches: x\nkind: weird\nlanguages: [new]\nlesson: languages/new.md\nloop-by: loop-statement\nevaluation: eager\nassurance: guaranteed\ntags: [control-flow]\n---\n"
+FM="---\nname: New\nteaches: x\nkind: weird\nlanguages: [new]\nlesson: languages/new.md\nloop-by: loop-statement\nevaluation: eager\nassurance: guaranteed\nmachine: x\nstate: x\ntags: [control-flow]\n---\n"
 HB='# New\n\n## Run it\n\n## Program Flow\n\n## How the stunt works\n\n## What \`check.sh\` enforces\n\n## Gotchas worth knowing\n\n'
 HP='# New\n\n## Run it\n\n## Program Flow\n\n## How the stunt works\n\n## What \`check.ps1\` enforces\n\n## Gotchas worth knowing\n\n'
 good='mkdir -p src/newentry && printf -- "'"$FM$HB"'## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
@@ -120,7 +120,7 @@ case_branch no-gotchas-heading "$good && sed -i 's/^## Gotchas worth knowing/## 
 case_branch no-check-heading "$good && sed -i 's/^## What .check.sh. enforces/## Checks/' src/newentry/README.md"
 case_branch no-frontmatter 'mkdir -p src/newentry && printf "# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
 case_branch incomplete-frontmatter 'mkdir -p src/newentry && printf -- "---\nname: New\ntags: [control-flow]\n---\n# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
-case_branch no-tags 'mkdir -p src/newentry && printf -- "---\nname: New\nteaches: x\nkind: weird\nlanguages: [new]\nlesson: l.md\nloop-by: loop-statement\nevaluation: eager\nassurance: guaranteed\ntags: []\n---\n# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
+case_branch no-tags 'mkdir -p src/newentry && printf -- "---\nname: New\nteaches: x\nkind: weird\nlanguages: [new]\nlesson: l.md\nloop-by: loop-statement\nevaluation: eager\nassurance: guaranteed\nmachine: x\nstate: x\ntags: []\n---\n# New\n\n## Run it in Windows Sandbox\n" > src/newentry/README.md && printf "echo hi\n" > src/newentry/check.sh'
 case_branch unknown-tag "$good && sed -i 's/tags: \[control-flow\]/tags: [control-flow, brand-new-idea]/' src/newentry/README.md"
 case_branch readme-blob   "$good && printf 'abc \xe2\x80\xae evil\n' >> README.md"
 
