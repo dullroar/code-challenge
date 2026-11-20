@@ -1,6 +1,7 @@
 {
   "theme": "neutral",
   "look": "classic",
+  "handDrawnSeed": 1,
   "securityLevel": "strict",
   "fontFamily": "DejaVu Sans, sans-serif",
   "htmlLabels": false,

@@ -4,7 +4,7 @@
 
 Needs only the Python standard library. The two render tests are skipped, and say so, when Mermaid CLI or a Chromium is missing.
 """
-import os, sys, tempfile, unittest
+import json, os, sys, tempfile, unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import diagrams
@@ -239,6 +239,32 @@ class RealRender(unittest.TestCase):
             os.remove(os.path.join(diagrams.CACHE, f))
         b, _ = diagrams.render_all(self.r, {self.GOOD: "a"})
         self.assertEqual(first, read(b[self.GOOD].svg))
+
+    # Mermaid draws some shapes (the stadium A(["..."]) is the common one) with rough.js, which is random unless seeded.
+    # mermaid-config.json sets handDrawnSeed; without it a fresh draw of such a diagram is not byte-identical to the last,
+    # and the committed PDFs and EPUBs could only be reproduced from the exact diagram cache that built them.
+    SHAPES = ("flowchart TD\n    accTitle: T\n    accDescr: D\n"
+              "    A([start]) --> B{{decide}} --> C[(store)] --> D((ring)) --> E[[call]] --> F{test}\n"
+              "    F -->|yes| G([end])")
+
+    def test_every_node_shape_draws_the_same_twice_from_a_cold_cache(self):
+        first = {}
+        for attempt in (1, 2):
+            for f in os.listdir(diagrams.CACHE):
+                os.remove(os.path.join(diagrams.CACHE, f))
+            figs, errors = diagrams.render_all(self.r, {self.SHAPES: "a"})
+            self.assertEqual(errors, [])
+            fig = figs[self.SHAPES]
+            drawn = (read(fig.svg), open(fig.png, "rb").read())
+            if attempt == 1:
+                first = drawn
+            else:
+                self.assertEqual(first[0], drawn[0], "the SVG changed between two cold draws: is handDrawnSeed still set in mermaid-config.json?")
+                self.assertEqual(first[1], drawn[1], "the PNG changed between two cold draws")
+
+    def test_the_config_seeds_the_hand_drawn_randomness(self):
+        with open(diagrams.CONFIG, encoding="utf-8") as f:
+            self.assertIsInstance(json.load(f).get("handDrawnSeed"), int)
 
 
 if __name__ == "__main__":
