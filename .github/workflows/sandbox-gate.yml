@@ -110,6 +110,12 @@ jobs:
       - name: Build the sandbox image (from master's Dockerfile)
         run: docker build -t code-challenge-sandbox:local sandbox/linux
 
+      # The self-test checks that an entry's runtime image is locked down. It builds that image from
+      # cc-rt-gforth:local, which a fresh runner does not have. Build it from master's Dockerfile, like the
+      # image above; nothing from the pull request is involved.
+      - name: Build the runtime base the self-test probes (from master's Dockerfile)
+        run: sandbox/container/build-bases.sh gforth
+
       - name: Self-test the sandbox on this runner
         run: sandbox/selftest.sh
 
